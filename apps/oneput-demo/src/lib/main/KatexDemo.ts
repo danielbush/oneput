@@ -10,7 +10,7 @@
  * - `KatexDemo` is the AppObject: the UI adapter. It shows the model's state
  *   and calls the model on user events. It holds no rules.
  *
- * Both are in one file because the demo is small.
+ * These parts share one file because the demo is small.
  */
 import type { Controller } from '@oneput/oneput';
 import katex from 'katex';
@@ -18,7 +18,7 @@ import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMen
 import { divider, menuItem } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { infoMenuItem } from '@oneput/oneput/shared/ui/menuItems/infoMenuItem.js';
-import type { AppActions, AppLayoutParams, AppObject, UIFlags } from '@oneput/oneput';
+import type { AppActions, AppLayoutParams, AppObject, UIFlags, MountContext } from '@oneput/oneput';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
 import { icons } from '../common/_icons.js';
@@ -29,47 +29,72 @@ import './KatexDemo.css';
  * The page that the demo inserts formulas into.
  *
  * Infrastructure wrapper: `create()` appends to `#katex-demo`. `createNull()`
- * appends to nothing, and `trackAppends()` shows what was appended.
+ * appends to a detached root. Tests can supply a root and read its DOM.
  */
 export class DemoDocument {
   static create() {
-    return new DemoDocument((html) => {
-      document.getElementById('katex-demo')!.innerHTML += html;
-    });
+    return new DemoDocument(document.getElementById('katex-demo')!);
   }
 
-  static createNull() {
-    return new DemoDocument();
+  static createNull(root = document.createElement('div')) {
+    return new DemoDocument(root);
   }
 
-  private appended: string[] = [];
+  constructor(private root: HTMLElement) {}
 
-  private constructor(private write?: (html: string) => void) {}
-
-  append(html: string) {
-    this.appended.push(html);
-    this.write?.(html);
+  append(formula: FormulaMarkup, displayMode: boolean) {
+    const nodes = unsafeKatexOutputNodes(formula, this.root.ownerDocument);
+    if (displayMode) this.root.append(nodes);
+    else {
+      const paragraph = this.root.ownerDocument.createElement('p');
+      paragraph.append(nodes);
+      this.root.append(paragraph);
+    }
   }
+}
 
-  trackAppends() {
-    return { data: this.appended };
-  }
+/** Only bounded output from our fixed KaTeX options enters this store. */
+type FormulaMarkup = Readonly<{ kind: 'katex' }>;
+const formulaOutput = new WeakMap<FormulaMarkup, string>();
+
+/**
+ * The only raw formula HTML escape hatch. Never pass caller HTML here.
+ * The private store accepts only output from renderToString below.
+ * KaTeX needs MathML, SVG and inline styles that the display policy removes.
+ */
+function unsafeKatexOutputNodes(formula: FormulaMarkup, doc: Document): DocumentFragment {
+  const template = doc.createElement('template');
+  const html = formulaOutput.get(formula);
+  if (html === undefined) template.content.append(doc.createTextNode('Content unavailable'));
+  else template.innerHTML = html;
+  return template.content;
 }
 
 /** The result of compiling katex source. */
 type RenderResult =
   | { empty: true } // nothing typed
-  | { html: string } // valid katex
+  | { html: FormulaMarkup } // valid katex
   | { error: string }; // invalid katex
 
 /**
- * Turn katex source into HTML. Pure: it sets no fields and does not touch the
- * page.
+ * Compile bounded source with fixed options. Store only accepted output.
  */
 function renderToString(source: string, displayMode: boolean): RenderResult {
+  if (source.length > 4096) return { error: 'Formula source is too large.' };
   if (source.trim() === '') return { empty: true };
   try {
-    return { html: katex.renderToString(source, { displayMode, throwOnError: true }) };
+    const output = katex.renderToString(source, {
+      displayMode,
+      throwOnError: true,
+      trust: false,
+      strict: 'error',
+      maxExpand: 1000,
+      maxSize: 20
+    });
+    if (output.length > 200000) return { error: 'Formula output is too large.' };
+    const html: FormulaMarkup = Object.freeze({ kind: 'katex' });
+    formulaOutput.set(html, output);
+    return { html };
   } catch (err) {
     return { error: (err as Error).message };
   }
@@ -86,11 +111,11 @@ export type FormulaView = {
    */
   displayMode: boolean;
   /**
-   * Rendered HTML of the formula. Empty when the source is empty. While the
+   * Checked formula output. Null when the source is empty. While the
    * source is invalid, it is the last valid render, so the preview does not
    * flicker as you type.
    */
-  preview: string;
+  preview: FormulaMarkup | null;
   /** The parse error of the current source, if any. */
   error?: string;
   /** True when there is valid katex to insert. */
@@ -106,7 +131,7 @@ export type FormulaView = {
  */
 export class KatexFormula {
   private state: Writable<FormulaState>;
-  private lastValid = '';
+  private lastValid: FormulaMarkup | null = null;
   private view: Readable<FormulaView>;
   /** The current view. */
   get current(): FormulaView {
@@ -120,7 +145,7 @@ export class KatexFormula {
     this.state = writable({ source: '', displayMode });
     this.view = derived(this.state, ({ source, displayMode }) => {
       const compiled = renderToString(source, displayMode);
-      if ('empty' in compiled) this.lastValid = '';
+      if ('empty' in compiled) this.lastValid = null;
       else if ('html' in compiled) this.lastValid = compiled.html;
       return {
         source,
@@ -158,10 +183,29 @@ export class KatexFormula {
    */
   insert(): boolean {
     const { canInsert, displayMode, preview } = this.current;
-    if (!canInsert) return false;
-    this.doc.append(displayMode ? preview : `<p>${preview}</p>`);
+    if (!canInsert || !preview) return false;
+    this.doc.append(preview, displayMode);
     this.setSource('');
     return true;
+  }
+}
+
+/** A named formula widget. Its source stays live when a menu row is reused. */
+export class KatexPreview {
+  static onMount(formula: KatexFormula) {
+    return (node: HTMLElement, { pull }: MountContext) => {
+      const paint = () => {
+        const current = formula.current.preview;
+        if (current) node.replaceChildren(unsafeKatexOutputNodes(current, node.ownerDocument));
+        else node.textContent = '(preview)';
+      };
+      const offFormula = formula.subscribe(paint);
+      const offPull = pull.subscribe(paint);
+      return () => {
+        offFormula();
+        offPull();
+      };
+    };
   }
 }
 
@@ -296,7 +340,7 @@ export class KatexDemo implements AppObject {
                 fontSize: preview ? '150%' : '100%',
                 display: 'inline-block'
               },
-              dangerouslySetHtmlWithoutSanitising: preview || '(preview)'
+              onMount: KatexPreview.onMount(this.formula)
             }
           ]
         }),

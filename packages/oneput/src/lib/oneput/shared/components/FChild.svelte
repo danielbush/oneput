@@ -3,7 +3,7 @@
    * Renders one builder child (`FChildParams`). Its tag, attributes and styles
    * pass through `checkedElement` before Svelte writes them, on the server and
    * in the browser. It shows the first content that is set: `icon`,
-   * `textSegments`, `htmlContent`, `dangerouslySetHtmlWithoutSanitising`,
+   * `textSegments`, `htmlContent`,
    * `textContent`.
    */
   import { onMount } from 'svelte';
@@ -54,7 +54,7 @@
     {...checked.attr}
   >
     {#if props.icon}
-      <!-- Icon is rendered via onMount using renderIcon() -->
+      <!-- Icon is rendered via $effect using renderIcon() -->
     {:else if props.textSegments}
       <span>
         {#each props.textSegments as segment, index (index)}{#if segment.emphasis}<b
@@ -64,8 +64,6 @@
     {:else if props.htmlContent !== undefined}
       <!-- sanitiseHtml cleaned this HTML inside a div, so it must go in a div. -->
       <div class="oneput__rich-content">{@html checkedRichContent(props.htmlContent)}</div>
-    {:else if props.dangerouslySetHtmlWithoutSanitising}
-      {@html props.dangerouslySetHtmlWithoutSanitising}
     {:else if props.textContent}
       {props.textContent}
     {/if}

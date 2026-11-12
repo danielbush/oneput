@@ -372,11 +372,6 @@ export type FChildParams = {
    */
   htmlContent?: SafeHtml | null;
   /**
-   * Writes this HTML as given, with no cleaning. Only the KaTeX formula preview
-   * uses it. Phase 2 replaces it with a checked formula widget.
-   */
-  dangerouslySetHtmlWithoutSanitising?: string;
-  /**
    * Name of a registered icon to render.
    * Use registerIcon() or registerIcons() to register icons before use.
    * Takes precedence over rich content.

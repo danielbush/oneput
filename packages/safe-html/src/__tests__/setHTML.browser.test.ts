@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { setHTML, untrustedDocumentPolicy } from "../setHTML.js";
+import { setHTML } from "../setHTML.js";
 
 test("browser: inserts safe HTML", () => {
   // arrange
@@ -32,7 +32,7 @@ test("browser: the document policy keeps structure markup and removes active con
   setHTML(
     element,
     '<article class="task" data-task="todo" aria-label="Task" onclick="alert(1)"><button type="button">Done</button></article><!-- note --><form><p>in form</p></form><iframe></iframe><script>alert(1)</script>',
-    untrustedDocumentPolicy,
+    "document",
   );
 
   // assert

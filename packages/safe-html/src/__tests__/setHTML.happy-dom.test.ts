@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import { expect, test } from "vitest";
-import { setHTML } from "../setHTML.js";
+import { setHTML, sanitiseHtml } from "../setHTML.js";
 
 test("fallback: refuses a DOM that DOMPurify cannot walk", () => {
   // arrange
@@ -12,5 +12,16 @@ test("fallback: refuses a DOM that DOMPurify cannot walk", () => {
 
   // assert
   expect(run).toThrow("HTML sanitization is unavailable in this environment.");
-  expect(element.innerHTML).toBe("");
+  expect(element.textContent).toBe("Content unavailable");
+});
+
+test("SafeHtml refuses the same broken DOM without retaining raw input", () => {
+  // arrange
+  const input = "<img src=x onerror=bad><b>text</b>";
+
+  // act
+  const result = sanitiseHtml(input, "ui");
+
+  // assert
+  expect(result.isErr()).toBe(true);
 });

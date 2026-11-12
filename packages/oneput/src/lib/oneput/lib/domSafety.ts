@@ -10,7 +10,17 @@ import type { ElementDescription } from './domSafety/types.js';
 export { checkElement } from './domSafety/checkElement.js';
 export type { AttributeValue, ElementDescription } from './domSafety/types.js';
 
-/** Warning output is separate from refusal. Production refuses the same input. */
+/**
+ * Tells the developer when Oneput has removed something unsafe from an element
+ * (an attribute, URL, style or tag) before writing it to the page.
+ *
+ * - `create()`: in development, writes "Oneput refused <rule>" to the console.
+ *   In production, it says nothing.
+ * - `createNull()`: writes nothing, and keeps the messages so that a test can
+ *   read them.
+ *
+ * It only reports. `checkElement` removes the unsafe parts, in production too.
+ */
 export class DomWriteWarnings {
   static create() {
     return new DomWriteWarnings(

@@ -1,7 +1,14 @@
 import DOMPurify from "dompurify";
 
 let fallbackWorks: boolean | undefined;
-/** Check the DOM walker with a fixed policy, independent of caller policy. */
+/**
+ * Returns `true` when DOMPurify works in this environment, so that it can be used
+ * where the browser has no native `setHTML`.
+ *
+ * It cleans a fixed test string (with `onclick` attributes and a `script` tag)
+ * and checks that they are removed. Some DOMs, such as happy-dom, fail this. The
+ * result is computed once and then reused.
+ */
 export function canUseFallback(): boolean {
   if (!DOMPurify.isSupported) return false;
   fallbackWorks ??=

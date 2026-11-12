@@ -1,6 +1,15 @@
 import type { Config } from "dompurify";
 
-/** UI content has no styles, SVG, MathML, or resource-loading elements. */
+/**
+ * The name of a policy for `sanitiseHtml`.
+ *
+ * - `"display"`: text formatting, links, lists, tables and headings. Only `href`
+ *   and `title` attributes stay.
+ * - `"ui"`: the same, plus `kbd` and the class `oneput__kbd-symbol`.
+ *
+ * Neither policy keeps styles, SVG, MathML, images or other elements that load
+ * resources.
+ */
 export type ContentPolicy = "display" | "ui";
 
 const displayTags = Object.freeze([
@@ -36,7 +45,13 @@ const displayTags = Object.freeze([
   "ul",
 ]);
 
-/** Return new arrays so a sanitiser cannot change the registered policy. */
+/**
+ * Returns the allowed tags and attributes for a policy, as DOMPurify options. It
+ * throws for an unknown policy name.
+ *
+ * Each call returns new arrays, so a sanitiser that changes them cannot change
+ * the policy.
+ */
 export function contentConfig(policy: ContentPolicy): Config {
   if (policy !== "display" && policy !== "ui")
     throw new Error("Unknown HTML policy.");
@@ -50,7 +65,14 @@ export function contentConfig(policy: ContentPolicy): Config {
   };
 }
 
-/** Links can navigate by HTTP(S), mailto, tel, fragment, or relative path. */
+/**
+ * Returns the trimmed URL when it is safe for a link, and `undefined` when it is
+ * not.
+ *
+ * It allows `http:`, `https:`, `mailto:` and `tel:` URLs, relative paths and
+ * `#fragments`. It refuses other schemes, such as `javascript:` and `data:`, and
+ * URLs that contain spaces, control characters or a backslash.
+ */
 export function checkedLink(value: string): string | undefined {
   const clean = value.trim();
   if (/[\u0000-\u0020\u007f\\]/.test(clean)) return undefined;
@@ -64,7 +86,12 @@ export function checkedLink(value: string): string | undefined {
   }
 }
 
-/** Remove URL and class values that are outside the named content policy. */
+/**
+ * Removes unsafe values from the sanitised elements under `root`, in place.
+ *
+ * - `href`: kept only on `a` elements and only when `checkedLink` accepts it.
+ * - `class`: removed, except `oneput__kbd-symbol` with the `"ui"` policy.
+ */
 export function checkContentValues(root: Element, policy: ContentPolicy): void {
   for (const element of root.querySelectorAll("*")) {
     const href = element.getAttribute("href");

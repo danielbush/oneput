@@ -24,10 +24,16 @@ type NativeSetHTML = Element & {
 };
 
 /**
- * Set untrusted HTML on an element. The policy decides what stays; the default
- * is the display policy. The document policy is separate from UI content.
+ * Cleans untrusted HTML and puts it into `element`, replacing its children.
  *
- * Throw when the environment cannot sanitize HTML correctly.
+ * - `"display"` (default) or `"ui"`: cleans with `sanitiseHtml`. `element` must
+ *   be a `div`.
+ * - `"document"`: cleans with `untrustedDocumentPolicy`, which keeps much more
+ *   (styles, SVG, `data-*`), for a whole document that the user opens.
+ *
+ * It throws when HTML cannot be cleaned in this environment, and then writes
+ * "Content unavailable" into `element`. With `"display"` or `"ui"`, it also
+ * throws when `element` is not a `div`.
  */
 export function setHTML(
   element: Element,

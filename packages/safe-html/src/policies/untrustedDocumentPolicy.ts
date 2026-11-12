@@ -4,9 +4,9 @@ import type { DocumentPolicy } from "./types.js";
  * Allow the markup of a document from an untrusted file.
  *
  * Keep normal HTML and SVG, `class`, `id`, `aria-*` and `data-*` attributes,
- * so structures in the document still work. Remove active content, and
- * elements in the blocklist below. Inline styles and image/SVG resources can
- * remain. Resource and style checks for documents are phase 2 work.
+ * so structures in the document still work. Remove scripts, event handlers
+ * and the elements listed below, with their content. Inline styles, images and
+ * SVG stay, and can load resources. Phase 2 will check those too.
  *
  * Example: use this for an HTML file that the user opens.
  */

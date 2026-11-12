@@ -51,7 +51,8 @@ The source has `get()` and `subscribe()`.
 - XState adapter: `packages/oneput/src/lib/oneput/shared/routing/xstate/routeMachine.ts`.
   `routeMachine(ctl, actor, apps)` takes a map in the shape of the machine and
   calls `routeApp`; it declares the XState shapes it reads, so Oneput does not
-  depend on XState.
+  depend on XState. `fromChild(id, childApps)` routes a state that invokes a
+  child machine on the child's state.
 - Stack membership: `ctl.app.contains(app)` includes suspended parents.
 
 ### Input claims

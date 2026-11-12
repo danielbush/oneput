@@ -954,6 +954,27 @@ routeApp(
 
 ---
 
+### ROUTED_MODE with a child machine
+
+A state can invoke a child machine, for example a setup flow that two parent states share. The child is a separate actor: while it runs, the parent's state stays the invoking state, and the child's state is only in `snapshot.children[id].getSnapshot().value`. So the map entry for the invoking state is `fromChild(id, childApps)`, and `routeMachine` routes on the child with `childApps`, a map in the shape of the child machine. There is still one router, so nothing fights over the screen.
+
+```ts
+const setupApps = {
+  providers: (snapshot, child) => ProvidersUI.create({ send: child.send }),
+  provider: (snapshot, child) =>
+    ProviderUI.create({ provider: snapshot.context.picked, send: child.send })
+};
+routeMachine(ctl, actor, {
+  home: { menu: () => Home.create(ctl, send), setup: fromChild('setup', setupApps) },
+  chat: { setup: fromChild('setup', setupApps), session: () => Chat.create(ctl, send) }
+});
+```
+
+- Each entry gets the snapshot and the actor whose state it is: the child's for the child's states. An AppObject sends the child's events to the child, and the events that leave the child (for example Back out of the flow) to the parent. The map says which.
+- The key joins the paths, for example `home.setup/setup:provider`, so a new child, or the same child in another state, replaces the AppObject.
+- `routeMachine` subscribes to the parent and to each child on the route, and drops a child when the route leaves it.
+- A child that is done (in a final state) keeps the AppObject that is shown until the parent's `onDone` moves it on; a child that is not there yet is not routed either. `resolveRoute` returns undefined for both.
+
 Oneput has no `send`. The code that sets up ROUTED_MODE decides its own send mechanism (for example `actor.send` for XState), and injects it into each routed AppObject when it makes it. The injection happens in `appFor` (here, in the `apps` map). `routeApp` only calls `appFor` and never sees `send`, so it works with any send mechanism. This has three results:
 
 - An AppObject that gets a `send` knows that it is in ROUTED_MODE and that it can send events. An AppObject without one is not routed. The map of state to AppObject (`apps` above) shows which AppObjects can send.

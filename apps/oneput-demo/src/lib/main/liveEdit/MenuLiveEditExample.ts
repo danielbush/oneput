@@ -2,7 +2,7 @@ import type { AppLayoutParams, AppObject, Controller, UIFlags } from '@oneput/on
 import { MenuLiveEdit } from '@oneput/oneput/shared/behaviors/liveEdit/MenuLiveEdit.js';
 import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
-import { icons } from '../_icons.js';
+import { icons } from '../../common/_icons.js';
 
 type FieldId = 'name' | 'role';
 

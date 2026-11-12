@@ -6,9 +6,9 @@
   import Anchor from '@oneput/oneput/shared/components/Anchor.svelte';
   import OneputController from '@oneput/oneput/shared/components/OneputController.svelte';
   import OneputCornerButton from '@oneput/oneput/shared/components/OneputCornerButton.svelte';
-  import { icons } from '$lib/app/_icons.js';
-  import { flowMachine, routeFlow } from '$lib/app/routed/flowMachine.js';
-  import { Layout } from '$lib/app/_layout.js';
+  import { icons } from '$lib/common/_icons.js';
+  import { flowMachine, routeFlow } from '$lib/routed/flowMachine.js';
+  import { Layout } from '$lib/common/_layout.js';
 
   // Each page visit owns its actor and router subscriptions.
   const actor = createActor(flowMachine);
@@ -78,6 +78,7 @@
   <p aria-live="polite"><small>Current state: <strong>{state}</strong></small></p>
 </main>
 
+<!-- The routed page mounts its own controller. -->
 <Anchor>
   <OneputController run={init} />
 </Anchor>

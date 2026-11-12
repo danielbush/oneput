@@ -16,7 +16,7 @@ import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.
 import { AddEntry, isAddEntryResult } from './AddEntry.js';
 import { isPickDurationResult, SetDuration } from '@oneput/oneput/shared/appObjects/SetDuration.js';
 import { TimeVal } from '@oneput/oneput/shared/lib/time/TimeVal.js';
-import { icons } from '../_icons.js';
+import { icons } from '../../common/_icons.js';
 import { TomatoTimerDiagnostics } from './TomatoTimerDiagnostics.js';
 
 export class TomatoTimer implements AppObject {

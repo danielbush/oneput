@@ -21,7 +21,7 @@ import { infoMenuItem } from '@oneput/oneput/shared/ui/menuItems/infoMenuItem.js
 import type { AppActions, AppLayoutParams, AppObject, UIFlags } from '@oneput/oneput';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
-import { icons } from './_icons.js';
+import { icons } from '../common/_icons.js';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import './KatexDemo.css';
 

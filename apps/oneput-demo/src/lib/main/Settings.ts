@@ -4,7 +4,7 @@ import { BindingsEditor } from '@oneput/oneput/shared/appObjects/BindingsEditor.
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { FiltersUI } from './FiltersUI.js';
 import { TestBindingsService } from '@oneput/oneput/shared/bindings/TestBindingsService.js';
-import { icons } from './_icons.js';
+import { icons } from '../common/_icons.js';
 import type { AppObject } from '@oneput/oneput';
 import { BindingsIDB } from '@oneput/oneput/shared/bindings/BindingsIDB.js';
 

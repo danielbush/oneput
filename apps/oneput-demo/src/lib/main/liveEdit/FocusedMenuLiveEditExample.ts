@@ -1,7 +1,7 @@
 import type { AppLayoutParams, AppObject, Controller, UIFlags } from '@oneput/oneput';
 import { FocusedMenuLiveEdit } from '@oneput/oneput/shared/behaviors/liveEdit/FocusedMenuLiveEdit.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
-import { icons } from '../_icons.js';
+import { icons } from '../../common/_icons.js';
 
 type FieldId = 'name' | 'role' | 'location';
 

@@ -1,7 +1,7 @@
 import type { Controller, Menu, UIFlags } from '@oneput/oneput';
 import type { AppObject } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
-import { icons } from './_icons.js';
+import { icons } from '../common/_icons.js';
 import { mockListDir, type DirEntry } from '../service/listDir.js';
 import { stdSkeletonMenuItems } from '@oneput/oneput/shared/ui/menuItems/stdSkeletonMenuItems.js';
 

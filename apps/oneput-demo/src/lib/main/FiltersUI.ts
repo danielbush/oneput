@@ -1,7 +1,7 @@
 import type { AppLayoutParams, AppObject, Controller } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { SettingsManager } from '../service/SettingsManager.js';
-import { icons } from './_icons.js';
+import { icons } from '../common/_icons.js';
 
 export class FiltersUI implements AppObject {
   static create(ctl: Controller) {

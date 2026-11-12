@@ -1,7 +1,7 @@
 import type { AppLayoutParams, AppObject, Controller, OneputProps, UIFlags } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
-import { icons } from '../_icons.js';
+import { icons } from '../../common/_icons.js';
 
 /** Tagged resume payload when Note compose accepts. Cancel exits with no payload. */
 export type SetNoteResult = {

@@ -17,7 +17,7 @@ import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.
 import { TimeVal } from '@oneput/oneput/shared/lib/time/TimeVal.js';
 import { DateTimeVal } from '@oneput/oneput/shared/lib/time/DateTimeVal.js';
 import { DateVal } from '@oneput/oneput/shared/lib/time/DateVal.js';
-import { icons } from '../_icons.js';
+import { icons } from '../../common/_icons.js';
 
 /** Tagged resume payload when Add Entry submits. */
 export type AddEntryResult = {

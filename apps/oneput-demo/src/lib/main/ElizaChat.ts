@@ -5,7 +5,7 @@ import {
   type ChatSessionTurn
 } from '@oneput/oneput/shared/ui/menuItems/chatSessionItem.js';
 import { AsyncEliza } from '@oneput/eliza';
-import { icons } from './_icons.js';
+import { icons } from '../common/_icons.js';
 
 const SESSION_ID = 'eliza-chat-session';
 

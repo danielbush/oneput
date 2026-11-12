@@ -1,3 +1,4 @@
+import { sanitiseHtml } from '@oneput/safe-html';
 import {
   KeyEventBindings,
   toDisplayString,
@@ -97,11 +98,13 @@ export class BindingsEditor implements AppObject {
           right: (b) => [
             bindings.length > 1 &&
               b.fchild({
-                innerHTMLUnsafe: `(${bindings.length})`
+                textContent: `(${bindings.length})`
               }),
             b.fchild({
-              htmlContentUnsafe:
+              htmlContent: sanitiseHtml(
                 bindings.length === 0 ? '<code><kbd>-</kbd></code>' : bindingToKbdHtml(bindings[0]),
+                'ui'
+              ).unwrapOr(null),
               classes: ['oneput__kbd']
             }),
             b.icon(this.icons.Right)
@@ -144,12 +147,12 @@ export class BindingsEditor implements AppObject {
             id: binding,
             // The row is the binding, thus it shows key badges, not the raw
             // tinykeys chord.
-            htmlContentUnsafe: bindingToKbdHtml(binding),
+            htmlContent: sanitiseHtml(bindingToKbdHtml(binding), 'ui').unwrapOr(null),
             classes: ['oneput__kbd'],
             left: (b) => [b.icon(this.icons.Keyboard)],
             right: (b) => [
               b.fchild({
-                htmlContentUnsafe: this.whenBadge(when),
+                htmlContent: sanitiseHtml(this.whenBadge(when), 'ui').unwrapOr(null),
                 classes: ['oneput__kbd']
               }),
               b.icon(this.icons.Remove)

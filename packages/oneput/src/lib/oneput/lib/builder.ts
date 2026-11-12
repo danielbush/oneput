@@ -110,14 +110,11 @@ export class FlexChildBuilder {
  *
  * Supports both:
  * - icon: string (registered icon name via registerIcon/registerIcons)
- * - innerHTMLUnsafe: string (raw SVG string - legacy approach)
  */
 export function icon(iconName: string, params: Partial<FChildParams>): FChildParams {
   return fchild({
     textContent: params.textContent,
     icon: iconName,
-    // TODO: superfluous because of 'icon'?
-    innerHTMLUnsafe: params.innerHTMLUnsafe,
     ...params,
     classes: ['oneput__icon', ...(params.classes ?? [])],
     style: { alignSelf: 'flex-start', ...params.style }
@@ -155,7 +152,6 @@ export function spacer(
  *
  * Supports both:
  * - icon: string (registered icon name via registerIcon/registerIcons)
- * - innerHTMLUnsafe: string (raw SVG string - legacy approach)
  */
 export function iconButton(
   iconName: string,
@@ -165,8 +161,6 @@ export function iconButton(
     tag: 'button',
     textContent: params.textContent,
     icon: iconName,
-    // TODO: superfluous because of 'icon'?
-    innerHTMLUnsafe: params.innerHTMLUnsafe,
     ...params,
     classes: ['oneput__icon-button', ...(params.classes ?? [])],
     style: { alignSelf: 'flex-start', ...params.style },
@@ -188,7 +182,7 @@ export function button(
   return fchild({
     tag: 'button',
     textContent: params.textContent,
-    innerHTMLUnsafe: params.innerHTMLUnsafe,
+    htmlContent: params.htmlContent,
     ...params,
     classes: ['oneput__button', ...(params.classes ?? [])],
     attr: {

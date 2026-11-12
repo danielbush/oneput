@@ -21,5 +21,14 @@ export class DOMUpdater {
     }
   };
 
-  destroy = () => {};
+  /** Replace status text without parsing HTML. */
+  setText(text: string) {
+    this.withNode((node) => {
+      node.textContent = text;
+    });
+  }
+
+  destroy = () => {
+    this.node = undefined;
+  };
 }

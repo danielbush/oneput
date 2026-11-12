@@ -1,3 +1,4 @@
+import { sanitiseHtml } from '@oneput/safe-html';
 /**
  * Some fake ui data we can use to populate oneput for demos.
  */
@@ -90,7 +91,9 @@ export const menuItems1: () => MenuItemAny[] = () => {
             {
               id: randomId(),
               type: 'fchild',
-              innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
+              htmlContent: sanitiseHtml('<code><kbd>Ctrl</kbd><kbd>x</kbd></code>', 'ui').unwrapOr(
+                null
+              ),
               classes: ['oneput__kbd']
             },
             {

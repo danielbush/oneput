@@ -1,3 +1,4 @@
+import type { SafeHtml } from '@oneput/safe-html';
 import type { AppController } from './controllers/AppController.js';
 import type { Controller } from './controllers/controller.js';
 import type { InputController } from './controllers/InputController.js';
@@ -232,10 +233,6 @@ export type FlexParams = {
    * them.
    */
   children?: FlexChildren;
-  /**
-   * Instructs Oneput rendered to override default list of HTML void elements.
-   */
-  voidElements?: Set<string | undefined>;
   action?: (c: Controller) => void;
   attachments?: Record<symbol, (element: HTMLElement) => void>;
   onMount?: (node: HTMLElement, ctx: MountContext) => void | (() => void);
@@ -375,26 +372,19 @@ export type FChildParams = {
   classes?: Array<string | false | undefined>;
   style?: Partial<CSSStyleDeclaration>;
   textContent?: string;
-  htmlContentUnsafe?: string;
-  /**
-   * Use innerHTMLUnsafe for icons or decorative content.  Use
-   * htmlContentUnsafe for actual content.
-   */
-  innerHTMLUnsafe?: string;
+  /** Rich content. Null shows a fixed unavailable state after sanitiser failure. */
+  htmlContent?: SafeHtml | null;
+  /** Formula preview only, until the formula policy is reviewed in phase 2. */
+  dangerouslySetHtmlWithoutSanitising?: string;
   /**
    * Name of a registered icon to render.
    * Use registerIcon() or registerIcons() to register icons before use.
-   * Takes precedence over innerHTMLUnsafe when both are specified.
+   * Takes precedence over rich content.
    */
   icon?: string;
-  /**
-   * Is set by a menuItemsFn (via Oneput controller) usually to show
-   * highlighted text when user is filtering menu items by typing.
-   */
-  derivedHTML?: string;
+  /** Text runs with fixed emphasis or caption classes. Filters can replace them. */
+  textSegments?: Array<{ text: string; emphasis?: boolean; classes?: string[] }>;
   onMount?: (node: HTMLElement, ctx: MountContext) => void | (() => void);
-  /** List of HTML void elements. */
-  voidElements?: Set<string | undefined>;
 };
 
 /**

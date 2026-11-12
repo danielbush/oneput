@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { sanitiseHtml } from '@oneput/safe-html';
   import '../_demo-styles.css';
   import '$lib/oneput/shared/styles/oneput-defaults.css';
   import Oneput from '$lib/oneput/shared/components/Oneput.svelte';
@@ -111,7 +112,10 @@
             right: (b) => [
               b.fchild({
                 style: { flex: '0' },
-                innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
+                htmlContent: sanitiseHtml(
+                  '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
+                  'ui'
+                ).unwrapOr(null),
                 classes: ['oneput__kbd']
               }),
               b.icon(icons.ChevronRight)
@@ -141,15 +145,15 @@
             right: (b) => [
               b.iconButton(icons.Play, {
                 title: 'Play',
-                innerHTMLUnsafe: '<i data-lucide="play"></i>'
+                icon: 'Play'
               }),
               b.iconButton(icons.Pause, {
                 title: 'Pause',
-                innerHTMLUnsafe: '<i data-lucide="pause"></i>'
+                icon: 'Pause'
               }),
               b.iconButton(icons.Square, {
                 title: 'Stop',
-                innerHTMLUnsafe: '<i data-lucide="square"></i>'
+                icon: 'Square'
               }),
               b.icon(icons.ChevronRight)
             ],
@@ -168,7 +172,10 @@
             right: (b) => [
               b.fchild({
                 style: { flex: '0' },
-                innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
+                htmlContent: sanitiseHtml(
+                  '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
+                  'ui'
+                ).unwrapOr(null),
                 classes: ['oneput__kbd']
               }),
               b.icon(icons.ChevronRight)
@@ -189,7 +196,10 @@
             right: (b) => [
               b.fchild({
                 style: { flex: '0' },
-                innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
+                htmlContent: sanitiseHtml(
+                  '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
+                  'ui'
+                ).unwrapOr(null),
                 classes: ['oneput__kbd']
               }),
               b.spacer()
@@ -211,7 +221,10 @@
             right: (b) => [
               b.fchild({
                 style: { flex: '0' },
-                innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
+                htmlContent: sanitiseHtml(
+                  '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
+                  'ui'
+                ).unwrapOr(null),
                 classes: ['oneput__kbd']
               }),
               b.spacer()
@@ -238,7 +251,10 @@
             right: (b) => [
               b.fchild({
                 style: { flex: '0' },
-                innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
+                htmlContent: sanitiseHtml(
+                  '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
+                  'ui'
+                ).unwrapOr(null),
                 classes: ['oneput__kbd']
               }),
               b.spacer()
@@ -261,7 +277,10 @@
             right: (b) => [
               b.fchild({
                 style: { flex: '0' },
-                innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
+                htmlContent: sanitiseHtml(
+                  '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
+                  'ui'
+                ).unwrapOr(null),
                 classes: ['oneput__kbd']
               })
             ],

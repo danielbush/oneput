@@ -1,3 +1,4 @@
+import { checkedElement } from '../lib/domSafety.js';
 import type { Controller } from './controller.js';
 
 export class NativeController {
@@ -24,11 +25,15 @@ export class NativeController {
         const { dataUrl, fileName } = evt.data.payload;
         const doc = window.document;
         const img = doc.createElement('img');
-        img.src = dataUrl;
-        img.alt = fileName;
-        img.style.maxWidth = '100%';
-        img.style.height = 'auto';
-        img.style.margin = '16px 0';
+        const checked = checkedElement({
+          tag: 'img',
+          attr: { src: dataUrl, alt: fileName },
+          style: { maxWidth: '100%', height: 'auto', margin: '16px 0' }
+        });
+        if (!checked.attr.src) return;
+        for (const [name, value] of Object.entries(checked.attr))
+          img.setAttribute(name, String(value));
+        img.style.cssText = checked.style;
         doc.body.prepend(img);
         img.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }

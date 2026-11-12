@@ -24,6 +24,12 @@ Offer to flesh this out with the user. Look for obvious things to tackle.
 
 Below are pointers for agents — read the source files for full detail via JSDoc.
 
+### Safe UI content
+
+Strings stay text. Rich fields require `SafeHtml` from `@oneput/safe-html`.
+`lib/domSafety.ts` checks tags, attributes, URLs, and styles before rendering.
+See `docs/safe-content.md` for policies, failure states, and deferred sinks.
+
 ### Bindings
 
 Key bindings map keyboard shortcuts to actions. Each binding declares `when` conditions (`menuOpen`, `multiline`) controlling when it fires. Dispatch also leaves unmodified Enter/Space alone when the browser already activates the focused control (`lib/nativeActivation.ts`) - see ENTER_SEMANTICS.

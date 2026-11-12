@@ -97,9 +97,6 @@ export const longElementTrail = (onSelect: (label: string) => void): Crumb[] =>
     onSelect
   );
 
-const escapeHTML = (s: string) =>
-  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-
 const separator = (index: number): FChildParams => ({
   id: `crumb-sep-${index}`,
   type: 'fchild',
@@ -113,11 +110,10 @@ const crumb = (c: Crumb, index: number): FChildParams => ({
   type: 'fchild',
   tag: 'button',
   classes: ['demo-crumb', !c.onSelect && 'demo-crumb--current'],
-  // A qualifier needs its own element to be styled down, so build the markup
-  // rather than setting textContent.
+  // Fixed text runs give the qualifier its caption style.
   ...(c.qualifier
     ? {
-        htmlContentUnsafe: `${escapeHTML(c.label)}<span class="demo-crumb-qual">${escapeHTML(c.qualifier)}</span>`
+        textSegments: [{ text: c.label }, { text: c.qualifier, classes: ['demo-crumb-qual'] }]
       }
     : { textContent: c.label }),
   attr: {

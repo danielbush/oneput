@@ -4,6 +4,25 @@ Oneput provides a shared input, menus, and controls. Host apps and library integ
 
 This source review covers content rendering. It does not prove runtime exploitation. Paths below are relative to `packages/oneput/`. Review date: 2026-11-12.
 
+## Phase 1 status
+
+Phase 1 closes the Alert and filter text conversions. Statuses, hour labels,
+skeletons, thinking dots, and timer details use text or fixed elements.
+`htmlContent` requires `SafeHtml`; runtime checks refuse forged values.
+FChild and Flex use `lib/domSafety.ts` for tags, attributes, URLs, and styles
+on server render, mount, and update. NativeController uses its image URL check.
+See [safe content](docs/safe-content.md) for named policies and limits.
+
+SVG renderers and the explicit KaTeX preview escape hatch remain. Builder
+callbacks and attachments are code APIs. Native message origin/schema checks
+remain open. Document and declarative data work is deferred to phase 2.
+
+## Original review evidence
+
+The findings below describe the baseline before phase 1. Line numbers refer
+to that review. Completed controls are stated above; document and SVG findings
+remain open.
+
 ## Still to add
 
 - Key bindings and global shortcuts, including dispatch from other controls (`src/lib/oneput/controllers/KeysController.ts:99`).
@@ -16,7 +35,7 @@ This source review covers content rendering. It does not prove runtime exploitat
 
 ## Trust boundary and current findings
 
-The earlier security notes named three concerns: HTML through FChild and Flex, `innerHTMLUnsafe`, and icons. All remain open. FChild inserts raw HTML. Flex nests FChild and accepts dynamic tags, attributes, styles, and hooks. Icon registration selects a renderer but does not validate its output.
+The earlier security notes named three concerns: HTML through FChild and Flex, `innerHTMLUnsafe`, and icons. At that review, all were open. FChild inserted raw HTML. Flex nests FChild and accepts dynamic tags, attributes, styles, and hooks. Icon registration selects a renderer but does not validate its output.
 
 Plain `textContent` uses Svelte text interpolation. This protection does not survive all later operations: both filters can convert text to unchecked highlight HTML. Alert also puts caller strings inside HTML. Script injection can read page content and accessible storage, change controls, and use the host app's authority.
 
@@ -36,7 +55,7 @@ Builder callbacks and mount hooks run code by design. They are not a safe data f
 
 ## Known risks and plan
 
-The detailed plan is [SAFE_HTML](../../work/backlog/SAFE_HTML.md). These controls are planned, not implemented:
+The detailed plan is [SAFE_HTML](../../work/backlog/SAFE_HTML.md). At the baseline review, these controls were planned. See the phase 1 status above for completed UI controls:
 
 - Keep strings as text, including filters and Alert. Use fixed nodes for emphasis.
 - Accept rich content only as `SafeHtml` made by `packages/safe-html`. Check its origin at runtime. The current safe-html API inserts content and returns `void`; it does not yet provide this type (`packages/safe-html/src/setHTML.ts:26`, relative to the repo root).

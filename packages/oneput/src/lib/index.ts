@@ -48,3 +48,5 @@ export {
 export { routeApp } from './oneput/shared/routing/routeApp.js';
 
 export type { IconDefinition, IconNode } from './oneput/lib/icons.js';
+
+export { renderMessage, type Message } from './oneput/shared/ui/Message.js';

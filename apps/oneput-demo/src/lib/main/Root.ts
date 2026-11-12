@@ -1,5 +1,5 @@
 import { sanitiseHtml } from '@oneput/safe-html';
-import type { Controller, UILayout } from '@oneput/oneput';
+import { fchild, type Controller, type UILayout } from '@oneput/oneput';
 import { Settings } from './Settings.js';
 import { AsyncSearchExample } from './AsyncSearchExample.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
@@ -250,12 +250,14 @@ export class Root implements AppObject {
         }),
         stdMenuItem({
           id: 'alert',
-          textContent: 'Show alert',
+          textContent: 'Show alert with bold messages',
           action: async () => {
             console.log('before alert...');
             const alert = this.ctl.alert({
-              message: 'Main message',
-              additional: 'This is some additional info'
+              message: fchild({ tag: 'strong', textContent: 'Builder message' }),
+              additional: sanitiseHtml('<b>SafeHtml message</b>', 'display').unwrapOr(
+                'Content unavailable'
+              )
             });
             await alert.userClicksOk();
             console.log('after alert...');

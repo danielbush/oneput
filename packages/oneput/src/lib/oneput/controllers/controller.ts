@@ -1,3 +1,4 @@
+import type { Message } from '../shared/ui/Message.js';
 import { AppEventsController } from './AppEventsController.js';
 import { MenuController } from './MenuController.js';
 import { InternalEventEmitter } from './InternalEventEmitter.js';
@@ -86,7 +87,7 @@ export class Controller {
 
   private notification = Notification.create(this);
 
-  notify(message: string, params: NotificationParams = {}): Notification {
+  notify(message: Message, params: NotificationParams = {}): Notification {
     this.notification.run(message, params);
     return this.notification;
   }
@@ -94,13 +95,13 @@ export class Controller {
     this.notification.clear();
   }
 
-  alert(params: { message: string; additional: string }): Alert {
+  alert(params: { message: Message; additional?: Message }): Alert {
     const alert = Alert.create(this, params);
     alert.run();
     return alert;
   }
 
-  confirm(params: { additional?: string; message: string }): Confirm {
+  confirm(params: { additional?: Message; message: Message }): Confirm {
     const confirm = Confirm.create(this, params);
     confirm.run();
     return confirm;

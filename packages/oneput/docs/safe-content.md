@@ -4,6 +4,14 @@ Strings stay text. `FChildParams.textContent`, Alert messages, status text,
 filter highlights, time labels, and breadcrumb qualifiers do not enter an HTML
 parser. `textSegments` describes text with fixed `b` and `span` elements.
 
+`Message` accepts a string, `SafeHtml`, one builder child (`FlexRealChild`), or
+`FlexChildren`. Alert and Confirm use it for `message` and `additional`;
+Notification uses it for its message. The shared `shared/ui/Message.ts` helper
+`renderMessage` keeps strings as text, inserts `SafeHtml` from
+`sanitiseHtml(input, 'display')` through `insertSafeHtml` on mount, and sends
+builder children through the checked Flex write path. Forged tokens show
+`Content unavailable`. Server rendering uses the checked HTML reader.
+
 Rich fields in FChild and stdMenuItem use `htmlContent: SafeHtml | null`.
 `sanitiseHtml(input, policy)` from `@oneput/safe-html` returns a neverthrow
 `Result<SafeHtml, Error>`. Only that package can create a value with runtime

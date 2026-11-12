@@ -1,6 +1,10 @@
 import type { CheckedIcon } from './geometry.js';
 
-/** Create fresh SVG nodes in the target document. Never insert caller nodes. */
+/**
+ * Builds an `<svg>` from checked icon data with `createElementNS` in
+ * `target`'s document, and puts it in `target`, replacing its children. It
+ * always makes new nodes, and never inserts nodes that a caller gave it.
+ */
 export function drawIcon(icon: CheckedIcon, target: HTMLElement): void {
   const doc = target.ownerDocument;
   const ns = 'http://www.w3.org/2000/svg';

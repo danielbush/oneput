@@ -1,8 +1,12 @@
 /**
- * Chrome icons are registered geometry or checked geometry data, never SVG text
- * or executable renderers. Registration stores a checked, immutable copy.
- * Rendering checks again at the DOM boundary. Invalid names or data use one
- * fixed fallback. See icons/geometry.ts for the policy and input limits.
+ * Icons for Oneput's own UI (menus, buttons, breadcrumbs). An icon is geometry
+ * data, such as a Lucide icon export: a list of `[tag, attributes]` pairs. It is
+ * never an SVG string or a function.
+ *
+ * Registration checks the data and stores a frozen copy. Rendering checks it
+ * again and builds the SVG with DOM calls. An unknown name or invalid data draws
+ * a fixed fallback: a square with a diagonal line. See `icons/geometry.ts` for
+ * what the check allows.
  */
 import { type Result } from 'neverthrow';
 import { checkIconGeometry, type IconDefinition } from './icons/geometry.js';
@@ -21,14 +25,22 @@ const fallback: IconDefinition = [
   ['line', { x1: 3, y1: 3, x2: 21, y2: 21 }]
 ];
 
-/** Refused registrations replace any prior value with the fixed fallback. */
+/**
+ * Checks `definition` and stores it under `name`. It returns an error when the
+ * check fails. In that case `name` draws the fallback icon, even if a valid icon
+ * was registered under that name before.
+ */
 export function registerIcon(name: string, definition: IconDefinition): Result<void, Error> {
   const result = checkIconGeometry(definition);
   iconRegistry.set(name, result.isOk() ? result.value : fallback);
   return result.map(() => undefined);
 }
 
-/** Register Lucide or custom geometry and return the names for UI builders. */
+/**
+ * Registers each icon with `registerIcon` and returns an object of the names, for
+ * use with `b.icon(name)`. For example, `registerIcons({ ChevronDown })` returns
+ * `{ ChevronDown: 'ChevronDown' }`. Invalid icons draw the fallback.
+ */
 export function registerIcons<const Icons extends Record<string, IconDefinition>>(
   icons: Icons
 ): RegisteredIconNames<Icons> {
@@ -38,7 +50,13 @@ export function registerIcons<const Icons extends Record<string, IconDefinition>
   ) as RegisteredIconNames<Icons>;
 }
 
-/** Render a registered name or geometry. Check data even after a type bypass. */
+/**
+ * Draws an icon into `target`, replacing its children. `icon` is a registered
+ * name or geometry data.
+ *
+ * It checks the data again, because a caller can pass invalid data with a type
+ * cast. An unknown name or invalid data draws the fallback icon.
+ */
 export function renderIcon(icon: string | IconDefinition, target: HTMLElement): void {
   const input = typeof icon === 'string' ? iconRegistry.get(icon) : icon;
   const checked = checkIconGeometry(input).orElse(() => checkIconGeometry(fallback));

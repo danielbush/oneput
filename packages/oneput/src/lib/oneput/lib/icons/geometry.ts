@@ -1,4 +1,7 @@
-/** Check icon data before any SVG nodes are created. No markup is parsed. */
+/**
+ * Checks icon geometry data before `drawIcon` turns it into SVG nodes. The data
+ * is plain values; no SVG text is parsed.
+ */
 import { err, ok, type Result } from 'neverthrow';
 
 export type IconNode = readonly [
@@ -6,7 +9,13 @@ export type IconNode = readonly [
   attributes: Readonly<Record<string, string | number | undefined>>
 ];
 
-/** Lucide data uses the default view box. Custom data can set a view box. */
+/**
+ * Icon geometry, in one of two forms:
+ *
+ * - a list of `[tag, attributes]` pairs, as Lucide exports it. The view box is
+ *   `0 0 24 24`.
+ * - `{ viewBox, nodes }`, for a custom icon with its own view box.
+ */
 export type IconDefinition =
   | readonly IconNode[]
   | {
@@ -44,9 +53,18 @@ const paint =
   /^(?:none|currentColor|transparent|#[\da-f]{3}|#[\da-f]{4}|#[\da-f]{6}|#[\da-f]{8})$/i;
 
 /**
- * Copy bounded data. Refuse the whole icon on failure, including throwing getters.
- * Limits: 32 nodes, 16 attributes per node, 4096 characters per value, and
- * 16384 characters in total (tags, keys, values, and view box numbers).
+ * Checks icon data and returns a frozen copy of it, or an error. One bad part
+ * refuses the whole icon. A getter that throws also refuses it.
+ *
+ * - Tags: `circle`, `ellipse`, `line`, `path`, `polygon`, `polyline`, `rect`.
+ * - Attributes: coordinates and sizes, `d`, `points`, `fill`, `stroke`. Their
+ *   values hold only finite numbers (and path commands in `d`).
+ * - `fill` and `stroke`: `none`, `currentColor`, `transparent` or a hex colour.
+ * - Limits: 32 nodes, 16 attributes per node, 4096 characters per value, and
+ *   16384 characters in all (tags, attribute names, values and view box).
+ *
+ * For example, `['a', { href: '...' }]` or `['path', { onclick: '...' }]`
+ * refuses the icon.
  */
 export function checkIconGeometry(input: unknown): Result<CheckedIcon, Error> {
   try {
@@ -119,7 +137,8 @@ function checkGeometry(input: unknown): Result<CheckedIcon, Error> {
       if (name === 'fill' || name === 'stroke') {
         if (!paint.test(text)) return refuse();
       } else {
-        // Only path commands, separators, and finite numeric tokens can survive.
+        // Remove the numbers. Only spaces, commas and (in `d`) path command
+        // letters may be left.
         const remainder = text.replace(numberToken, '');
         const allowed = name === 'd' ? /^[\s,MmZzLlHhVvCcSsQqTtAa]*$/ : /^[\s,]*$/;
         if (

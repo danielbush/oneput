@@ -33,9 +33,12 @@ function getHaystack(menuItems: MenuItemAny[]): HaystackInfo {
 }
 
 /**
- * Include a row when each query word is a prefix of text in the row.
- * Rich content is searched through its checked plain text. Highlights use
- * text segments and fixed emphasis elements; no text becomes HTML.
+ * Keeps a menu item when each word in the query starts a word in one of its
+ * children. For `htmlContent`, it checks whether the text without tags contains
+ * the query word.
+ *
+ * It highlights the matched prefixes in `textContent` children by setting
+ * `textSegments`, with the prefix in `b`. The text is never parsed as HTML.
  */
 export class WordFilter {
   static create() {

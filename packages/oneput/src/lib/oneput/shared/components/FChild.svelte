@@ -1,5 +1,11 @@
 <script lang="ts">
-  /** Check builder values before each server or client DOM write. */
+  /**
+   * Renders one builder child (`FChildParams`). Its tag, attributes and styles
+   * pass through `checkedElement` before Svelte writes them, on the server and
+   * in the browser. It shows the first content that is set: `icon`,
+   * `textSegments`, `htmlContent`, `dangerouslySetHtmlWithoutSanitising`,
+   * `textContent`.
+   */
   import { onMount } from 'svelte';
   import { checkedElement, checkedRichContent } from '../../lib/domSafety.js';
   import { defaultVoidElements } from '../../lib/defaultVoidElements.js';
@@ -19,7 +25,7 @@
     }
   });
 
-  // Render icon if specified (takes precedence over htmlContent)
+  // Render icon if specified (takes precedence over all other content)
   // Use $effect, not onMount because fchild with same id in an array may
   // conditionally render an icon or spacer etc.
   $effect(() => {
@@ -56,7 +62,7 @@
             >{:else}<span class={segment.classes}>{segment.text}</span>{/if}{/each}
       </span>
     {:else if props.htmlContent !== undefined}
-      <!-- The sanitiser and this insertion both use a fixed div context. -->
+      <!-- sanitiseHtml cleaned this HTML inside a div, so it must go in a div. -->
       <div class="oneput__rich-content">{@html checkedRichContent(props.htmlContent)}</div>
     {:else if props.dangerouslySetHtmlWithoutSanitising}
       {@html props.dangerouslySetHtmlWithoutSanitising}

@@ -372,9 +372,15 @@ export type FChildParams = {
   classes?: Array<string | false | undefined>;
   style?: Partial<CSSStyleDeclaration>;
   textContent?: string;
-  /** Rich content. Null shows a fixed unavailable state after sanitiser failure. */
+  /**
+   * HTML from `sanitiseHtml`. Pass `null` when sanitising failed; it shows
+   * "Content unavailable". A string is a type error.
+   */
   htmlContent?: SafeHtml | null;
-  /** Formula preview only, until the formula policy is reviewed in phase 2. */
+  /**
+   * Writes this HTML as given, with no cleaning. Only the KaTeX formula preview
+   * uses it. Phase 2 replaces it with a checked formula widget.
+   */
   dangerouslySetHtmlWithoutSanitising?: string;
   /**
    * Name of a registered icon to render.
@@ -382,7 +388,11 @@ export type FChildParams = {
    * Takes precedence over rich content.
    */
   icon?: string;
-  /** Text runs with fixed emphasis or caption classes. Filters can replace them. */
+  /**
+   * Text in pieces, each shown as text in a `b` (`emphasis`) or a `span` (with
+   * `classes`). Menu filters set it to highlight matches, and clear it on the
+   * next search.
+   */
   textSegments?: Array<{ text: string; emphasis?: boolean; classes?: string[] }>;
   onMount?: (node: HTMLElement, ctx: MountContext) => void | (() => void);
 };

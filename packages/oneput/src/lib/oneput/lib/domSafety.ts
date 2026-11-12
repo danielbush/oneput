@@ -1,7 +1,10 @@
 /**
- * One write policy for executable UI builders. Check before Svelte writes so
- * the same rules apply to server output, mounting, updates, and removals.
- * Callbacks and attachments remain code APIs. They are not a data boundary.
+ * Checks what Oneput's builders (FChild, Flex and NativeController) write to the
+ * page. The components call these functions before Svelte writes an element, so
+ * the same rules apply on the server, on mount and on every update.
+ *
+ * These checks do not make builder params safe to take from untrusted data.
+ * Event handler functions and attachments are code, and they run as given.
  */
 import { isSafeHtml, safeHtmlMarkup, type SafeHtml } from '@oneput/safe-html';
 import { checkElement } from './domSafety/checkElement.js';
@@ -50,13 +53,18 @@ export class DomWriteWarnings {
 }
 
 const warnings = DomWriteWarnings.create();
+/** Runs `checkElement` and warns in development about what it removed. */
 export function checkedElement(params: ElementDescription) {
   const result = checkElement(params);
   warnings.report(result.refused);
   return result;
 }
 
-/** Svelte attachments use symbol keys. String keys must not bypass attributes. */
+/**
+ * Returns only the symbol-keyed functions in `attachments`, for Flex to spread
+ * onto its element. Svelte attachments use symbol keys. A string key such as
+ * `onclick` or `href` is dropped, so it cannot skip the attribute checks.
+ */
 export function checkedAttachments(attachments?: Record<symbol, (element: HTMLElement) => void>) {
   const result: Record<symbol, (element: HTMLElement) => void> = {};
   for (const key of Object.getOwnPropertySymbols(attachments ?? {})) {
@@ -66,7 +74,13 @@ export function checkedAttachments(attachments?: Record<symbol, (element: HTMLEl
   return result;
 }
 
-/** The only rich-content reader used by the renderer, in a fixed div context. */
+/**
+ * Returns the cleaned HTML of a `SafeHtml` for FChild's `{@html}`, which is
+ * inside a `div`. FChild reads `htmlContent` only through this function.
+ *
+ * A value that `sanitiseHtml` did not make gives "Content unavailable", and a
+ * warning in development. `null` gives "Content unavailable" with no warning.
+ */
 export function checkedRichContent(value: SafeHtml | null): string {
   if (value !== null && !isSafeHtml(value)) warnings.report(['content:SafeHtml']);
   return safeHtmlMarkup(value, 'div');

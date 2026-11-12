@@ -2,7 +2,11 @@ import { menuItem } from '@oneput/oneput';
 import type { FinishedSessionRecord } from './idb.js';
 import { formatSecondsToHHMMSS } from './utils.js';
 
-/** Build session details with text fields, including the caller's label. */
+/**
+ * Returns a menu item that shows a finished session: its label and length as a
+ * heading, then its start and end times. The label is written as text, so a
+ * label such as `<b>x</b>` shows its tags.
+ */
 export function sessionDetailsMenuItem(session: FinishedSessionRecord, elapsed: number) {
   return menuItem({
     id: 'tomato-timer-session-details',

@@ -55,10 +55,12 @@ function getHaystack(menuItems: MenuItemAny[]) {
 }
 
 /**
- * Include rows with a child that matches the whole query through uFuzzy.
- * Rich content is searched as checked text. Plain text highlights use fixed
- * emphasis segments. Clear old highlights before every search, including
- * an empty query.
+ * Keeps the menu items that have one child whose text matches the whole query
+ * with uFuzzy. For `htmlContent`, it searches the text without tags.
+ *
+ * It highlights matches in `textContent` children by setting `textSegments`,
+ * with the matched parts in `b`. Every search first clears the old highlights,
+ * also when the query is empty.
  */
 export class FuzzyFilter {
   static create() {
@@ -126,7 +128,8 @@ export class FuzzyFilter {
       const infoIdx = order[i];
       const item = haystackInfo[info.idx[infoIdx]];
       if (item.type === 'plainText') {
-        // One inline run keeps spaces between text and emphasis.
+        // Put all pieces in one `textSegments` list, so they render in one
+        // inline span and the spaces between them stay.
         const segments: NonNullable<FChildParams['textSegments']> = [];
         uFuzzy.highlight(item.textContent, info.ranges[infoIdx], (text, emphasis) => {
           segments.push({ text, emphasis });

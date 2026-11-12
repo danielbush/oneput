@@ -110,7 +110,8 @@ const crumb = (c: Crumb, index: number): FChildParams => ({
   type: 'fchild',
   tag: 'button',
   classes: ['demo-crumb', !c.onSelect && 'demo-crumb--current'],
-  // Fixed text runs give the qualifier its caption style.
+  // The qualifier is a second text piece with its own class, so it can be
+  // styled smaller. No HTML is built.
   ...(c.qualifier
     ? {
         textSegments: [{ text: c.label }, { text: c.qualifier, classes: ['demo-crumb-qual'] }]

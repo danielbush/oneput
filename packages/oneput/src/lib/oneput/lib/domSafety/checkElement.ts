@@ -1,4 +1,7 @@
-/** Decide which UI values can reach the DOM. No DOM or warning effects. */
+/**
+ * Decides which tag, attributes and styles of a builder element may be written
+ * to the page. It only computes: it does not touch the DOM and does not warn.
+ */
 import { checkedLink } from '@oneput/safe-html';
 import type { AttributeValue, ElementDescription } from './types.js';
 
@@ -50,7 +53,22 @@ const styleProperties = new Set(
   )
 );
 
-/** Pure decision. The returned values are the only values sent to the DOM. */
+/**
+ * Returns the parts of `params` that are safe to write, and lists what it
+ * removed. FChild and Flex write only the returned `tag`, `attr` and `style`.
+ *
+ * - `tag`: an unknown tag, or one such as `script`, `iframe` or `textarea`,
+ *   becomes `div`.
+ * - `attr`: only allow-listed attributes stay. `on*` attributes stay only when
+ *   they are known events with a function value. `href` and `src` must pass
+ *   `checkedLink`, so `href="javascript:..."` is dropped; `src` must also be
+ *   HTTP(S) or relative. `target="_blank"` adds `rel="noopener noreferrer"`.
+ * - `style`: only allow-listed properties with simple values stay, written as
+ *   one CSS string. `url(...)`, `var(...)`, `calc(...)`, `;` and `!important`
+ *   are dropped.
+ * - `refused`: one entry per removed item, such as `tag:script`,
+ *   `attribute:onclick` or `style:zIndex`.
+ */
 export function checkElement(params: ElementDescription) {
   const refused: string[] = [];
   const requested = typeof params.tag === 'string' ? params.tag.toLowerCase() : 'div';
@@ -85,7 +103,8 @@ export function checkElement(params: ElementDescription) {
   if (attr.target === '_blank') attr.rel = 'noopener noreferrer';
   const declarations: string[] = [];
   for (const [name, value] of Object.entries(params.style ?? {})) {
-    // No CSS escapes, declarations, resources, variables, or executable CSS.
+    // A value may not hold a backslash escape, a second declaration (`;`, `{`),
+    // `!important`, `@` rules, or functions that load or compute values.
     const safe =
       styleProperties.has(name) &&
       typeof value === 'string' &&

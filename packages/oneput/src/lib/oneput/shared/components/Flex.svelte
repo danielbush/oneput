@@ -1,5 +1,9 @@
 <script lang="ts">
-  /** Check builder values before each server or client DOM write. */
+  /**
+   * Renders a builder `hflex` or `vflex` and its children. Each element's tag,
+   * attributes and styles pass through `checkedElement`, and its attachments
+   * through `checkedAttachments`, before Svelte writes them.
+   */
   import FChild from './FChild.svelte';
   import { checkedElement, checkedAttachments } from '../../lib/domSafety.js';
   import { defaultVoidElements } from '../../lib/defaultVoidElements.js';

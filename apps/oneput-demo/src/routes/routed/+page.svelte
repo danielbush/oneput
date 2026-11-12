@@ -23,6 +23,8 @@
   const subscription = actor.subscribe((snapshot) => (state = pathOf(snapshot.value)));
   let routing: ReturnType<typeof routeFlow> | undefined;
 
+  // OneputController needs an AppObject to run. routeFlow replaces it at once
+  // with Welcome, so the stack is [Welcome] and Welcome is the root.
   function init(ctl: Controller): AppObject {
     return {
       layout: { layout: Layout.create, params: {} },

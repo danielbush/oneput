@@ -275,6 +275,9 @@ stdMenuItem({
 The `b` parameter in `left`, `right`, and `bottom` builders:
 
 - `b.icon(name)` — render a registered icon
+  - Register geometry with `registerIcons({ ChevronDown })` from Lucide, or
+    `registerIcon(name, geometry)`. Geometry is checked and copied. SVG strings
+    and element factories are refused. Invalid icons use a fixed fallback.
 - `b.fchild({ textContent, htmlContent, classes, ... })` — general flex child
   Plain strings stay text. `htmlContent` requires `SafeHtml` from
   `sanitiseHtml(input, 'display' | 'ui')` in `@oneput/safe-html`.

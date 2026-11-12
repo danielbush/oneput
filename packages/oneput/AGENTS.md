@@ -28,6 +28,7 @@ Below are pointers for agents — read the source files for full detail via JSDo
 
 Strings stay text. Rich fields require `SafeHtml` from `@oneput/safe-html`.
 `lib/domSafety.ts` checks tags, attributes, URLs, and styles before rendering.
+`lib/icons.ts` checks bounded SVG geometry and renders it with DOM calls.
 See `docs/safe-content.md` for policies, failure states, and deferred sinks.
 
 ### Bindings

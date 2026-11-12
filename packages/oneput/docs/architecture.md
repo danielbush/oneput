@@ -159,7 +159,12 @@ FChild and Flex pass tags, attributes, URLs, and styles through
 `lib/domSafety.ts` before rendering, including server output and updates.
 Strings stay text. Rich fields require package-owned `SafeHtml` and a runtime
 provenance check in a fixed div context. See [safe content](safe-content.md)
-for policies, API examples, and the SVG/document work left for phase 2.
+for policies, API examples, and the remaining document work.
+
+`lib/icons.ts` registers checked geometry and returns icon names. Its private
+`icons/` modules check bounded data and create SVG nodes with DOM calls.
+No icon string or caller node enters an HTML parser. Invalid icons use a
+fixed fallback. Lucide geometry uses this same contract.
 
 `replaceMenuUI` temporarily replaces the menu area (used by Alert, Confirm).
 It swaps view only — it is not **MenuLike** (no focus / filter / activate

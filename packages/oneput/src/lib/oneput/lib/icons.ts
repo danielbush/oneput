@@ -1,105 +1,46 @@
 /**
- * Icon Registry - allows registration and rendering of icons from various sources.
- *
- * An IconRenderer is simply a function that renders an icon into a target element.
- * This strategy pattern allows any icon library or custom rendering approach.
+ * Chrome icons are registered geometry or checked geometry data, never SVG text
+ * or executable renderers. Registration stores a checked, immutable copy.
+ * Rendering checks again at the DOM boundary. Invalid names or data use one
+ * fixed fallback. See icons/geometry.ts for the policy and input limits.
  */
+import { type Result } from 'neverthrow';
+import { checkIconGeometry, type IconDefinition } from './icons/geometry.js';
+import { drawIcon } from './icons/dom.js';
 
-// Strategy: a function that renders an icon into a target element
-export type IconRenderer = (target: HTMLElement) => void;
+export { checkIconGeometry } from './icons/geometry.js';
+export type { IconDefinition, IconNode } from './icons/geometry.js';
 
-/** Registered icon names keyed by their source names. */
 export type RegisteredIconNames<Icons extends Record<string, unknown>> = {
   readonly [Name in keyof Icons]: Name;
 };
 
-// Registry for icons - webapp registers icons upfront
-const iconRegistry = new Map<string, IconRenderer>();
+const iconRegistry = new Map<string, IconDefinition>();
+const fallback: IconDefinition = [
+  ['rect', { x: 3, y: 3, width: 18, height: 18, rx: 2 }],
+  ['line', { x1: 3, y1: 3, x2: 21, y2: 21 }]
+];
 
-/**
- * Register a single icon by name.
- */
-export function registerIcon(name: string, renderer: IconRenderer): void {
-  iconRegistry.set(name, renderer);
+/** Refused registrations replace any prior value with the fixed fallback. */
+export function registerIcon(name: string, definition: IconDefinition): Result<void, Error> {
+  const result = checkIconGeometry(definition);
+  iconRegistry.set(name, result.isOk() ? result.value : fallback);
+  return result.map(() => undefined);
 }
 
-/**
- * Register multiple icons at once.
- */
-export function registerIcons<const Icons extends Record<string, unknown>>(
-  icons: Icons,
-  rendererFor: (icon: Icons[keyof Icons]) => IconRenderer
-): RegisteredIconNames<Icons> {
-  for (const name of Object.keys(icons) as Array<Extract<keyof Icons, string>>) {
-    iconRegistry.set(name, rendererFor(icons[name]));
-  }
-  return registeredIconNames(icons);
-}
-
-/**
- * Get an icon renderer by name (for inspection/debugging).
- */
-export function getIconRenderer(name: string): IconRenderer | undefined {
-  return iconRegistry.get(name);
-}
-
-/**
- * Renders an icon into a target element.
- * Used internally by FChild.svelte when an icon prop is specified.
- */
-export function renderIcon(name: string, target: HTMLElement): void {
-  const renderer = iconRegistry.get(name);
-  if (!renderer) {
-    console.warn(`Icon "${name}" not found in registry`);
-    missingIcon(target);
-    return;
-  }
-  target.innerHTML = ''; // Clear existing content
-  renderer(target);
-}
-
-// ============================================================
-// Built-in strategies (convenience helpers)
-// ============================================================
-
-/**
- * Strategy for raw SVG strings.
- * Usage: svg('<svg>...</svg>')
- *
- * Could use with lucide i-tags:
- *
- * 	 registerIcon(name, unsafeHTML(`<i data-lucide="${snakeCaseName}"></i>`));
- *
- * However, it's easier to use lucide's createElement api.
- */
-export function unsafeHTML(svgString: string): IconRenderer {
-  return (target) => {
-    target.innerHTML = svgString;
-  };
-}
-
-/**
- * Strategy for element factories (works with Lucide, or any library).
- * Usage: element(() => createElement(X))
- */
-export function element(create: () => Element): IconRenderer {
-  return (target) => {
-    target.appendChild(create());
-  };
-}
-
-/** Return each registered icon key as its runtime name. */
-function registeredIconNames<const Icons extends Record<string, unknown>>(
+/** Register Lucide or custom geometry and return the names for UI builders. */
+export function registerIcons<const Icons extends Record<string, IconDefinition>>(
   icons: Icons
 ): RegisteredIconNames<Icons> {
+  for (const [name, definition] of Object.entries(icons)) registerIcon(name, definition);
   return Object.fromEntries(
     Object.keys(icons).map((name) => [name, name])
   ) as RegisteredIconNames<Icons>;
 }
 
-/**
- * Missing icon fallback renderer.
- */
-export const missingIcon: IconRenderer = unsafeHTML(
-  '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image-off-icon lucide-image-off"><line x1="2" x2="22" y1="2" y2="22"/><path d="M10.41 10.41a2 2 0 1 1-2.83-2.83"/><line x1="13.5" x2="6" y1="13.5" y2="21"/><line x1="18" x2="21" y1="12" y2="15"/><path d="M3.59 3.59A1.99 1.99 0 0 0 3 5v14a2 2 0 0 0 2 2h14c.55 0 1.052-.22 1.41-.59"/><path d="M21 15V5a2 2 0 0 0-2-2H9"/></svg>'
-);
+/** Render a registered name or geometry. Check data even after a type bypass. */
+export function renderIcon(icon: string | IconDefinition, target: HTMLElement): void {
+  const input = typeof icon === 'string' ? iconRegistry.get(icon) : icon;
+  const checked = checkIconGeometry(input).orElse(() => checkIconGeometry(fallback));
+  if (checked.isOk()) drawIcon(checked.value, target);
+}

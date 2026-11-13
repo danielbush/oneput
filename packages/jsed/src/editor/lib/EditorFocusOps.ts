@@ -1,6 +1,7 @@
 import type { EditorState } from './EditorState.js';
 import * as insert from '../../lib/ops/focusable/insert.js';
 import * as paste from '../../lib/ops/focusable/paste.js';
+import { PasteElement } from './ops/PasteElement.js';
 import { canDelete } from '../../lib/core/dom-rules.js';
 import { convert, getConversionCandidates, unwrap } from '../../lib/ops/focusable/convert.js';
 import { isInlineFlow } from '../../lib/core/taxonomy.js';
@@ -285,13 +286,7 @@ export class EditorFocusOps {
     if (!cutElement || !focus) {
       return false;
     }
-    const result = this.isCopy
-      ? paste.pasteCopyBefore(cutElement, focus)
-      : paste.pasteBefore(cutElement, focus);
-    if (result) {
-      this.state.nav.FOCUS(result);
-    }
-    return !!result;
+    return !!this._undo(PasteElement.run(this.state, cutElement, focus, 'before', this.isCopy));
   }
 
   pasteAfter(): boolean {
@@ -299,13 +294,7 @@ export class EditorFocusOps {
     if (!cutElement || !focus) {
       return false;
     }
-    const result = this.isCopy
-      ? paste.pasteCopyAfter(cutElement, focus)
-      : paste.pasteAfter(cutElement, focus);
-    if (result) {
-      this.state.nav.FOCUS(result);
-    }
-    return !!result;
+    return !!this._undo(PasteElement.run(this.state, cutElement, focus, 'after', this.isCopy));
   }
 
   pasteAppend(): boolean {
@@ -313,13 +302,7 @@ export class EditorFocusOps {
     if (!cutElement || !focus) {
       return false;
     }
-    const result = this.isCopy
-      ? paste.pasteCopyWithin(cutElement, focus)
-      : paste.pasteWithin(cutElement, focus);
-    if (result) {
-      this.state.nav.FOCUS(result);
-    }
-    return !!result;
+    return !!this._undo(PasteElement.run(this.state, cutElement, focus, 'within', this.isCopy));
   }
 
   cancelPaste(): boolean {

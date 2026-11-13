@@ -133,10 +133,11 @@ describe('patchElement', () => {
 
   test.each([
     '<script>bad()</script>',
+    '<iframe></iframe>',
+    '<img src="data:text/html,bad">',
     '<img src=x onerror=bad()>',
     '<a href="javascript:bad()">link</a>',
     '<span onclick="bad()">text</span>',
-    '<span style="background:url(https://example.com)">text</span>',
     '<svg onload="bad()"></svg>'
   ])('refused nodes: %s', (html) => {
     // arrange
@@ -154,21 +155,18 @@ describe('patchElement', () => {
     expect(element.outerHTML).toBe('<div>before</div>');
   });
 
-  test.each(['onclick', 'srcdoc', 'style', 'href', 'src', 'bad name'])(
-    'refused attribute: %s',
-    (name) => {
-      // arrange
-      const element = document.createElement('div');
-      element.textContent = 'before';
+  test.each(['onclick', 'srcdoc', 'bad name'])('refused attribute: %s', (name) => {
+    // arrange
+    const element = document.createElement('div');
+    element.textContent = 'before';
 
-      // act
-      const operation = patchElement(element, { attributes: { [name]: 'bad' } });
+    // act
+    const operation = patchElement(element, { attributes: { [name]: 'bad' } });
 
-      // assert
-      expect(operation).toBeNull();
-      expect(element.outerHTML).toBe('<div>before</div>');
-    }
-  );
+    // assert
+    expect(operation).toBeNull();
+    expect(element.outerHTML).toBe('<div>before</div>');
+  });
 
   test('unsafe existing children cannot enter undo history', () => {
     // arrange

@@ -1,3 +1,4 @@
+import { isDocumentTagAllowed } from '@oneput/safe-html';
 /**
  * Change an element's tag while keeping its children, or dissolve it entirely.
  *
@@ -11,6 +12,7 @@ export function unwrap(el: HTMLElement): void {
 }
 
 export function convert(el: HTMLElement, toTagName: string): HTMLElement {
+  if (!isDocumentTagAllowed(toTagName)) throw new Error('Active document tag refused');
   const newEl = el.ownerDocument.createElement(toTagName);
   el.before(newEl);
   newEl.append(...Array.from(el.childNodes));

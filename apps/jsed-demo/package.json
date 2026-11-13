@@ -43,7 +43,8 @@
     "markdown-it": "^13.0.1",
     "neverthrow": "catalog:",
     "@oneput/oneput": "workspace:",
-    "@oneput/jsed": "workspace:"
+    "@oneput/jsed": "workspace:",
+    "@oneput/safe-html": "workspace:"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.5",

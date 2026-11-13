@@ -1,3 +1,4 @@
+import { documentMarkupForExport } from '@oneput/safe-html';
 import { Nav } from '../../focus/Nav.js';
 import { Cursor } from '../../cursor/Cursor.js';
 import { Tokenizer } from '../../lib/ops/Tokenizer.js';
@@ -26,7 +27,9 @@ import { addImplicitLines } from '../../lib/ops/implicitLine.js';
 import { removeArtifacts } from '../../lib/ops/document.js';
 
 export type EditorError = { type: 'no-token-under-focus' } | CursorError;
-export type SerializeElementError = { type: 'element-outside-document' };
+export type SerializeElementError =
+  | { type: 'element-outside-document' }
+  | { type: 'document-export-refused'; cause: Error };
 export type EditorTextChangeEvent =
   | {
       type: 'token-text-change';
@@ -272,14 +275,16 @@ export class EditorState {
   }
 
   /**
-   * Clone the document, strip editing artifacts from the clone, return its html.
+   * Clone the document, strip editing artifacts, remove active content, and return its HTML.
    *
    * Works mid-session. The live document keeps its artifacts.
    */
   serialize(): string {
     const clone = this.document.root.cloneNode(true) as HTMLElement;
     removeArtifacts(clone);
-    return clone.innerHTML;
+    const result = documentMarkupForExport(clone);
+    if (result.isErr()) throw result.error;
+    return result.value;
   }
 
   /**
@@ -293,7 +298,10 @@ export class EditorState {
 
     const clone = element.cloneNode(true) as HTMLElement;
     removeArtifacts(clone);
-    return ok(clone.innerHTML);
+    return documentMarkupForExport(clone).mapErr((cause) => ({
+      type: 'document-export-refused' as const,
+      cause
+    }));
   }
 
   isEditing(): boolean {

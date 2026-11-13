@@ -70,6 +70,9 @@ importers:
       '@oneput/oneput':
         specifier: 'workspace:'
         version: link:../../packages/oneput
+      '@oneput/safe-html':
+        specifier: 'workspace:'
+        version: link:../../packages/safe-html
       commander:
         specifier: ^11.1.0
         version: 11.1.0
@@ -239,6 +242,9 @@ importers:
       '@iktakahiro/markdown-it-katex':
         specifier: ^4.0.1
         version: 4.0.1
+      '@oneput/safe-html':
+        specifier: 'workspace:'
+        version: link:../safe-html
       commander:
         specifier: ^11.1.0
         version: 11.1.0

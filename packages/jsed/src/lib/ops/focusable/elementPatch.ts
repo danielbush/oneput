@@ -4,11 +4,10 @@ import { checkPatchContent, checkPatchAttributes } from './lib/patchSafety.js';
 /**
  * A declarative update to one existing element.
  *
- * Child patches accept caller-built nodes. A small presentation policy checks
- * both new children and the undo snapshot. It refuses active elements, URLs,
- * inline styles and unknown attributes. Accepted nodes are cloned for every
- * write, so caller changes and live edits cannot change undo or redo data.
- * Other document entry points still need the document policy.
+ * Child patches accept caller-built nodes. The shared document policy checks
+ * both new children and the undo snapshot. It refuses active content.
+ * Each write uses new clones, so caller changes and live edits cannot change
+ * undo or redo data.
  */
 export type ElementPatch = {
   /** Set an attribute, or remove it with `null`. */
@@ -73,7 +72,7 @@ export function checkElementPatch(
   element: HTMLElement,
   input: ElementPatch
 ): Result<void, PatchError> {
-  if (!checkPatchAttributes(input.attributes))
+  if (!checkPatchAttributes(element, input.attributes))
     return err({ type: 'patch-refused', field: 'attributes' });
   if (
     input.children !== undefined &&
@@ -83,7 +82,7 @@ export function checkElementPatch(
   const previousAttributes = Object.fromEntries(
     Object.keys(input.attributes ?? {}).map((name) => [name, element.getAttribute(name)])
   );
-  if (!checkPatchAttributes(previousAttributes))
+  if (!checkPatchAttributes(element, previousAttributes))
     return err({ type: 'patch-refused', field: 'attributes' });
   const tokens = [...(input.classes?.add ?? []), ...(input.classes?.remove ?? [])];
   if (tokens.some((token) => !token || /\s/.test(token)))

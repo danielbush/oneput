@@ -162,10 +162,10 @@ export function resolveRoute(
  * A route that is not settled (see {@link resolveRoute}) keeps the AppObject
  * that is shown.
  */
-export function routeMachine<S extends MachineSnapshot, A extends MachineActor<S>>(
+export function routeMachine<A extends MachineActor<MachineSnapshot>>(
   ctl: Controller,
   actor: A,
-  apps: AppMap<S, A>
+  apps: AppMap<ReturnType<A['getSnapshot']>, A>
 ) {
   const root = actor as MachineActor<MachineSnapshot>;
   const map = apps as AppMap<never, never>;

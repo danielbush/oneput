@@ -37,6 +37,9 @@ test("browser: the document policy keeps structure markup and removes active con
 
   // assert
   expect(element.innerHTML).toBe(
-    '<article class="task" data-task="todo" aria-label="Task"><button type="button">Done</button></article><!-- note -->',
+    '<article class="task" data-task="todo" aria-label="Task"><button type="button">Done</button></article><!-- note --><form><p>in form</p></form>',
   );
 });
+
+import { documentPolicyCases } from "./document-cases.js";
+documentPolicyCases();

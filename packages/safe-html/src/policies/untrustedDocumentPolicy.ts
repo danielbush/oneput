@@ -1,34 +1,25 @@
-import type { DocumentPolicy } from "./types.js";
-
 /**
- * Allow the markup of a document from an untrusted file.
- *
- * Keep normal HTML and SVG, `class`, `id`, `aria-*` and `data-*` attributes,
- * so structures in the document still work. Remove scripts, event handlers
- * and the elements listed below, with their content. Inline styles, images and
- * SVG stay, and can load resources. Phase 2 will check those too.
- *
- * Example: use this for an HTML file that the user opens.
+ * One policy for editor documents. Keep document structure, CSS, images, SVG,
+ * MathML and comments. Remove active content before nodes become live.
+ * Remote resources and document CSS are accepted risks.
  */
-export const untrustedDocumentPolicy: DocumentPolicy = {
-  removeElements: [
-    "base",
-    "embed",
-    "form",
-    "frame",
-    "frameset",
-    "iframe",
-    "link",
-    "meta",
-    "noscript",
-    "object",
+export const untrustedDocumentPolicy = Object.freeze({
+  removeElements: Object.freeze([
     "script",
-    "style",
-  ],
+    "iframe",
+    "frame",
+    "object",
+    "embed",
+    "base",
+    "foreignobject",
+  ]),
   comments: true,
-};
+});
 
-for (const value of Object.values(untrustedDocumentPolicy)) {
-  if (Array.isArray(value)) Object.freeze(value);
+/** Check caller tag names before creating or converting an element. */
+export function isDocumentTagAllowed(tag: string): boolean {
+  return (
+    /^[a-z][a-z0-9-]*$/i.test(tag) &&
+    !untrustedDocumentPolicy.removeElements.includes(tag.toLowerCase())
+  );
 }
-Object.freeze(untrustedDocumentPolicy);

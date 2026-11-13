@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { documentPolicyCases } from "./document-cases.js";
 
 import { describe, expect, test } from "vitest";
 import { setHTML } from "../setHTML.js";
@@ -70,6 +71,10 @@ describe("setHTML with untrustedDocumentPolicy", () => {
     );
 
     // assert
-    expect(element.innerHTML).toBe("<h1>Hi</h1><a>x</a>");
+    expect(element.innerHTML).toBe(
+      '<h1>Hi</h1><a>x</a><form action="https://example.com"><p>in form</p></form><style>body{display:none}</style><link rel="stylesheet" href="https://example.com/a.css">',
+    );
   });
 });
+
+documentPolicyCases();

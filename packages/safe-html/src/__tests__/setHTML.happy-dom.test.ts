@@ -25,3 +25,6 @@ test("SafeHtml refuses the same broken DOM without retaining raw input", () => {
   // assert
   expect(result.isErr()).toBe(true);
 });
+
+import { documentPolicyCases } from "./document-cases.js";
+documentPolicyCases();

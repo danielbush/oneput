@@ -18,19 +18,33 @@ checked reader for fixed-div renderers, including server rendering.
 `safeHtmlText(value)` supplies plain text for filtering. A renderer must not
 put the checked markup into a raw-text, SVG, or other parsing context.
 
-`setHTML(div, input, policy?)` sanitises and inserts display or UI content.
-It accepts registered policy names. The separate `document` name retains the
-existing document policy. That policy can preserve inline CSS, images, SVG,
-classes, IDs, data, aria, and comments. It is not a UI SafeHtml constructor.
-Document style and resource hardening is deferred to phase 2.
+`setHTML(element, input, 'document')` parses HTML in an inert template, removes
+active content, and inserts the checked nodes. It keeps document structure,
+CSS, images, SVG, MathML, forms, classes, IDs, data, aria and comments.
+`sanitiseDocumentNodes(root)` applies the same policy to caller-built nodes
+without parsing or replacing safe nodes. A false result refuses the root.
+Use it before insertion. It cannot undo script that a host already ran.
 
-Native `Element.setHTML` is used when available. Otherwise DOMPurify returns a
-fragment. A fixed-policy health check detects an unsafe DOM walker independently
-of the selected policy. For example, happy-dom currently fails this check.
-Failure throws in `setHTML` and shows a fixed unavailable state; it never
-inserts the original input. Construction without a DOM returns an error.
+The document policy removes script, event attributes, script URLs, frames,
+objects, embeds, base, meta refresh and SVG foreignObject. Data URLs are
+allowed only for PNG, JPEG, GIF and WebP in `img src`. SVG link animation
+cannot introduce active URLs. Remote images and CSS loads are accepted privacy
+risks. Document CSS can also change the host page's appearance.
 
-Run `task check` and `task test` here for types, jsdom refusal tests, and the
-happy-dom refusal test. `task test:browser` is a separate native-browser check.
+`checkDocumentNodes` checks a copy without changing caller nodes. Patches use
+this check before writes and history capture. `isDocumentTagAllowed` checks
+caller tag names. `documentMarkupForExport` checks a detached export clone and
+its saved markup, and returns `Result<string, Error>`. Export parsing uses the
+same element context, including tables. It refuses markup that does not
+stabilise in four passes. Never pass the live editor root to this export API.
+
+UI sanitisation uses native `Element.setHTML` when available, with a DOMPurify
+fallback and a fixed health check. Happy-dom fails that fallback health check.
+The document policy uses one DOM node walk in all environments. It does not
+use the browser's narrower built-in policy or DOMPurify's UI defaults.
+Construction of UI SafeHtml without a DOM returns an error.
+
+Run `task check` and `task test` here for types and the shared jsdom/happy-dom document cases,
+plus UI refusal tests. `task test:browser` is a separate native-browser check.
 The browser target starts a local test server; do not use it when servers are
-not permitted. Native browser parity was not run for phase 1.
+not permitted. Browser cases were not run for this document policy update.

@@ -18,39 +18,44 @@ UI tags, attributes, URLs and styles. Rich UI fields require package-owned
 [Oneput safe content](../oneput/docs/safe-content.md) for these protections and
 [Oneput's threat model](../oneput/THREAT_MODEL.md) for its trust boundary.
 
-These UI protections do not make an editor document safe. Structural
-normalisation and export artifact cleanup do not enforce a content security
-policy. Document checks must preserve node identity, focus and history.
+Document content uses a separate, shared policy from `@oneput/safe-html`.
+It removes active content while keeping normal document markup and styles.
 
 ## Most at risk now
 
-Ranked within the current document scope:
+The active-content gaps at document load, paste, caller tag creation,
+conversion and export are closed. `JsedDocument.create(root, html)` checks
+HTML before insertion. The root-only factory checks caller-built nodes before
+editor setup. Hosts must check HTML before making it live; a later check
+cannot undo script that already ran. The demo checks fetched HTML before its
+first write.
 
-1. **Unchecked live documents.** Attack: fetched HTML or caller nodes contain active markup.
-   Impact: import, paste or caller tag creation can give content the host page's authority.
-   Source: `apps/jsed-demo/src/lib/jsed/services/TestDocService.ts:28`, `packages/jsed/src/JsedDocument.ts:33`, `packages/jsed/src/lib/ops/focusable/paste.ts:19`, `packages/jsed/src/lib/ops/focusable/create.ts:11`, `packages/jsed/src/lib/ops/focusable/convert.ts:14`.
-   Close with the shared document contract in [SAFE_HTML step 4](../../work/backlog/SAFE_HTML.md#4-migrate-icons-and-documents).
-2. **Document resources and CSS.** Attack: a document uses allowed CSS, images or SVG resources.
-   Impact: it can load remote resources or change the host page's appearance.
-   Source: `packages/safe-html/src/policies/untrustedDocumentPolicy.ts:13`.
-   Close with the resource rules in [SAFE_HTML step 4](../../work/backlog/SAFE_HTML.md#4-migrate-icons-and-documents).
-3. **Saved content and plugin output.** Attack: unsafe live DOM or formula plugin output is exported and opened again.
-   Impact: active content can return. Artifact cleanup is not sanitisation.
-   Source: `packages/jsed/src/editor/lib/EditorState.ts:282`, `:296`, `packages/jsed/src/lib/convert/convert.ts:10`, `:44`.
-   Close with export and plugin checks in [SAFE_HTML step 4](../../work/backlog/SAFE_HTML.md#4-migrate-icons-and-documents).
+Paste checks nodes before insertion. Creation checks tags and bounds recursive
+specifications to 10000 nodes and depth 64. Conversion checks tags before any
+write. Patches use the same document policy before changing FOCUS or history.
+Export checks a clone after artifact removal, including markup that changes
+structure when saved. The live editor root is never parsed again. Tests cover
+hostile content, preserved documents, FOCUS, node identity and paste/patch
+undo and redo.
 
-Patches now take checked presentation nodes and keep cloned undo and redo
-snapshots. They do not secure the other document entry points. The patch
-policy refuses URLs, styles and unknown attributes; it cannot replace the
-full document policy. The missing enforced sink scan and browser coverage
-remain in [SAFE_HTML step 6](../../work/backlog/SAFE_HTML.md#6-enforce-the-contract).
+Accepted risks:
+
+- Remote images and CSS can load resources. A sender can learn that a user
+  opened a file. Document CSS can also change the host page's appearance.
+  This is accepted for now so normal documents keep working. A later option
+  could **block remote content in files from elsewhere**, as email clients do.
+  That option is not built.
+- CLI conversion has no DOM check and is out of scope because it runs on the user's own files.
+
+Real-browser policy checks, production checks and an enforced sink scan remain
+in [SAFE_HTML step 6](../../work/backlog/SAFE_HTML.md#6-enforce-the-contract).
+DOM tests do not prove browser behaviour.
 
 ## Remaining work
 
-[SAFE_HTML](../../work/backlog/SAFE_HTML.md#4-migrate-icons-and-documents)
-contains the document release plan and remaining-sink inventory. It lists
-current source locations for import, patch, replay, paste, creation,
-conversion, export and document policies. Keep that list there.
+[SAFE_HTML](../../work/backlog/SAFE_HTML.md) records completed boundaries and
+remaining checks. Keep the release inventory there. Hosts that import files
+or clipboard HTML must use the checked entry APIs before insertion.
 
 ## Other review areas
 

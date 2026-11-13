@@ -54,13 +54,49 @@ applies as given.
 | ---------- | ------------------------------------------------------------------------ | ------------------------------------------------------------- | --------------------------------------------------------------------- |
 | `display`  | Text, lists, tables, headings; `href`, `title`                           | Links on `a`: HTTP(S), mailto, tel, relative paths, fragments | No inline CSS, SVG, MathML, images, media, or other resource elements |
 | `ui`       | Display markup plus `kbd`; only `oneput__kbd-symbol` survives in `class` | Same as display                                               | Same as display                                                       |
-| `document` | Document preservation in `setHTML` only; cannot create UI `SafeHtml`     | Existing DOMPurify/native rules                               | Inline CSS, images, and SVG resources can remain                      |
+| `document` | Document structure and attributes; separate from UI `SafeHtml`           | No script URLs; data only for raster `img src`                | Document CSS, images, SVG and remote loads stay                       |
 
 Callers choose a policy by name. They cannot pass their own policy object.
 When the browser has no native `setHTML`, `sanitiseHtml` uses DOMPurify. It
 first checks that DOMPurify works in this DOM: it cleans a fixed test string
 and checks the result. If the check fails, `sanitiseHtml` returns an error.
 No error path returns the input unchanged.
+
+## Editor documents
+
+The `document` policy in `@oneput/safe-html` keeps normal elements, classes,
+IDs, data and aria attributes, document CSS, images, SVG, MathML, tables,
+forms and comments. It removes scripts, event attributes, JavaScript and
+VBScript URLs, frames, objects, embeds, base, meta refresh and SVG
+foreignObject. SVG script links and active link animations are removed.
+Data URLs are allowed only for PNG, JPEG, GIF and WebP in `img src`.
+
+`setHTML(root, html, 'document')` parses HTML in an inert template, checks the
+nodes, then inserts them without another parse. It uses the same node walk
+in all DOM environments. It does not depend on native/UI sanitiser defaults.
+`JsedDocument.create(root, html)` uses this boundary before editor setup.
+The root-only factory checks caller-built nodes in place. A host must check
+untrusted HTML before making it live; jsed cannot undo script run earlier.
+
+`sanitiseDocumentNodes` checks caller nodes before paste and insertion. It
+keeps safe nodes by identity and refuses an active root. Creation and
+conversion check tags with `isDocumentTagAllowed`; recursive creation is
+limited to 10000 nodes and depth 64. Patches use `checkDocumentNodes` before
+writes and history capture. They keep isolated snapshots and use the same
+policy, so normal document content also works in patches.
+
+Export removes editor artifacts from a clone, then checks its nodes and saved
+markup with `documentMarkupForExport`. That function returns a neverthrow
+`Result<string, Error>` and refuses markup that does not stabilise in four
+passes. The element export API returns a `document-export-refused` error;
+whole-document export throws on that refusal. Only detached export nodes are
+parsed. The live root, FOCUS, node identity and undo history stay intact.
+
+Remote images and CSS loading are accepted for now. They can tell a sender
+that a file was opened. Document CSS can also change the host page's
+appearance. A later option could **block remote content in files from
+elsewhere**, as email clients do. That option is not built.
+CLI conversion has no DOM check and is out of scope because it runs on the user's own files.
 
 ## DOM writes
 
@@ -150,5 +186,5 @@ old page content again. KaTeX output needs MathML, SVG and inline styles, so
 it cannot use the display policy. This boundary still trusts KaTeX's output;
 it is not an independent formula sanitiser.
 
-For the remaining document and browser checks, see
+For the completed document boundaries and remaining browser checks, see
 [SAFE_HTML](../../../work/backlog/SAFE_HTML.md#4-migrate-icons-and-documents).

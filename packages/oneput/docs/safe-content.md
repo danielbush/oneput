@@ -189,15 +189,13 @@ raw HTML field in FChild. The demo compiles formulas with `trust: false`,
 `strict: 'error'`, `maxExpand: 1000` and `maxSize: 20`. It refuses source over
 4096 characters and output over 200000 characters.
 
-Only compiler output enters a private store. `unsafeKatexOutputNodes` is the
-one raw formula HTML escape hatch. It parses output from that store into a
-new fragment. Preview and insertion use these nodes. Insertion does not parse
-old page content again. KaTeX output needs MathML, SVG and inline styles, so
-it cannot use the display policy. An independent formula policy checks each
-node before preview or insertion. It permits formula elements, MathML, SVG
-geometry and fixed layout styles. It refuses links, resource attributes, active
-elements and other CSS. A failed check replaces the whole fragment with text.
-The policy bounds output to 10000 nodes and depth 64.
+The model checks compiler output with `sanitiseHtml(output, 'math')` before
+it notifies subscribers. A refusal becomes the normal error state; later valid
+input can recover. Preview and insertion use `insertSafeHtml` to copy checked
+nodes. Insertion does not parse old page content again. Formula containers use
+`contain: paint`. See the
+[math policy contract](../../safe-html/README.md) for the allow-lists and style
+checks.
 
 For the completed document boundaries and remaining browser checks, see
 [SAFE_HTML](../../../work/backlog/SAFE_HTML.md#4-migrate-icons-and-documents).

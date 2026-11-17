@@ -61,6 +61,12 @@ tasks:
       task oneput:test -- -t "enableModal"
     cmds:
       - ./node_modules/.bin/vitest run --project=server {{.CLI_ARGS}}
+  test:production-safety:
+    desc: Build production components and test DOM refusal without a browser
+    cmds:
+      - pnpm exec vite build --config vite.production-test.config.ts --mode production
+      - pnpm exec vitest run --config vitest.production.config.ts
+
   test:coverage:
     desc: Like `test` but prints coverage at the end
     cmds:

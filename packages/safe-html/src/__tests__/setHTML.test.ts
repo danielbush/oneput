@@ -78,3 +78,6 @@ describe("setHTML with untrustedDocumentPolicy", () => {
 });
 
 documentPolicyCases();
+
+import { uiPolicyCases } from "./ui-cases.js";
+uiPolicyCases("shared UI policy", setHTML);

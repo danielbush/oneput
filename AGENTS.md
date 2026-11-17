@@ -1,4 +1,9 @@
-The main session follows [MANAGER.md](./MANAGER.md): how to answer, explain, help the user decide and run the work.
+## Project docs
+
+- [NFR.md](./NFR.md), [CODE.md](./CODE.md), [REVIEW.md](./REVIEW.md) and [MANAGER.md](./MANAGER.md) hold what we have agreed; each answers one question. Concepts live per package, eg `packages/oneput/docs/CONCEPTS.md`.
+- The main session follows MANAGER.md: how to answer, explain, help the user decide and run the work.
+- When adding, moving or questioning a rule or decision, use the codebase-docs skill to decide which file it belongs in.
+- Before starting work, read CODE.md and REVIEW.md. Check the work against REVIEW.md and CODE.md before reporting it. Name both files in briefs to other agents.
 
 ## Overview
 
@@ -29,11 +34,6 @@ There is a `work-tracker` skill that manages areas like `work/`.
 Also note: `work/active/CURRENT.md` is a space where current planned or in-progress work has been written down.  You can refer here to get an idea of what they're trying to do.
 
 Also remind them that the `jsed-test-cases` skill can turn a jsed test document or failing test into an interactive SvelteKit demo under `apps/jsed-demo/src/routes/test-cases/`.
-
-## Reading and writing code
-
-Follow [CODE.md](./CODE.md) for how code is structured, tested and documented.
-Check work against [REVIEW.md](./REVIEW.md) and CODE.md before reporting it.
 
 ## Building and testing
 

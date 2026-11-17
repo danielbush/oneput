@@ -183,8 +183,11 @@ Only compiler output enters a private store. `unsafeKatexOutputNodes` is the
 one raw formula HTML escape hatch. It parses output from that store into a
 new fragment. Preview and insertion use these nodes. Insertion does not parse
 old page content again. KaTeX output needs MathML, SVG and inline styles, so
-it cannot use the display policy. This boundary still trusts KaTeX's output;
-it is not an independent formula sanitiser.
+it cannot use the display policy. An independent formula policy checks each
+node before preview or insertion. It permits formula elements, MathML, SVG
+geometry and fixed layout styles. It refuses links, resource attributes, active
+elements and other CSS. A failed check replaces the whole fragment with text.
+The policy bounds output to 10000 nodes and depth 64.
 
 For the completed document boundaries and remaining browser checks, see
 [SAFE_HTML](../../../work/backlog/SAFE_HTML.md#4-migrate-icons-and-documents).

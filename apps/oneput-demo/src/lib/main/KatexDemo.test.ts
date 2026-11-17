@@ -1,4 +1,4 @@
-// @vitest-environment happy-dom
+// @vitest-environment jsdom
 import { describe, expect, test } from 'vitest';
 import { notifier } from '@oneput/oneput';
 import { DemoDocument, KatexFormula, KatexPreview } from './KatexDemo.js';

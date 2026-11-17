@@ -24,6 +24,7 @@ import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
 import { icons } from '../common/_icons.js';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import './KatexDemo.css';
+import { restrictKatexOutput } from './katex/outputPolicy.js';
 
 /**
  * The page that the demo inserts formulas into.
@@ -60,13 +61,15 @@ const formulaOutput = new WeakMap<FormulaMarkup, string>();
 /**
  * The only raw formula HTML escape hatch. Never pass caller HTML here.
  * The private store accepts only output from renderToString below.
- * KaTeX needs MathML, SVG and inline styles that the display policy removes.
+ * An independent formula policy checks its MathML, SVG and inline styles
+ * before either preview or insertion can use the nodes.
  */
 function unsafeKatexOutputNodes(formula: FormulaMarkup, doc: Document): DocumentFragment {
   const template = doc.createElement('template');
   const html = formulaOutput.get(formula);
   if (html === undefined) template.content.append(doc.createTextNode('Content unavailable'));
   else template.innerHTML = html;
+  restrictKatexOutput(template.content);
   return template.content;
 }
 

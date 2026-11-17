@@ -129,7 +129,8 @@ This is a missing entry boundary, not an additional raw HTML sink.
 Status: Implementation complete. Fast checks and a production-build DOM test
 cover refusal. Browser checks are written but have not been run.
 
-- KaTeX output goes through safe-html `setHTML` with the `"math"` policy.
+- KaTeX output goes through safe-html `sanitiseHtml` with the `"math"` policy,
+  then `insertSafeHtml` copies the checked nodes into the page.
   Package regression cases preserve MathML, SVG, styles, `\utilde`, `\widehat`,
   `\llap`, `\colorbox` and `\fcolorbox` output. Sanitiser refusals enter the
   model's error state before preview notification, so valid input can recover.

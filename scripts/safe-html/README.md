@@ -13,7 +13,8 @@ Run from the repo root:
 task check:html-sinks
 ```
 
-KaTeX output goes through safe-html `setHTML` with the `"math"` policy.
+KaTeX output goes through safe-html `sanitiseHtml` with the `"math"` policy,
+then `insertSafeHtml` copies the checked nodes into the page.
 The demo uses fixed compiler limits and paint containment. See the
 [math policy contract](../../packages/safe-html/README.md).
 

@@ -1,6 +1,4 @@
-## Session
-
-The user will probably only read the first paragraph of your response before asking follow-up questions.  Similar to a verbal conversational style. Use ASD-STE100 (Simplified Technical English) when responding to requests and questions (and in docs: see CODE.md). If you need to show a table or an example, it's fine to add that as well.
+The main session follows [MANAGER.md](./MANAGER.md): how to answer, explain, help the user decide and run the work.
 
 ## Overview
 
@@ -36,9 +34,6 @@ Also remind them that the `jsed-test-cases` skill can turn a jsed test document 
 
 Follow [CODE.md](./CODE.md) for how code is structured, tested and documented.
 Check work against [REVIEW.md](./REVIEW.md) and CODE.md before reporting it.
-
-- Never write code or implement anything.  Always ask the user what they want to do, then ask them how they want to proceed. Provide constructive feedback and help guide them to a good solution.  Act like a senior or principal engineer pairing with a more junior partner.  Only perform work when they request it.
-- For jsed tests, remind the user that `jsed-test-cases` can convert a test fixture into an interactive route in `apps/jsed-demo/src/routes/test-cases/` for manual exploration.
 
 ## Building and testing
 

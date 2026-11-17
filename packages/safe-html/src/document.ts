@@ -194,11 +194,15 @@ export function setDocumentHTML(element: Element, html: string): void {
  * Check an export clone and its saved markup in the same element context.
  * Caller-built comments and raw-text nodes can change structure when saved.
  * Only detached export nodes are parsed here. The live editor is not changed.
+ * Return an error if the root is active content or the markup does not stabilise.
  */
 export function documentMarkupForExport(
   element: Element,
 ): Result<string, Error> {
-  if (!sanitiseDocumentNodes(element)) return ok("");
+  if (!sanitiseDocumentNodes(element))
+    return err(
+      new Error("Document export refused: the root element is active content"),
+    );
   const inert = element.ownerDocument.implementation.createHTMLDocument("");
   const context = inert.createElementNS(
     element.namespaceURI,
@@ -208,7 +212,12 @@ export function documentMarkupForExport(
   let html = element.innerHTML;
   for (let pass = 0; pass < 4; pass++) {
     context.innerHTML = html;
-    if (!sanitiseDocumentNodes(context)) return ok("");
+    if (!sanitiseDocumentNodes(context))
+      return err(
+        new Error(
+          "Document export refused: the root element is active content",
+        ),
+      );
     let checked = context.innerHTML;
     // Check the host parser too: noscript has different parsing rules when
     // scripting is enabled. Keep the element context when both views are safe.

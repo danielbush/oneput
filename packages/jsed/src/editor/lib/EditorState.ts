@@ -277,7 +277,7 @@ export class EditorState {
   /**
    * Clone the document, strip editing artifacts, remove active content, and return its HTML.
    *
-   * Works mid-session. The live document keeps its artifacts.
+   * Works mid-session. The live document keeps its artifacts. Throws if export is refused.
    */
   serialize(): string {
     const clone = this.document.root.cloneNode(true) as HTMLElement;
@@ -290,6 +290,7 @@ export class EditorState {
   /**
    * Clone one element in this document, strip editing artifacts from the
    * clone, and return its authored inner HTML.
+   * Return document-export-refused if the export check refuses the clone.
    */
   serializeElement(element: HTMLElement): Result<string, SerializeElementError> {
     if (!this.document.root.contains(element)) {

@@ -54,7 +54,7 @@ risks. Document CSS can also change the host page's appearance.
 this check before writes and history capture. `isDocumentTagAllowed` checks
 caller tag names. `documentMarkupForExport` checks a detached export clone and
 its saved markup, and returns `Result<string, Error>`. Export parsing uses the
-same element context, including tables. It refuses markup that does not
+same element context, including tables. It returns an error for an active root or markup that does not
 stabilise in four passes. Never pass the live editor root to this export API.
 
 UI sanitisation uses native `Element.setHTML` when available, with a DOMPurify

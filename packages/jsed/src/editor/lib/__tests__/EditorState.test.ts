@@ -1,4 +1,5 @@
 import { Controller } from '@oneput/oneput';
+import { JsedDocument } from '../../../JsedDocument.js';
 import { describe, expect, test } from 'vitest';
 import { JSED_CURSOR_MARKER_CLASS } from '../../../cursor/lib/CursorState.js';
 import {
@@ -75,6 +76,25 @@ describe('EditorState.exitEditing', () => {
 });
 
 describe('EditorState.serialize', () => {
+  test('export: active root - throws', () => {
+    // arrange
+    const root = document.createElement('meta');
+    const doc = JsedDocument.createNull(root);
+    const state = EditorState.createNull({
+      document: doc,
+      userInput: Controller.createNull().input
+    });
+    root.setAttribute('http-equiv', 'refresh');
+
+    // act
+    const serialize = () => state.serialize();
+
+    // assert
+    expect(serialize).toThrow('Document export refused: the root element is active content');
+
+    state.destroy();
+  });
+
   test('returns whole-document authored html', () => {
     // arrange
     const doc = makeRoot(
@@ -127,6 +147,29 @@ describe('EditorState.serialize', () => {
 });
 
 describe('EditorState.serializeElement', () => {
+  test('export: active element - document-export-refused', () => {
+    // arrange
+    const doc = makeRoot('');
+    const state = EditorState.createNull({
+      document: doc,
+      userInput: Controller.createNull().input
+    });
+    const target = document.createElement('script');
+    doc.root.append(target);
+
+    // act
+    const result = state.serializeElement(target);
+
+    // assert
+    expect(result._unsafeUnwrapErr()).toEqual({
+      type: 'document-export-refused',
+      cause: new Error('Document export refused: the root element is active content')
+    });
+    expect(doc.root.contains(target)).toBe(true);
+
+    state.destroy();
+  });
+
   test('returns formatted authored html without cursor or ignored artifacts', () => {
     // arrange
     const doc = makeRoot(

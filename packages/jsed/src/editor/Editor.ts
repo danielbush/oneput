@@ -48,6 +48,7 @@ export class Editor {
   destroy = () => this.state.destroy();
   /**
    * Returns html ready to be persisted.
+   * Throws if export is refused; the host must report the failed save.
    *
    * Can be repeatedly run during the edit session.
    * Fairly heavy operation (clone, strip, serialize to string), so call it on a

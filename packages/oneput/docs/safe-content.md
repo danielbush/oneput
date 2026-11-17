@@ -87,7 +87,7 @@ policy, so normal document content also works in patches.
 
 Export removes editor artifacts from a clone, then checks its nodes and saved
 markup with `documentMarkupForExport`. That function returns a neverthrow
-`Result<string, Error>` and refuses markup that does not stabilise in four
+`Result<string, Error>` and returns an error for an active root or markup that does not stabilise in four
 passes. The element export API returns a `document-export-refused` error;
 whole-document export throws on that refusal. Only detached export nodes are
 parsed. The live root, FOCUS, node identity and undo history stay intact.

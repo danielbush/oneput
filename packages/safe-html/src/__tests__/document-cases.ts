@@ -151,6 +151,37 @@ export function documentPolicyCases(): void {
       );
     });
 
+    test.each(["iframe", "script"])(
+      "export: active %s root - refused",
+      (tag) => {
+        // arrange
+        const root = document.createElement(tag);
+
+        // act
+        const result = documentMarkupForExport(root);
+
+        // assert
+        expect(result.isErr()).toBe(true);
+        expect(result._unsafeUnwrapErr()).toEqual(
+          new Error(
+            "Document export refused: the root element is active content",
+          ),
+        );
+      },
+    );
+
+    test("export: allowed root - empty", () => {
+      // arrange
+      const root = document.createElement("div");
+
+      // act
+      const result = documentMarkupForExport(root);
+
+      // assert
+      expect(result.isOk()).toBe(true);
+      expect(result._unsafeUnwrap()).toBe("");
+    });
+
     test("table export keeps its context", () => {
       // arrange
       const table = document.createElement("table");

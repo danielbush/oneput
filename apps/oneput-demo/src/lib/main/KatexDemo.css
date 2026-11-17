@@ -1,3 +1,9 @@
+.katex-preview-pane,
+#katex-demo > p,
+#katex-demo > .katex-display {
+  contain: paint;
+}
+
 /*
  * The preview row has its own class, thus Oneput adds `katex-preview-pane--focused`
  * when it has menu focus (CUSTOM_ROW_FOCUS). A dashed outline shows that Enter

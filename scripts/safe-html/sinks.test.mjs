@@ -64,6 +64,36 @@ describe("raw HTML sinks", () => {
   });
 
   test.each([
+    'const { key } = { key: "title", ...{ key: "innerHTML" } };',
+    'const { key } = { ...{ key: "innerHTML" }, key: "title" };',
+    'const { key } = { key: "title", key: "innerHTML" };',
+    'const { key } = { key: "innerHTML", key: "title" };',
+    'const { key = "title" } = { ...payload };',
+    'const { key } = { key: "title", [unknown]: "innerHTML" };',
+  ])("uncertain destructured property: %s", (binding) => {
+    // arrange
+    const path = "source.ts";
+    const source = `declare const node: HTMLElement; ${binding} node[key] = input`;
+
+    // act
+    const findings = scanSource(path, source);
+    const errors = checkFindings(path, findings, [], {});
+
+    // assert
+    expect(findings).toEqual([
+      {
+        kind: "computed HTML write",
+        line: 1,
+        source: "node[key]",
+        owner: undefined,
+      },
+    ]);
+    expect(errors).toEqual([
+      "source.ts:1: unlisted computed HTML write: node[key]",
+    ]);
+  });
+
+  test.each([
     "const saved = node.innerHTML;",
     'const key = "innerHTML"; function read(key: string) { return node[key] }',
     'const key = "innerHTML"; { const key = "title"; node[key] = input }',

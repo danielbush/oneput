@@ -79,14 +79,20 @@ function constantInitializer(declaration, checker) {
     const object = constantObject(initializer, checker);
     const name = declaration.propertyName ?? declaration.name;
     const key = ts.isIdentifier(name) ? name.text : literal(name, checker);
-    const property = object?.properties.find(
-      (property) =>
-        property.name &&
-        (ts.isIdentifier(property.name)
-          ? property.name.text
-          : literal(property.name, checker)) === key,
-    );
-    return property?.initializer ?? declaration.initializer;
+    if (!object || key === undefined || declaration.dotDotDotToken)
+      return undefined;
+    const properties = new Map();
+    for (const property of object.properties) {
+      if (!property.name) return undefined;
+      const name = ts.isIdentifier(property.name)
+        ? property.name.text
+        : literal(property.name, checker);
+      if (name === undefined || properties.has(name)) return undefined;
+      properties.set(name, property);
+    }
+    const property = properties.get(key);
+    if (!property) return declaration.initializer;
+    return ts.isPropertyAssignment(property) ? property.initializer : undefined;
   }
 }
 

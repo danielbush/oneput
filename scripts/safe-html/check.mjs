@@ -1,3 +1,7 @@
+/**
+ * Check source files for HTML sinks and match them to reviewed exceptions.
+ * Run at check time so new unchecked sinks fail before code reaches the page.
+ */
 import { readdir, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { relative, resolve } from "node:path";

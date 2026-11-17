@@ -1,4 +1,8 @@
-// Reviewed entry points. Each entry permits one occurrence of the named sink.
+/**
+ * List reviewed sink occurrences and files that build raw test fixtures.
+ * Keep each permission explicit so new sinks need a separate review.
+ */
+// Each entry permits one occurrence of the named sink.
 export const exceptions = [
   {
     path: "packages/safe-html/src/document.ts",

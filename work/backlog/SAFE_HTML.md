@@ -150,6 +150,11 @@ The `jsed-test-cases` skill can turn a test fixture or failing test into an
 interactive route under `apps/jsed-demo/src/routes/test-cases/` for manual
 review.
 
+## Accepted scan limit
+
+The source scan cannot resolve runtime names or receiver types that static analysis cannot establish.
+It does not follow values across function calls or resolve code created at runtime.
+
 ## Recorded document decisions
 
 Normal document features stay. Remote resources and document CSS remain

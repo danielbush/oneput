@@ -58,6 +58,34 @@ describe('KaTeX content boundary', () => {
     stop();
   });
 
+  test('preview recovers after sanitiser refusal', () => {
+    // arrange
+    const root = document.createElement('div');
+    const doc = DemoDocument.createNull(document.createElement('div'), {
+      sanitiseErrors: [new Error('HTML sanitization is unavailable.'), null]
+    });
+    const formula = new KatexFormula(doc);
+    const stop = KatexPreview.onMount(formula)(root, { pull: notifier() });
+
+    // act
+    formula.setSource('x^2');
+
+    // assert
+    expect(formula.current.error).toBe('HTML sanitization is unavailable.');
+    expect(formula.current.canInsert).toBe(false);
+    expect(root.textContent).toBe('(preview)');
+
+    // act
+    formula.setSource('y^2');
+
+    // assert
+    expect(formula.current.error).toBeUndefined();
+    expect(formula.current.canInsert).toBe(true);
+    expect(root.querySelector('.katex')).not.toBeNull();
+    expect(root.querySelector('annotation')?.textContent).toBe('y^2');
+    stop();
+  });
+
   test.each([
     String.raw`\href{javascript:alert(1)}{x}`,
     String.raw`\htmlStyle{background:url(https://example.com)}{x}`,

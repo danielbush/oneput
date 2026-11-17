@@ -24,10 +24,11 @@ import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
 import { icons } from '../common/_icons.js';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import './KatexDemo.css';
-import { setHTML } from '@oneput/safe-html';
+import { insertSafeHtml, sanitiseHtml, type SafeHtml } from '@oneput/safe-html';
+import { err, type Result } from 'neverthrow';
 
 /**
- * The page that the demo inserts formulas into.
+ * Checks formula output and inserts accepted formulas into the page.
  *
  * Infrastructure wrapper: `create()` appends to `#katex-demo`. `createNull()`
  * appends to a detached root. Tests can supply a root and read its DOM.
@@ -37,15 +38,27 @@ export class DemoDocument {
     return new DemoDocument(document.getElementById('katex-demo')!);
   }
 
-  static createNull(root = document.createElement('div')) {
-    return new DemoDocument(root);
+  static createNull(
+    root = document.createElement('div'),
+    { sanitiseErrors = [] }: { sanitiseErrors?: (Error | null)[] } = {}
+  ) {
+    return new DemoDocument(root, [...sanitiseErrors]);
   }
 
-  constructor(private root: HTMLElement) {}
+  constructor(
+    private root: HTMLElement,
+    private sanitiseErrors: (Error | null)[] = []
+  ) {}
 
-  append(formula: FormulaMarkup, displayMode: boolean) {
+  /** Check output before the model publishes it to subscribers. */
+  prepare(output: string): Result<SafeHtml, Error> {
+    const refusal = this.sanitiseErrors.shift();
+    return refusal ? err(refusal) : sanitiseHtml(output, 'math');
+  }
+
+  append(formula: SafeHtml, displayMode: boolean) {
     const output = this.root.ownerDocument.createElement('div');
-    setHTML(output, formulaOutput.get(formula) ?? 'Content unavailable', 'math');
+    insertSafeHtml(output, formula);
     const nodes = this.root.ownerDocument.createDocumentFragment();
     nodes.append(...output.childNodes);
     if (displayMode) this.root.append(nodes);
@@ -57,20 +70,16 @@ export class DemoDocument {
   }
 }
 
-/** Only bounded output from our fixed KaTeX options enters this store. */
-type FormulaMarkup = Readonly<{ kind: 'katex' }>;
-const formulaOutput = new WeakMap<FormulaMarkup, string>();
-
 /** The result of compiling katex source. */
 type RenderResult =
   | { empty: true } // nothing typed
-  | { html: FormulaMarkup } // valid katex
+  | { html: SafeHtml } // valid katex
   | { error: string }; // invalid katex
 
 /**
  * Compile bounded source with fixed options. Store only accepted output.
  */
-function renderToString(source: string, displayMode: boolean): RenderResult {
+function renderToString(source: string, displayMode: boolean, doc: DemoDocument): RenderResult {
   if (source.length > 4096) return { error: 'Formula source is too large.' };
   if (source.trim() === '') return { empty: true };
   try {
@@ -83,9 +92,8 @@ function renderToString(source: string, displayMode: boolean): RenderResult {
       maxSize: 20
     });
     if (output.length > 200000) return { error: 'Formula output is too large.' };
-    const html: FormulaMarkup = Object.freeze({ kind: 'katex' });
-    formulaOutput.set(html, output);
-    return { html };
+    const content = doc.prepare(output);
+    return content.isErr() ? { error: content.error.message } : { html: content.value };
   } catch (err) {
     return { error: (err as Error).message };
   }
@@ -106,7 +114,7 @@ export type FormulaView = {
    * source is invalid, it is the last valid render, so the preview does not
    * flicker as you type.
    */
-  preview: FormulaMarkup | null;
+  preview: SafeHtml | null;
   /** The parse error of the current source, if any. */
   error?: string;
   /** True when there is valid katex to insert. */
@@ -122,7 +130,7 @@ export type FormulaView = {
  */
 export class KatexFormula {
   private state: Writable<FormulaState>;
-  private lastValid: FormulaMarkup | null = null;
+  private lastValid: SafeHtml | null = null;
   private view: Readable<FormulaView>;
   /** The current view. */
   get current(): FormulaView {
@@ -135,7 +143,7 @@ export class KatexFormula {
   ) {
     this.state = writable({ source: '', displayMode });
     this.view = derived(this.state, ({ source, displayMode }) => {
-      const compiled = renderToString(source, displayMode);
+      const compiled = renderToString(source, displayMode, this.doc);
       if ('empty' in compiled) this.lastValid = null;
       else if ('html' in compiled) this.lastValid = compiled.html;
       return {
@@ -187,7 +195,7 @@ export class KatexPreview {
     return (node: HTMLElement, { pull }: MountContext) => {
       const paint = () => {
         const current = formula.current.preview;
-        if (current) setHTML(node, formulaOutput.get(current) ?? 'Content unavailable', 'math');
+        if (current) insertSafeHtml(node, current);
         else node.textContent = '(preview)';
       };
       const offFormula = formula.subscribe(paint);

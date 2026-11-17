@@ -14,7 +14,8 @@ task check:html-sinks
 ```
 
 KaTeX output goes through safe-html `setHTML` with the `"math"` policy.
-No formula escape hatch remains.
+The demo uses fixed compiler limits and paint containment. See the
+[math policy contract](../../packages/safe-html/README.md).
 
 ## Reviewed exceptions
 
@@ -32,5 +33,6 @@ scan. Add a file to `fixturePaths` only after review of its raw test fixtures.
 ## Limits
 
 An unresolved property write on a known HTML sink receiver needs an exception.
+Object spreads or duplicate keys make a destructured property name unresolved.
 The scan is a source check, not proof of runtime safety. See the
 [accepted scan limit](../../work/backlog/SAFE_HTML.md#accepted-scan-limit).

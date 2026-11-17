@@ -31,8 +31,8 @@ const contents = new WeakMap<
  * it as `SafeHtml`.
  *
  * It parses the input inside a new `div`. It uses the browser's `setHTML` when
- * there is one, and DOMPurify when there is not. The math policy checks formula
- * styles, MathML and SVG values and refuses invalid content. Other policies
+ * there is one, and DOMPurify when there is not. The math policy removes CSS
+ * URL and fixed/sticky position declarations. Other policies
  * remove `href` values and classes that the policy does not allow. For example,
  * `<a href="javascript:alert(1)">x</a>` becomes `<a>x</a>`.
  *

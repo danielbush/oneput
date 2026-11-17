@@ -18,6 +18,17 @@ checked reader for fixed-div renderers, including server rendering.
 `safeHtmlText(value)` supplies plain text for filtering. A renderer must not
 put the checked markup into a raw-text, SVG, or other parsing context.
 
+`setHTML(div, input, 'math')` permits formula spans, MathML and SVG through
+element and attribute allow-lists. It removes scripts, event handlers, URL
+attributes and SVG foreignObject. It removes style declarations with `url()`
+(including CSS escapes), or `position: fixed` / `position: sticky`. Other
+style and attribute values are retained.
+
+Use the math policy for KaTeX output with `trust: false`, strict parsing and
+fixed expansion, size, input and output limits. Give each formula container
+`contain: paint` so formula layout stays inside its box. Use a block or
+inline-block container; paint containment does not apply to a plain inline box.
+
 `setHTML(element, input, 'document')` parses HTML in an inert template, removes
 active content, and inserts the checked nodes. It keeps document structure,
 CSS, images, SVG, MathML, forms, classes, IDs, data, aria and comments.

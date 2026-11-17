@@ -105,8 +105,11 @@ not built. CLI conversion has no DOM check and is out of scope because it
 runs on the user's own files.
 
 KaTeX output uses the safe-html `"math"` policy for formula layout, MathML and
-SVG. The demo keeps fixed compiler options and bounded input and output. No
-formula escape hatch remains.
+SVG. The demo keeps `trust: false`, strict parsing, fixed expansion and size
+limits, and bounded input and output. The policy keeps element and attribute
+allow-lists and removes CSS URL and fixed/sticky position declarations. Other
+values are retained. Formula containers use paint containment. See the
+[math policy contract](../../packages/safe-html/README.md).
 
 ### 5. Add safe declarative data
 
@@ -127,8 +130,10 @@ Status: Implementation complete. Fast checks and a production-build DOM test
 cover refusal. Browser checks are written but have not been run.
 
 - KaTeX output goes through safe-html `setHTML` with the `"math"` policy.
-  Package regression cases preserve MathML, SVG, styles, `\colorbox` and
-  `\fcolorbox` output. Shared browser cases cover the same policy.
+  Package regression cases preserve MathML, SVG, styles, `\utilde`, `\widehat`,
+  `\llap`, `\colorbox` and `\fcolorbox` output. Sanitiser refusals enter the
+  model's error state before preview notification, so valid input can recover.
+  Shared browser cases cover the same policy.
 - `task check` includes `task check:html-sinks`, a read-only source scan with
   explicit parser, rendering and fixture exceptions. New unlisted sinks fail.
 - `task oneput:test:production-safety` builds production UI components and tests
@@ -155,6 +160,8 @@ review.
 
 The source scan cannot resolve runtime names or receiver types that static analysis cannot establish.
 It does not follow values across function calls or resolve code created at runtime.
+Object spreads and duplicate keys leave destructured property names unresolved;
+writes on known DOM receivers then need an exception.
 
 ## Recorded document decisions
 

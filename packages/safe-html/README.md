@@ -11,6 +11,14 @@ The input is not retained after a failure.
   fragments. Both refuse styles, SVG, MathML, images, media, and resource
   elements. All data, JavaScript, file, blob, and unknown URL schemes are refused.
 
+Values are checked after sanitising. Native `setHTML` and DOMPurify remove
+known-dangerous values such as `javascript:` URLs, but they allow other schemes
+(`data:`, `blob:`, `file:`, custom app schemes) and do not look inside values
+such as class names. One value check runs on both paths: links keep only the
+schemes above, and classes keep only the `ui` class above. Removing other
+classes stops content from using Oneput's own styles to look like Oneput
+controls.
+
 `insertSafeHtml(div, value)` clones private checked nodes into an HTML `div`.
 It checks provenance, tag, and namespace. A refused value or context replaces
 content with `Content unavailable`. `safeHtmlMarkup(value, 'div')` is the

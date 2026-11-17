@@ -13,6 +13,9 @@ Run from the repo root:
 task check:html-sinks
 ```
 
+KaTeX output goes through safe-html `setHTML` with the `"math"` policy.
+No formula escape hatch remains.
+
 ## Reviewed exceptions
 
 First, use the checked path if possible. If a sink must remain, review it and

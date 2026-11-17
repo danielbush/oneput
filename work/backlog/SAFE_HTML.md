@@ -104,8 +104,9 @@ document CSS can change the host page's appearance. A later option could
 not built. CLI conversion has no DOM check and is out of scope because it
 runs on the user's own files.
 
-The bounded KaTeX demo checks fixed-option compiler output with an independent
-formula policy. This policy is separate from the editor document policy.
+KaTeX output uses the safe-html `"math"` policy for formula layout, MathML and
+SVG. The demo keeps fixed compiler options and bounded input and output. No
+formula escape hatch remains.
 
 ### 5. Add safe declarative data
 
@@ -125,9 +126,9 @@ This is a missing entry boundary, not an additional raw HTML sink.
 Status: Implementation complete. Fast checks and a production-build DOM test
 cover refusal. Browser checks are written but have not been run.
 
-- The bounded KaTeX demo has an independent node, attribute and style policy.
-  Regression cases preserve formula MathML, SVG and layout, and refuse content
-  outside that policy. `unsafeKatexOutputNodes` remains the named parser boundary.
+- KaTeX output goes through safe-html `setHTML` with the `"math"` policy.
+  Package regression cases preserve MathML, SVG, styles, `\colorbox` and
+  `\fcolorbox` output. Shared browser cases cover the same policy.
 - `task check` includes `task check:html-sinks`, a read-only source scan with
   explicit parser, rendering and fixture exceptions. New unlisted sinks fail.
 - `task oneput:test:production-safety` builds production UI components and tests

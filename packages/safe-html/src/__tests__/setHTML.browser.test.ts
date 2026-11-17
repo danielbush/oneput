@@ -3,6 +3,7 @@ import { describe, expect, inject, test } from "vitest";
 import { setHTML } from "../setHTML.js";
 import { checkContentValues, contentConfig } from "../lib/policies.js";
 import { documentPolicyCases } from "./document-cases.js";
+import { mathPolicyCases } from "./math-cases.js";
 import { uiPolicyCases } from "./ui-cases.js";
 
 declare module "vitest" {
@@ -33,12 +34,23 @@ describe.skipIf(
     .setHTML !== "function",
 )("native UI policy", () => {
   uiPolicyCases("native", setHTML);
+  mathPolicyCases("native math policy", setHTML);
 });
 uiPolicyCases("DOMPurify UI policy", (target, input, policy) => {
   target.replaceChildren(DOMPurify.sanitize(input, contentConfig(policy)));
   checkContentValues(target, policy);
 });
 uiPolicyCases("selected UI path", setHTML);
+mathPolicyCases("DOMPurify math policy", (target, input, policy) => {
+  try {
+    target.replaceChildren(DOMPurify.sanitize(input, contentConfig(policy)));
+    checkContentValues(target, policy);
+  } catch (error) {
+    target.textContent = "Content unavailable";
+    throw error;
+  }
+});
+mathPolicyCases("selected math path", setHTML);
 documentPolicyCases();
 
 for (const mode of ["csp", "tt"] as const) {

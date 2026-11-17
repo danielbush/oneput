@@ -24,7 +24,7 @@ import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
 import { icons } from '../common/_icons.js';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import './KatexDemo.css';
-import { restrictKatexOutput } from './katex/outputPolicy.js';
+import { setHTML } from '@oneput/safe-html';
 
 /**
  * The page that the demo inserts formulas into.
@@ -44,7 +44,10 @@ export class DemoDocument {
   constructor(private root: HTMLElement) {}
 
   append(formula: FormulaMarkup, displayMode: boolean) {
-    const nodes = unsafeKatexOutputNodes(formula, this.root.ownerDocument);
+    const output = this.root.ownerDocument.createElement('div');
+    setHTML(output, formulaOutput.get(formula) ?? 'Content unavailable', 'math');
+    const nodes = this.root.ownerDocument.createDocumentFragment();
+    nodes.append(...output.childNodes);
     if (displayMode) this.root.append(nodes);
     else {
       const paragraph = this.root.ownerDocument.createElement('p');
@@ -57,21 +60,6 @@ export class DemoDocument {
 /** Only bounded output from our fixed KaTeX options enters this store. */
 type FormulaMarkup = Readonly<{ kind: 'katex' }>;
 const formulaOutput = new WeakMap<FormulaMarkup, string>();
-
-/**
- * The only raw formula HTML escape hatch. Never pass caller HTML here.
- * The private store accepts only output from renderToString below.
- * An independent formula policy checks its MathML, SVG and inline styles
- * before either preview or insertion can use the nodes.
- */
-function unsafeKatexOutputNodes(formula: FormulaMarkup, doc: Document): DocumentFragment {
-  const template = doc.createElement('template');
-  const html = formulaOutput.get(formula);
-  if (html === undefined) template.content.append(doc.createTextNode('Content unavailable'));
-  else template.innerHTML = html;
-  restrictKatexOutput(template.content);
-  return template.content;
-}
 
 /** The result of compiling katex source. */
 type RenderResult =
@@ -199,7 +187,7 @@ export class KatexPreview {
     return (node: HTMLElement, { pull }: MountContext) => {
       const paint = () => {
         const current = formula.current.preview;
-        if (current) node.replaceChildren(unsafeKatexOutputNodes(current, node.ownerDocument));
+        if (current) setHTML(node, formulaOutput.get(current) ?? 'Content unavailable', 'math');
         else node.textContent = '(preview)';
       };
       const offFormula = formula.subscribe(paint);

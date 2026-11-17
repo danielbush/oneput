@@ -1,4 +1,5 @@
 import type { Config } from "dompurify";
+import { mathConfig, checkMathValues } from "../policies/mathPolicy.js";
 
 /**
  * The name of a policy for `sanitiseHtml`.
@@ -6,11 +7,12 @@ import type { Config } from "dompurify";
  * - `"display"`: text formatting, links, lists, tables and headings. Only `href`
  *   and `title` attributes stay.
  * - `"ui"`: the same, plus `kbd` and the class `oneput__kbd-symbol`.
+ * - `"math"`: formula layout spans, MathML and SVG geometry, with checked values.
  *
- * Neither policy keeps styles, SVG, MathML, images or other elements that load
- * resources.
+ * Display and UI policies do not keep styles, SVG, MathML, images or other
+ * elements that load resources.
  */
-export type ContentPolicy = "display" | "ui";
+export type ContentPolicy = "display" | "ui" | "math";
 
 const displayTags = Object.freeze([
   "a",
@@ -53,11 +55,19 @@ const displayTags = Object.freeze([
  * the policy.
  */
 export function contentConfig(policy: ContentPolicy): Config {
-  if (policy !== "display" && policy !== "ui")
+  if (policy !== "display" && policy !== "ui" && policy !== "math")
     throw new Error("Unknown HTML policy.");
   return {
-    ALLOWED_TAGS: [...displayTags, ...(policy === "ui" ? ["kbd"] : [])],
-    ALLOWED_ATTR: ["href", "title", ...(policy === "ui" ? ["class"] : [])],
+    ...(policy === "math"
+      ? mathConfig()
+      : {
+          ALLOWED_TAGS: [...displayTags, ...(policy === "ui" ? ["kbd"] : [])],
+          ALLOWED_ATTR: [
+            "href",
+            "title",
+            ...(policy === "ui" ? ["class"] : []),
+          ],
+        }),
     ALLOW_DATA_ATTR: false,
     ALLOW_ARIA_ATTR: false,
     ALLOW_UNKNOWN_PROTOCOLS: false,
@@ -87,12 +97,17 @@ export function checkedLink(value: string): string | undefined {
 }
 
 /**
- * Removes unsafe values from the sanitised elements under `root`, in place.
+ * Checks values under `root`. The math policy refuses invalid formula values.
+ * The display and UI policies remove unsafe values in place.
  *
  * - `href`: kept only on `a` elements and only when `checkedLink` accepts it.
  * - `class`: removed, except `oneput__kbd-symbol` with the `"ui"` policy.
  */
 export function checkContentValues(root: Element, policy: ContentPolicy): void {
+  if (policy === "math") {
+    checkMathValues(root);
+    return;
+  }
   for (const element of root.querySelectorAll("*")) {
     const href = element.getAttribute("href");
     if (href !== null) {

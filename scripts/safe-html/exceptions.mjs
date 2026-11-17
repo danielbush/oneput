@@ -33,14 +33,6 @@ export const exceptions = [
       "SafeHtml provenance and div context checked before Svelte insertion.",
   },
   {
-    path: "apps/oneput-demo/src/lib/main/KatexDemo.ts",
-    kind: "innerHTML",
-    source: "template.innerHTML",
-    owner: "unsafeKatexOutputNodes",
-    reason:
-      "Bounded fixed-option KaTeX compiler; independent output policy before insertion.",
-  },
-  {
     path: "packages/jsed/src/cli/convert.ts",
     kind: "write",
     source: "process.stdout.write",
@@ -99,6 +91,6 @@ export const fixturePaths = {
     "CSP fixture checks raw sink refusal in a separate document.",
   "packages/safe-html/src/__tests__/setHTML.browser.test.ts":
     "CSP iframe fixture with its own policy.",
-  "apps/oneput-demo/src/lib/main/katex/outputPolicy.test.ts":
-    "Independent formula policy fixtures.",
+  "packages/safe-html/src/__tests__/math-cases.ts":
+    "Shared formula policy fixtures.",
 };

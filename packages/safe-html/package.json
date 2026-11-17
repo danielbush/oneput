@@ -7,7 +7,7 @@
     ".": "./src/setHTML.ts"
   },
   "scripts": {
-    "test": "vitest --run src/__tests__/setHTML.test.ts src/__tests__/setHTML.happy-dom.test.ts src/__tests__/SafeHtml.test.ts",
+    "test": "vitest --run src/__tests__/setHTML.test.ts src/__tests__/setHTML.happy-dom.test.ts src/__tests__/SafeHtml.test.ts src/__tests__/math.test.ts",
     "test:browser": "vitest --run --config vitest.browser.config.ts",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",

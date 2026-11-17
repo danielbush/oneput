@@ -1,4 +1,5 @@
 import DOMPurify from "dompurify";
+import { mathNativeConfig } from "./policies/mathPolicy.js";
 import { err, ok, type Result } from "neverthrow";
 import { canUseFallback } from "./lib/fallback.js";
 import {
@@ -30,8 +31,9 @@ const contents = new WeakMap<
  * it as `SafeHtml`.
  *
  * It parses the input inside a new `div`. It uses the browser's `setHTML` when
- * there is one, and DOMPurify when there is not. It then removes `href` values
- * and classes that the policy does not allow. For example,
+ * there is one, and DOMPurify when there is not. The math policy checks formula
+ * styles, MathML and SVG values and refuses invalid content. Other policies
+ * remove `href` values and classes that the policy does not allow. For example,
  * `<a href="javascript:alert(1)">x</a>` becomes `<a>x</a>`.
  *
  * It returns an error, and never the input, when the input is not a string, the
@@ -53,8 +55,12 @@ export function sanitiseHtml(
     if (typeof native === "function") {
       native.call(root, input, {
         sanitizer: {
-          elements: config.ALLOWED_TAGS,
-          attributes: config.ALLOWED_ATTR,
+          ...(policy === "math"
+            ? mathNativeConfig()
+            : {
+                elements: config.ALLOWED_TAGS,
+                attributes: config.ALLOWED_ATTR,
+              }),
           dataAttributes: false,
           comments: false,
         },

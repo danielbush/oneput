@@ -27,6 +27,8 @@ import {
  *
  * - `"display"` (default) or `"ui"`: cleans with `sanitiseHtml`. `element` must
  *   be a `div`.
+ * - `"math"`: formula spans, MathML and SVG with checked style and attribute
+ *   values. `element` must be an HTML `div`.
  * - `"document"`: cleans with `untrustedDocumentPolicy`, which keeps much more
  *   (styles, SVG, `data-*`), for a whole document that the user opens.
  *

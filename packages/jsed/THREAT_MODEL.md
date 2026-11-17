@@ -47,8 +47,10 @@ Accepted risks:
   That option is not built.
 - CLI conversion has no DOM check and is out of scope because it runs on the user's own files.
 
-Real-browser policy checks, production checks and an enforced sink scan remain
-in [SAFE_HTML step 6](../../work/backlog/SAFE_HTML.md#6-enforce-the-contract).
+`task check` enforces a read-only HTML sink scan with explicit fixture
+exceptions. The production build refusal test is separate from fast tests.
+Real-browser policy tests are written but have not been run. See
+[SAFE_HTML step 6](../../work/backlog/SAFE_HTML.md#6-enforce-the-contract).
 DOM tests do not prove browser behaviour.
 
 ## Remaining work

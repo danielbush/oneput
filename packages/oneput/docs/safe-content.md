@@ -98,6 +98,16 @@ appearance. A later option could **block remote content in files from
 elsewhere**, as email clients do. That option is not built.
 CLI conversion has no DOM check and is out of scope because it runs on the user's own files.
 
+## CSP and Trusted Types
+
+`SafeHtml` is a package value, not browser `TrustedHTML`. Under strict
+Trusted Types, document string parsing is expected to throw before changing
+the target. The checked node path (`sanitiseDocumentNodes`) remains available.
+Browser checks cover UI content with CSP, native sanitisation and DOMPurify,
+and this document parsing refusal. They are written but have not been run.
+Run `task safe-html:test:browser` with current Chrome and Playwright's Firefox
+and WebKit installed to verify these behaviours in browsers.
+
 ## DOM writes
 
 FChild and Flex (also nested Flex) write elements through `checkedElement` in `lib/domSafety.ts`. It removes what is

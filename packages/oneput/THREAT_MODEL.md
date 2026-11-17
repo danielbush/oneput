@@ -27,20 +27,14 @@ refusals and warning behaviour. These UI checks do not secure editor documents.
 
 ## Most at risk now
 
-Ranked within the current rendering scope:
+The bounded KaTeX demo checks compiler output with an independent formula
+policy before insertion. `task check` enforces a read-only HTML sink scan.
+Raw parsing boundaries and test fixtures have explicit exceptions.
 
-1. **Formula output.** Attack: a crafted formula could exploit a KaTeX output bug.
-   Impact: the demo parses that output with page authority.
-   Source: `apps/oneput-demo/src/lib/main/KatexDemo.ts:65`.
-   Track the independent output policy in [SAFE_HTML step 6](../../work/backlog/SAFE_HTML.md#6-enforce-the-contract).
-2. **New raw writes.** Attack: untrusted text reaches a raw HTML write added later.
-   Impact: a regression can run script in the host page. No enforced sink scan exists.
-   Source: `packages/oneput/src/lib/oneput/shared/components/FChild.svelte:66`, `apps/oneput-demo/src/lib/main/KatexDemo.ts:69`.
-   Close with the sink scan in [SAFE_HTML step 6](../../work/backlog/SAFE_HTML.md#6-enforce-the-contract).
-3. **Browser policy gaps.** Attack: crafted markup reaches a native or fallback parsing difference.
-   Impact: a parsing difference could admit active content.
-   Source: `packages/safe-html/src/SafeHtml.ts` and `packages/safe-html/src/document.ts`.
-   Close with browser parity and production checks in [SAFE_HTML step 6](../../work/backlog/SAFE_HTML.md#6-enforce-the-contract).
+Production build DOM refusal is tested separately. Browser document cases,
+UI native/fallback parity, CSP and Trusted Types tests are written but have
+not been run. Browser behaviour remains unverified. See
+[SAFE_HTML step 6](../../work/backlog/SAFE_HTML.md#6-enforce-the-contract).
 
 The active-content gaps in jsed load, paste, creation, conversion and export
 are closed with one document policy. Node checks preserve FOCUS and identity;

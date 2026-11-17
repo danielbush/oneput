@@ -9,8 +9,8 @@ remaining-sink inventory here.
 
 Source review: 2026-11-13, branch `sec/safe-html`. Paths are relative to the
 repo root. Line numbers were checked against the current code. Test fixtures
-are excluded from the remaining-sink inventory. This update includes DOM
-regression tests for document boundaries, patches, formulas and Markdown metadata. It does not include browser policy tests.
+are excluded from the remaining-sink inventory. DOM regression tests cover
+document boundaries, patches, formulas and Markdown metadata. Browser policy tests are written but have not been run.
 
 Untrusted documents, agent output and config must stay within checked content
 boundaries. Script injection can read page content and accessible storage,
@@ -104,9 +104,8 @@ document CSS can change the host page's appearance. A later option could
 not built. CLI conversion has no DOM check and is out of scope because it
 runs on the user's own files.
 
-The bounded KaTeX demo still trusts fixed-option compiler output. Its
-independent formula output policy is tracked in step 6; it is separate from
-the editor document policy.
+The bounded KaTeX demo checks fixed-option compiler output with an independent
+formula policy. This policy is separate from the editor document policy.
 
 ### 5. Add safe declarative data
 
@@ -123,55 +122,29 @@ This is a missing entry boundary, not an additional raw HTML sink.
 
 ### 6. Enforce the contract
 
-Status: Partly done — refusal coverage in `49074a99`, `8bb850b1`,
-`02d044bf`, `91efbc05`; patch replay, bounded demo formulas, Markdown
-metadata and document boundaries have DOM coverage. The independent formula
-output policy, sink scan and browser policy checks remain.
+Status: Implementation complete. Fast checks and a production-build DOM test
+cover refusal. Browser checks are written but have not been run.
 
-Existing coverage:
-
-- SafeHtml provenance, copied values, wrong context and node insertion:
-  `packages/safe-html/src/__tests__/SafeHtml.test.ts:120`, `:200`.
-- UI refusal and warning cases:
-  `packages/oneput/src/lib/oneput/lib/domSafety.test.ts:4`.
-- Mount, update, removal and nested UI checks:
-  `packages/oneput/src/lib/oneput/shared/components/writeSafety.test.ts:20`.
-- Icon geometry and rendering:
-  `packages/oneput/src/lib/oneput/lib/icons/geometry.test.ts` and
-  `packages/oneput/src/lib/oneput/lib/icons.test.ts`.
-- Message variants:
-  `packages/oneput/src/lib/oneput/shared/ui/Message.test.ts:65`.
-
-- Node patch refusal, isolated snapshots and patch → undo → redo:
-  `packages/jsed/src/lib/ops/focusable/__tests__/elementPatch.test.ts` and
-  `packages/jsed/src/editor/lib/ops/__tests__/PatchElement.test.ts`.
-- Formula preview, append identity, trust and limits:
-  `apps/oneput-demo/src/lib/main/KatexDemo.test.ts`.
-- Markdown raw HTML and metadata contexts:
-  `packages/jsed/src/lib/convert/__tests__/contentSafety.test.ts`.
+- The bounded KaTeX demo has an independent node, attribute and style policy.
+  Regression cases preserve formula MathML, SVG and layout, and refuse content
+  outside that policy. `unsafeKatexOutputNodes` remains the named parser boundary.
+- `task check` includes `task check:html-sinks`, a read-only source scan with
+  explicit parser, rendering and fixture exceptions. New unlisted sinks fail.
+- `task oneput:test:production-safety` builds production UI components and tests
+  DOM refusal at mount and update. This build is separate from `task test`.
+- Shared document and UI cases run in fast DOM tests. Browser tests cover the
+  same cases, native/fallback UI parity, CSP and Trusted Types. They require
+  strict Trusted Types to refuse document string parsing without changing the
+  target, and to permit checked document nodes.
+- Existing state-based tests cover provenance, insertion context, UI writes,
+  icons, messages, document boundaries, patches, identity and undo/redo.
 
 Remaining checks:
 
-- Add an independent output policy for the bounded KaTeX demo, with regression
-  cases for its MathML, SVG and styles. Keep `unsafeKatexOutputNodes` visible
-  to the sink scan. The demo currently trusts fixed-option compiler output.
-- Document boundary cases, preserved documents, FOCUS, identity and paste/patch
-  undo and redo are covered in
-  `packages/jsed/src/editor/lib/ops/__tests__/DocumentSafety.test.ts` and
-  `packages/safe-html/src/__tests__/document-cases.ts`.
-- Test refusal in a production build. Current warning tests configure
-  development on/off; they do not prove a production build's DOM behaviour.
-- Run shared policy cases in real browsers. Document cases are shared with
-  `packages/safe-html/src/__tests__/setHTML.browser.test.ts`, but have not been
-  run there. UI native/fallback parity still needs browser checks. Keep the
-  happy-dom UI refusal test.
-- Add an enforced read-only sink scan with explicit fixture exceptions.
-  Make the retained formula escape hatch visible to the scan.
-- Test browser CSP and Trusted Types compatibility. Package `SafeHtml` is
-  not browser `TrustedHTML`; neither replaces attribute checks.
-- Assert final DOM state and tracked output. Use Vitest with arrange, act
-  and assert sections. Use `.createNull()` dependencies where appropriate.
-  Do not use mocks, spies, patched globals or interaction-count checks.
+- Run `task safe-html:test:browser` with current installed Chrome, plus
+  Playwright Firefox and WebKit. Chrome must provide native `setHTML` and
+  Trusted Types. These browser projects were deliberately not run for this
+  work. Source review and fast DOM tests do not prove browser behaviour.
 
 The `jsed-test-cases` skill can turn a test fixture or failing test into an
 interactive route under `apps/jsed-demo/src/routes/test-cases/` for manual

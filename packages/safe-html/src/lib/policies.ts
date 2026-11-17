@@ -1,5 +1,5 @@
 import type { Config } from "dompurify";
-import { mathConfig, checkMathValues } from "../policies/mathPolicy.js";
+import { mathConfig, cleanMathStyles } from "../policies/mathPolicy.js";
 
 /**
  * The name of a policy for `sanitiseHtml`.
@@ -7,7 +7,8 @@ import { mathConfig, checkMathValues } from "../policies/mathPolicy.js";
  * - `"display"`: text formatting, links, lists, tables and headings. Only `href`
  *   and `title` attributes stay.
  * - `"ui"`: the same, plus `kbd` and the class `oneput__kbd-symbol`.
- * - `"math"`: formula layout spans, MathML and SVG geometry, with checked values.
+ * - `"math"`: formula layout spans, MathML and SVG geometry. Styles cannot use
+ *   URLs or fixed/sticky positioning.
  *
  * Display and UI policies do not keep styles, SVG, MathML, images or other
  * elements that load resources.
@@ -97,7 +98,8 @@ export function checkedLink(value: string): string | undefined {
 }
 
 /**
- * Checks values under `root`. The math policy refuses invalid formula values.
+ * Cleans values under `root`. The math policy removes URL styles and
+ * fixed/sticky positioning.
  * The display and UI policies remove unsafe values in place.
  *
  * - `href`: kept only on `a` elements and only when `checkedLink` accepts it.
@@ -105,7 +107,7 @@ export function checkedLink(value: string): string | undefined {
  */
 export function checkContentValues(root: Element, policy: ContentPolicy): void {
   if (policy === "math") {
-    checkMathValues(root);
+    cleanMathStyles(root);
     return;
   }
   for (const element of root.querySelectorAll("*")) {

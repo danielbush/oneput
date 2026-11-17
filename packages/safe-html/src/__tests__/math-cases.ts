@@ -41,6 +41,16 @@ export function mathPolicyCases(
         '<math><mi href="https://example.com">x</mi></math>',
         "[href]",
       ],
+      [
+        "SVG resource",
+        '<svg src="https://example.com"><path d="M0 0"/></svg>',
+        "[src]",
+      ],
+      [
+        "SVG URL",
+        '<svg><path href="https://example.com" xlink:href="https://example.com" d="M0 0"/></svg>',
+        "[href], [xlink\\:href]",
+      ],
       ["MathML event", '<math><mi onclick="void 0">x</mi></math>', "[onclick]"],
       [
         "MathML unknown attribute",
@@ -82,61 +92,50 @@ export function mathPolicyCases(
     });
 
     test.each([
+      ["CSS resource", "background-image:url(https://example.com)"],
+      ["CSS custom property", "--formula:URL(https://example.com)"],
       [
-        "SVG paint URL",
-        '<svg><path d="M0 0" fill="url(https://example.com)"/></svg>',
-      ],
-      ["SVG path", '<svg><path d="not geometry"/></svg>'],
-      ["SVG viewBox", '<svg viewBox="0 0 1 nope"></svg>'],
-      ["SVG aspect ratio", '<svg preserveAspectRatio="none"></svg>'],
-      ["SVG length", '<svg width="auto"></svg>'],
-      [
-        "CSS resource",
-        '<span style="background-image:url(https://example.com)">x</span>',
+        "CSS escaped URL",
+        String.raw`background-image:u\72l(https://example.com)`,
       ],
       [
-        "CSS custom property",
-        '<span style="--formula:url(https://example.com)">x</span>',
+        "CSS escaped URL whitespace",
+        String.raw`background-image:\75 rl(https://example.com)`,
       ],
-      ["CSS position", '<span style="position:fixed">x</span>'],
-      ["CSS function", '<span style="width:var(--width)">x</span>'],
-      ["CSS escape", '<span style="c\\6flor:red">x</span>'],
-      ["CSS colour", '<span style="color:rgb(1,2,3)">x</span>'],
+      ["CSS comments", "background-image:u/**/rl(https://example.com)"],
       [
-        "border width",
-        '<math><mpadded style="border: 1em solid red">x</mpadded></math>',
+        "CSS comment separator",
+        "background-image:u/*;*/rl(https://example.com)",
       ],
-      [
-        "border function",
-        '<math><mpadded style="border: 0.04em solid var(--red)">x</mpadded></math>',
-      ],
-      ["MathML length", '<math><mpadded width="+6vh">x</mpadded></math>'],
-      ["MathML token", '<math display="other"><mi>x</mi></math>'],
-      ["MathML colour", '<math mathcolor="url(x)"><mi>x</mi></math>'],
-      ["MathML boolean", '<math><mo stretchy="yes">x</mo></math>'],
-      ["HTML namespace attributes", '<span width="1em">x</span>'],
-      ["MathML namespace attributes", '<math x1="1"></math>'],
-      ["class", '<span class="x:y">x</span>'],
-      ["namespace", '<math xmlns="http://example.com"><mi>x</mi></math>'],
-      ["depth limit", "<span>".repeat(66) + "x" + "</span>".repeat(66)],
-      ["node limit", "<span>x</span>".repeat(5001)],
-    ])("refuses %s", (_name, html) => {
+      ["CSS fixed", "position:fixed"],
+      ["CSS position comment", "position:fi/*;*/xed"],
+      ["CSS sticky", "POSITION: STICKY !important"],
+      ["CSS escaped position", String.raw`p\6fsition:f\69xed`],
+    ])("removes %s declarations", (_name, declaration) => {
       // arrange
       const target = document.createElement("div");
-      target.textContent = "previous";
+      const html = `<span style="color:red;${declaration};width:2em">x</span>`;
 
       // act
-      let error: unknown;
-      try {
-        insert(target, html, "math");
-      } catch (caught) {
-        error = caught;
-      }
+      insert(target, html, "math");
 
       // assert
-      expect(error).toBeInstanceOf(Error);
-      expect(target.textContent).toBe("Content unavailable");
-      expect(target.children).toHaveLength(0);
+      expect(target.querySelector("span")?.getAttribute("style")).toBe(
+        "color:red;width:2em",
+      );
+      expect(target.textContent).toBe("x");
+    });
+
+    test("removes an empty style attribute", () => {
+      // arrange
+      const target = document.createElement("div");
+
+      // act
+      insert(target, '<span style="position:fixed">x</span>', "math");
+
+      // assert
+      expect(target.querySelector("span")?.hasAttribute("style")).toBe(false);
+      expect(target.textContent).toBe("x");
     });
   });
 }

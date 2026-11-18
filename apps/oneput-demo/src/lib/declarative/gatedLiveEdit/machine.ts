@@ -1,12 +1,11 @@
-import { liveEdit, type LiveEditView } from './actions.js';
-import { initialValues } from './sources.js';
+import { liveEdit } from './actions.js';
 
 /** The active state selects the view. Each view repeats its menu as literals so the Stately viewer can read the machine. */
 export const gatedLiveEdit = liveEdit.createMachine({
   id: 'gated-live-edit',
   description: 'Edit values in a filterable menu.',
   initial: 'filtering',
-  context: { values: initialValues, editing: null },
+  context: { values: { name: 'Grace Hopper', role: 'Computer scientist' }, editing: null },
   on: {
     PREVIEW: { actions: 'preview', description: 'Show the current values.' },
     RESET: { actions: 'reset', description: 'Restore the example values.' }
@@ -53,7 +52,7 @@ export const gatedLiveEdit = liveEdit.createMachine({
             clearInputAfterAction: false,
             clearInputAfterBack: false
           }
-        } satisfies LiveEditView
+        }
       },
       on: {
         ACTIVATE_FIELD: {
@@ -111,7 +110,7 @@ export const gatedLiveEdit = liveEdit.createMachine({
             clearInputAfterAction: false,
             clearInputAfterBack: false
           }
-        } satisfies LiveEditView
+        }
       },
       on: {
         ACTIVATE_FIELD: [

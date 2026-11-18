@@ -12,30 +12,37 @@ import { err, ok, type Result } from 'neverthrow';
 import type { EventObject } from 'xstate';
 
 type Text<Source extends string> = string | { from: Source };
-type ViewSettings = Pick<UIFlags, 'enableFilter' | 'clearInputAfterAction' | 'clearInputAfterBack'>;
+type ViewSettings = Pick<
+  UIFlags,
+  'enableFilter' | 'enableGoBack' | 'clearInputAfterAction' | 'clearInputAfterBack'
+>;
+
+type Row<Label> = {
+  id: string;
+  text: Label;
+  detail?: Label;
+  icon?: string;
+  showActionBinding?: boolean;
+};
 
 export type ViewDef<
   Source extends string,
   Action extends string,
   MenuEvent extends EventObject,
-  Change extends string,
-  Release extends string
+  Change extends string = never,
+  Release extends string = never,
+  ListSource extends string = never
 > = {
   title: Text<Source>;
   menu: {
     id: string;
     focusBehaviour?: Menu['focusBehaviour'];
-    items: readonly {
-      id: string;
-      text: Text<Source>;
-      detail?: Text<Source>;
-      icon?: string;
-      showActionBinding?: boolean;
-      action: Action;
-    }[];
-  };
+  } & (
+    | { items: readonly (Row<Text<Source>> & { action?: Action })[] }
+    | { from: ListSource; empty?: { id: string; text: string } }
+  );
   actions: Record<Action, MenuEvent>;
-  input:
+  input?:
     | { kind: 'filter'; placeholder: Text<Source> }
     | {
         kind: 'claim';
@@ -52,7 +59,7 @@ export type OneputView = {
   layout: AppLayoutParams;
   menu: Menu;
   settings: ViewSettings;
-  input: { kind: 'filter'; placeholder: string } | { kind: 'claim'; options: InputClaimOptions };
+  input?: { kind: 'filter'; placeholder: string } | { kind: 'claim'; options: InputClaimOptions };
 };
 
 /**
@@ -70,7 +77,8 @@ export function renderActiveView<
   Action extends string,
   MenuEvent extends EventObject,
   Change extends string,
-  Release extends string
+  Release extends string,
+  ListSource extends string
 >(
   ctl: Controller,
   actor: {
@@ -78,7 +86,7 @@ export function renderActiveView<
       context: Context;
       getMeta(): Record<
         string,
-        { view?: ViewDef<Source, Action, MenuEvent, Change, Release> } | undefined
+        { view?: ViewDef<Source, Action, MenuEvent, Change, Release, ListSource> } | undefined
       >;
     };
     send(
@@ -88,7 +96,13 @@ export function renderActiveView<
         | { type: Release; reason: InputClaimReleaseReason }
     ): void;
   },
-  sources: Record<Source, (context: Context) => string>,
+  sources: {
+    text: Record<Source, (context: Context) => string>;
+    lists: Record<
+      ListSource,
+      (context: Context) => readonly (Row<string> & { event?: MenuEvent })[]
+    >;
+  },
   apply: ApplyView
 ): Result<void, 'Expected one active view'> {
   const snapshot = actor.getSnapshot();
@@ -99,33 +113,45 @@ export function renderActiveView<
   if (views.length !== 1 || !view) return err('Expected one active view');
 
   const read = (text: Text<Source>, context = snapshot.context) =>
-    typeof text === 'string' ? text : sources[text.from](context);
+    typeof text === 'string' ? text : sources.text[text.from](context);
+
+  const menu = view.menu;
+  const rows =
+    'from' in menu
+      ? sources.lists[menu.from](snapshot.context)
+      : menu.items.map((row) => ({
+          ...row,
+          text: read(row.text),
+          detail: row.detail === undefined ? undefined : read(row.detail),
+          event: row.action === undefined ? undefined : view.actions[row.action]
+        }));
+  const visibleRows: readonly (Row<string> & { event?: MenuEvent })[] =
+    rows.length === 0 && 'from' in menu && menu.empty ? [menu.empty] : rows;
 
   const input = view.input;
   apply(ctl, {
     layout: { menuTitle: read(view.title) },
     menu: {
-      id: view.menu.id,
-      focusBehaviour: view.menu.focusBehaviour,
-      items: view.menu.items.map((row) => {
-        const icon = row.icon;
+      id: menu.id,
+      focusBehaviour: menu.focusBehaviour,
+      items: visibleRows.map((row) => {
+        const { icon, event } = row;
         return stdMenuItem({
           id: row.id,
-          textContent: read(row.text),
-          bottom: row.detail === undefined ? undefined : { textContent: read(row.detail) },
+          textContent: row.text,
+          bottom: row.detail === undefined ? undefined : { textContent: row.detail },
           left: icon === undefined ? undefined : (b) => [b.icon(icon)],
           bindingHint: row.showActionBinding
             ? ctl.keys.getCurrentBindings()[OneputAction.DO_ACTION]?.bindings[0]
             : undefined,
-          action: () => actor.send(view.actions[row.action])
+          action: event === undefined ? undefined : () => actor.send(event)
         });
       })
     },
     settings: view.settings,
     input:
-      input.kind === 'filter'
-        ? { kind: 'filter', placeholder: read(input.placeholder) }
-        : {
+      input?.kind === 'claim'
+        ? {
             kind: 'claim',
             options: {
               owner: { type: 'menu-item', itemId: read(input.owner) },
@@ -144,6 +170,7 @@ export function renderActiveView<
               onRelease: (reason) => actor.send({ type: input.release, reason })
             }
           }
+        : input && { kind: 'filter', placeholder: read(input.placeholder) }
   });
   return ok(undefined);
 }

@@ -1,6 +1,6 @@
 import type { InputClaimReleaseReason } from '@oneput/oneput';
 import { assign, emit, setup } from 'xstate';
-import type { ViewDef } from './interpreter.js';
+import type { ViewDef } from '../interpreter.js';
 import { initialValues, sources, type EditContext, type Field } from './sources.js';
 
 export type MenuEvent =

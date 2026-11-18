@@ -3,6 +3,9 @@
 This sketch uses one XState machine and one AppObject. The active state's
 `meta.view` selects the menu, title, input and actions. Each state repeats its
 menu, actions and settings as literals so the viewer can read the machine. The sketch has no route.
+The [shared interpreter](../interpreter.ts) resolves static rows and named
+text sources here. The provider list and colour picker also use it for rows
+from named list sources.
 
 | Imperative example                     | Machine and interpreter                                                                                  |
 | -------------------------------------- | -------------------------------------------------------------------------------------------------------- |

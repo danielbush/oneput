@@ -78,6 +78,7 @@ tasks:
       - task: jsed:test
       - task: safe-html:test
       - task: oneput:test
+      - task: oneput-demo:test
 
   todo:
     cmds:

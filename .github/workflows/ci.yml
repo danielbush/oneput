@@ -111,6 +111,8 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.58.1-noble
       options: --ipc=host
+    env:
+      HOME: /root
 
     steps:
       - name: Checkout repository

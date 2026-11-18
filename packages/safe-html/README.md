@@ -1,7 +1,9 @@
 # Safe HTML
 
 How this package keeps HTML safe, and when each part runs. The API reference is
-at the end. The plan and threat model are in `work/backlog/SAFE_HTML.md`.
+at the end. The threat models are in
+[packages/oneput/THREAT_MODEL.md](../oneput/THREAT_MODEL.md) and
+[packages/jsed/THREAT_MODEL.md](../jsed/THREAT_MODEL.md).
 
 ## The problem
 
@@ -198,8 +200,8 @@ fails on any raw-HTML sink outside a reviewed list in
 a person or an agent. It also catches indirect writes (`node[key] = s` with a
 constant `key`, `Reflect.set`, `Object.assign`) and uses Svelte's own parser for
 `{@html}`. When it cannot tell which property is written on an HTML element, it
-treats the write as a sink. It is a source check, not runtime protection; what it
-cannot see is listed in `SAFE_HTML.md`. See
+treats the write as a sink. It is a source check, not runtime protection. Its
+limits and how to add an exception are in
 [scripts/safe-html/README.md](../../scripts/safe-html/README.md).
 
 ## Tests

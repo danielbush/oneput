@@ -35,5 +35,6 @@ scan. Add a file to `fixturePaths` only after review of its raw test fixtures.
 
 An unresolved property write on a known HTML sink receiver needs an exception.
 Object spreads or duplicate keys make a destructured property name unresolved.
-The scan is a source check, not proof of runtime safety. See the
-[accepted scan limit](../../work/backlog/SAFE_HTML.md#accepted-scan-limit).
+The scan is a source check, not proof of runtime safety. It cannot resolve
+names or receiver types that only exist at runtime, does not follow values
+across function calls, and does not see code created at runtime.

@@ -26,6 +26,7 @@ export default defineConfig({
         resolve: { conditions: ['browser'] },
         test: {
           name: 'server',
+          testTimeout: 1000,
           environment: 'happy-dom',
           include: ['src/**/*.{test,spec}.{js,ts}']
         }

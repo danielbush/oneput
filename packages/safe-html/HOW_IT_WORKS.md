@@ -17,11 +17,11 @@ one checked path**.
 
 HTML is cleaned with a named **policy**. Each policy says what may stay.
 
-| Policy | For | Keeps |
-| --- | --- | --- |
-| `display` | rich text | text formatting, links, lists, tables, headings |
-| `ui` | small markup in Oneput menus | `display`, plus `kbd` and one class |
-| `math` | KaTeX output | formula spans, MathML, SVG shapes |
+| Policy     | For                             | Keeps                                                      |
+| ---------- | ------------------------------- | ---------------------------------------------------------- |
+| `display`  | rich text                       | text formatting, links, lists, tables, headings            |
+| `ui`       | small markup in Oneput menus    | `display`, plus `kbd` and one class                        |
+| `math`     | KaTeX output                    | formula spans, MathML, SVG shapes                          |
 | `document` | a whole document the user opens | structure, CSS, images, SVG, forms, ids, classes, `data-*` |
 
 `ui`, `display` and `math` clean in two steps:

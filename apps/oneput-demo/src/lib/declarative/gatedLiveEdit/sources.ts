@@ -1,8 +1,8 @@
 import type { InputClaimReleaseReason } from '@oneput/oneput';
-import type { Profile, ProfileSaveError } from './profileStore.js';
+import type { Profile } from './profileStore.js';
 
 export type Field = keyof Profile;
-export type Draft = { field: Field; value: string; saveError: ProfileSaveError | null };
+export type Draft = { field: Field; value: string };
 
 export type EditContext = {
   profile: Profile | null;
@@ -13,7 +13,7 @@ export type EditContext = {
 
 const idleHint = 'Activate to edit this value.';
 const editHint = 'Activate again to save. Moving focus or going back also saves.';
-const saveErrorHint = 'Could not save. Activate this row to retry.';
+const fieldNames = { name: 'Name', role: 'Role' };
 
 export function fieldId(field: Field | null) {
   return field === null ? '' : `live-edit-mixed-${field}`;
@@ -33,19 +33,22 @@ function fieldHint({ draft }: EditContext, field: Field, activeHint: string) {
   return draft?.field === field ? activeHint : idleHint;
 }
 
-function editFieldHint(context: EditContext, field: Field) {
-  return fieldHint(context, field, context.draft?.saveError ? saveErrorHint : editHint);
+function fieldLabel(context: EditContext, field: Field) {
+  return `${fieldNames[field]}: ${fieldValue(context, field) || '—'}`;
 }
 
 /** Project the saved profile and active draft into menu labels and input text. */
 export const sources = {
   text: {
-    nameLabel: (context: EditContext) => `Name: ${fieldValue(context, 'name') || '—'}`,
-    roleLabel: (context: EditContext) => `Role: ${fieldValue(context, 'role') || '—'}`,
-    nameHint: (context: EditContext) => editFieldHint(context, 'name'),
-    roleHint: (context: EditContext) => editFieldHint(context, 'role'),
+    nameLabel: (context: EditContext) => fieldLabel(context, 'name'),
+    roleLabel: (context: EditContext) => fieldLabel(context, 'role'),
+    nameHint: (context: EditContext) => fieldHint(context, 'name', editHint),
+    roleHint: (context: EditContext) => fieldHint(context, 'role', editHint),
     nameSavingHint: (context: EditContext) => fieldHint(context, 'name', 'Saving…'),
     roleSavingHint: (context: EditContext) => fieldHint(context, 'role', 'Saving…'),
+    editLabel: (context: EditContext) =>
+      context.draft === null ? '' : fieldLabel(context, context.draft.field),
+    discardLabel: ({ draft }: EditContext) => `Discard "${draft?.value ?? ''}"`,
     editOwner: ({ draft }: EditContext) => fieldId(draft?.field ?? null),
     editValue: ({ draft }: EditContext) => draft?.value ?? '',
     editPlaceholder: ({ draft }: EditContext) => (draft === null ? '' : `Edit ${draft.field}...`)

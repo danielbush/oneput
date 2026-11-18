@@ -20,7 +20,7 @@ type LiveEditView = ViewDef<keyof typeof sources.text, never, keyof typeof sourc
 type ProfileActionArgs = ActionArgs<EditContext, LiveEditEvent, LiveEditEvent>;
 
 function draftFor(profile: Profile, field: Field) {
-  return { field, value: profile[field], saveError: null };
+  return { field, value: profile[field] };
 }
 
 /** Link the named load and save actions to a store for the demo or a headless actor. */
@@ -68,30 +68,30 @@ export const liveEdit = setup({
       event.type === 'ITEM_ACTIVATED' &&
       fieldFor(event.id) !== null &&
       fieldId(context.draft?.field ?? null) !== event.id,
-    canSwitchField: ({ context, event }) =>
-      context.draft?.saveError === null &&
-      event.type === 'ITEM_ACTIVATED' &&
-      fieldId(context.draft.field) !== event.id &&
-      fieldFor(event.id) !== null,
     activatesPreview: ({ context, event }) =>
       context.profile !== null &&
       event.type === 'ITEM_ACTIVATED' &&
       event.id === 'live-edit-mixed-preview',
     activatesLoadRetry: ({ event }) =>
       event.type === 'ITEM_ACTIVATED' && event.id === 'live-edit-retry-load',
+    activatesSaveRetry: ({ event }) =>
+      event.type === 'ITEM_ACTIVATED' && event.id === 'live-edit-retry-save',
+    activatesDiscard: ({ event }) =>
+      event.type === 'ITEM_ACTIVATED' && event.id === 'live-edit-discard',
+    activatesKeepEditing: ({ event }) =>
+      event.type === 'ITEM_ACTIVATED' && event.id === 'live-edit-keep-editing',
     userFocusLeftOwner: ({ context, event }) =>
-      context.draft?.saveError === null &&
+      context.draft !== null &&
       event.type === 'ITEM_FOCUSED' &&
       event.menuId === 'live-edit-mixed-menu' &&
       (event.cause === 'keyboard' || event.cause === 'pointer') &&
       fieldId(context.draft.field) !== event.id,
     ownerReleasedForCommit: ({ context, event }) =>
-      context.draft?.saveError === null &&
+      context.draft !== null &&
       event.type === 'INPUT_RELEASED' &&
       fieldId(context.draft.field) === event.id &&
       (event.reason === 'submit' || event.reason === 'back' || event.reason === 'focus-changed'),
-    hasNextField: ({ context }) => context.nextField !== null,
-    hasSaveError: ({ context }) => context.draft?.saveError?.type === 'save-failed'
+    hasNextField: ({ context }) => context.nextField !== null
   },
   actions: {
     ...profileActions(ProfileStore.create()),
@@ -131,11 +131,8 @@ export const liveEdit = setup({
           }
         : {}
     ),
-    storeSaveFailure: assign(({ context, event }) =>
-      event.type === 'SAVE_FAILED' && context.draft !== null
-        ? { draft: { ...context.draft, saveError: event.error }, nextField: null }
-        : {}
-    ),
+    clearNextField: assign({ nextField: null }),
+    discardEdit: assign({ draft: null, releaseReason: 'back' }),
     preview: emit(({ context }) => ({
       type: 'preview',
       message: `${fieldValue(context, 'name')} — ${fieldValue(context, 'role')}`

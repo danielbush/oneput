@@ -7,14 +7,21 @@ each `INPUT_CHANGED` updates its draft. Preview shows the current row values.
 
 Suppose the store loads **Grace Hopper** and you activate **Name**. Type
 **Grace Murray Hopper**, then activate **Name** again to save. If the save
-fails, the Name row still shows **Grace Murray Hopper** and offers a retry.
-Activate that row again. The store saves the draft and the menu returns to
-filtering with the new name.
+fails, the Name row still shows **Grace Murray Hopper** and says
+**Could not save. Activate to retry.** Press Back to open **Changes not
+saved**, then select **Keep editing** to return to the draft. Activate the
+Name row to retry. After the save succeeds, the menu returns to filtering
+with the new name.
 
-Moving focus to another row or pressing Back also saves a draft. After a
-successful save, these actions restore the query. Activating the edited row
-clears it. After a save fails, Back, focus changes, and claim release all
-leave the draft in place until you activate its row to retry.
+If you want to drop the draft after a failed save, press Back and select
+**Discard "Grace Murray Hopper"**. The menu returns to filtering with the
+last saved name, **Grace Hopper**. Pressing Back from **Changes not saved**
+returns to the draft, just like **Keep editing**.
+
+While you edit before a save failure, moving focus or pressing Back also
+saves the draft. After a successful save, these actions restore the query.
+Activating the edited row clears it. After a save fails, moving focus or
+releasing the input claim leaves the draft in place.
 
 For a headless actor, use
 `gatedLiveEdit.provide({ actions: profileActions(store) })`.

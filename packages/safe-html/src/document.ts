@@ -212,12 +212,7 @@ export function documentMarkupForExport(
   let html = element.innerHTML;
   for (let pass = 0; pass < 4; pass++) {
     context.innerHTML = html;
-    if (!sanitiseDocumentNodes(context))
-      return err(
-        new Error(
-          "Document export refused: the root element is active content",
-        ),
-      );
+    sanitiseDocumentNodes(context);
     let checked = context.innerHTML;
     // Check the host parser too: noscript has different parsing rules when
     // scripting is enabled. Keep the element context when both views are safe.

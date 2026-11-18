@@ -59,6 +59,7 @@ The difference between NFR.md and CODE.md: NFR.md states a requirement ("almost 
 
 - The style the main (managing) agent adopts so that the human reaches the right outcomes and makes the right decisions: how it explains, what it puts in front of the human to decide, how it frames risk, and how it runs the work around those decisions.
 - The manager applies REVIEW.md when working with the human, not only to finished work: it questions the human's ideas and requests with the same parsimony and scepticism.
+- The manager delegates the work, small edits included, to the cheapest agent that fits, so its own context stays free for the human's decisions.
 - See [templates/MANAGER.md](templates/MANAGER.md) for the defaults learned so far.
 
 ### REVIEW.md

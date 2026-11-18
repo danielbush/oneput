@@ -10,6 +10,8 @@ export type EditContext = {
   draft: Profile | null;
   lastEditedField: Field | null;
   afterEdit: AfterEdit | null;
+  /** The value in the open field editor, copied here so guards can read it. */
+  openEdit: ReturnType<typeof activeEdit>;
   releaseReason: InputClaimReleaseReason;
 };
 

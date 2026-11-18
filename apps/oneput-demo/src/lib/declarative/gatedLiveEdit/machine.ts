@@ -10,6 +10,7 @@ export const gatedLiveEdit = liveEdit.createMachine({
     draft: null,
     lastEditedField: null,
     afterEdit: null,
+    openEdit: null,
     releaseReason: 'released'
   },
   states: {
@@ -172,7 +173,9 @@ export const gatedLiveEdit = liveEdit.createMachine({
             src: 'gatedFieldEdit',
             id: 'gatedFieldEdit',
             onSnapshot: {
-              description: 'Notify the view when the field editor updates.'
+              actions: 'trackOpenEdit',
+              description:
+                'Copy the open edit to the context and notify the view when the field editor updates.'
             },
             onDone: {
               target: 'filtering',
@@ -186,8 +189,10 @@ export const gatedLiveEdit = liveEdit.createMachine({
               description: 'Finish the edit and open the selected field if it differs.'
             },
             SAVE: {
+              guard: 'isDirtyWithEdit',
               actions: 'submitEdit',
-              description: 'Finish the edit before saving when a field value has changed.'
+              description:
+                'Finish the edit before saving when the draft or the open edit has changed.'
             },
             INPUT_CHANGED: {
               actions: 'forwardEditEvent',

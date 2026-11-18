@@ -90,7 +90,8 @@ export const liveEdit = setup({
   },
   actors: { gatedFieldEdit },
   guards: {
-    isDirty: ({ context }) => isDirty(context, null)
+    isDirty: ({ context }) => isDirty(context, null),
+    isDirtyWithEdit: ({ context }) => isDirty(context, context.openEdit)
   },
   actions: {
     ...profileActions(ProfileStore.create()),
@@ -107,11 +108,11 @@ export const liveEdit = setup({
         menuId: 'live-edit-mixed-menu'
       };
     }),
+    trackOpenEdit: assign(({ self }) => ({ openEdit: activeEdit(self.getSnapshot()) })),
     forwardEditEvent: forwardTo('gatedFieldEdit'),
-    submitEdit: enqueueActions(({ context, event, self, enqueue }) => {
+    submitEdit: enqueueActions(({ event, self, enqueue }) => {
       assertEvent(event, ['EDIT_FIELD', 'SAVE']);
       const edit = activeEdit(self.getSnapshot());
-      if (event.type === 'SAVE' && !isDirty(context, edit)) return;
       if (event.type === 'EDIT_FIELD' && event.field === edit?.field) {
         enqueue.sendTo('gatedFieldEdit', event);
       } else {

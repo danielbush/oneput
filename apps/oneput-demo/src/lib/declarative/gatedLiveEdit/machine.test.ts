@@ -249,6 +249,27 @@ describe('gated live-edit form', () => {
     actor.stop();
   });
 
+  it('allows Save while editing only when the open edit differs from the saved value', async () => {
+    // arrange
+    const profile = { name: 'Grace Hopper', role: 'Computer scientist' };
+    const store = ProfileStore.createNull({ profile });
+    const actor = createActor(gatedLiveEdit.provide({ actions: profileActions(store) })).start();
+    actor.send({ type: 'STARTED' });
+    await waitFor(actor, (snapshot) => snapshot.matches({ ready: 'filtering' }));
+
+    // act
+    actor.send({ type: 'EDIT_FIELD', field: 'name' });
+    const unchanged = actor.getSnapshot().can({ type: 'SAVE' });
+    actor.send({ type: 'INPUT_CHANGED', value: 'Ada' });
+    const changed = actor.getSnapshot().can({ type: 'SAVE' });
+
+    // assert
+    expect(actor.getSnapshot().matches({ ready: 'editing' })).toBe(true);
+    expect(unchanged).toBe(false);
+    expect(changed).toBe(true);
+    actor.stop();
+  });
+
   it('returns to clean when an edit restores the saved value', async () => {
     // arrange
     const profile = { name: 'Grace Hopper', role: 'Computer scientist' };

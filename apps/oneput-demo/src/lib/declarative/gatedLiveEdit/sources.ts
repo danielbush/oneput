@@ -46,8 +46,6 @@ export const sources = {
     roleHint: (context: EditContext) => fieldHint(context, 'role', editHint),
     nameSavingHint: (context: EditContext) => fieldHint(context, 'name', 'Saving…'),
     roleSavingHint: (context: EditContext) => fieldHint(context, 'role', 'Saving…'),
-    editLabel: (context: EditContext) =>
-      context.draft === null ? '' : fieldLabel(context, context.draft.field),
     discardLabel: ({ draft }: EditContext) => `Discard "${draft?.value ?? ''}"`,
     editOwner: ({ draft }: EditContext) => fieldId(draft?.field ?? null),
     editValue: ({ draft }: EditContext) => draft?.value ?? '',

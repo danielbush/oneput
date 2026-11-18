@@ -40,6 +40,7 @@ export type ViewDef<
   menu: {
     id: string;
     focusBehaviour?: Menu['focusBehaviour'];
+    rowOverride?: { id: Text<Source>; detail: Text<Source>; icon: string };
   } & (
     | { items: readonly Row<Text<Source>>[] }
     | { from: ListSource; empty?: { id: string; text: string } }
@@ -91,7 +92,7 @@ type ViewCallbacks = {
   release(id: string, reason: InputClaimReleaseReason): void;
 };
 
-/** Resolve one active view for Oneput's checked text, icon and input APIs. */
+/** Resolve one active view, including row overrides by ID, for Oneput's view APIs. */
 export function renderActiveView<
   Context,
   Source extends string,
@@ -125,6 +126,8 @@ export function renderActiveView<
   const visibleRows: readonly Row<string>[] =
     rows.length === 0 && 'from' in menu && menu.empty ? [menu.empty] : rows;
 
+  const override = menu.rowOverride;
+  const overrideId = override && read(override.id);
   const input = view.input;
   return ok({
     layout: { menuTitle: read(view.title) },
@@ -132,11 +135,13 @@ export function renderActiveView<
       id: menu.id,
       focusBehaviour: menu.focusBehaviour,
       items: visibleRows.map((row) => {
-        const { icon } = row;
+        const rowOverride = override && row.id === overrideId ? override : undefined;
+        const detail = rowOverride ? read(rowOverride.detail) : row.detail;
+        const icon = rowOverride?.icon ?? row.icon;
         return stdMenuItem({
           id: row.id,
           textContent: row.text,
-          bottom: row.detail === undefined ? undefined : { textContent: row.detail },
+          bottom: detail === undefined ? undefined : { textContent: detail },
           left: icon === undefined ? undefined : (b) => [b.icon(icon)],
           bindingHint: row.showActionBinding
             ? ctl.keys.getCurrentBindings()[OneputAction.DO_ACTION]?.bindings[0]

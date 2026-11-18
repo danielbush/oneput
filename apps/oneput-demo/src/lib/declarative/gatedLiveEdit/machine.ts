@@ -183,7 +183,7 @@ export const gatedLiveEdit = liveEdit.createMachine({
                 placeholder: { from: 'editPlaceholder' }
               },
               settings: {
-                enableFilter: true,
+                enableFilter: false,
                 enableGoBack: true,
                 enableInputElement: true,
                 clearInputAfterAction: false,
@@ -226,32 +226,46 @@ export const gatedLiveEdit = liveEdit.createMachine({
           }
         },
         saveFailed: {
-          description: 'Show the failed save and wait for the user to retry or go back.',
+          description: 'Keep the menu, focus and draft while the user retries or goes back.',
           meta: {
             view: {
               title: 'Live edit — mixed menu',
               menu: {
                 id: 'live-edit-mixed-menu',
-                focusBehaviour: 'last-action,first',
+                focusBehaviour: 'none',
+                rowOverride: {
+                  id: { from: 'editOwner' },
+                  detail: 'Could not save. Activate to retry.',
+                  icon: 'CircleAlert'
+                },
                 items: [
                   {
-                    id: 'live-edit-retry-save',
-                    text: { from: 'editLabel' },
-                    detail: 'Could not save. Activate to retry.',
+                    id: 'live-edit-mixed-name',
+                    text: { from: 'nameLabel' },
+                    detail: { from: 'nameHint' },
                     icon: 'Pencil',
                     showActionBinding: true,
                     activate: true
-                  }
+                  },
+                  {
+                    id: 'live-edit-mixed-role',
+                    text: { from: 'roleLabel' },
+                    detail: { from: 'roleHint' },
+                    icon: 'Pencil',
+                    showActionBinding: true,
+                    activate: true
+                  },
+                  { id: 'live-edit-mixed-preview', text: 'Preview values', activate: true }
                 ]
               },
               input: {
                 kind: 'claim',
-                owner: 'live-edit-retry-save',
+                owner: { from: 'editOwner' },
                 value: { from: 'editValue' },
                 placeholder: { from: 'editPlaceholder' }
               },
               settings: {
-                enableFilter: true,
+                enableFilter: false,
                 enableGoBack: true,
                 enableInputElement: true,
                 clearInputAfterAction: false,
@@ -261,7 +275,7 @@ export const gatedLiveEdit = liveEdit.createMachine({
           },
           on: {
             ITEM_ACTIVATED: {
-              guard: 'activatesSaveRetry',
+              guard: 'activatesOwner',
               target: '#gated-live-edit.saving',
               actions: 'submitEdit',
               description: 'Retry the save and clear the filter on success.'
@@ -316,14 +330,14 @@ export const gatedLiveEdit = liveEdit.createMachine({
       }
     },
     saving: {
-      description: 'Keep the draft in the editor while the store saves it.',
+      description: 'Keep the menu, focus and draft while the store saves it.',
       entry: 'saveProfile',
       meta: {
         view: {
           title: 'Live edit — mixed menu',
           menu: {
             id: 'live-edit-mixed-menu',
-            focusBehaviour: 'last-action,first',
+            focusBehaviour: 'none',
             items: [
               {
                 id: 'live-edit-mixed-name',
@@ -351,7 +365,7 @@ export const gatedLiveEdit = liveEdit.createMachine({
             placeholder: { from: 'editPlaceholder' }
           },
           settings: {
-            enableFilter: true,
+            enableFilter: false,
             enableInputElement: false,
             clearInputAfterAction: false,
             clearInputAfterBack: false,

@@ -7,7 +7,8 @@ each `INPUT_CHANGED` updates its draft. Preview shows the current row values.
 
 Suppose the store loads **Grace Hopper** and you activate **Name**. Type
 **Grace Murray Hopper**, then activate **Name** again to save. If the save
-fails, the Name row still shows **Grace Murray Hopper** and says
+fails, the full menu stays visible and the input keeps **Grace Murray Hopper**.
+The Name row shows the registered `CircleAlert` icon and the detail
 **Could not save. Activate to retry.** Press Back to open **Changes not
 saved**, then select **Keep editing** to return to the draft. Activate the
 Name row to retry. After the save succeeds, the menu returns to filtering
@@ -22,6 +23,13 @@ While you edit before a save failure, moving focus or pressing Back also
 saves the draft. After a successful save, these actions restore the query.
 Activating the edited row clears it. After a save fails, moving focus or
 releasing the input claim leaves the draft in place.
+
+The saving and failed views use `focusBehaviour: 'none'` and keep the same
+menu and row IDs. The Oneput view update stub needs to retain the focused row
+by ID and restore it when the confirmation closes. A save triggered by moving
+focus keeps the row the user moved to. The update must also release any held
+filter while keeping the saved query and the draft claim. The renderer uses
+the demo's existing icon registry to show the alert.
 
 For a headless actor, use
 `gatedLiveEdit.provide({ actions: profileActions(store) })`.

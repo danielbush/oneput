@@ -24,7 +24,10 @@ type ViewActor<
 
 /**
  * Stub for a Oneput update that applies the layout, settings, menu and input together.
- * Keep the focused row by ID and retain a claim for the same owner on refresh.
+ * For focusBehaviour 'none', keep the current row ID for that menu.
+ * Save and restore that ID when a view temporarily replaces the menu.
+ * Keep the input claim for the same owner. For views with filtering disabled, clear any held
+ * filter after acquiring the claim but before publishing rows and focus. Keep the saved query.
  * Release the previous claim with the filter view's reason before restoring or clearing input.
  * Send each release once and ignore late callbacks from replaced claims.
  * Clear and focus the filter input on first entry.

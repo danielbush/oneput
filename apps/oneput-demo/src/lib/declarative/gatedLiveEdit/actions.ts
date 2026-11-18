@@ -74,8 +74,6 @@ export const liveEdit = setup({
       event.id === 'live-edit-mixed-preview',
     activatesLoadRetry: ({ event }) =>
       event.type === 'ITEM_ACTIVATED' && event.id === 'live-edit-retry-load',
-    activatesSaveRetry: ({ event }) =>
-      event.type === 'ITEM_ACTIVATED' && event.id === 'live-edit-retry-save',
     activatesDiscard: ({ event }) =>
       event.type === 'ITEM_ACTIVATED' && event.id === 'live-edit-discard',
     activatesKeepEditing: ({ event }) =>

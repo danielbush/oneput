@@ -24,6 +24,30 @@ Pick the call by what you have and when it is shown:
 | **nodes** already built              | `sanitiseDocumentNodes(root)`           | pasted or converted content, before jsed inserts it                 |
 | a document to **save**               | `documentMarkupForExport(clone)`        | jsed's save                                                         |
 
+`setHTML` and `sanitiseHtml` both clean a string with a policy. The difference
+is what you get back:
+
+- `setHTML(element, html, policy)` cleans the string and writes it into
+  `element` now. It returns nothing.
+- `sanitiseHtml(html, policy)` cleans the string and writes it nowhere. It
+  returns a `SafeHtml` token for something else to render later.
+
+Use `sanitiseHtml` when there is no element yet. For example, a Oneput menu item
+is data; Oneput renders it later, and again each time the menu changes:
+
+```ts
+// No DOM element exists when you describe the item.
+const item = {
+  type: "fchild",
+  id: "save",
+  htmlContent: sanitiseHtml("<b>Save</b> <kbd>⌘S</kbd>", "ui").unwrapOr(null),
+};
+// Oneput's FChild turns the token back into HTML each time it renders.
+```
+
+When you have the element in hand, as the KaTeX demo has its formula div,
+`setHTML` does both steps at once.
+
 There are two things called `setHTML`. This package's `setHTML(element, html,
 policy)` is the one your code calls. The browser's native `Element.setHTML` is
 used only inside the package, as the first step of some policies (below).

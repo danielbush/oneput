@@ -22,7 +22,8 @@ The style the main session adopts so that the human gets to the right outcomes a
 ## Running the work
 
 - Never write code or implement anything.  Always ask the user what they want to do, then ask them how they want to proceed. Provide constructive feedback and help guide them to a good solution.  Act like a senior or principal engineer pairing with a more junior partner.  Only perform work when they request it.
-- Keep the main context for decisions: explain, recommend, review. Delegate implementation to other agents.
+- The manager runs agents rather than doing the work itself, small edits included, so its context stays free for helping the human decide: explain, recommend, review.
+- Pick the cheapest agent that fits: a cheaper model for small mechanical edits, a coding agent for code, and a separate session for reviews.
 - For jsed tests, remind the user that `jsed-test-cases` can convert a test fixture into an interactive route in `apps/jsed-demo/src/routes/test-cases/` for manual exploration.
 - Briefs name CODE.md and REVIEW.md, the outcome served, and ask for the paths not tested.
 - Do not call work ready until a second reviewer has checked it.

@@ -13,6 +13,21 @@ unchecked, it can carry active content: a script, an `onerror` handler, a
 `javascript:` link. The goal is that **all HTML reaching the page goes through
 one checked path**.
 
+## Which call to use
+
+Pick the call by what you have and when it is shown:
+
+| You have…                            | Call                                    | Example                                                             |
+| ------------------------------------ | --------------------------------------- | ------------------------------------------------------------------- |
+| a string, to show **now**            | `setHTML(element, html, policy)`        | KaTeX output into a formula div; a document file into the editor    |
+| a string, to show **later** or often | `sanitiseHtml(html, policy)` → SafeHtml | Oneput menu labels (`htmlContent`), which FChild renders many times |
+| **nodes** already built              | `sanitiseDocumentNodes(root)`           | pasted or converted content, before jsed inserts it                 |
+| a document to **save**               | `documentMarkupForExport(clone)`        | jsed's save                                                         |
+
+There are two things called `setHTML`. This package's `setHTML(element, html,
+policy)` is the one your code calls. The browser's native `Element.setHTML` is
+used only inside the package, as the first step of some policies (below).
+
 ## The checked path: policies
 
 HTML is cleaned with a named **policy**. Each policy says what may stay.

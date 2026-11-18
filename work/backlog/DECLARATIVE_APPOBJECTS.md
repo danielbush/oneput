@@ -1,16 +1,16 @@
 # DECLARATIVE_APPOBJECTS
 
-Make the common AppObject glue a stored, validated data document that one generic AppObject can interpret. This lets a human or agent describe menus and the small parts around the input and menu header, while models, state machines, and Effect services keep the business rules. The chrome builders already return object trees. Named events, live source bindings, and checked parts in named slots can make their inputs storable data. Layout factories, CSS, and the current tree renderer stay code.
+Make the common AppObject glue a stored, validated data document that one generic AppObject can interpret. This lets a human or agent describe menus and the small parts around the input and menu header, while named machine implementations, models, and Effect services keep the business rules. The chrome builders already return object trees. Named events, live source bindings, and checked parts in named slots can make their inputs storable data. Layout factories, CSS, and the current tree renderer stay code.
 
 ## 1. Scope and recommendation
 
-Use two connected documents: a view definition and, when needed, a flow definition. The view says what to show and which named event an action sends. The flow says what happens next. Neither document contains JavaScript functions.
+Store one XState machine with each screen in its state’s `meta.view`. The view describes the title, menu, input, and actions that send named events. The transitions define what those events do. Use literals, descriptions on states and transitions, and names for actions and guards. A screen shared by several states can repeat in each state or use a reference to a shared definition.
 
 First build a separate declarative demo beside the main and routed demos. Prove live lists, input events, a stack picker result, promise load states, signals, and a typed Effect failure in that demo. These are the first design test, not later extensions. Use named sources for all computed values. Do not make an expression language for menus.
 
 Recommend a small built-in description validator that returns neverthrow Results. Keep Effect in host adapters. Allow Standard Schema at the host contract boundary when needed. Render through SAFE_HTML; do not make a second HTML or icon policy.
 
-This is a design report, not an implementation. All proposed types and functions below are new. Paths without a repo prefix are in `/Users/danb/projects/@oneput-declarative`; paths starting with `@2br/` are under `/Users/danb/projects/@2br`. `SAFE_HTML/` means `/Users/danb/projects/@oneput-safe-html`, branch `sec/safe-html`. Citations refer to the files read for this report on 12 November 2026. Another worker can change those files and their line numbers.
+This report describes proposed APIs. Paths without a repo prefix are in `/Users/danb/projects/@oneput-declarative`; paths starting with `@2br/` are under `/Users/danb/projects/@2br`. `SAFE_HTML/` means `/Users/danb/projects/@oneput-safe-html`, branch `sec/safe-html`. Citations refer to the files read for this report on 12 November 2026. Another worker can change those files and their line numbers.
 
 The original request is at `work/backlog/oneput.md:223`. DECLARATIVE_ONEPUT concerns state machines *inside* Oneput (`work/backlog/oneput.md:226`). It is separate work. This proposal can use the current controllers. The deep module direction at `work/backlog/oneput.md:234` supports a small public definition and interpreter, with rendering and validation details below them.
 
@@ -115,23 +115,25 @@ Each registered layout should name the places a description may fill. A slot is 
 
 Proposed names can be `header` for the menu-owned header, `footer` for the menu-owned footer, and `inputLeft` / `inputRight` for parts beside the input. StandardLayout would need checked params for the input slots and a rule for combining `inputRight` parts with its existing affordances. A part beside the title in the layout-owned header would need a separate slot there. Do not silently replace Back or Close. The controller reads layout output again on invalidation, so slot content must be part of that output, not a one-time `setInputUI` patch (`packages/oneput/src/lib/oneput/controllers/UIController.ts:111`).
 
-A description fills these slots with text, icon, button, badge, spacer, and `hflex` / `vflex` groups. A registered widget covers special content. Suppose the providers screen has a selected provider. It puts a live status badge in the menu-owned header and a Test key button right of the input:
+A state’s `meta.view` fills these slots with text, icon, button, badge, spacer, and `hflex` / `vflex` groups. A registered widget covers special content. Suppose a provider editing state shows a live status badge in the menu header and a Test key button right of the input.
 
 ```ts
-const chrome = { // Proposed chrome for the selected provider.
-  layout: 'standard', // Host registry entry for StandardLayout.
-  slots: { // Named places accepted by that layout adapter.
-    header: [ // Maps to Menu.header, below Back/title/Close.
-      { kind: 'badge', text: { from: 'config.keyStatus' }, tone: 'neutral' } // Shows 'Key OK' now.
-    ], // The header has one status badge.
-    inputRight: [ // Joins inputUI.right through the proposed slot param.
-      { kind: 'button', text: 'Test key', on: { click: 'test-key' } } // Sends the named key-test event.
-    ] // The input slot has one button.
-  } // The two slot values contain no functions.
-}; // This description can be stored and checked.
+meta: {
+  view: {
+    layout: 'standard',
+    slots: {
+      header: [
+        { kind: 'badge', text: { from: 'config.keyStatus' }, tone: 'neutral' }
+      ],
+      inputRight: [
+        { kind: 'button', text: 'Test key', on: { click: 'test-key' } }
+      ]
+    }
+  }
+}
 ```
 
-Suppose the test starts. Host code sets the status source to `Testing…`. Its notification triggers the existing refresh path. The interpreter reads the new value and supplies the badge's `textContent`. After success it reads `Key OK`. The stored description does not change. The host owns the command, provider selection, and key access.
+Suppose the test starts. Host code sets the status source to `Testing…`. Its notification triggers the existing refresh path. The interpreter reads the new value and supplies the badge's `textContent`. After success it reads `Key OK`. The stored description does not change. The button sends `test-key` to the actor. The state can handle it with a named action. The host owns the command, provider selection, and key access.
 
 These are proposed names and behaviour. ProvidersUI currently watches config and shows `hasKey` in rows. It has no `config.keyStatus` source, status badge, or Test key action. ProviderUI saves a draft key through its config connection (`@2br/packages/oneput/src/ProvidersUI.ts:28`, `:34`, `:43`, `:100`). The example requires a host source and event capability; it does not imply those already exist.
 
@@ -149,163 +151,145 @@ Create a third peer in `apps/oneput-demo`. Proposed files go under `src/lib/decl
 
 The new demo edits a simulated provider connection. It uses no real credentials or network. A host control can make the next fetch or key check fail. Another control can rename a provider while the list is open. This makes live updates and failure states visible.
 
-### Screens as data
+### Views on machine states
 
-These are proposed JSON-compatible descriptions, shown as commented TypeScript. `defineViews<DemoSources, DemoEvents>` is a proposed authoring helper, not an existing API. It checks field and event references. JSON from an agent must pass runtime validation and linking too. Every screen below has version 1. Literal strings stay text.
+The proposed configuration below shows the provider flow as one document. Its version applies to the whole machine. The [GATED_LIVE_EDIT sketch](../../apps/oneput-demo/src/lib/declarative/gatedLiveEdit/README.md) shows the same structure with an input claim.
 
 ```ts
-const views = defineViews<DemoSources, DemoEvents>({ // Host contracts supply the types.
-  providers: { // Routed root: a live list, not Welcome.
-    version: 1, id: 'providers', title: 'Providers',
-    settings: { enableGoBack: false },
-    actions: {
-      reload: { event: { type: 'RELOAD' } } // Host restarts the simulated fetch.
-    },
-    menu: {
-      id: 'providers', from: 'providers', // Named Source<readonly ProviderRow[], FetchError>.
-      loading: { text: 'Loading providers…' },
-      failed: { text: 'Providers unavailable', detail: 'message', action: 'reload' },
-      ready: {
-        empty: { text: 'No providers' },
-        each: {
-          key: 'id', show: { text: 'name', detail: 'statusText', icon: 'icon' },
-          select: { event: 'SELECT_PROVIDER', fields: { providerId: 'id' } },
-          closeMenuOnAction: false // Selection sends an event; the machine changes screen.
+const definition = {
+  version: 1,
+  machine: {
+    id: 'provider-demo',
+    initial: { target: 'providers', description: 'Start at the provider list.' },
+    context: { providerId: null, draft: '', colour: 'blue', receipt: null },
+    states: {
+      providers: {
+        description: 'Browse and select a provider.',
+        meta: { view: {
+          title: 'Providers',
+          settings: { enableGoBack: false },
+          actions: { reload: { event: { type: 'RELOAD' } } },
+          menu: {
+            id: 'providers', from: 'providers',
+            loading: { text: 'Loading providers…' },
+            failed: { text: 'Providers unavailable', detail: 'message', action: 'reload' },
+            ready: {
+              empty: { text: 'No providers' },
+              each: {
+                key: 'id', show: { text: 'name', detail: 'statusText', icon: 'icon' },
+                select: { event: 'SELECT_PROVIDER', fields: { providerId: 'id' } },
+                closeMenuOnAction: false
+              }
+            }
+          }
+        } },
+        on: {
+          SELECT_PROVIDER: {
+            target: 'editing', guard: 'providerExists', actions: 'selectProvider',
+            description: 'Check the selected ID and initialise the form.'
+          },
+          RELOAD: { actions: 'reloadProviders', description: 'Restart the fetch.' }
+        }
+      },
+      editing: {
+        description: 'Edit the draft and choose a colour.',
+        meta: { view: {
+          title: { from: 'providerTitle' },
+          settings: { enableFilter: false, clearInputAfterAction: false },
+          hasBackLevel: true, back: { event: { type: 'BACK' } },
+          input: {
+            kind: 'text', value: { from: 'draft' },
+            change: { event: 'DRAFT_CHANGED', value: 'input' }
+          },
+          actions: {
+            colour: { child: 'colourPicker', resume: 'colourResult' },
+            check: { event: { type: 'CHECK' }, enabled: { from: 'canCheck' } }
+          },
+          menu: { id: 'edit', items: [
+            { id: 'draft', text: { from: 'draftLabel' } },
+            { id: 'colour', text: { from: 'colourLabel' }, action: 'colour' },
+            { id: 'check', text: 'Check connection', action: 'check' }
+          ] }
+        } },
+        on: {
+          DRAFT_CHANGED: { actions: 'setDraft', description: 'Update the draft.' },
+          COLOUR_CHOSEN: { actions: 'setColour', description: 'Apply the picker result.' },
+          CHECK: { target: 'checking', guard: 'canCheck', description: 'Check the connection.' },
+          BACK: { target: 'providers', description: 'Return to the list.' }
+        }
+      },
+      checking: {
+        description: 'Show the current check attempt.',
+        entry: 'requestCheck',
+        meta: { view: {
+          title: 'Check connection',
+          hasBackLevel: true, back: { event: { type: 'BACK' } },
+          actions: { retry: { event: { type: 'RETRY_CHECK' } } },
+          menu: {
+            id: 'checking', from: 'keyCheck',
+            loading: { text: 'Checking…' },
+            failed: { text: 'Check failed', detail: 'message', action: 'retry' },
+            ready: { show: { text: 'message' } }
+          }
+        } },
+        on: {
+          CHECK_OK: { target: 'done', actions: 'storeReceipt', description: 'Show the receipt.' },
+          CHECK_FAILED: { description: 'Keep the failed attempt visible.' },
+          RETRY_CHECK: { actions: 'restartCheck', description: 'Start a fresh attempt.' },
+          BACK: { target: 'editing', description: 'Return to the draft.' }
+        }
+      },
+      done: {
+        description: 'Show the successful check.',
+        meta: { view: {
+          title: 'Connection checked',
+          hasBackLevel: true, back: { event: { type: 'BACK' } },
+          actions: { restart: { event: { type: 'RESTART' } } },
+          menu: { id: 'done', items: [
+            { id: 'receipt', text: { from: 'receiptLabel' } },
+            { id: 'restart', text: 'Choose another provider', action: 'restart' }
+          ] }
+        } },
+        on: {
+          BACK: { target: 'editing', description: 'Return to the draft.' },
+          RESTART: {
+            target: 'providers', actions: 'clearDraftAndReceipt',
+            description: 'Clear the form and return to the list.'
+          }
         }
       }
     }
-  },
-  edit: { // Routed parent of the colour picker.
-    version: 1, id: 'edit', title: { from: 'providerTitle' },
-    settings: { enableFilter: false, clearInputAfterAction: false },
-    hasBackLevel: true, back: { event: { type: 'BACK' } },
-    input: {
-      kind: 'text', value: { from: 'draft' },
-      change: { event: 'DRAFT_CHANGED', value: 'input' } // Input text is the event payload.
-    },
-    actions: {
-      colour: { child: 'colourPicker', resume: 'colourResult' },
-      check: { event: { type: 'CHECK' }, enabled: { from: 'canCheck' } }
-    },
-    menu: { id: 'edit', items: [
-      { id: 'draft', text: { from: 'draftLabel' } },
-      { id: 'colour', text: { from: 'colourLabel' }, action: 'colour' },
-      { id: 'check', text: 'Check connection', action: 'check' }
-    ] }
-  },
-  checking: { // A source state, not an Effect stored in data.
-    version: 1, id: 'checking', title: 'Check connection',
-    hasBackLevel: true, back: { event: { type: 'BACK' } },
-    actions: { retry: { event: { type: 'RETRY_CHECK' } } },
-    menu: {
-      id: 'checking', from: 'keyCheck',
-      loading: { text: 'Checking…' },
-      failed: { text: 'Check failed', detail: 'message', action: 'retry' },
-      ready: { show: { text: 'message' } } // CHECK_OK then routes to Done.
-    }
-  },
-  done: {
-    version: 1, id: 'done', title: 'Connection checked',
-    hasBackLevel: true, back: { event: { type: 'BACK' } },
-    actions: { restart: { event: { type: 'RESTART' } } },
-    menu: { id: 'done', items: [
-      { id: 'receipt', text: { from: 'receiptLabel' } },
-      { id: 'restart', text: 'Choose another provider', action: 'restart' }
-    ] }
-  },
-  colourPicker: { // STACK_MODE child; no machine sender is injected.
-    version: 1, id: 'colourPicker', title: 'Choose a colour',
-    menu: { id: 'colours', from: 'colours', ready: { each: {
-      key: 'id', show: { text: 'name' },
-      select: { result: { fields: { colour: 'id' } } } // Calls exit with checked data.
-    } } },
-    back: { cancel: true } // Exits without a payload; it sends no routed event.
   }
-});
+};
 ```
 
-`detail: 'message'` in a failed branch reads only the declared error shape. `show` and `fields` in an `each` branch read only one row. A scalar `ready.show` reads the ready value. Source references use `from` everywhere. Literal rows use `text`; repeated rows use `show.text` to name a row field. No arbitrary property path is accepted. Omitted loading/failed branches are allowed only for sources declared always ready, such as `colours`.
+Each `from` names a source. `detail: 'message'` in a failed branch reads the declared error. `show` and `fields` in an `each` branch read one row. A scalar `ready.show` reads the ready value. Omit loading and failed only for always-ready sources. Literal strings stay text.
 
-The child registry grants only `colourPicker` to Edit. The named `colourResult` handler is code owned by the routed parent. In `onResume`, it validates `{ colour: 'blue' }` and sends `COLOUR_CHOSEN`. An absent payload means cancel and sends no selection event. A malformed payload produces a visible error. The child never receives the parent's `send`.
+The host supplies typed guards and actions. `requestCheck` records the request. The `keyCheck` host adapter starts and cancels the producer within the screen scope in section 6. Retry replaces the attempt in that scope. `DemoEvents` defines exact payloads. Only the host sends `CHECK_OK { receipt: { id: 'r-1', message: 'OpenAI checked' } }` or `CHECK_FAILED { error: { _tag: 'RejectedKey', message: 'Key rejected' } }`. The guard checks the current value even when the view’s enabled source was true at render time.
 
-### A small machine and its event contract
+Register `colourPicker` as a STACK_MODE child view granted to Edit. It reads the always-ready `colours` source and returns a checked `{ colour }` from the selected row ID. In `onResume`, the named `colourResult` handler validates the payload and sends `COLOUR_CHOSEN`. Back cancels without a payload. A malformed result displays an error. The child has no parent sender.
 
-The host uses an XState machine. Keep machine actions and guards as named code implementations. The state graph itself can be data. This is the complete proposed transition outline; it is not pasted XState configuration.
+One generic AppObject reads `meta.view` for the current actor state. It reads live sources, resolves a pure view, and applies Oneput menu, layout, and action calls. It receives the linked machine and host grants. State changes select the next view without a route map. Context changes update the current view.
 
-```text
-initial: providers
-context: providerId=null, draft='', colour='blue', receipt=null
+Suppose the page opens. The list says `Loading providers…`. After 300 ms it shows `OpenAI` and `Anthropic`. Renaming OpenAI to `OpenAI demo` updates its row without changing ID `openai`. Selecting that row sends `SELECT_PROVIDER { providerId: 'openai' }`. The machine enters `editing`.
 
-providers
-  SELECT_PROVIDER { providerId: 'openai' } -> form.editing
-    selectProvider: recheck current ID; initialise draft for this provider
-  RELOAD {} -> providers (restart fetch; keep the current route)
-
-form.editing
-  DRAFT_CHANGED { value: 'demo-key' } -> form.editing (context only)
-  COLOUR_CHOSEN { colour: 'green' } -> form.editing (context only)
-  CHECK {} [canCheck] -> form.checking
-  BACK {} -> providers
-
-form.checking
-  entry: host starts the keyCheck source for this attempt
-  CHECK_OK { receipt: { id: 'r-1', message: 'OpenAI checked' } } -> done
-  CHECK_FAILED { error: { _tag: 'RejectedKey', message: 'Key rejected' } }
-    -> form.checking (context only; source remains Failed)
-  RETRY_CHECK {} -> form.checking (restart attempt; source becomes Loading)
-  BACK {} -> form.editing (cancel attempt)
-
-done
-  BACK {} -> form.editing
-  RESTART {} -> providers (clear draft and receipt)
-```
-
-`DemoEvents` is a discriminated union of these exact events and payloads. `CHECK_OK` and `CHECK_FAILED` are host-only. View actions cannot send them. Guards check current state and values again; an enabled source is only display guidance. Opening the picker is a granted stack operation, not a machine transition. The actor stays in `form.editing` while the child is open.
-
-```ts
-routeMachine(ctl, actor, { // New demo setup; current routeMachine API.
-  providers: () => makeView('providers', host),
-  form: {
-    editing: () => makeView('edit', host),
-    checking: () => makeView('checking', host)
-  },
-  done: () => makeView('done', host)
-}); // The picker is created by the child registry, outside this route map.
-```
-
-`makeView` is the proposed single interpreter constructor. It receives a linked immutable definition, permitted events, sources, and child capabilities. It creates Oneput callbacks in code. The interpreter reads snapshots, resolves a pure view, then applies menu, layout, and actions. It has no domain I/O.
-
-Suppose the page opens. The list says `Loading providers…`. After 300 ms it shows `OpenAI` and `Anthropic`. Renaming OpenAI to `OpenAI demo` updates its row without changing ID `openai`. Selecting that row sends `SELECT_PROVIDER { providerId: 'openai' }`. The machine enters `form.editing`.
-
-Suppose input becomes `demo-key`. The input adapter sends `DRAFT_CHANGED { value: 'demo-key' }`. The actor updates its draft signal. Named sources update `draftLabel` and `canCheck` without replacing Edit. Select Choose colour. The stack becomes `[Edit, ColourPicker]`. Selecting Green returns `{ colour: 'green' }`. Edit decides in `onResume` to send `COLOUR_CHOSEN`. The machine remains in `form.editing` and the label becomes `Colour: Green`.
+Suppose input becomes `demo-key`. The input adapter sends `DRAFT_CHANGED { value: 'demo-key' }`. The actor updates its draft signal. Named sources update `draftLabel` and `canCheck` without replacing Edit. Select Choose colour. The stack becomes `[Edit, ColourPicker]`. Selecting Green returns `{ colour: 'green' }`. Edit decides in `onResume` to send `COLOUR_CHOSEN`. The machine remains in `editing` and the label becomes `Colour: Green`.
 
 Suppose Check starts and the simulated Effect fails with `RejectedKey`. The source changes Loading -> Failed. The checking screen displays `Check failed` and `Key rejected`. Retry starts a fresh attempt and clears the error. Success produces receipt `r-1`; a host-only event takes the machine to Done. Back during a slow check cancels the attempt. A late result cannot change the resumed form.
 
-The promise adapter has a separate failure path: fail the next provider load, see `Providers unavailable`, then reload successfully. The demo must expose both failures. Do not replace them with console messages.
+Suppose the provider load fails with `{ _tag: 'FetchFailed', message: 'Try again' }`. The list shows `Providers unavailable` with that detail. Reload starts another fetch. The demo must expose both failures. Do not replace them with console messages.
 
 ## 5. ROUTED_MODE, children, and AGENT_MENUS
 
-Use a new `routeMachine` map in the separate demo, as section 4 shows. The current `routeFlow` demonstrates sender injection (`apps/oneput-demo/src/lib/routed/flowMachine.ts:66`). Leave that demo intact. Oneput itself has no `send`; the host supplies it (`packages/oneput/docs/CONCEPTS.md:949`).
+The host gives one interpreter the actor and its sender. It reads the active state’s `meta.view` and uses the state path to identify that view. Validate one renderable view per active leaf and the payloads that its actions can send. A known event can be ignored when the state contract allows it. Parallel states are outside this pilot. The existing routed demo shows sender injection in `flowMachine.ts:66` and keeps its current map. Oneput itself has no `send` (`packages/oneput/docs/CONCEPTS.md:949`).
 
-The machine owns transitions and guards. The view owns labels and event references. A linked bundle checks that each routed state has a view and that event payloads fit its host contract. An event may validly be ignored in some states; validation must distinguish that from an unknown event.
+When the state path stays the same, refresh live bindings through actor-backed sources. Keep the current view’s input and scope. When the path changes, switch the view and close the old screen scope.
 
-`routeMachine` walks nested state names and uses the found path as the route key. A factory at a parent state covers its children. Parallel state values and missing mappings currently throw (`packages/oneput/src/lib/oneput/shared/routing/xstate/routeMachine.ts:28`, `:41`, `:55`). Do not imply the new format adds parallel routing.
+For STACK_MODE, the interpreter runs a fresh child and the parent owns the result handler. While a child runs, defer parent rendering until the parent is current. Stop subscriptions when the routed AppObject leaves the stack. Root exit remains with the host’s `setOnRootExit`. These are the current `routeApp` lifecycle rules (`packages/oneput/src/lib/oneput/shared/routing/routeApp.ts:61`, `:83`).
 
-A context-only machine change does not replace the view when the route key stays the same. Bindings must therefore read a live source, not the context snapshot captured when the factory ran. Use a source adapter over the actor if context drives text or enabled state.
+For AGENT_MENUS, keep the fixed core machine and its `agentMenu` state (`@2br/.work/backlog.electron.md:141`). The agent supplies one restricted machine document with views in `meta.view`. The host validates the document and provides permitted actions, guards, and services by name. The core invokes the document as `agentFlow`. Completion takes the core through `onDone`.
 
-STACK_MODE is part of the first milestone. Use the `child: 'colourPicker', resume: 'colourResult'` request in section 4. The interpreter runs a fresh child and the parent owns the result handler. Cancel without a payload remains distinct from selection. The old routed demo picker only notifies and goes Back (`apps/oneput-demo/src/lib/routed/ColourPicker.ts:15`); the new demo must return a checked colour payload. This follows `packages/oneput/docs/CONCEPTS.md:949`.
-
-While a child runs, `routeApp` waits for its routed parent to become current. If the routed AppObject leaves the stack, it stops its subscriptions. Root exit belongs to the host's `setOnRootExit`, not to the router (`packages/oneput/src/lib/oneput/shared/routing/routeApp.ts:61`, `:83`). Preserve these rules.
-
-For AGENT_MENUS, the proposal is already specific (`@2br/.work/backlog.electron.md:141`):
-
-- The fixed core machine enters `agentMenu` and invokes `agentFlow`.
-- The agent supplies machine data, menu definitions, and a state-to-definition map.
-- The host validates the whole bundle and supplies allowed action, guard, and service implementations by name. Arbitrary executable machine functions are not agent data.
-- One router follows both the core and the active child. Its map gets `agentMenu: fromChild('agentFlow', agentApps)`.
-- Child completion takes the core through `onDone` to its next state.
-
-`fromChild` is proposed, not present in the current routing module. Implement it only with the first agent menu, as the appendix requests. It must subscribe to the active child as well as the parent, detach when the child changes, and include the parent/child route path in its key. Parent subscription alone does not establish child-state routing. Inject the child's sender into the child's declarative views. Do not use a second competing router.
+Add the proposed `fromChild('agentFlow')` capability with the first agent menu. The same router follows the child actor, resolves its current `meta.view`, and supplies the child’s sender. Subscribe to the child as well as the parent, detach when the child changes, and identify views by the parent/child state path.
 
 ## 6. Named sources: the main design contract
 
@@ -373,15 +357,15 @@ const sources = defineSources({ // Each open receives a screen-owned scope.
 // Contract inference checks each factory's Source<T, E> against the descriptors.
 ```
 
-`fetchErrorContract`, `checkErrorContract`, and `receiptContract` describe the exact tagged errors and Receipt fields shown above. `readySource` declares that Loading/Failed are impossible. `source` declares all three states. The host grants only a subset of this registry to each view. Code-derived fields such as `model.draftLabel` are live projections with their own notification bridge; they are not strings evaluated by the interpreter.
+`fetchErrorContract`, `checkErrorContract`, and `receiptContract` validate the tagged errors and receipt fields in this section. `readySource` declares that Loading/Failed are impossible. `source` declares all three states. The host grants only a subset of this registry to each view. Code-derived fields such as `model.draftLabel` are live projections with their own notification bridge; they are not strings evaluated by the interpreter.
 
-For example, the host declares `providers` as a list whose row fields are `id: string`, `name: string`, `statusText: string`, and `icon: IconName`. The linker finds `from: 'providers'`, enters that row scope, and accepts `show: { text: 'name' }`. It rejects `text: 'missing'`, a boolean field used as text, a non-list used with `each`, or an unregistered icon. It verifies `fields: { providerId: 'id' }` against the `SELECT_PROVIDER` payload. Errors include paths such as `views.providers.menu.ready.each.show.text`. Named formatters have checked input/output types too.
+For example, the host declares `providers` as a list whose row fields are `id: string`, `name: string`, `statusText: string`, and `icon: IconName`. The linker finds `from: 'providers'`, enters that row scope, and accepts `show: { text: 'name' }`. It rejects `text: 'missing'`, a boolean field used as text, a non-list used with `each`, or an unregistered icon. It verifies `fields: { providerId: 'id' }` against the `SELECT_PROVIDER` payload. Errors include paths such as `machine.states.providers.meta.view.menu.ready.each.show.text`. Named formatters have checked input/output types too.
 
 The registry also declares which source states are possible. Fallible sources require loading and failed views. Lists require an empty view unless emptiness is excluded by the contract. `key` must name a stable unique scalar field. Check actual keys in each snapshot; malformed or duplicate rows stop that view with a path-based interpreter contract error. Do not invent a domain error of type E for a host contract violation.
 
 ### Who supplies sources, and when
 
-The demo page creates a flow host with the actor, local model, source registry, and adapter runtime. `makeView` opens a screen scope for the names referenced by that view. The host owns draft, colour, selected provider, and receipt for the whole flow. These values survive a picker. Screen scopes own fetches, subscriptions, and key-check attempts. No renderer starts work.
+The demo page creates a flow host with the actor, local model, source registry, and adapter runtime. The interpreter opens a screen scope for the names referenced by the current `meta.view`. The host owns draft, colour, selected provider, and receipt for the whole flow. These values survive a picker. Screen scopes own fetches, subscriptions, and key-check attempts. No renderer starts work.
 
 - On start, acquire referenced sources and start screen-owned producers. Oneput then subscribes through the interpreter's `watch()`. Attach producer bridges before reading snapshots. Oneput builds an initial menu before attaching `watch`; its immediate scheduled refresh then reads again after attachment. Keep both steps so a change in that gap is not lost.
 - `get()` is synchronous, pure, and returns a cached immutable snapshot. It never starts a fetch, Effect, subscription, or state transition. Read each name once per render. Projections that need atomic values read one shared model/actor snapshot.
@@ -522,17 +506,17 @@ Field names such as `name` and event payload mappings are finite typed selectors
 
 Use Standard Schema only as an optional port for host-defined payloads and widget props when that need appears. Convert validation issues to Oneput's error type. Its validation method may be asynchronous, so await it at ingestion before linking; never call it from `menu()` or `get()`. The [Standard Schema specification](https://standardschema.dev/schema) defines validation results and type inference. It does not remove the need for Oneput's canonical format. The installed Effect source has `toStandardSchemaV1` at `@2br/packages/config/node_modules/effect/src/Schema.ts:1397`.
 
-For AGENT_MENUS, publish one versioned JSON Schema for descriptions plus the host's permitted names, source fields, event payloads, and limits. Prefer one small grammar descriptor that emits the built-in validator, TypeScript contract, and JSON Schema. If hand-written checks are simpler for the pilot, maintain a shared accept/reject corpus for decoder/schema parity and resolve drift before the agent milestone. Do not let each host silently redefine version 1. Check the target agent API's supported JSON Schema subset at its boundary.
+For AGENT_MENUS, publish one versioned JSON Schema for the machine document plus the host's permitted names, source fields, event payloads, and limits. Prefer one small grammar descriptor that emits the built-in validator, TypeScript contract, and JSON Schema. If hand-written checks are simpler for the pilot, maintain a shared accept/reject corpus for decoder/schema parity and resolve drift before the agent milestone. Do not let each host silently redefine version 1. Check the target agent API's supported JSON Schema subset at its boundary.
 
 ```ts
 type DefinitionIssue = { path: string; code: string; message: string };
 // Both operations are pure. Only a successful link can create a runtime view.
-decodeDescription(input: unknown): Result<ViewDef, readonly DefinitionIssue[]>;
-linkBundle(defs: readonly ViewDef[], grants: HostContracts):
-  Result<LinkedBundle, readonly DefinitionIssue[]>;
+decodeDefinition(input: unknown): Result<MachineDocument, readonly DefinitionIssue[]>;
+linkDefinition(def: MachineDocument, grants: HostContracts):
+  Result<LinkedDefinition, readonly DefinitionIssue[]>;
 ```
 
-Decode rejects unknown keys, functions, HTML fields, invalid versions, and unbounded documents/trees. Link checks source fields and states, events and payloads, child inputs/results, icons, slot ownership, row IDs, and complete route coverage. Accept a bundle atomically before activation. Validate event values again at dispatch; a selected row can disappear after render. Ignore a known event only when the machine contract allows it in that state. Runtime source values are checked too. Return paths such as `views.edit.actions.colour.child`.
+Decode rejects unknown keys, functions, HTML fields, invalid versions, and unbounded documents/trees. Link checks transition targets and permitted action, guard, and service names. It also checks source fields and states, event payloads, child inputs/results, icons, slot ownership, row IDs, and active state view coverage. Accept the document atomically before activation. Validate event values again at dispatch; a selected row can disappear after render. Ignore a known event only when the machine contract allows it in that state. Runtime source values are checked too. Return paths such as `machine.states.editing.meta.view.actions.colour.child`.
 
 ## 6c. Build on SAFE_HTML
 
@@ -545,7 +529,7 @@ The interpreter depends on these SAFE_HTML pieces:
 - `SAFE_HTML/packages/oneput/src/lib/oneput/lib/domSafety.ts:43`, `:60`: `checkedElement` and `checkedRichContent`. Existing FChild/Flex renderers use checked tags, attributes, URLs, and styles before writes. Their Svelte rich-content path uses the checked markup reader; an imperative widget uses `insertSafeHtml`. These are two checked consumers of the same package authority, not a claim that every Svelte write calls `insertSafeHtml`.
 - `SAFE_HTML/packages/oneput/docs/safe-content.md:38`, `:59`: the common DOM policy and named icon path. Resolve only granted icon names. SAFE_HTML phase 2 is in progress; the current worktree documents checked icon geometry, registration, and rendering. Use that allow-list renderer and its fallback. Do not copy it into the interpreter or accept icon markup/factories from data.
 
-The first demo needs text and named icons only. Later rich content is a named host source or registered widget whose code supplies `SafeHtml`, made only through safe-html. The stored document carries the source/widget name, never markup or a serialized SafeHtml token. This requires a separate rich-value contract; do not let generic text fields accept it. Agent bundle validation is still needed: checked DOM writes do not validate event authority or source access.
+The first demo needs text and named icons only. Later rich content is a named host source or registered widget whose code supplies `SafeHtml`, made only through safe-html. The stored document carries the source/widget name, never markup or a serialized SafeHtml token. This requires a separate rich-value contract; do not let generic text fields accept it. Agent document validation is still needed: checked DOM writes do not validate event authority or source access.
 
 This dependency is on the safe-content implementation in `sec/safe-html`, not a second sanitiser in this branch. Confirm its public API and icon work before the demo is implemented. General document SVG, editor import/export, and the explicit KaTeX escape hatch are outside this interpreter contract (`SAFE_HTML/packages/oneput/docs/safe-content.md:92`).
 
@@ -573,7 +557,7 @@ The user asks for graphical and declarative structure, almost all logic tested w
 
 Provide three linked views of the same definition:
 
-- Stored JSON: version, source references, actions, and route IDs. A diff shows a label or binding change directly.
+- Show the version, machine states, source references, and actions in stored JSON. A diff shows a label or binding change directly.
 - A resolved tree: layout title, menu, stable rows, their actions, and the values used. Selecting a node shows its definition path and source name.
 - A flow graph: machine states and event edges. Selecting a state shows its view. Keep live values separate from the immutable definition.
 
@@ -584,9 +568,9 @@ providers — routed view
   title: Providers
   source: providers — Ready, 2 rows
   row: openai — OpenAI demo
-    select: SELECT_PROVIDER { providerId: "openai" } → form.editing
+    select: SELECT_PROVIDER { providerId: "openai" } → editing
   row: anthropic — Anthropic
-    select: SELECT_PROVIDER { providerId: "anthropic" } → form.editing
+    select: SELECT_PROVIDER { providerId: "anthropic" } → editing
 ```
 
 The first demo renders these same definitions with in-memory sources. Its inspection panel can start as a text tree and current machine state. Suppose the host renames `openai` to `OpenAI demo`. The row text changes; its ID and stored definition stay unchanged. Show `providers → repeated row → SELECT_PROVIDER` without exposing secret values. A graphical inspector can follow after the demo proves the contract.
@@ -623,11 +607,11 @@ Recommend the second option with the schema choice in section 6b. Use fixed load
 
 ## 10. Small, shippable steps
 
-1. **The separate demo in section 4.** Add the third peer, its small XState machine, five screen descriptions, validator/linker, source registry, and one interpreter. Include promise Loading/Ready/Failed and retry; a signal update while the list stays open; form input events; a stack picker result decided in parent `onResume`; and a typed Effect failure/retry. Bind context changes through live sources without remounting Edit. Cancel work on suspend/exit and reject late results. Use SAFE_HTML text and named icons. Show the current machine state and resolved text tree. Done means the full walk-through works, both failure controls work, malformed references fail before activation, and the main/routed demos remain usable. Agree the key higher-level tests before implementing them.
+1. **The separate demo in section 4.** Add the third peer, its small XState machine with four state views, one stack picker view, a validator/linker, source registry, and one interpreter. Include promise Loading/Ready/Failed and retry; a signal update while the list stays open; form input events; a stack picker result decided in parent `onResume`; and a typed Effect failure/retry. Bind context changes through live sources without remounting Edit. Cancel work on suspend/exit and reject late results. Use SAFE_HTML text and named icons. Show the current machine state and resolved text tree. Done means the full walk-through works, both failure controls work, malformed references fail before activation, and the main/routed demos remain usable. Agree the key higher-level tests before implementing them.
 2. **Stabilise the public contract from demo evidence.** Review source state/error descriptors, row keys, event payload mappings, retry ownership, and child result contracts. Put private validation, linking, lifecycle, and row adapters below a small public interface. Publish version 1 plus the canonical agent JSON Schema and parity checks. Add a shortcut or layout affordance only when the demo has a useful action for it; use the same action path as a row. Confirm SAFE_HTML API and phase 2 icon readiness.
 3. **One real menu, recommended Themes.** Use @2br's existing Effect/config boundary as the host. Publish typed theme rows, Default with null, and active-state projection. Preserve order, close-on-success, and visible failure. A real downstream consumer tests the portable contract. No @2br change is part of this report.
 4. **Providers and its input form.** Bind graph changes and child results. Keep the code ProviderUI as a child first. Then put draft/save rules in a model and select the existing live-edit behaviour from data. Preserve password/input claims, Back, failure, clearing after save, and cancellation. Add chrome slots only for real requirements with clear ownership.
-5. **First agent bundle.** Validate descriptions and restricted machine data together, including grants and route coverage. Keep the core machine fixed. Add the single-router `fromChild` extension only for this case, as AGENT_MENUS requests. Add graphical flow/source inspection when useful. Standard Schema host codecs and rich widgets need concrete uses before inclusion.
+5. **First agent document.** Validate restricted machine data with its embedded views, including grants and active state view coverage. Keep the core machine fixed. Add the single-router `fromChild` extension only for this case, as AGENT_MENUS requests. Add graphical flow/source inspection when useful. Standard Schema host codecs and rich widgets need concrete uses before inclusion.
 
 Each step must leave a usable flow. These are design milestones, not work authorised by this report. Oneput is greenfield; improve its upstream API if the demo shows a better contract. The demo needs an Effect host dependency or a separate demo edge module; keep that dependency out of Oneput core. Package placement is an open decision, not a reason to skip the Effect case.
 
@@ -668,6 +652,4 @@ Open decisions for the user, with proposed defaults:
 
 ## 12. Report checks
 
-The update was checked against this worktree, the SAFE_HTML worktree, the listed @2br menus, the installed Effect Schema source, and the linked Standard Schema specification. File citations describe the snapshot read on 12 November 2026; other workers can change them. All types, adapter bodies, and descriptions are design sketches. They were not compiled or run. The adapter bodies use conceptual host operations, not unverified Effect-version API calls.
-
-Only `work/backlog/DECLARATIVE_APPOBJECTS.md` was edited. No implementation, tests, installs, dev servers, format tasks, or Git writes were run. Other trees were read only.
+File citations describe the snapshot read on 12 November 2026. The provider demo and adapter bodies use proposed APIs. They are design sketches and have no runtime coverage.

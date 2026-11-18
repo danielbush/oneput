@@ -48,6 +48,26 @@ const item = {
 When you have the element in hand, as the KaTeX demo has its formula div,
 `setHTML` does both steps at once.
 
+Both draw on the same logic underneath. For `ui`, `display` and `math`,
+`setHTML` is `sanitiseHtml` followed by an insert, so the checks cannot drift
+apart. `sanitiseHtml` is where the browser's native `Element.setHTML` runs, on a
+detached scratch `div` that is not on the page:
+
+```ts
+sanitiseHtml(html, policy):
+  scratch = document.createElement("div")         // detached
+  scratch.setHTML(html, { sanitizer: allowList }) // the browser's sanitiser (or DOMPurify)
+  checkValues(scratch)                             // links, classes, math styles
+  return a SafeHtml token for the cleaned nodes and text
+
+setHTML(element, html, policy):                    // this package's
+  token = sanitiseHtml(html, policy)
+  insertSafeHtml(element, token)                   // copy the clean nodes into element
+```
+
+Only the `document` policy takes its own path (below), because it keeps far
+more.
+
 There are two things called `setHTML`. This package's `setHTML(element, html,
 policy)` is the one your code calls. The browser's native `Element.setHTML` is
 used only inside the package, as the first step of some policies (below).

@@ -34,7 +34,8 @@ Raw parsing boundaries and test fixtures have explicit exceptions.
 Production build DOM refusal is tested separately. Browser document cases,
 UI native/fallback parity, CSP and Trusted Types tests are written but have
 not been run. Browser behaviour remains unverified. See
-[SAFE_HTML step 6](../../work/backlog/SAFE_HTML.md#6-enforce-the-contract).
+[Tests](../safe-html/README.md#tests) and
+[the sink scan](../../scripts/safe-html/README.md).
 
 The active-content gaps in jsed load, paste, creation, conversion and export
 are closed with one document policy. Node checks preserve FOCUS and identity;
@@ -49,9 +50,9 @@ See [Jsed's document boundary](../jsed/THREAT_MODEL.md#most-at-risk-now).
 
 ## Remaining work
 
-[SAFE_HTML](../../work/backlog/SAFE_HTML.md#recommendation-and-small-releases)
-is the single release plan and remaining-sink inventory. It includes current
-source locations, completed commits and open work. Keep that list there.
+The browser checks in the safe-html package must be run in real browsers.
+The sink scan cannot follow values across calls or resolve runtime names; see
+[its limits](../../scripts/safe-html/README.md#limits).
 
 ## Other review areas
 

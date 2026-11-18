@@ -197,5 +197,6 @@ nodes. Insertion does not parse old page content again. Formula containers use
 [math policy contract](../../safe-html/README.md) for the allow-lists and style
 checks.
 
-For the completed document boundaries and remaining browser checks, see
-[SAFE_HTML](../../../work/backlog/SAFE_HTML.md#4-migrate-icons-and-documents).
+For the document boundaries and the browser checks, see the
+[safe-html boundaries](../../safe-html/README.md#when-it-runs-the-boundaries)
+and [tests](../../safe-html/README.md#tests).

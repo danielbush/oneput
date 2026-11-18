@@ -50,14 +50,13 @@ Accepted risks:
 `task check` enforces a read-only HTML sink scan with explicit fixture
 exceptions. The production build refusal test is separate from fast tests.
 Real-browser policy tests are written but have not been run. See
-[SAFE_HTML step 6](../../work/backlog/SAFE_HTML.md#6-enforce-the-contract).
-DOM tests do not prove browser behaviour.
+[Tests](../safe-html/README.md#tests). DOM tests do not prove browser behaviour.
 
 ## Remaining work
 
-[SAFE_HTML](../../work/backlog/SAFE_HTML.md) records completed boundaries and
-remaining checks. Keep the release inventory there. Hosts that import files
-or clipboard HTML must use the checked entry APIs before insertion.
+The browser checks in the safe-html package must be run in real browsers.
+Hosts that import files or clipboard HTML must use the checked entry APIs
+before insertion. See [the boundaries](../safe-html/README.md#when-it-runs-the-boundaries).
 
 ## Other review areas
 

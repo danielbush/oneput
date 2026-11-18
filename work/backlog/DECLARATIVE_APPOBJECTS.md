@@ -4,7 +4,7 @@ Make the common AppObject glue a stored, validated data document that one generi
 
 ## 1. Scope and recommendation
 
-Store one XState machine with each screen in its state’s `meta.view`. The view describes the title, menu, input, and actions that send named events. The transitions define what those events do. Use literals, descriptions on states and transitions, and names for actions and guards. A screen shared by several states can repeat in each state or use a reference to a shared definition.
+Store one XState machine with each screen in its state’s `meta.view`. The view describes the title, menu, input, and actions that send named events. The transitions define what those events do. Use literals, descriptions on states and transitions, and names for actions and guards. A screen shared by several states is repeated as literals in each state so the viewer can read the machine.
 
 First build a separate declarative demo beside the main and routed demos. Prove live lists, input events, a stack picker result, promise load states, signals, and a typed Effect failure in that demo. These are the first design test, not later extensions. Use named sources for all computed values. Do not make an expression language for menus.
 

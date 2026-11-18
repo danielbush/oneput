@@ -1,49 +1,11 @@
 import { liveEdit, type LiveEditView } from './actions.js';
 import { initialValues } from './sources.js';
 
-const menu = {
-  id: 'live-edit-mixed-menu',
-  focusBehaviour: 'last-action,first',
-  items: [
-    {
-      id: 'live-edit-mixed-name',
-      text: { from: 'nameLabel' },
-      detail: { from: 'nameHint' },
-      icon: 'Pencil',
-      showActionBinding: true,
-      action: 'editName'
-    },
-    {
-      id: 'live-edit-mixed-role',
-      text: { from: 'roleLabel' },
-      detail: { from: 'roleHint' },
-      icon: 'Pencil',
-      showActionBinding: true,
-      action: 'editRole'
-    },
-    { id: 'live-edit-mixed-preview', text: 'Preview values', action: 'preview' },
-    { id: 'live-edit-mixed-reset', text: 'Reset example', action: 'reset' }
-  ]
-} as const satisfies LiveEditView['menu'];
-
-const actions = {
-  editName: { type: 'ACTIVATE_FIELD', field: 'name' },
-  editRole: { type: 'ACTIVATE_FIELD', field: 'role' },
-  preview: { type: 'PREVIEW' },
-  reset: { type: 'RESET' }
-} as const satisfies LiveEditView['actions'];
-
-const settings = {
-  enableFilter: true,
-  clearInputAfterAction: false,
-  clearInputAfterBack: false
-} as const satisfies LiveEditView['settings'];
-
-/** The active state selects the view. Both views use the same mixed menu. */
+/** The active state selects the view. Each view repeats its menu as literals so the Stately viewer can read the machine. */
 export const gatedLiveEdit = liveEdit.createMachine({
   id: 'gated-live-edit',
   description: 'Edit values in a filterable menu.',
-  initial: { target: 'filtering', description: 'Start with input owned by the filter.' },
+  initial: 'filtering',
   context: { values: initialValues, editing: null },
   on: {
     PREVIEW: { actions: 'preview', description: 'Show the current values.' },
@@ -51,15 +13,47 @@ export const gatedLiveEdit = liveEdit.createMachine({
   },
   states: {
     filtering: {
-      description: 'Use the shared input to filter the menu.',
+      description: 'Start here: the shared input filters the menu.',
       meta: {
         view: {
           title: 'Live edit — mixed menu',
-          menu,
+          menu: {
+            id: 'live-edit-mixed-menu',
+            focusBehaviour: 'last-action,first',
+            items: [
+              {
+                id: 'live-edit-mixed-name',
+                text: { from: 'nameLabel' },
+                detail: { from: 'nameHint' },
+                icon: 'Pencil',
+                showActionBinding: true,
+                action: 'editName'
+              },
+              {
+                id: 'live-edit-mixed-role',
+                text: { from: 'roleLabel' },
+                detail: { from: 'roleHint' },
+                icon: 'Pencil',
+                showActionBinding: true,
+                action: 'editRole'
+              },
+              { id: 'live-edit-mixed-preview', text: 'Preview values', action: 'preview' },
+              { id: 'live-edit-mixed-reset', text: 'Reset example', action: 'reset' }
+            ]
+          },
           input: { kind: 'filter', placeholder: 'Filter menu, then activate a field to edit...' },
-          actions,
-          settings
-        }
+          actions: {
+            editName: { type: 'ACTIVATE_FIELD', field: 'name' },
+            editRole: { type: 'ACTIVATE_FIELD', field: 'role' },
+            preview: { type: 'PREVIEW' },
+            reset: { type: 'RESET' }
+          },
+          settings: {
+            enableFilter: true,
+            clearInputAfterAction: false,
+            clearInputAfterBack: false
+          }
+        } satisfies LiveEditView
       },
       on: {
         ACTIVATE_FIELD: {
@@ -74,7 +68,30 @@ export const gatedLiveEdit = liveEdit.createMachine({
       meta: {
         view: {
           title: 'Live edit — mixed menu',
-          menu,
+          menu: {
+            id: 'live-edit-mixed-menu',
+            focusBehaviour: 'last-action,first',
+            items: [
+              {
+                id: 'live-edit-mixed-name',
+                text: { from: 'nameLabel' },
+                detail: { from: 'nameHint' },
+                icon: 'Pencil',
+                showActionBinding: true,
+                action: 'editName'
+              },
+              {
+                id: 'live-edit-mixed-role',
+                text: { from: 'roleLabel' },
+                detail: { from: 'roleHint' },
+                icon: 'Pencil',
+                showActionBinding: true,
+                action: 'editRole'
+              },
+              { id: 'live-edit-mixed-preview', text: 'Preview values', action: 'preview' },
+              { id: 'live-edit-mixed-reset', text: 'Reset example', action: 'reset' }
+            ]
+          },
           input: {
             kind: 'claim',
             owner: { from: 'editOwner' },
@@ -83,9 +100,18 @@ export const gatedLiveEdit = liveEdit.createMachine({
             change: 'EDIT_CHANGED',
             release: 'CLAIM_RELEASED'
           },
-          actions,
-          settings
-        }
+          actions: {
+            editName: { type: 'ACTIVATE_FIELD', field: 'name' },
+            editRole: { type: 'ACTIVATE_FIELD', field: 'role' },
+            preview: { type: 'PREVIEW' },
+            reset: { type: 'RESET' }
+          },
+          settings: {
+            enableFilter: true,
+            clearInputAfterAction: false,
+            clearInputAfterBack: false
+          }
+        } satisfies LiveEditView
       },
       on: {
         ACTIVATE_FIELD: [

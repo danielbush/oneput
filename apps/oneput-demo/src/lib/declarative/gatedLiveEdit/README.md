@@ -1,8 +1,8 @@
 # Gated live-edit sketch
 
 This sketch uses one XState machine and one AppObject. The active state's
-`meta.view` selects the menu, title, input and actions. Both states refer to
-shared literal menu, action and settings definitions. The sketch has no route.
+`meta.view` selects the menu, title, input and actions. Each state repeats its
+menu, actions and settings as literals so the viewer can read the machine. The sketch has no route.
 
 | Imperative example                     | Machine and interpreter                                                                                  |
 | -------------------------------------- | -------------------------------------------------------------------------------------------------------- |

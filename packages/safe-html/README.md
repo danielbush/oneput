@@ -18,12 +18,12 @@ one checked path**.
 
 Pick the call by what you have and when it is shown:
 
-| You have…                            | Call                                    | Example                                                             |
-| ------------------------------------ | --------------------------------------- | ------------------------------------------------------------------- |
-| a string, to show **now**            | `setHTML(element, html, policy)`        | KaTeX output into a formula div; a document file into the editor    |
-| a string, to show **later** or often | `sanitiseHtml(html, policy)` → SafeHtml | Oneput menu labels (`htmlContent`), which FChild renders many times |
-| **nodes** already built              | `sanitiseDocumentNodes(root)`           | pasted or converted content, before jsed inserts it                 |
-| a document to **save**               | `documentMarkupForExport(clone)`        | jsed's save                                                         |
+| You have…                            | Call                                    | Example                                             |
+| ------------------------------------ | --------------------------------------- | --------------------------------------------------- |
+| a string, to show **now**            | `setHTML(element, html, policy)`        | A document file opened in the editor                |
+| a string, to show **later** or often | `sanitiseHtml(html, policy)` → SafeHtml | Oneput menu labels and KaTeX previews               |
+| **nodes** already built              | `sanitiseDocumentNodes(root)`           | pasted or converted content, before jsed inserts it |
+| a document to **save**               | `documentMarkupForExport(clone)`        | jsed's save                                         |
 
 There are two things called `setHTML`. This package's `setHTML(element, html,
 policy)` is the one your code calls. The browser's native `Element.setHTML` is
@@ -50,8 +50,7 @@ const item = {
 // Oneput's FChild turns the token back into HTML each time it renders.
 ```
 
-When you have the element in hand, as the KaTeX demo has its formula div,
-`setHTML` does both steps at once.
+When you have the element in hand, `setHTML` does both steps at once.
 
 Both draw on the same logic underneath. For `ui`, `display` and `math`,
 `setHTML` is `sanitiseHtml` followed by an insert, so the checks cannot drift
@@ -101,16 +100,11 @@ HTML is cleaned with a named **policy**. Each policy says what may stay.
 1. **Sanitise.** The browser's native `Element.setHTML` keeps only the allowed
    tags and attribute names. Where a browser has no `setHTML`, DOMPurify does
    the same job.
-2. **Check values.** `setHTML` and DOMPurify only remove known-dangerous values
-   such as `javascript:` URLs. They let other link schemes through (`data:`,
-   `blob:`, `file:`, custom app schemes) and do not look inside values. So one
-   value check runs after either path:
-   - links keep only `http`, `https`, `mailto`, `tel`, relative paths and
-     `#fragments`, and only on `<a>`;
-   - classes are removed, except Oneput's `oneput__kbd-symbol` in `ui`.
-     Oneput's buttons look like buttons because of their classes; removing
-     them stops outside HTML from looking like Oneput's own controls;
-   - in `math`, styles lose `url(...)` and fixed or sticky positioning.
+2. **Check values.** After either sanitiser, `display` and `ui` keep links
+   only on `<a>` and allow `http`, `https`, `mailto`, `tel`, relative paths and
+   `#fragments`. `display` removes classes. `ui` keeps only
+   `oneput__kbd-symbol`. `math` keeps classes and removes style declarations
+   that use `url(...)` or fixed or sticky positioning.
 
 The `document` policy keeps much more, so it uses its own node walk instead of
 `setHTML`. It removes script, event attributes, script URLs, frames, objects,
@@ -184,13 +178,14 @@ KaTeX turns a formula such as `x^2` into HTML, MathML and SVG.
    and limits on expansion and size. `trust: false` refuses commands that reach
    outside the maths: `\href`, `\url`, `\includegraphics` and the `\html…`
    commands.
-3. **Insert:** the output goes into the page with `setHTML(div, html, "math")`.
-4. **Contain:** each formula's container has `contain: paint`, so a formula
-   cannot draw over the UI around it.
+3. **Check:** the demo calls `sanitiseHtml(output, "math")` to prepare a
+   `SafeHtml` token.
+4. **Show:** the preview uses `insertSafeHtml` to render the token. On submit,
+   the demo uses `insertSafeHtml` on a detached `div`, then appends the nodes
+   directly for display mode or in a paragraph for inline mode. The preview
+   pane and submitted formulas use `contain: paint`.
 
-This is a little stricter than common practice, which trusts KaTeX with
-`trust: false`. Stricter value checks were tried and removed: they broke valid
-formulas.
+The math policy assumes KaTeX output rendered with fixed options (`trust: false`). Like the document policy, it does not try to block every remote load in hand-written HTML.
 
 ## Keeping it that way: the sink scan
 
@@ -206,12 +201,18 @@ limits and how to add an exception are in
 
 ## Tests
 
-- `task test`: the policies, SafeHtml, boundaries and scan, in jsdom and
-  happy-dom.
-- `task oneput:test:production-safety`: proves refusal in a production build.
-- `task safe-html:test:browser`: native `setHTML`, the DOMPurify fallback,
-  CSP and Trusted Types in real browsers. Run it by hand; it needs Chrome and
-  the Playwright browsers.
+From the repo root, use these commands.
+
+- `task check` for type checks and the sink scan, or `task check:html-sinks`
+  for the sink scan and its tests alone.
+- `task test` for workspace unit tests, including the Safe HTML tests in
+  jsdom and happy-dom. Use `task safe-html:test` for those tests alone.
+- `task oneput:test:production-safety` for refusal in a production build.
+- `task safe-html:test:browser` for native `setHTML`, the DOMPurify fallback,
+  CSP and Trusted Types in real browsers. This task starts a local test server
+  and needs Chrome and the Playwright browsers.
+
+From `packages/safe-html`, use `task check`, `task test` or `task test:browser`.
 
 ## Accepted risks
 
@@ -233,56 +234,53 @@ it does not exist in jsdom tests or server rendering.
 
 **UI content (`ui`, `display`, `math`)**
 
-- `sanitiseHtml(input, policy)` returns a neverthrow `Result<SafeHtml, Error>`.
-  Strings, JSON, copies and type assertions cannot create a `SafeHtml`. The
-  input is not retained after a failure. Building UI `SafeHtml` without a DOM
-  returns an error.
+- `type ContentPolicy = "display" | "ui" | "math"` names the content policies.
 - `display` permits text formatting, lists, tables, headings, and
   `href`/`title`. `ui` also permits `kbd` and the single `oneput__kbd-symbol`
   class. Both permit links on `a` with HTTP(S), mailto, tel, relative paths or
   fragments, and refuse styles, SVG, MathML, images, media and resource
-  elements. Data, JavaScript, file, blob and unknown URL schemes are refused.
-- `math` permits formula spans, MathML and SVG. It removes scripts, event
+  elements.
+- `math` permits formula spans, classes, MathML and SVG. It removes scripts, event
   handlers, URL attributes and SVG `foreignObject`, and style declarations with
   `url()` (including CSS escapes) or `position: fixed` / `position: sticky`.
-  Other style and attribute values are kept. Use a block or inline-block
-  formula container: `contain: paint` does not apply to a plain inline box.
-- `insertSafeHtml(div, value)` clones the private checked nodes into an HTML
-  `div`. It checks provenance, tag and namespace. A refused value or context
-  writes `Content unavailable`.
-- `safeHtmlMarkup(value, 'div')` is the checked reader for fixed-div renderers,
-  including server rendering. `safeHtmlText(value)` gives plain text for
-  filtering. Never put the checked markup into a raw-text, SVG or other parsing
-  context.
-- `setHTML(div, input, policy)` is `sanitiseHtml` then `insertSafeHtml`. On a
-  failure it writes `Content unavailable` and throws. UI targets must be HTML
-  `div` elements.
-- Sanitising uses native `Element.setHTML` when available, with a DOMPurify
-  fallback and a fixed health check. Happy-dom fails that health check.
+  Use a block or inline-block formula container with `contain: paint`.
+- `type SafeHtml = Readonly<{ [brand]: true }>` is an opaque token.
+  The brand is private. Get a token from `sanitiseHtml`.
+- `sanitiseHtml(input: string, policy: ContentPolicy = "display"): Result<SafeHtml, Error>`
+  checks the input and returns a neverthrow result. It uses native
+  `Element.setHTML` when available or DOMPurify with a health check. It
+  returns an error without a DOM or if the health check fails.
+- `isSafeHtml(value: unknown): value is SafeHtml` checks if this package
+  issued the token.
+- `insertSafeHtml(element: Element, value: SafeHtml | null): boolean` replaces
+  the children of an HTML `div` with copies of the checked nodes. If the value
+  or context is refused, it writes `Content unavailable` and returns `false`.
+- `safeHtmlMarkup(value: SafeHtml | null, context: "div"): string` gives
+  markup for fixed HTML `div` renderers, including server rendering. It
+  returns `Content unavailable` if the value or context is refused.
+- `safeHtmlText(value: SafeHtml): string` gives plain text for filtering, or
+  an empty string if the token is refused.
+- `checkedLink(value: string): string | undefined` returns the trimmed URL
+  if it passes the link checks for `display` and `ui`, or `undefined`.
+- `setHTML(element: Element, unsafeHTML: string, name: ContentPolicy | "document" = "display"): void`
+  calls `sanitiseHtml` then `insertSafeHtml` for `display`, `ui` and `math`.
+  These policies require an HTML `div`. On failure, it writes
+  `Content unavailable` and throws. For `document`, it calls `setDocumentHTML`.
 
 **Documents (`document`)**
 
-- `setHTML(element, input, 'document')` parses HTML in an inert template,
+- `setDocumentHTML(element: Element, html: string): void` parses HTML in an inert template,
   removes active content and inserts the checked nodes. It keeps document
   structure, CSS, images, SVG, MathML, forms, classes, ids, data, aria and
   comments. Data URLs are allowed only for PNG, JPEG, GIF and WebP in
-  `img src`. SVG link animation cannot introduce active URLs. An active target
-  element is refused before any write.
-- `sanitiseDocumentNodes(root)` applies the same policy to caller-built nodes,
-  without parsing or replacing safe nodes. A `false` result refuses the root.
-  Use it before insertion; it cannot undo script that a host already ran.
-- `checkDocumentNodes(root)` checks a copy without changing the caller's nodes.
-  jsed patches use it before writes and history capture.
-- `isDocumentTagAllowed(name)` checks a caller's tag name.
-- `documentMarkupForExport(clone)` checks a detached export clone and its saved
-  markup in the same element context (including tables) and returns
-  `Result<string, Error>`. Never pass the live editor root.
-- The document policy uses one DOM node walk in all environments, not the
-  browser's built-in policy or DOMPurify's defaults.
-
-**Running the checks here**
-
-- `task check` and `task test` run types, the shared jsdom/happy-dom document
-  cases and the UI refusal tests.
-- `task test:browser` is the native-browser check. It starts a local test
-  server; do not use it where servers are not permitted.
+  `img src`. It throws before writing to a target with a disallowed tag.
+- `sanitiseDocumentNodes(root: Node): boolean` applies the document policy to
+  caller-built nodes before insertion. It leaves safe nodes in place and
+  returns `false` if the root is refused.
+- `checkDocumentNodes(root: Node): boolean` checks a copy without changing the
+  caller's nodes. It returns `true` if the copy needs no changes and the root
+  is allowed. jsed patches use it before writes and history capture.
+- `isDocumentTagAllowed(tag: string): boolean` checks a caller's tag name.
+- `documentMarkupForExport(element: Element): Result<string, Error>` checks
+  and cleans a detached export clone. It checks the saved markup in the same
+  element context, including tables. Pass a clone of the editor root.

@@ -1,6 +1,6 @@
-import type { AppObject, Controller } from '@oneput/oneput';
+import type { Controller } from '@oneput/oneput';
 import { createActor } from 'xstate';
-import { renderActiveView, type ApplyView } from '../interpreter.js';
+import { appObjectActor, type ApplyView } from '../appObjectActor.js';
 import { loadProviders } from './actions.js';
 import { providerList } from './machine.js';
 import {
@@ -20,31 +20,8 @@ export function createProviderList(
   const actor = createActor(
     providerList.provide({ actors: { loadProviders: loadProviders(load) } })
   );
-  const refresh = () => {
-    const result = renderActiveView(ctl, actor, sources, applyView);
-    if (result.isErr()) ctl.notify(result.error);
-  };
-
-  const app: AppObject = {
-    onStart() {
-      actor.start();
-      refresh();
-    },
-    watch: () => [
-      {
-        subscribe(onChange) {
-          const subscription = actor.subscribe(onChange);
-          return () => subscription.unsubscribe();
-        }
-      }
-    ],
-    onRefresh: refresh,
-    onExit() {
-      selected.unsubscribe();
-      actor.stop();
-    }
-  };
-  const selected = actor.on('SELECT_PROVIDER', onSelect);
+  actor.on('SELECT_PROVIDER', onSelect);
+  const app = appObjectActor(ctl, actor, sources, applyView);
 
   return {
     app,

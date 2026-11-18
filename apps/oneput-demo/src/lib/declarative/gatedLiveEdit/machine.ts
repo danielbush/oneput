@@ -5,10 +5,24 @@ export const gatedLiveEdit = liveEdit.createMachine({
   id: 'gated-live-edit',
   description: 'Edit values in a filterable menu.',
   initial: 'filtering',
-  context: { values: { name: 'Grace Hopper', role: 'Computer scientist' }, editing: null },
+  context: {
+    values: { name: 'Grace Hopper', role: 'Computer scientist' },
+    editing: null,
+    releaseReason: 'released'
+  },
   on: {
-    PREVIEW: { actions: 'preview', description: 'Show the current values.' },
-    RESET: { actions: 'reset', description: 'Restore the example values.' }
+    ITEM_ACTIVATED: [
+      {
+        guard: 'activatesPreview',
+        actions: 'preview',
+        description: 'Show the current values.'
+      },
+      {
+        guard: 'activatesReset',
+        actions: 'reset',
+        description: 'Restore the example values.'
+      }
+    ]
   },
   states: {
     filtering: {
@@ -26,7 +40,7 @@ export const gatedLiveEdit = liveEdit.createMachine({
                 detail: { from: 'nameHint' },
                 icon: 'Pencil',
                 showActionBinding: true,
-                action: 'editName'
+                activate: true
               },
               {
                 id: 'live-edit-mixed-role',
@@ -34,18 +48,16 @@ export const gatedLiveEdit = liveEdit.createMachine({
                 detail: { from: 'roleHint' },
                 icon: 'Pencil',
                 showActionBinding: true,
-                action: 'editRole'
+                activate: true
               },
-              { id: 'live-edit-mixed-preview', text: 'Preview values', action: 'preview' },
-              { id: 'live-edit-mixed-reset', text: 'Reset example', action: 'reset' }
+              { id: 'live-edit-mixed-preview', text: 'Preview values', activate: true },
+              { id: 'live-edit-mixed-reset', text: 'Reset example', activate: true }
             ]
           },
-          input: { kind: 'filter', placeholder: 'Filter menu, then activate a field to edit...' },
-          actions: {
-            editName: { type: 'ACTIVATE_FIELD', field: 'name' },
-            editRole: { type: 'ACTIVATE_FIELD', field: 'role' },
-            preview: { type: 'PREVIEW' },
-            reset: { type: 'RESET' }
+          input: {
+            kind: 'filter',
+            placeholder: 'Filter menu, then activate a field to edit...',
+            release: { from: 'editRelease' }
           },
           settings: {
             enableFilter: true,
@@ -55,7 +67,8 @@ export const gatedLiveEdit = liveEdit.createMachine({
         }
       },
       on: {
-        ACTIVATE_FIELD: {
+        ITEM_ACTIVATED: {
+          guard: 'activatesField',
           target: 'editing',
           actions: 'startEdit',
           description: 'Give the selected row the input claim.'
@@ -77,7 +90,7 @@ export const gatedLiveEdit = liveEdit.createMachine({
                 detail: { from: 'nameHint' },
                 icon: 'Pencil',
                 showActionBinding: true,
-                action: 'editName'
+                activate: true
               },
               {
                 id: 'live-edit-mixed-role',
@@ -85,25 +98,17 @@ export const gatedLiveEdit = liveEdit.createMachine({
                 detail: { from: 'roleHint' },
                 icon: 'Pencil',
                 showActionBinding: true,
-                action: 'editRole'
+                activate: true
               },
-              { id: 'live-edit-mixed-preview', text: 'Preview values', action: 'preview' },
-              { id: 'live-edit-mixed-reset', text: 'Reset example', action: 'reset' }
+              { id: 'live-edit-mixed-preview', text: 'Preview values', activate: true },
+              { id: 'live-edit-mixed-reset', text: 'Reset example', activate: true }
             ]
           },
           input: {
             kind: 'claim',
             owner: { from: 'editOwner' },
             value: { from: 'editValue' },
-            placeholder: { from: 'editPlaceholder' },
-            change: 'EDIT_CHANGED',
-            release: 'CLAIM_RELEASED'
-          },
-          actions: {
-            editName: { type: 'ACTIVATE_FIELD', field: 'name' },
-            editRole: { type: 'ACTIVATE_FIELD', field: 'role' },
-            preview: { type: 'PREVIEW' },
-            reset: { type: 'RESET' }
+            placeholder: { from: 'editPlaceholder' }
           },
           settings: {
             enableFilter: true,
@@ -113,26 +118,39 @@ export const gatedLiveEdit = liveEdit.createMachine({
         }
       },
       on: {
-        ACTIVATE_FIELD: [
+        ITEM_ACTIVATED: [
           {
             guard: 'activatesOwner',
             target: 'filtering',
-            actions: 'finishEdit',
+            actions: 'submitEdit',
             description: 'Submit the edit on repeat activation and clear the filter.'
           },
           {
+            guard: 'activatesField',
             actions: 'startEdit',
             description: 'Transfer the claim if activation selects another row directly.'
           }
         ],
-        EDIT_CHANGED: {
+        INPUT_CHANGED: {
           actions: 'writeEdit',
           description: 'Write the text to the selected field.'
         },
-        CLAIM_RELEASED: {
+        ITEM_FOCUSED: {
+          guard: 'focusLeftOwner',
+          target: 'filtering',
+          actions: 'leaveEdit',
+          description: 'Restore the filter when focus leaves the edited row.'
+        },
+        BACK: {
+          target: 'filtering',
+          actions: 'backFromEdit',
+          description: 'Restore the filter and keep the values written so far.'
+        },
+        INPUT_RELEASED: {
+          guard: 'releasedOwner',
           target: 'filtering',
           actions: 'finishEdit',
-          description: 'Return to filtering after Oneput releases the claim.'
+          description: 'Return to filtering if Oneput has already released the active claim.'
         }
       }
     }

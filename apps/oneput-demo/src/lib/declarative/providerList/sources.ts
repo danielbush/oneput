@@ -42,7 +42,8 @@ export const sources = {
         id,
         text: name,
         detail: statusText,
-        event: { type: 'SELECT_PROVIDER', providerId: id } satisfies SelectProvider
+        activate: true
       }))
-  }
+  },
+  release: {}
 };

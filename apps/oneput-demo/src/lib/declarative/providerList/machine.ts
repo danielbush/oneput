@@ -17,7 +17,6 @@ export const providerList = providers.createMachine({
             id: 'providers',
             items: [{ id: 'providers-loading', text: 'Loading providers…' }]
           },
-          actions: { reload: { type: 'RELOAD' } },
           settings: { enableGoBack: false }
         }
       },
@@ -47,15 +46,15 @@ export const providerList = providers.createMachine({
                 text: 'Providers unavailable',
                 detail: { from: 'fetchMessage' }
               },
-              { id: 'providers-retry', text: 'Retry', action: 'reload' }
+              { id: 'providers-retry', text: 'Retry', activate: true }
             ]
           },
-          actions: { reload: { type: 'RELOAD' } },
           settings: { enableGoBack: false }
         }
       },
       on: {
-        RELOAD: {
+        ITEM_ACTIVATED: {
+          guard: 'activatesRetry',
           target: 'loading',
           description: 'Start a new load.'
         }
@@ -71,7 +70,6 @@ export const providerList = providers.createMachine({
             from: 'providers',
             empty: { id: 'providers-empty', text: 'No providers' }
           },
-          actions: { reload: { type: 'RELOAD' } },
           settings: { enableGoBack: false }
         }
       },
@@ -80,7 +78,7 @@ export const providerList = providers.createMachine({
           actions: 'renameProvider',
           description: 'Update the row label and keep its ID.'
         },
-        SELECT_PROVIDER: {
+        ITEM_ACTIVATED: {
           guard: 'providerExists',
           actions: 'selectProvider',
           description: 'Send the ID to the host if the provider is still in the list.'

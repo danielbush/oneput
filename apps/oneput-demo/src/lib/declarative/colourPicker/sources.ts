@@ -6,16 +6,20 @@ const choices = [
 ] as const;
 
 export type Colour = (typeof choices)[number]['id'];
-export type PickColour = { type: 'PICK_COLOUR'; colour: Colour };
+export type FormContext = { colour: Colour | null };
 
 export function isColour(value: unknown): value is Colour {
   return choices.some(({ id }) => id === value);
 }
 
-export const lists = {
-  colours: () =>
-    choices.map((row) => ({
-      ...row,
-      event: { type: 'PICK_COLOUR', colour: row.id } satisfies PickColour
-    }))
+export const pickerSources = {
+  text: {},
+  lists: { colours: () => choices.map((row) => ({ ...row, activate: true })) },
+  release: {}
+};
+
+export const formSources = {
+  text: { colourLabel: ({ colour }: FormContext) => colour ?? 'No colour selected' },
+  lists: {},
+  release: {}
 };

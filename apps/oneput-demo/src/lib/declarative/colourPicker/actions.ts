@@ -1,14 +1,23 @@
 import { err, ok, type Result } from 'neverthrow';
-import { emit, setup } from 'xstate';
+import { emit, enqueueActions, setup } from 'xstate';
 import type { ViewDef } from '../interpreter.js';
-import { isColour, type Colour, type PickColour, type lists } from './sources.js';
+import type { OneputEvent } from '../oneputEvents.js';
+import {
+  isColour,
+  type Colour,
+  type FormContext,
+  type formSources,
+  type pickerSources
+} from './sources.js';
 
-export type ColourResult = { colour: Colour };
+type ColourResult = { colour: Colour };
 type Picked = { type: 'picked'; payload: ColourResult };
-type PickerView = ViewDef<never, never, PickColour, never, never, keyof typeof lists>;
+type FormOutput = { type: 'openPicker' } | { type: 'invalidResult'; message: string };
+type PickerView = ViewDef<never, keyof typeof pickerSources.lists>;
+type FormView = ViewDef<keyof typeof formSources.text>;
 
-/** Check the unknown payload before delivering it to the parent machine. */
-export function readColourResult(payload: unknown): Result<ColourResult, 'Invalid colour result'> {
+/** Check the child payload before storing it in the parent context. */
+function readColourResult(payload: unknown): Result<ColourResult, 'Invalid colour result'> {
   if (
     typeof payload === 'object' &&
     payload !== null &&
@@ -20,17 +29,41 @@ export function readColourResult(payload: unknown): Result<ColourResult, 'Invali
   return err('Invalid colour result');
 }
 
-/** XState implementations for the names in the picker machine. */
 export const picker = setup({
   types: {
-    events: {} as PickColour,
+    events: {} as OneputEvent,
     emitted: {} as Picked,
     meta: {} as { view?: PickerView }
   },
   guards: {
-    isOfferedColour: ({ event }) => isColour(event.colour)
+    isOfferedColour: ({ event }) => event.type === 'ITEM_ACTIVATED' && isColour(event.id)
   },
   actions: {
-    returnColour: emit(({ event }) => ({ type: 'picked', payload: { colour: event.colour } }))
+    returnColour: enqueueActions(({ event, enqueue }) => {
+      if (event.type === 'ITEM_ACTIVATED' && isColour(event.id)) {
+        enqueue.emit({ type: 'picked', payload: { colour: event.id } });
+      }
+    })
+  }
+});
+
+export const form = setup({
+  types: {
+    context: {} as FormContext,
+    events: {} as OneputEvent,
+    emitted: {} as FormOutput,
+    meta: {} as { view?: FormView }
+  },
+  guards: {
+    activatesPicker: ({ event }) => event.type === 'ITEM_ACTIVATED' && event.id === 'pick-colour'
+  },
+  actions: {
+    openPicker: emit({ type: 'openPicker' }),
+    readResult: enqueueActions(({ event, enqueue }) => {
+      if (event.type !== 'RESUMED' || event.result === undefined) return;
+      const result = readColourResult(event.result);
+      if (result.isOk()) enqueue.assign({ colour: result.value.colour });
+      else enqueue.emit({ type: 'invalidResult', message: result.error });
+    })
   }
 });

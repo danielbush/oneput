@@ -26,6 +26,21 @@ export const exceptions = [
     reason: "Detached export reparsing followed by the document policy.",
   },
   {
+    path: "packages/safe-html/src/document.ts",
+    kind: "DOMParser",
+    source: "DOMParser",
+    owner: "checkScriptDisabledMarkup",
+    reason:
+      "Inert document parser to check fallback markup with scripting disabled.",
+  },
+  {
+    path: "packages/safe-html/src/document.ts",
+    kind: "parseFromString",
+    source: "parser.parseFromString",
+    owner: "checkScriptDisabledMarkup",
+    reason: "Check the detached document with the shared policy before export.",
+  },
+  {
     path: "packages/oneput/src/lib/oneput/shared/components/FChild.svelte",
     kind: "@html",
     source: "{@html checkedRichContent(props.htmlContent)}",

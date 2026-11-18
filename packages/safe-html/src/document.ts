@@ -193,6 +193,7 @@ export function setDocumentHTML(element: Element, html: string): void {
 /**
  * Check an export clone and its saved markup in the same element context.
  * Caller-built comments and raw-text nodes can change structure when saved.
+ * Check noscript in a script-disabled document as well as in fragments.
  * Only detached export nodes are parsed here. The live editor is not changed.
  * Return an error if the root is active content or the markup does not stabilise.
  */
@@ -208,21 +209,86 @@ export function documentMarkupForExport(
     element.namespaceURI,
     element.localName,
   );
+  const { localName, namespaceURI } = context;
   const template = element.ownerDocument.createElement("template");
+  const checkInTemplate = (markup: string) => {
+    template.innerHTML = markup;
+    return checkDocumentNodes(template.content);
+  };
   let html = element.innerHTML;
   for (let pass = 0; pass < 4; pass++) {
+    const hasNoscript =
+      localName === "noscript" || /<noscript[\t\n\f\r />]/i.test(html);
     context.innerHTML = html;
-    sanitiseDocumentNodes(context);
+    let removed = false;
+    cleanDocumentNodes(context, () => {
+      removed = true;
+    });
+
     let checked = context.innerHTML;
-    // Check the host parser too: noscript has different parsing rules when
-    // scripting is enabled. Keep the element context when both views are safe.
-    template.innerHTML = checked;
-    if (!checkDocumentNodes(template.content)) {
+    if (
+      hasNoscript &&
+      !removed &&
+      checkInTemplate(html) &&
+      checkScriptDisabledMarkup(html, localName, namespaceURI, checked !== html)
+    ) {
+      // Firefox parses noscript as raw text in fragments, then escapes it
+      // during detached serialisation. The script-disabled view can give a
+      // fixed point instead. All views must accept the exact bytes we return.
+      return ok(html);
+    }
+
+    const templateIsClean = checkInTemplate(checked);
+    if (!templateIsClean) {
       sanitiseDocumentNodes(template.content);
       checked = template.innerHTML;
     }
-    if (checked === html) return ok(checked);
+    if (checked === html) {
+      if (!hasNoscript && !removed && templateIsClean) return ok(checked);
+      return err(new Error("Document export markup did not stabilise safely"));
+    }
     html = checked;
   }
   return err(new Error("Document export markup did not stabilise"));
+}
+
+function checkScriptDisabledMarkup(
+  html: string,
+  tag: string,
+  namespace: string | null,
+  requireFixedPoint: boolean,
+): boolean {
+  let source = `<${tag}>${html}</${tag}>`;
+  switch (namespace) {
+    case "http://www.w3.org/2000/svg":
+      source = `<svg>${source}</svg>`;
+      break;
+    case "http://www.w3.org/1998/Math/MathML":
+      // The original encoding attribute can change the fragment's namespace.
+      if (tag === "annotation-xml") return false;
+      source = `<math>${source}</math>`;
+      break;
+    case "http://www.w3.org/1999/xhtml":
+      break;
+    default:
+      return false;
+  }
+  // A template keeps table rows and cells when there is no enclosing table.
+  // Check the full document because the markup can close the wrapper.
+  const documentRoot =
+    namespace === "http://www.w3.org/1999/xhtml" &&
+    ["html", "head", "body"].includes(tag);
+  const wrapped = documentRoot ? source : `<template>${source}</template>`;
+  const parser = new DOMParser();
+  const parsed = parser.parseFromString(
+    `<!doctype html>${wrapped}`,
+    "text/html",
+  );
+  if (!checkDocumentNodes(parsed.documentElement)) return false;
+  if (!requireFixedPoint) return true;
+  const wrapper = Document.prototype.querySelector.call(
+    parsed,
+    documentRoot ? tag : "head > template",
+  );
+  return wrapper?.outerHTML === wrapped;
 }

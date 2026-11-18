@@ -207,12 +207,40 @@ export function documentPolicyCases(): void {
 
       // act
       const result = documentMarkupForExport(root);
+      const markup = result._unsafeUnwrap();
       const template = document.createElement("template");
-      template.innerHTML = result._unsafeUnwrap();
+      template.innerHTML = markup;
+      const scriptDisabled = new DOMParser().parseFromString(
+        `<!doctype html><body>${markup}`,
+        "text/html",
+      );
 
       // assert
       expect(checkDocumentNodes(template.content)).toBe(true);
       expect(template.content.querySelector("[onerror]")).toBeNull();
+      expect(checkDocumentNodes(scriptDisabled.body)).toBe(true);
+    });
+
+    test("export keeps noscript fallback markup", () => {
+      // arrange
+      const root = document.createElement("div");
+      const noscript = document.createElement("noscript");
+      const paragraph = document.createElement("p");
+      paragraph.textContent = "Fallback & help";
+      noscript.append(paragraph);
+      root.append(noscript);
+
+      // act
+      const result = documentMarkupForExport(root);
+      const parsed = new DOMParser().parseFromString(
+        `<!doctype html><body>${result._unsafeUnwrap()}`,
+        "text/html",
+      );
+
+      // assert
+      expect(parsed.querySelector("noscript > p")?.textContent).toBe(
+        "Fallback & help",
+      );
     });
 
     test("root refusal and template checks", () => {

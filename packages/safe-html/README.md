@@ -155,13 +155,19 @@ Checks run where HTML enters or leaves, never on every edit:
 
 Turning nodes into a string and parsing that string again does not always give
 the same tree; `<noscript>`, comments and odd nesting can change shape. A clean
-tree could save to a string that becomes active when it is opened again. So
-export repeats parse, clean, serialise until the string stops changing:
+tree could save to a string that becomes active when it is opened again. Export
+repeats parse, clean, serialise until the string stops changing. For
+`<noscript>`, export also parses the markup in a document with scripting
+disabled. The markup must be safe in the element context and in both
+scripting modes. The scripting-disabled document can supply the stable markup
+when a fragment parser and its serializer handle fallback content differently:
 
 ```ts
 repeat up to 4 times:
+  if hasNoscript(html) and safeInBothModesAndStable(html): return ok(html)
   result = serialise(clean(parse(html)))
-  if result === html: return ok(result)  // stable: re-opening gives what was checked
+  if result === html:
+    return ok(html) if safeInAllRequiredViews(html) else err("unsafe export")
   html = result
 return err("did not stabilise")          // refuse rather than guess
 ```

@@ -20,7 +20,8 @@ The style the main session adopts so that the human gets to the right outcomes a
 
 ## Running the work
 
-- Keep the main context for decisions: explain, recommend, review. Delegate implementation to other agents.
+- The manager runs agents rather than doing the work itself, small edits included, so its context stays free for helping the human decide: explain, recommend, review.
+- Pick the cheapest agent that fits: a cheaper model for small mechanical edits, a coding agent for code, and a separate session for reviews.
 - <how delegated work is isolated and brought back in this project, eg a branch per agent>
 - Briefs name CODE.md and REVIEW.md, the outcome served, and ask for the paths not tested.
 - Do not call work ready until a second reviewer has checked it.

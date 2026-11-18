@@ -13,7 +13,11 @@ import { err, ok, type Result } from 'neverthrow';
 type Text<Source extends string> = string | { from: Source };
 type ViewSettings = Pick<
   UIFlags,
-  'enableFilter' | 'enableGoBack' | 'clearInputAfterAction' | 'clearInputAfterBack'
+  | 'enableFilter'
+  | 'enableGoBack'
+  | 'enableInputElement'
+  | 'clearInputAfterAction'
+  | 'clearInputAfterBack'
 >;
 
 type Row<Label> = {

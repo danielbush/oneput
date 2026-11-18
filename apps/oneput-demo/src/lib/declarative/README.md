@@ -4,11 +4,12 @@ Oneput sends each AppObject actor the events in `oneputEvents.ts`. The actor
 handles the events it needs. `appObjectActor.ts` refreshes the active state's
 `meta.view` through the interpreter when the actor changes.
 
-Suppose you filter the gated editor for **Name** and activate that row.
+Suppose the profile loads and you filter the gated editor for **Name** and
+activate that row.
 `ITEM_ACTIVATED` enters `editing` and the view claims the input. Each
-`INPUT_CHANGED` writes the value. `ITEM_FOCUSED` on a different row or `BACK`
-returns to filtering and restores the query. Repeat activation ends the edit
-and clears the query.
+`INPUT_CHANGED` writes the draft. Activate **Name** again to save and clear the
+query. Moving focus or pressing Back saves and restores the query. If a save
+fails, the row keeps the draft and offers a retry.
 
 Click and keyboard action use `ITEM_ACTIVATED`. Claim writes and regular
 input use `INPUT_CHANGED`. A submit by row activation uses that activation

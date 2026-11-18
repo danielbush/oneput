@@ -59,12 +59,7 @@ for (const mode of ["csp", "tt"] as const) {
     async () => {
       // arrange
       const frame = document.createElement("iframe");
-      const script = new URL("./csp-frame.ts", import.meta.url).href;
-      const trustedTypes =
-        mode === "tt"
-          ? "require-trusted-types-for 'script'; trusted-types dompurify;"
-          : "";
-      frame.srcdoc = `<!doctype html><meta http-equiv="Content-Security-Policy" content="script-src 'self'; style-src 'none'; object-src 'none'; ${trustedTypes}"><body data-mode="${mode}"><script type="module" src="${script}"></script>`;
+      frame.src = `/__safe-html-csp/${mode}`;
 
       // act
       document.body.append(frame);
@@ -72,7 +67,7 @@ for (const mode of ["csp", "tt"] as const) {
       // assert
       try {
         await expect
-          .poll(() => frame.contentDocument?.body.dataset.done)
+          .poll(() => frame.contentDocument?.body?.dataset.done)
           .toBe("true");
         const body = frame.contentDocument!.body;
         expect(body.dataset.error).toBeUndefined();

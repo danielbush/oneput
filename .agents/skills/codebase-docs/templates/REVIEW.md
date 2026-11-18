@@ -19,6 +19,10 @@ Checkable rules: how to tell that work was done well. Work must also follow the 
 - Do not preserve obsolete prototypes, schemas, APIs or tests unless explicitly requested.
 - Step back and rethink if we are going down the wrong path.
 
+## Tests
+
+- Tests stay fast: check the run's slowest tests. A unit test over 100ms needs a stated reason; a slow refusal or validation usually means the work happens before the check. Projects set a low per-test timeout so a slow test fails every time instead of now and then.
+
 ## Before you report work as done
 
 - Check the work against this file and CODE.md.

@@ -27,6 +27,7 @@ type Row<Label> = {
   icon?: string;
   showActionBinding?: boolean;
   activate?: boolean;
+  canFilter?: boolean;
 };
 
 type Release<Source extends string> = InputClaimReleaseReason | { from: Source };
@@ -140,6 +141,7 @@ export function renderActiveView<
         const icon = rowOverride?.icon ?? row.icon;
         return stdMenuItem({
           id: row.id,
+          canFilter: row.canFilter,
           textContent: row.text,
           bottom: detail === undefined ? undefined : { textContent: detail },
           left: icon === undefined ? undefined : (b) => [b.icon(icon)],

@@ -8,15 +8,15 @@ import { gatedLiveEdit } from './machine.js';
 import { ProfileStore } from './profileStore.js';
 import { sources } from './sources.js';
 
-function activeMenu(snapshot: SnapshotFrom<typeof gatedLiveEdit>) {
-  const views = Object.values(snapshot.getMeta()).flatMap((meta) =>
-    meta?.view ? [meta.view] : []
-  );
-  const [view] = views;
-  if (views.length !== 1 || !view || !('items' in view.menu)) {
-    throw new Error('Expected one active view with literal menu items.');
-  }
-  return { title: view.title, items: view.menu.items };
+type EditActor = ReturnType<typeof createActor<typeof gatedLiveEdit>>;
+type EditSnapshot = SnapshotFrom<typeof gatedLiveEdit>;
+
+function renderEditor(actor: EditActor, snapshot: EditSnapshot) {
+  return renderActiveView(Controller.createNull(), snapshot, () => snapshot.context, sources, {
+    activate: (id) => actor.send({ type: 'ITEM_ACTIVATED', id }),
+    change: (value) => actor.send({ type: 'INPUT_CHANGED', value }),
+    release: (id, reason) => actor.send({ type: 'INPUT_RELEASED', id, reason })
+  })._unsafeUnwrap();
 }
 
 function rowContent(children: FlexChildren = []): string[] {
@@ -29,113 +29,144 @@ function rowContent(children: FlexChildren = []): string[] {
   );
 }
 
-describe('gated live edit', () => {
-  it('keeps the draft through confirmation and saves on retry', async () => {
+describe('gated live-edit form', () => {
+  it('keeps the whole draft on a failed save and saves it on retry', async () => {
     // arrange
     const profile = { name: 'Grace Hopper', role: 'Computer scientist' };
     const store = ProfileStore.createNull({ profile, failNextSave: true });
     const actor = createActor(gatedLiveEdit.provide({ actions: profileActions(store) })).start();
-    const ctl = Controller.createNull();
-    const render = (snapshot: SnapshotFrom<typeof gatedLiveEdit>) =>
-      renderActiveView(ctl, snapshot, () => snapshot.context, sources, {
-        activate: (id) => actor.send({ type: 'ITEM_ACTIVATED', id }),
-        change: (value) => actor.send({ type: 'INPUT_CHANGED', value }),
-        release: (id, reason) => actor.send({ type: 'INPUT_RELEASED', id, reason })
-      })._unsafeUnwrap();
     actor.send({ type: 'STARTED' });
-    await waitFor(actor, (snapshot) => snapshot.matches('filtering'));
+    const clean = await waitFor(actor, (snapshot) => snapshot.matches('clean'));
+    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-role' });
+    actor.send({ type: 'INPUT_CHANGED', value: 'Rear admiral' });
+    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-role' });
     actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-name' });
-    actor.send({ type: 'INPUT_CHANGED', value: 'Grace Murray Hopper' });
-    const typing = actor.getSnapshot();
+    actor.send({ type: 'INPUT_CHANGED', value: 'Ada' });
+    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-name' });
+    const dirty = actor.getSnapshot();
+    const storeBeforeSave = (await store.load())._unsafeUnwrap();
+    const previewMessages: string[] = [];
+    actor.on('preview', ({ message }) => previewMessages.push(message));
 
     // act
-    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-name' });
-    const failed = await waitFor(actor, (snapshot) => snapshot.matches({ editing: 'saveFailed' }));
+    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-preview' });
+    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-save' });
+    const saving = actor.getSnapshot();
+    const failed = await waitFor(actor, (snapshot) => snapshot.matches({ dirty: 'saveFailed' }));
+    const storeAfterFailure = (await store.load())._unsafeUnwrap();
     actor.send({ type: 'BACK' });
-    const confirmation = actor.getSnapshot();
     actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-keep-editing' });
     const kept = actor.getSnapshot();
-    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-name' });
-    const retrying = actor.getSnapshot();
-    const saved = await waitFor(actor, (snapshot) => snapshot.matches('filtering'));
+    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-save' });
+    const saved = await waitFor(actor, (snapshot) => snapshot.matches('clean'));
 
     // assert
-    expect(typing.matches({ editing: 'typing' })).toBe(true);
-    const failedView = render(failed);
-    const typingMenu = render(typing).menu;
-    expect(failedView.menu.items.map((row) => row && row.id)).toEqual(
-      typingMenu.items.map((row) => row && row.id)
-    );
+    const cleanView = renderEditor(actor, clean);
+    const dirtyView = renderEditor(actor, dirty);
+    const savingView = renderEditor(actor, saving);
+    const failedView = renderEditor(actor, failed);
+    const savedView = renderEditor(actor, saved);
+    expect(cleanView.menu.items[3]).toMatchObject({ id: 'live-edit-save', canFilter: false });
+    expect(cleanView.menu.items[3]).not.toHaveProperty('action', expect.any(Function));
+    expect(dirty.matches({ dirty: 'filtering' })).toBe(true);
+    expect(dirtyView.menu.items[3]).toHaveProperty('action', expect.any(Function));
+    expect(saving.matches('saving')).toBe(true);
+    expect(savingView.menu.items[3]).not.toHaveProperty('action', expect.any(Function));
+    expect(failedView.menu.items[3]).toHaveProperty('action', expect.any(Function));
+    expect(savedView.menu.items[3]).not.toHaveProperty('action', expect.any(Function));
+    expect(saved.context.draft).toEqual({ name: 'Ada', role: 'Rear admiral' });
+    expect(saved.context.profile).toEqual(saved.context.draft);
+    expect(previewMessages).toEqual(['Ada — Rear admiral']);
+    expect(storeBeforeSave).toEqual(profile);
+    expect(storeAfterFailure).toEqual(profile);
+    expect((await store.load())._unsafeUnwrap()).toEqual(saved.context.draft);
+
+    const ids = cleanView.menu.items.map((row) => row && row.id);
+    for (const view of [savingView, failedView, savedView]) {
+      expect(view.menu.id).toBe(cleanView.menu.id);
+      expect(view.menu.items.map((row) => row && row.id)).toEqual(ids);
+      expect(view.menu.focusBehaviour).toBe('none');
+    }
     expect(failedView.menu.items.map((row) => rowContent(row ? row.children : undefined))).toEqual([
-      ['CircleAlert', 'Name: Grace Murray Hopper', 'Could not save. Activate to retry.'],
-      ['Pencil', 'Role: Computer scientist', 'Activate to edit this value.'],
-      ['Preview values']
+      ['Pencil', 'Name: Ada', 'Activate to edit this value.'],
+      ['Pencil', 'Role: Rear admiral', 'Activate to edit this value.'],
+      ['Preview values'],
+      ['CircleAlert', 'Save', 'Could not save. Activate to retry.']
     ]);
-    expect(failedView.menu.focusBehaviour).toBe('none');
-    expect(failedView.settings.enableFilter).toBe(false);
-    expect(failedView.input).toMatchObject({
-      kind: 'claim',
-      options: { owner: { type: 'menu-item', itemId: 'live-edit-mixed-name' } }
-    });
-    if (failedView.input?.kind !== 'claim') throw new Error('Expected the draft input claim.');
-    expect(failedView.input.options.value.read()).toBe('Grace Murray Hopper');
-    expect(confirmation.matches('confirmDiscard')).toBe(true);
-    const { title, items } = activeMenu(confirmation);
-    expect(title).toBe('Changes not saved');
-    expect(
-      items.map(({ text }) =>
-        typeof text === 'string' ? text : sources.text[text.from](confirmation.context)
-      )
-    ).toEqual(['Discard "Grace Murray Hopper"', 'Keep editing']);
-    expect(kept.matches({ editing: 'saveFailed' })).toBe(true);
-    expect(kept.context.draft?.value).toBe('Grace Murray Hopper');
-    expect(render(kept).menu.focusBehaviour).toBe('none');
-    expect(retrying.matches('saving')).toBe(true);
-    const retryMenu = render(retrying).menu;
-    expect(retryMenu.focusBehaviour).toBe('none');
-    expect(retryMenu.items.map((row) => row && row.id)).toEqual(
-      typingMenu.items.map((row) => row && row.id)
-    );
-    expect(sources.text.nameLabel(saved.context)).toBe('Name: Grace Murray Hopper');
-    expect((await store.load())._unsafeUnwrap().name).toBe('Grace Murray Hopper');
+    expect(kept.matches({ dirty: 'saveFailed' })).toBe(true);
+    for (const view of [savingView, failedView]) {
+      expect(view.settings.enableFilter).toBe(false);
+      expect(view.settings.enableInputElement).toBe(false);
+      if (view.input?.kind !== 'claim') throw new Error('Expected the draft input claim.');
+      expect(view.input.options.owner).toEqual({ type: 'menu-item', itemId: 'live-edit-save' });
+      expect(view.input.options.value.read()).toBe('Ada');
+    }
     actor.stop();
   });
 
-  it('returns to the last saved value after discard', async () => {
+  it('keeps or discards unsaved changes from Back', async () => {
     // arrange
     const profile = { name: 'Grace Hopper', role: 'Computer scientist' };
-    const store = ProfileStore.createNull({ profile, failNextSave: true });
+    const store = ProfileStore.createNull({ profile });
     const actor = createActor(gatedLiveEdit.provide({ actions: profileActions(store) })).start();
     actor.send({ type: 'STARTED' });
-    await waitFor(actor, (snapshot) => snapshot.matches('filtering'));
+    await waitFor(actor, (snapshot) => snapshot.matches('clean'));
     actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-role' });
     actor.send({ type: 'INPUT_CHANGED', value: 'Rear admiral' });
-    actor.send({ type: 'BACK' });
-    await waitFor(actor, (snapshot) => snapshot.matches({ editing: 'saveFailed' }));
 
     // act
-    actor.send({
-      type: 'ITEM_FOCUSED',
-      menuId: 'live-edit-mixed-menu',
-      index: -1,
-      cause: 'keyboard'
-    });
-    const unfocused = actor.getSnapshot();
     actor.send({ type: 'BACK' });
+    const confirmation = actor.getSnapshot();
     actor.send({ type: 'BACK' });
-    const returned = actor.getSnapshot();
+    const kept = actor.getSnapshot();
     actor.send({ type: 'BACK' });
     actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-discard' });
     const discarded = actor.getSnapshot();
 
     // assert
-    expect(unfocused.matches({ editing: 'saveFailed' })).toBe(true);
-    expect(returned.matches({ editing: 'saveFailed' })).toBe(true);
-    expect(returned.context.draft?.value).toBe('Rear admiral');
-    expect(discarded.matches('filtering')).toBe(true);
-    expect(discarded.context.draft).toBeNull();
-    expect(sources.text.roleLabel(discarded.context)).toBe('Role: Computer scientist');
+    expect(confirmation.matches('confirmDiscard')).toBe(true);
+    const view = renderEditor(actor, confirmation);
+    expect(view.layout.menuTitle).toBe('Changes not saved');
+    expect(view.menu.items.map((row) => rowContent(row ? row.children : undefined))).toEqual([
+      ['Discard'],
+      ['Keep editing']
+    ]);
+    expect(kept.matches({ dirty: 'filtering' })).toBe(true);
+    expect(kept.context.draft).toEqual({ ...profile, role: 'Rear admiral' });
+    expect(discarded.matches('clean')).toBe(true);
+    expect(discarded.context.draft).toEqual(profile);
     expect((await store.load())._unsafeUnwrap()).toEqual(profile);
+    actor.stop();
+  });
+
+  it('returns to clean when an edit restores the saved value', async () => {
+    // arrange
+    const profile = { name: 'Grace Hopper', role: 'Computer scientist' };
+    const store = ProfileStore.createNull({ profile });
+    const actor = createActor(gatedLiveEdit.provide({ actions: profileActions(store) })).start();
+    actor.send({ type: 'STARTED' });
+    await waitFor(actor, (snapshot) => snapshot.matches('clean'));
+    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-name' });
+    actor.send({ type: 'INPUT_CHANGED', value: 'Ada' });
+    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-name' });
+    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-name' });
+
+    // act
+    const editingView = renderEditor(actor, actor.getSnapshot());
+    if (editingView.input?.kind !== 'claim') throw new Error('Expected the editing input claim.');
+    const reopenedValue = editingView.input.options.value.read();
+    actor.send({ type: 'INPUT_CHANGED', value: 'Grace Hopper' });
+    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-name' });
+    const clean = actor.getSnapshot();
+
+    // assert
+    expect(reopenedValue).toBe('Ada');
+    expect(clean.matches('clean')).toBe(true);
+    expect(clean.context.draft).toEqual(profile);
+    expect(renderEditor(actor, clean).menu.items[3]).not.toHaveProperty(
+      'action',
+      expect.any(Function)
+    );
     actor.stop();
   });
 });

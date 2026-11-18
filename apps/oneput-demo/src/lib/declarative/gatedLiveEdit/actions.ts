@@ -7,7 +7,15 @@ import {
   type ProfileLoadError,
   type ProfileSaveError
 } from './profileStore.js';
-import { fieldFor, fieldId, fieldValue, sources, type EditContext, type Field } from './sources.js';
+import {
+  draftIsDirty,
+  fieldFor,
+  fieldId,
+  fieldValue,
+  saveId,
+  sources,
+  type EditContext
+} from './sources.js';
 
 type Preview = { type: 'preview'; message: string };
 type LiveEditEvent =
@@ -16,12 +24,12 @@ type LiveEditEvent =
   | { type: 'LOAD_FAILED'; error: ProfileLoadError }
   | { type: 'SAVE_SUCCEEDED'; profile: Profile }
   | { type: 'SAVE_FAILED'; error: ProfileSaveError };
-type LiveEditView = ViewDef<keyof typeof sources.text, never, keyof typeof sources.release>;
+type LiveEditView = ViewDef<
+  keyof typeof sources.text,
+  keyof typeof sources.lists,
+  keyof typeof sources.release
+>;
 type ProfileActionArgs = ActionArgs<EditContext, LiveEditEvent, LiveEditEvent>;
-
-function draftFor(profile: Profile, field: Field) {
-  return { field, value: profile[field] };
-}
 
 /** Link the named load and save actions to a store for the demo or a headless actor. */
 export function profileActions(store: ProfileStore) {
@@ -35,13 +43,9 @@ export function profileActions(store: ProfileStore) {
         );
       });
     },
-    saveProfile({ context: { profile, draft }, self }: ProfileActionArgs) {
-      if (profile === null || draft === null) return;
-      if (profile[draft.field] === draft.value) {
-        self.send({ type: 'SAVE_SUCCEEDED', profile });
-        return;
-      }
-      void store.save(draft.field, draft.value).then((result) => {
+    saveProfile({ context: { draft }, self }: ProfileActionArgs) {
+      if (draft === null) return;
+      void store.save(draft).then((result) => {
         self.send(
           result.isOk()
             ? { type: 'SAVE_SUCCEEDED', profile: result.value }
@@ -50,6 +54,10 @@ export function profileActions(store: ProfileStore) {
       });
     }
   };
+}
+
+function activatesSave(event: LiveEditEvent) {
+  return event.type === 'ITEM_ACTIVATED' && event.id === saveId;
 }
 
 /** XState implementations for the names in the machine document. */
@@ -63,15 +71,12 @@ export const liveEdit = setup({
   guards: {
     activatesField: ({ event }) => event.type === 'ITEM_ACTIVATED' && fieldFor(event.id) !== null,
     activatesOwner: ({ context, event }) =>
-      event.type === 'ITEM_ACTIVATED' && fieldId(context.draft?.field ?? null) === event.id,
-    activatesOtherField: ({ context, event }) =>
-      event.type === 'ITEM_ACTIVATED' &&
-      fieldFor(event.id) !== null &&
-      fieldId(context.draft?.field ?? null) !== event.id,
+      event.type === 'ITEM_ACTIVATED' && fieldId(context.edit?.field ?? null) === event.id,
     activatesPreview: ({ context, event }) =>
       context.profile !== null &&
       event.type === 'ITEM_ACTIVATED' &&
       event.id === 'live-edit-mixed-preview',
+    activatesSave: ({ event }) => activatesSave(event),
     activatesLoadRetry: ({ event }) =>
       event.type === 'ITEM_ACTIVATED' && event.id === 'live-edit-retry-load',
     activatesDiscard: ({ event }) =>
@@ -79,31 +84,39 @@ export const liveEdit = setup({
     activatesKeepEditing: ({ event }) =>
       event.type === 'ITEM_ACTIVATED' && event.id === 'live-edit-keep-editing',
     userFocusLeftOwner: ({ context, event }) =>
-      context.draft !== null &&
+      context.edit !== null &&
       event.type === 'ITEM_FOCUSED' &&
       event.menuId === 'live-edit-mixed-menu' &&
       (event.cause === 'keyboard' || event.cause === 'pointer') &&
-      fieldId(context.draft.field) !== event.id,
+      fieldId(context.edit.field) !== event.id,
     ownerReleasedForCommit: ({ context, event }) =>
-      context.draft !== null &&
+      context.edit !== null &&
       event.type === 'INPUT_RELEASED' &&
-      fieldId(context.draft.field) === event.id &&
+      fieldId(context.edit.field) === event.id &&
       (event.reason === 'submit' || event.reason === 'back' || event.reason === 'focus-changed'),
-    hasNextField: ({ context }) => context.nextField !== null
+    draftIsDirty: ({ context }) => draftIsDirty(context),
+    saveWasActivatedWithChanges: ({ context, event }) =>
+      activatesSave(event) && draftIsDirty(context),
+    leftFieldWithBack: ({ context }) => context.releaseReason === 'back'
   },
   actions: {
     ...profileActions(ProfileStore.create()),
     storeProfile: assign(({ event }) =>
-      event.type === 'LOAD_SUCCEEDED' ? { profile: event.profile } : {}
+      event.type === 'LOAD_SUCCEEDED' ? { profile: event.profile, draft: event.profile } : {}
     ),
     startEdit: assign(({ context, event }) => {
-      if (context.profile === null || event.type !== 'ITEM_ACTIVATED') return {};
+      if (context.draft === null || event.type !== 'ITEM_ACTIVATED') return {};
       const field = fieldFor(event.id);
-      return field === null ? {} : { draft: draftFor(context.profile, field) };
+      return field === null ? {} : { edit: { field, value: context.draft[field] } };
     }),
     writeEdit: assign(({ context, event }) =>
-      event.type === 'INPUT_CHANGED' && context.draft !== null
-        ? { draft: { ...context.draft, value: event.value } }
+      event.type === 'INPUT_CHANGED' && context.edit !== null
+        ? { edit: { ...context.edit, value: event.value } }
+        : {}
+    ),
+    commitEdit: assign(({ context }) =>
+      context.draft !== null && context.edit !== null
+        ? { draft: { ...context.draft, [context.edit.field]: context.edit.value } }
         : {}
     ),
     submitEdit: assign({ releaseReason: 'submit' }),
@@ -112,25 +125,17 @@ export const liveEdit = setup({
     finishEdit: assign(({ event }) =>
       event.type === 'INPUT_RELEASED' ? { releaseReason: event.reason } : {}
     ),
-    queueNextEdit: assign(({ event }) =>
-      event.type === 'ITEM_ACTIVATED' ? { nextField: fieldFor(event.id) } : {}
-    ),
+    restoreQuery: assign({ releaseReason: 'released' }),
     storeSave: assign(({ event }) =>
       event.type === 'SAVE_SUCCEEDED'
-        ? { profile: event.profile, draft: null, nextField: null }
+        ? { profile: event.profile, draft: event.profile, edit: null, releaseReason: 'submit' }
         : {}
     ),
-    startQueuedEdit: assign(({ context, event }) =>
-      event.type === 'SAVE_SUCCEEDED' && context.nextField !== null
-        ? {
-            profile: event.profile,
-            draft: draftFor(event.profile, context.nextField),
-            nextField: null
-          }
-        : {}
-    ),
-    clearNextField: assign({ nextField: null }),
-    discardEdit: assign({ draft: null, releaseReason: 'back' }),
+    discardDraft: assign(({ context }) => ({
+      draft: context.profile,
+      edit: null,
+      releaseReason: 'back'
+    })),
     preview: emit(({ context }) => ({
       type: 'preview',
       message: `${fieldValue(context, 'name')} — ${fieldValue(context, 'role')}`

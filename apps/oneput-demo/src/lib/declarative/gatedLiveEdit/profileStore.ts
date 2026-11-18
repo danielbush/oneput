@@ -45,13 +45,13 @@ export class ProfileStore {
     return ok({ ...this.profile });
   }
 
-  async save(field: keyof Profile, value: string): Promise<Result<Profile, ProfileSaveError>> {
+  async save(profile: Profile): Promise<Result<Profile, ProfileSaveError>> {
     await this.delay();
     if (this.failNextSave) {
       this.failNextSave = false;
       return err({ type: 'save-failed' });
     }
-    this.profile = { ...this.profile, [field]: value };
+    this.profile = { ...profile };
     return ok({ ...this.profile });
   }
 

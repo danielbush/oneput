@@ -7,9 +7,10 @@ handles the events it needs. `appObjectActor.ts` refreshes the active state's
 Suppose the profile loads and you filter the gated editor for **Name** and
 activate that row.
 `ITEM_ACTIVATED` enters `editing` and the view claims the input. Each
-`INPUT_CHANGED` writes the draft. Activate **Name** again to save and clear the
-query. Moving focus or pressing Back saves and restores the query. If a save
-fails, the row keeps the draft and offers a retry.
+`INPUT_CHANGED` writes the field text. Activate **Name** again to update the
+form draft and clear the query. Activate **Save** to save all draft values
+together. If the write fails, **Save** offers a retry. See the
+[gated live-edit form](./gatedLiveEdit/README.md) for the complete flow.
 
 Click and keyboard action use `ITEM_ACTIVATED`. Claim writes and regular
 input use `INPUT_CHANGED`. A submit by row activation uses that activation

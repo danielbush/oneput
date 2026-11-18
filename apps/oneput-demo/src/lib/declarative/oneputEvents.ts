@@ -20,7 +20,7 @@ export type OneputEvent =
   | { type: 'MENU_UPDATED'; menuId: string; id?: string; index: number; cause: MenuUpdateCause }
   /** Replaces AppObject.onMenuItemFocus and MenuItem.onFocus. */
   | { type: 'ITEM_FOCUSED'; menuId: string; id?: string; index: number; cause: MenuItemFocusCause }
-  /** Replaces the MenuItem.action reached through onMenuAction or keyboard activation. */
+  /** Default activation event for rows with no named event. */
   | { type: 'ITEM_ACTIVATED'; id: string }
   /** Replaces AppObject.onInputChange and the active claim's value.write. */
   | { type: 'INPUT_CHANGED'; value: string }

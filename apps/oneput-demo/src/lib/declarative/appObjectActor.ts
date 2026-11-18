@@ -12,13 +12,14 @@ type ViewActor<
   Source extends string,
   List extends string,
   ReleaseSource extends string,
-  EnabledSource extends string
+  EnabledSource extends string,
+  Event extends { type: string }
 > = {
   start(): void;
   stop(): void;
-  send: (event: OneputEvent) => void;
-  getSnapshot(): ViewSnapshot<Context, Source, List, ReleaseSource, EnabledSource> & {
-    can: (event: OneputEvent) => boolean;
+  send: (event: OneputEvent | Event) => void;
+  getSnapshot(): ViewSnapshot<Context, Source, List, ReleaseSource, EnabledSource, Event> & {
+    can: (event: OneputEvent | Event) => boolean;
   };
   subscribe(onChange: () => void): { unsubscribe(): void };
 };
@@ -42,15 +43,16 @@ export function appObjectActor<
   Source extends string,
   List extends string,
   ReleaseSource extends string,
-  EnabledSource extends string
+  EnabledSource extends string,
+  Event extends { type: string }
 >(
   ctl: Controller,
-  actor: ViewActor<Context, Source, List, ReleaseSource, EnabledSource>,
+  actor: ViewActor<Context, Source, List, ReleaseSource, EnabledSource, Event>,
   sources: ViewSources<Context, Source, List, ReleaseSource, EnabledSource>,
   apply: ApplyView
 ): AppObject {
-  const send = (event: OneputEvent) => actor.send(event);
-  const sendIfCurrent = (event: OneputEvent) => {
+  const send = (event: OneputEvent | Event) => actor.send(event);
+  const sendIfCurrent = (event: OneputEvent | Event) => {
     if (ctl.app.isCurrent(app)) send(event);
   };
   const back = { type: 'BACK' } as const;
@@ -112,7 +114,7 @@ export function appObjectActor<
         () => actor.getSnapshot().context,
         sources,
         {
-          activate: (id) => sendIfCurrent({ type: 'ITEM_ACTIVATED', id }),
+          activate: sendIfCurrent,
           change: (value) => sendIfCurrent({ type: 'INPUT_CHANGED', value }),
           release: (id, reason) => sendIfCurrent({ type: 'INPUT_RELEASED', id, reason })
         }

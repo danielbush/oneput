@@ -1,6 +1,6 @@
 # Colour picker sketch
 
-The form handles `ITEM_ACTIVATED` by opening a fresh picker on the stack.
+The form handles `PICK_COLOUR` by opening a fresh picker on the stack.
 The picker handles `ITEM_ACTIVATED` for a valid colour ID and exits with
 `{ colour }`. Oneput sends the same form actor `RESUMED` with the payload.
 The form checks it before updating the selected colour.

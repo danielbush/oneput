@@ -45,7 +45,7 @@ export const colourForm = form.createMachine({
                 id: 'pick-colour',
                 text: 'Pick a colour…',
                 detail: { from: 'colourLabel' },
-                activate: true
+                send: { type: 'PICK_COLOUR' }
               }
             ]
           },
@@ -53,8 +53,7 @@ export const colourForm = form.createMachine({
         }
       },
       on: {
-        ITEM_ACTIVATED: {
-          guard: 'activatesPicker',
+        PICK_COLOUR: {
           actions: 'openPicker',
           description: 'Open a fresh picker AppObject.'
         },

@@ -66,7 +66,7 @@ export const gatedLiveEdit = liveEdit.createMachine({
                 id: 'live-edit-retry-load',
                 text: 'Could not load profile',
                 detail: 'Activate to retry.',
-                activate: true
+                send: { type: 'RETRY_LOAD' }
               }
             ]
           },
@@ -74,8 +74,7 @@ export const gatedLiveEdit = liveEdit.createMachine({
         }
       },
       on: {
-        ITEM_ACTIVATED: {
-          guard: 'activatesLoadRetry',
+        RETRY_LOAD: {
           target: 'loading',
           description: 'Try to load the profile again.'
         }
@@ -97,7 +96,7 @@ export const gatedLiveEdit = liveEdit.createMachine({
                 detail: { from: 'nameHint' },
                 icon: 'Pencil',
                 showActionBinding: true,
-                activate: true
+                send: { type: 'EDIT_FIELD', field: 'name' }
               },
               {
                 id: 'live-edit-mixed-role',
@@ -105,13 +104,13 @@ export const gatedLiveEdit = liveEdit.createMachine({
                 detail: { from: 'roleHint' },
                 icon: 'Pencil',
                 showActionBinding: true,
-                activate: true
+                send: { type: 'EDIT_FIELD', field: 'role' }
               },
-              { id: 'live-edit-mixed-preview', text: 'Preview values', activate: true },
+              { id: 'live-edit-mixed-preview', text: 'Preview values', send: { type: 'PREVIEW' } },
               {
                 id: 'live-edit-save',
                 text: 'Save',
-                activate: true,
+                send: { type: 'SAVE' },
                 enabled: { from: 'saveEnabled' },
                 canFilter: false
               }
@@ -132,25 +131,21 @@ export const gatedLiveEdit = liveEdit.createMachine({
         }
       },
       on: {
-        ITEM_ACTIVATED: [
-          {
-            guard: 'activatesField',
-            target: '.editing',
-            actions: ['commitEdit', 'startEdit'],
-            description: 'Open the selected field after keeping any current edit.'
-          },
-          {
-            guard: 'activatesDirtySave',
-            target: '.saving',
-            actions: 'commitEdit',
-            description: 'Save the complete draft when it has changed.'
-          },
-          {
-            guard: 'activatesPreview',
-            actions: 'preview',
-            description: 'Show the values currently displayed in the menu.'
-          }
-        ],
+        EDIT_FIELD: {
+          target: '.editing',
+          actions: ['commitEdit', 'startEdit'],
+          description: 'Open the selected field after keeping any current edit.'
+        },
+        SAVE: {
+          guard: 'isDirty',
+          target: '.saving',
+          actions: 'commitEdit',
+          description: 'Save the complete draft when it has changed.'
+        },
+        PREVIEW: {
+          actions: 'preview',
+          description: 'Show the values currently displayed in the menu.'
+        },
         BACK: {
           guard: 'isDirty',
           target: '#gated-live-edit.confirmDiscard',
@@ -179,8 +174,8 @@ export const gatedLiveEdit = liveEdit.createMachine({
               actions: 'writeEdit',
               description: 'Keep the current field text in the edit buffer.'
             },
-            ITEM_ACTIVATED: {
-              guard: 'activatesOwner',
+            EDIT_FIELD: {
+              guard: 'isCurrentField',
               target: 'filtering',
               actions: 'commitEdit',
               description: 'Keep the edit in the draft and clear the filter query.'
@@ -221,11 +216,8 @@ export const gatedLiveEdit = liveEdit.createMachine({
             }
           },
           on: {
-            ITEM_ACTIVATED: {
-              description: 'Ignore row activations until the save finishes.'
-            },
-            BACK: {
-              description: 'Keep the form open until the save finishes.'
+            '*': {
+              description: 'Keep the form open and ignore other events until the save finishes.'
             },
             SAVE_SUCCEEDED: {
               target: 'filtering',
@@ -275,8 +267,8 @@ export const gatedLiveEdit = liveEdit.createMachine({
           menu: {
             id: 'live-edit-confirm-discard',
             items: [
-              { id: 'live-edit-discard', text: 'Discard', activate: true },
-              { id: 'live-edit-keep-editing', text: 'Keep editing', activate: true }
+              { id: 'live-edit-discard', text: 'Discard', send: { type: 'DISCARD' } },
+              { id: 'live-edit-keep-editing', text: 'Keep editing', send: { type: 'KEEP_EDITING' } }
             ]
           },
           settings: {
@@ -289,19 +281,15 @@ export const gatedLiveEdit = liveEdit.createMachine({
         }
       },
       on: {
-        ITEM_ACTIVATED: [
-          {
-            guard: 'activatesDiscard',
-            target: 'ready',
-            actions: 'discardDraft',
-            description: 'Restore the last saved profile and disable Save.'
-          },
-          {
-            guard: 'activatesKeepEditing',
-            target: 'ready.history',
-            description: 'Close the confirmation and keep the draft.'
-          }
-        ],
+        DISCARD: {
+          target: 'ready',
+          actions: 'discardDraft',
+          description: 'Restore the last saved profile and disable Save.'
+        },
+        KEEP_EDITING: {
+          target: 'ready.history',
+          description: 'Close the confirmation and keep the draft.'
+        },
         BACK: {
           target: 'ready.history',
           description: 'Close the confirmation and keep the draft.'

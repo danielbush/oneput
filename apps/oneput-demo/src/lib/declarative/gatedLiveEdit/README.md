@@ -1,10 +1,11 @@
 # Gated live-edit form
 
 On `STARTED`, the machine loads a profile from an in-memory store. If the load
-fails, activate the retry row to load again. After a load, the form enters
+fails, the retry row sends `RETRY_LOAD`. After a load, the form enters
 `ready.filtering` and the shared input filters the menu.
 
-Suppose the store loads **Grace Hopper**. Activate **Name** and type **Ada** in
+Suppose the store loads **Grace Hopper**. Activate **Name** to send
+`EDIT_FIELD` with `field: name`, then type **Ada** in
 `ready.editing`. Activate **Name** again, release the field input, or move focus
 to another row to keep the change in the draft and return to filtering.
 **Preview values** shows the values currently in the menu. **Save** is enabled

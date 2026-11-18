@@ -10,16 +10,8 @@ export type EditContext = {
   releaseReason: InputClaimReleaseReason;
 };
 
-export const saveId = 'live-edit-save';
-
 export function fieldId(field: Field | null) {
   return field === null ? '' : `live-edit-mixed-${field}`;
-}
-
-export function fieldFor(id: string): Field | null {
-  if (id === fieldId('name')) return 'name';
-  if (id === fieldId('role')) return 'role';
-  return null;
 }
 
 export function fieldValue({ draft, editField, editValue }: EditContext, field: Field) {

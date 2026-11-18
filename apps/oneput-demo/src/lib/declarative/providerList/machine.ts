@@ -46,15 +46,14 @@ export const providerList = providers.createMachine({
                 text: 'Providers unavailable',
                 detail: { from: 'fetchMessage' }
               },
-              { id: 'providers-retry', text: 'Retry', activate: true }
+              { id: 'providers-retry', text: 'Retry', send: { type: 'RETRY_LOAD' } }
             ]
           },
           settings: { enableGoBack: false }
         }
       },
       on: {
-        ITEM_ACTIVATED: {
-          guard: 'activatesRetry',
+        RETRY_LOAD: {
           target: 'loading',
           description: 'Start a new load.'
         }

@@ -9,13 +9,21 @@ import {
   type SelectProvider
 } from './sources.js';
 
+type Retry = { type: 'RETRY_LOAD' };
 type ProviderEvent =
   | OneputEvent
+  | Retry
   | { type: 'LOAD_SUCCEEDED'; providers: ProviderContext['providers'] }
   | { type: 'LOAD_FAILED'; error: NonNullable<ProviderContext['fetchError']> }
   | { type: 'RENAME_PROVIDER'; providerId: string; name: string };
 
-type ProviderView = ViewDef<keyof typeof sources.text, keyof typeof sources.lists>;
+type ProviderView = ViewDef<
+  keyof typeof sources.text,
+  keyof typeof sources.lists,
+  never,
+  never,
+  Retry
+>;
 
 /** Bridge the source into the machine. XState stops it when loading ends. */
 export const loadProviders = (load: LoadProviders) =>
@@ -40,8 +48,6 @@ export const providers = setup({
     loadProviders: loadProviders(simulateProviderLoad())
   },
   guards: {
-    activatesRetry: ({ event }) =>
-      event.type === 'ITEM_ACTIVATED' && event.id === 'providers-retry',
     providerExists: ({ context, event }) =>
       event.type === 'ITEM_ACTIVATED' &&
       context.providers.some((provider) => provider.id === event.id)

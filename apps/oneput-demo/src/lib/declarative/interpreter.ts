@@ -21,18 +21,22 @@ type ViewSettings = Pick<
   | 'clearInputAfterBack'
 >;
 
-type Row<Label, Enabled = boolean> = {
+type RowEvent = { type: string };
+
+type Row<Label, Enabled = boolean, Event extends RowEvent = never> = {
   id: string;
   text: Label;
   detail?: Label;
   icon?: string;
   showActionBinding?: boolean;
   activate?: boolean;
+  send?: Event;
   enabled?: Enabled;
   canFilter?: boolean;
 };
 
-type RowPatch<Label, Enabled> = Pick<Row<Label, Enabled>, 'id'> & Partial<Row<Label, Enabled>>;
+type RowPatch<Label, Enabled, Event extends RowEvent> = Pick<Row<Label, Enabled, Event>, 'id'> &
+  Partial<Row<Label, Enabled, Event>>;
 
 type Release<Source extends string> = InputClaimReleaseReason | { from: Source };
 
@@ -40,13 +44,14 @@ export type ViewDef<
   Source extends string = never,
   ListSource extends string = never,
   ReleaseSource extends string = never,
-  EnabledSource extends string = never
+  EnabledSource extends string = never,
+  Event extends RowEvent = never
 > = {
   title?: Text<Source>;
   menu?: {
     id?: string;
     focusBehaviour?: Menu['focusBehaviour'];
-    items?: readonly RowPatch<Text<Source>, Binding<boolean, EnabledSource>>[];
+    items?: readonly RowPatch<Text<Source>, Binding<boolean, EnabledSource>, Event>[];
     from?: ListSource;
     empty?: { id: string; text: string };
   };
@@ -66,13 +71,14 @@ export type ViewSnapshot<
   Source extends string,
   List extends string,
   ReleaseSource extends string,
-  EnabledSource extends string
+  EnabledSource extends string,
+  Event extends RowEvent
 > = {
   context: Context;
   machine: { getStateNodeById(id: string): { path: readonly string[] } };
   getMeta(): Record<
     string,
-    { view?: ViewDef<Source, List, ReleaseSource, EnabledSource> } | undefined
+    { view?: ViewDef<Source, List, ReleaseSource, EnabledSource, Event> } | undefined
   >;
 };
 
@@ -98,8 +104,8 @@ export type OneputView = {
     | { kind: 'claim'; options: InputClaimOptions };
 };
 
-type ViewCallbacks = {
-  activate(id: string): void;
+type ViewCallbacks<Event extends RowEvent> = {
+  activate(event: Event | { type: 'ITEM_ACTIVATED'; id: string }): void;
   change(value: string): void;
   release(id: string, reason: InputClaimReleaseReason): void;
 };
@@ -107,19 +113,21 @@ type ViewCallbacks = {
 /** Build a Oneput view from the metadata of the active states, with parents first.
  * Child view fields replace parent fields. Settings and menu fields merge by key.
  * A child row updates fields of the same ID and keeps its position in the menu.
+ * A row with a send event or activate flag can run an action when enabled.
  */
 export function renderActiveView<
   Context,
   Source extends string,
   List extends string,
   ReleaseSource extends string,
-  EnabledSource extends string
+  EnabledSource extends string,
+  Event extends RowEvent
 >(
   ctl: Controller,
-  snapshot: ViewSnapshot<Context, Source, List, ReleaseSource, EnabledSource>,
+  snapshot: ViewSnapshot<Context, Source, List, ReleaseSource, EnabledSource, Event>,
   currentContext: () => Context,
   sources: ViewSources<Context, Source, List, ReleaseSource, EnabledSource>,
-  callbacks: ViewCallbacks
+  callbacks: ViewCallbacks<Event>
 ): Result<OneputView, 'Expected a complete active view' | 'Expected text for each menu row'> {
   const views = Object.entries(snapshot.getMeta())
     .flatMap(([id, meta]) =>
@@ -129,7 +137,7 @@ export function renderActiveView<
     )
     .sort((a, b) => a.depth - b.depth)
     .map(({ view }) => view);
-  const view = views.reduce<ViewDef<Source, List, ReleaseSource, EnabledSource>>(
+  const view = views.reduce<ViewDef<Source, List, ReleaseSource, EnabledSource, Event>>(
     (parent, child) => ({
       ...parent,
       ...child,
@@ -144,7 +152,7 @@ export function renderActiveView<
   const read = (text: Text<Source>, context = snapshot.context) =>
     typeof text === 'string' ? text : sources.text[text.from](context);
 
-  const rows = new Map<string, RowPatch<Text<Source>, Binding<boolean, EnabledSource>>>();
+  const rows = new Map<string, RowPatch<Text<Source>, Binding<boolean, EnabledSource>, Event>>();
   if (menu.from !== undefined) {
     for (const row of sources.lists[menu.from](snapshot.context)) rows.set(row.id, row);
   }
@@ -158,7 +166,7 @@ export function renderActiveView<
     if (row.text === undefined) return err('Expected text for each menu row');
     const { id, icon, enabled } = row;
     const canActivate =
-      row.activate &&
+      (row.activate ?? row.send !== undefined) &&
       (typeof enabled === 'object'
         ? sources.enabled?.[enabled.from](snapshot.context)
         : enabled !== false);
@@ -172,7 +180,9 @@ export function renderActiveView<
         bindingHint: row.showActionBinding
           ? ctl.keys.getCurrentBindings()[OneputAction.DO_ACTION]?.bindings[0]
           : undefined,
-        action: canActivate ? () => callbacks.activate(id) : undefined
+        action: canActivate
+          ? () => callbacks.activate(row.send ?? { type: 'ITEM_ACTIVATED', id })
+          : undefined
       })
     );
   }

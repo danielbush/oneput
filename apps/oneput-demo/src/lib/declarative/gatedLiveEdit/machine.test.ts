@@ -14,7 +14,7 @@ type EditSnapshot = SnapshotFrom<typeof gatedLiveEdit>;
 
 function renderEditor(actor: EditActor, snapshot: EditSnapshot) {
   return renderActiveView(Controller.createNull(), snapshot, () => snapshot.context, sources, {
-    activate: (id) => actor.send({ type: 'ITEM_ACTIVATED', id }),
+    activate: (event) => actor.send(event),
     change: (value) => actor.send({ type: 'INPUT_CHANGED', value }),
     release: (id, reason) => actor.send({ type: 'INPUT_RELEASED', id, reason })
   })._unsafeUnwrap();
@@ -40,10 +40,14 @@ describe('gated live-edit form', () => {
     await waitFor(actor, (snapshot) => snapshot.matches({ ready: 'filtering' }));
 
     // act
-    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-name' });
+    const name = renderEditor(actor, actor.getSnapshot()).menu.items[0];
+    if (!name || !name.action) throw new Error('Expected Name to be editable.');
+    name.action(Controller.createNull());
     actor.send({ type: 'INPUT_CHANGED', value: 'Ada' });
     const edited = actor.getSnapshot();
-    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-save' });
+    const save = renderEditor(actor, edited).menu.items[3];
+    if (!save || !save.action) throw new Error('Expected Save to be enabled.');
+    save.action(Controller.createNull());
     const saved = await waitFor(actor, (snapshot) => snapshot.matches({ ready: 'filtering' }));
 
     // assert
@@ -70,7 +74,7 @@ describe('gated live-edit form', () => {
     const actor = createActor(gatedLiveEdit.provide({ actions: profileActions(store) })).start();
     actor.send({ type: 'STARTED' });
     const clean = await waitFor(actor, (snapshot) => snapshot.matches({ ready: 'filtering' }));
-    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-role' });
+    actor.send({ type: 'EDIT_FIELD', field: 'role' });
     actor.send({ type: 'INPUT_CHANGED', value: 'Rear admiral' });
     actor.send({
       type: 'ITEM_FOCUSED',
@@ -79,24 +83,24 @@ describe('gated live-edit form', () => {
       index: 0,
       cause: 'keyboard'
     });
-    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-name' });
+    actor.send({ type: 'EDIT_FIELD', field: 'name' });
     actor.send({ type: 'INPUT_CHANGED', value: 'Ada' });
-    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-name' });
+    actor.send({ type: 'EDIT_FIELD', field: 'name' });
     const dirty = actor.getSnapshot();
     const storeBeforeSave = (await store.load())._unsafeUnwrap();
     const previewMessages: string[] = [];
     actor.on('preview', ({ message }) => previewMessages.push(message));
 
     // act
-    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-preview' });
-    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-save' });
+    actor.send({ type: 'PREVIEW' });
+    actor.send({ type: 'SAVE' });
     const saving = actor.getSnapshot();
     const failed = await waitFor(actor, (snapshot) => snapshot.matches({ ready: 'saveFailed' }));
     const storeAfterFailure = (await store.load())._unsafeUnwrap();
     actor.send({ type: 'BACK' });
-    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-keep-editing' });
+    actor.send({ type: 'KEEP_EDITING' });
     const kept = actor.getSnapshot();
-    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-save' });
+    actor.send({ type: 'SAVE' });
     const saved = await waitFor(actor, (snapshot) => snapshot.matches({ ready: 'filtering' }));
 
     // assert
@@ -171,7 +175,7 @@ describe('gated live-edit form', () => {
     const actor = createActor(gatedLiveEdit.provide({ actions: profileActions(store) })).start();
     actor.send({ type: 'STARTED' });
     await waitFor(actor, (snapshot) => snapshot.matches({ ready: 'filtering' }));
-    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-role' });
+    actor.send({ type: 'EDIT_FIELD', field: 'role' });
     actor.send({ type: 'INPUT_CHANGED', value: 'Rear admiral' });
 
     // act
@@ -180,7 +184,7 @@ describe('gated live-edit form', () => {
     actor.send({ type: 'BACK' });
     const kept = actor.getSnapshot();
     actor.send({ type: 'BACK' });
-    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-discard' });
+    actor.send({ type: 'DISCARD' });
     const discarded = actor.getSnapshot();
 
     // assert
@@ -206,10 +210,10 @@ describe('gated live-edit form', () => {
     const actor = createActor(gatedLiveEdit.provide({ actions: profileActions(store) })).start();
     actor.send({ type: 'STARTED' });
     await waitFor(actor, (snapshot) => snapshot.matches({ ready: 'filtering' }));
-    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-name' });
+    actor.send({ type: 'EDIT_FIELD', field: 'name' });
     actor.send({ type: 'INPUT_CHANGED', value: 'Ada' });
-    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-name' });
-    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-name' });
+    actor.send({ type: 'EDIT_FIELD', field: 'name' });
+    actor.send({ type: 'EDIT_FIELD', field: 'name' });
 
     // act
     const editingView = renderEditor(actor, actor.getSnapshot());

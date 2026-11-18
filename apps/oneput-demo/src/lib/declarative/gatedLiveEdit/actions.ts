@@ -7,19 +7,19 @@ import {
   type ProfileLoadError,
   type ProfileSaveError
 } from './profileStore.js';
-import {
-  fieldFor,
-  fieldId,
-  fieldValue,
-  isDirty,
-  saveId,
-  sources,
-  type EditContext
-} from './sources.js';
+import { fieldId, fieldValue, isDirty, sources, type EditContext, type Field } from './sources.js';
 
 type Preview = { type: 'preview'; message: string };
+type RowEvent =
+  | { type: 'EDIT_FIELD'; field: Field }
+  | { type: 'SAVE' }
+  | { type: 'PREVIEW' }
+  | { type: 'DISCARD' }
+  | { type: 'KEEP_EDITING' }
+  | { type: 'RETRY_LOAD' };
 type LiveEditEvent =
   | OneputEvent
+  | RowEvent
   | { type: 'LOAD_SUCCEEDED'; profile: Profile }
   | { type: 'LOAD_FAILED'; error: ProfileLoadError }
   | { type: 'SAVE_SUCCEEDED'; profile: Profile }
@@ -28,7 +28,8 @@ type LiveEditView = ViewDef<
   keyof typeof sources.text,
   keyof typeof sources.lists,
   keyof typeof sources.release,
-  keyof typeof sources.enabled
+  keyof typeof sources.enabled,
+  RowEvent
 >;
 type ProfileActionArgs = ActionArgs<EditContext, LiveEditEvent, LiveEditEvent>;
 
@@ -59,7 +60,8 @@ export function profileActions(store: ProfileStore) {
 
 function editReleaseReason(event: LiveEditEvent) {
   switch (event.type) {
-    case 'ITEM_ACTIVATED':
+    case 'EDIT_FIELD':
+    case 'SAVE':
       return 'submit';
     case 'ITEM_FOCUSED':
       return 'focus-changed';
@@ -81,19 +83,8 @@ export const liveEdit = setup({
     meta: {} as { view?: LiveEditView }
   },
   guards: {
-    activatesField: ({ event }) => event.type === 'ITEM_ACTIVATED' && fieldFor(event.id) !== null,
-    activatesOwner: ({ context, event }) =>
-      event.type === 'ITEM_ACTIVATED' && fieldId(context.editField) === event.id,
-    activatesPreview: ({ event }) =>
-      event.type === 'ITEM_ACTIVATED' && event.id === 'live-edit-mixed-preview',
-    activatesDirtySave: ({ context, event }) =>
-      event.type === 'ITEM_ACTIVATED' && event.id === saveId && isDirty(context),
-    activatesLoadRetry: ({ event }) =>
-      event.type === 'ITEM_ACTIVATED' && event.id === 'live-edit-retry-load',
-    activatesDiscard: ({ event }) =>
-      event.type === 'ITEM_ACTIVATED' && event.id === 'live-edit-discard',
-    activatesKeepEditing: ({ event }) =>
-      event.type === 'ITEM_ACTIVATED' && event.id === 'live-edit-keep-editing',
+    isCurrentField: ({ context, event }) =>
+      event.type === 'EDIT_FIELD' && context.editField === event.field,
     userFocusLeftOwner: ({ context, event }) =>
       context.editField !== null &&
       event.type === 'ITEM_FOCUSED' &&
@@ -115,11 +106,11 @@ export const liveEdit = setup({
     storeProfile: assign(({ event }) =>
       event.type === 'LOAD_SUCCEEDED' ? { profile: event.profile, draft: event.profile } : {}
     ),
-    startEdit: assign(({ context, event }) => {
-      if (context.draft === null || event.type !== 'ITEM_ACTIVATED') return {};
-      const field = fieldFor(event.id);
-      return field === null ? {} : { editField: field, editValue: context.draft[field] };
-    }),
+    startEdit: assign(({ context, event }) =>
+      context.draft !== null && event.type === 'EDIT_FIELD'
+        ? { editField: event.field, editValue: context.draft[event.field] }
+        : {}
+    ),
     writeEdit: assign(({ event }) =>
       event.type === 'INPUT_CHANGED' ? { editValue: event.value } : {}
     ),

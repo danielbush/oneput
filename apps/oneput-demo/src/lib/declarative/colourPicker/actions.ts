@@ -14,7 +14,8 @@ type ColourResult = { colour: Colour };
 type Picked = { type: 'picked'; payload: ColourResult };
 type FormOutput = { type: 'openPicker' } | { type: 'invalidResult'; message: string };
 type PickerView = ViewDef<never, keyof typeof pickerSources.lists>;
-type FormView = ViewDef<keyof typeof formSources.text>;
+type OpenPicker = { type: 'PICK_COLOUR' };
+type FormView = ViewDef<keyof typeof formSources.text, never, never, never, OpenPicker>;
 
 /** Check the child payload before storing it in the parent context. */
 function readColourResult(payload: unknown): Result<ColourResult, 'Invalid colour result'> {
@@ -50,12 +51,9 @@ export const picker = setup({
 export const form = setup({
   types: {
     context: {} as FormContext,
-    events: {} as OneputEvent,
+    events: {} as OneputEvent | OpenPicker,
     emitted: {} as FormOutput,
     meta: {} as { view?: FormView }
-  },
-  guards: {
-    activatesPicker: ({ event }) => event.type === 'ITEM_ACTIVATED' && event.id === 'pick-colour'
   },
   actions: {
     openPicker: emit({ type: 'openPicker' }),

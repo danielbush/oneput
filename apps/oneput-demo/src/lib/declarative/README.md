@@ -1,8 +1,12 @@
 # AppObject machines
 
 Oneput sends each AppObject actor the events in `oneputEvents.ts`. The actor
-handles the events it needs. `appObjectActor.ts` refreshes the active state's
-`meta.view` through the interpreter when the actor changes.
+handles the events it needs. When the actor changes, `appObjectActor.ts` uses
+the interpreter to combine `meta.view` from the active parent and child
+states. A child can change individual settings and menu fields. A child
+row with the same ID changes only the specified fields and keeps its
+position. Define fixed rows in the view and use sources for changing values
+and lists of rows from data.
 
 Suppose the profile loads and you filter the gated editor for **Name** and
 activate that row.

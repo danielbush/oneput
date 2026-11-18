@@ -1,4 +1,4 @@
-import { assign, emit, setup, type ActionArgs } from 'xstate';
+import { assign, emit, raise, setup, type ActionArgs } from 'xstate';
 import type { ViewDef } from '../interpreter.js';
 import type { OneputEvent } from '../oneputEvents.js';
 import {
@@ -8,10 +8,10 @@ import {
   type ProfileSaveError
 } from './profileStore.js';
 import {
-  draftIsDirty,
   fieldFor,
   fieldId,
   fieldValue,
+  isDirty,
   saveId,
   sources,
   type EditContext
@@ -27,7 +27,8 @@ type LiveEditEvent =
 type LiveEditView = ViewDef<
   keyof typeof sources.text,
   keyof typeof sources.lists,
-  keyof typeof sources.release
+  keyof typeof sources.release,
+  keyof typeof sources.enabled
 >;
 type ProfileActionArgs = ActionArgs<EditContext, LiveEditEvent, LiveEditEvent>;
 
@@ -56,8 +57,19 @@ export function profileActions(store: ProfileStore) {
   };
 }
 
-function activatesSave(event: LiveEditEvent) {
-  return event.type === 'ITEM_ACTIVATED' && event.id === saveId;
+function editReleaseReason(event: LiveEditEvent) {
+  switch (event.type) {
+    case 'ITEM_ACTIVATED':
+      return 'submit';
+    case 'ITEM_FOCUSED':
+      return 'focus-changed';
+    case 'BACK':
+      return 'back';
+    case 'INPUT_RELEASED':
+      return event.reason;
+    default:
+      return 'released';
+  }
 }
 
 /** XState implementations for the names in the machine document. */
@@ -71,12 +83,11 @@ export const liveEdit = setup({
   guards: {
     activatesField: ({ event }) => event.type === 'ITEM_ACTIVATED' && fieldFor(event.id) !== null,
     activatesOwner: ({ context, event }) =>
-      event.type === 'ITEM_ACTIVATED' && fieldId(context.edit?.field ?? null) === event.id,
-    activatesPreview: ({ context, event }) =>
-      context.profile !== null &&
-      event.type === 'ITEM_ACTIVATED' &&
-      event.id === 'live-edit-mixed-preview',
-    activatesSave: ({ event }) => activatesSave(event),
+      event.type === 'ITEM_ACTIVATED' && fieldId(context.editField) === event.id,
+    activatesPreview: ({ event }) =>
+      event.type === 'ITEM_ACTIVATED' && event.id === 'live-edit-mixed-preview',
+    activatesDirtySave: ({ context, event }) =>
+      event.type === 'ITEM_ACTIVATED' && event.id === saveId && isDirty(context),
     activatesLoadRetry: ({ event }) =>
       event.type === 'ITEM_ACTIVATED' && event.id === 'live-edit-retry-load',
     activatesDiscard: ({ event }) =>
@@ -84,20 +95,20 @@ export const liveEdit = setup({
     activatesKeepEditing: ({ event }) =>
       event.type === 'ITEM_ACTIVATED' && event.id === 'live-edit-keep-editing',
     userFocusLeftOwner: ({ context, event }) =>
-      context.edit !== null &&
+      context.editField !== null &&
       event.type === 'ITEM_FOCUSED' &&
       event.menuId === 'live-edit-mixed-menu' &&
       (event.cause === 'keyboard' || event.cause === 'pointer') &&
-      fieldId(context.edit.field) !== event.id,
+      fieldId(context.editField) !== event.id,
     ownerReleasedForCommit: ({ context, event }) =>
-      context.edit !== null &&
+      context.editField !== null &&
       event.type === 'INPUT_RELEASED' &&
-      fieldId(context.edit.field) === event.id &&
-      (event.reason === 'submit' || event.reason === 'back' || event.reason === 'focus-changed'),
-    draftIsDirty: ({ context }) => draftIsDirty(context),
-    saveWasActivatedWithChanges: ({ context, event }) =>
-      activatesSave(event) && draftIsDirty(context),
-    leftFieldWithBack: ({ context }) => context.releaseReason === 'back'
+      fieldId(context.editField) === event.id &&
+      (event.reason === 'submit' ||
+        event.reason === 'back' ||
+        event.reason === 'focus-changed' ||
+        event.reason === 'released'),
+    isDirty: ({ context }) => isDirty(context)
   },
   actions: {
     ...profileActions(ProfileStore.create()),
@@ -107,33 +118,36 @@ export const liveEdit = setup({
     startEdit: assign(({ context, event }) => {
       if (context.draft === null || event.type !== 'ITEM_ACTIVATED') return {};
       const field = fieldFor(event.id);
-      return field === null ? {} : { edit: { field, value: context.draft[field] } };
+      return field === null ? {} : { editField: field, editValue: context.draft[field] };
     }),
-    writeEdit: assign(({ context, event }) =>
-      event.type === 'INPUT_CHANGED' && context.edit !== null
-        ? { edit: { ...context.edit, value: event.value } }
-        : {}
+    writeEdit: assign(({ event }) =>
+      event.type === 'INPUT_CHANGED' ? { editValue: event.value } : {}
     ),
-    commitEdit: assign(({ context }) =>
-      context.draft !== null && context.edit !== null
-        ? { draft: { ...context.draft, [context.edit.field]: context.edit.value } }
-        : {}
-    ),
-    submitEdit: assign({ releaseReason: 'submit' }),
-    backFromEdit: assign({ releaseReason: 'back' }),
-    leaveEdit: assign({ releaseReason: 'focus-changed' }),
-    finishEdit: assign(({ event }) =>
-      event.type === 'INPUT_RELEASED' ? { releaseReason: event.reason } : {}
-    ),
-    restoreQuery: assign({ releaseReason: 'released' }),
+    commitEdit: assign(({ context, event }) => {
+      const { draft, editField, editValue } = context;
+      if (draft === null || editField === null) return {};
+      return {
+        draft: { ...draft, [editField]: editValue },
+        editField: null,
+        releaseReason: editReleaseReason(event)
+      };
+    }),
+    checkBackFromDraft: raise({ type: 'BACK' }),
     storeSave: assign(({ event }) =>
       event.type === 'SAVE_SUCCEEDED'
-        ? { profile: event.profile, draft: event.profile, edit: null, releaseReason: 'submit' }
+        ? {
+            profile: event.profile,
+            draft: event.profile,
+            editField: null,
+            editValue: '',
+            releaseReason: 'submit'
+          }
         : {}
     ),
     discardDraft: assign(({ context }) => ({
       draft: context.profile,
-      edit: null,
+      editField: null,
+      editValue: '',
       releaseReason: 'back'
     })),
     preview: emit(({ context }) => ({

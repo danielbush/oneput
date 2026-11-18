@@ -11,12 +11,13 @@ type ViewActor<
   Context,
   Source extends string,
   List extends string,
-  ReleaseSource extends string
+  ReleaseSource extends string,
+  EnabledSource extends string
 > = {
   start(): void;
   stop(): void;
   send: (event: OneputEvent) => void;
-  getSnapshot(): ViewSnapshot<Context, Source, List, ReleaseSource> & {
+  getSnapshot(): ViewSnapshot<Context, Source, List, ReleaseSource, EnabledSource> & {
     can: (event: OneputEvent) => boolean;
   };
   subscribe(onChange: () => void): { unsubscribe(): void };
@@ -40,11 +41,12 @@ export function appObjectActor<
   Context,
   Source extends string,
   List extends string,
-  ReleaseSource extends string
+  ReleaseSource extends string,
+  EnabledSource extends string
 >(
   ctl: Controller,
-  actor: ViewActor<Context, Source, List, ReleaseSource>,
-  sources: ViewSources<Context, Source, List, ReleaseSource>,
+  actor: ViewActor<Context, Source, List, ReleaseSource, EnabledSource>,
+  sources: ViewSources<Context, Source, List, ReleaseSource, EnabledSource>,
   apply: ApplyView
 ): AppObject {
   const send = (event: OneputEvent) => actor.send(event);

@@ -8,15 +8,9 @@ export const gatedLiveEdit = liveEdit.createMachine({
   context: {
     profile: null,
     draft: null,
-    edit: null,
+    editField: null,
+    editValue: '',
     releaseReason: 'released'
-  },
-  on: {
-    ITEM_ACTIVATED: {
-      guard: 'activatesPreview',
-      actions: 'preview',
-      description: 'Show the values currently displayed in the menu.'
-    }
   },
   states: {
     waiting: {
@@ -50,7 +44,7 @@ export const gatedLiveEdit = liveEdit.createMachine({
       },
       on: {
         LOAD_SUCCEEDED: {
-          target: 'clean',
+          target: 'ready',
           actions: 'storeProfile',
           description: 'Show the loaded profile.'
         },
@@ -87,15 +81,41 @@ export const gatedLiveEdit = liveEdit.createMachine({
         }
       }
     },
-    clean: {
-      description: 'Filter the menu while the draft matches the saved profile.',
+    ready: {
+      description: 'Show the profile draft and its actions.',
+      initial: 'filtering',
       meta: {
         view: {
           title: 'Live edit — mixed menu',
           menu: {
             id: 'live-edit-mixed-menu',
             focusBehaviour: 'none',
-            from: 'cleanRows'
+            items: [
+              {
+                id: 'live-edit-mixed-name',
+                text: { from: 'nameLabel' },
+                detail: { from: 'nameHint' },
+                icon: 'Pencil',
+                showActionBinding: true,
+                activate: true
+              },
+              {
+                id: 'live-edit-mixed-role',
+                text: { from: 'roleLabel' },
+                detail: { from: 'roleHint' },
+                icon: 'Pencil',
+                showActionBinding: true,
+                activate: true
+              },
+              { id: 'live-edit-mixed-preview', text: 'Preview values', activate: true },
+              {
+                id: 'live-edit-save',
+                text: 'Save',
+                activate: true,
+                enabled: { from: 'saveEnabled' },
+                canFilter: false
+              }
+            ]
           },
           input: {
             kind: 'filter',
@@ -112,156 +132,109 @@ export const gatedLiveEdit = liveEdit.createMachine({
         }
       },
       on: {
-        ITEM_ACTIVATED: {
-          guard: 'activatesField',
-          target: 'editing',
-          actions: 'startEdit',
-          description: 'Open the selected field in the shared input.'
-        }
-      }
-    },
-    editing: {
-      description: 'Edit one field in the shared input before updating the profile draft.',
-      meta: {
-        view: {
-          title: 'Live edit — mixed menu',
-          menu: {
-            id: 'live-edit-mixed-menu',
-            focusBehaviour: 'none',
-            from: 'editRows'
-          },
-          input: {
-            kind: 'claim',
-            owner: { from: 'editOwner' },
-            value: { from: 'editValue' },
-            placeholder: { from: 'editPlaceholder' }
-          },
-          settings: {
-            enableFilter: false,
-            enableGoBack: true,
-            enableInputElement: true,
-            clearInputAfterAction: false,
-            clearInputAfterBack: false
-          }
-        }
-      },
-      on: {
-        INPUT_CHANGED: {
-          actions: 'writeEdit',
-          description: 'Keep the current field text in the edit buffer.'
-        },
         ITEM_ACTIVATED: [
           {
-            guard: 'activatesOwner',
-            target: 'classifyDraft',
-            actions: ['commitEdit', 'submitEdit'],
-            description: 'Keep the edit in the draft and clear the filter query.'
-          },
-          {
             guard: 'activatesField',
+            target: '.editing',
             actions: ['commitEdit', 'startEdit'],
-            description: 'Keep the edit in the draft and open the selected field.'
+            description: 'Open the selected field after keeping any current edit.'
           },
           {
-            guard: 'activatesSave',
-            target: 'classifyDraft',
-            actions: ['commitEdit', 'submitEdit'],
-            description: 'Keep the edit in the draft before checking whether to save.'
-          }
-        ],
-        ITEM_FOCUSED: {
-          guard: 'userFocusLeftOwner',
-          target: 'classifyDraft',
-          actions: ['commitEdit', 'leaveEdit'],
-          description: 'Keep the edit in the draft when the user moves to another row.'
-        },
-        BACK: {
-          target: 'classifyDraft',
-          actions: ['commitEdit', 'backFromEdit'],
-          description: 'Keep the edit in the draft and check for unsaved changes.'
-        },
-        INPUT_RELEASED: {
-          guard: 'ownerReleasedForCommit',
-          target: 'classifyDraft',
-          actions: ['commitEdit', 'finishEdit'],
-          description: 'Keep the edit in the draft when Oneput releases its input claim.'
-        }
-      }
-    },
-    classifyDraft: {
-      description: 'Compare the committed draft with the saved profile.',
-      always: [
-        {
-          guard: 'saveWasActivatedWithChanges',
-          target: 'saving',
-          description: 'Save the updated draft when the user activated Save.'
-        },
-        {
-          guard: 'draftIsDirty',
-          target: 'dirty.filtering',
-          description: 'Enable Save when any field differs from its saved value.'
-        },
-        {
-          target: 'clean',
-          description: 'Disable Save when all values match the saved profile.'
-        }
-      ]
-    },
-    dirty: {
-      description: 'Keep the unsaved draft available for editing, saving or discarding.',
-      initial: 'filtering',
-      on: {
-        ITEM_ACTIVATED: [
-          {
-            guard: 'activatesField',
-            target: '#gated-live-edit.editing',
-            actions: 'startEdit',
-            description: 'Open the selected field with its current draft value.'
+            guard: 'activatesDirtySave',
+            target: '.saving',
+            actions: 'commitEdit',
+            description: 'Save the complete draft when it has changed.'
           },
           {
-            guard: 'activatesSave',
-            target: '#gated-live-edit.saving',
-            description: 'Save the complete draft.'
+            guard: 'activatesPreview',
+            actions: 'preview',
+            description: 'Show the values currently displayed in the menu.'
           }
         ],
         BACK: {
+          guard: 'isDirty',
           target: '#gated-live-edit.confirmDiscard',
           description: 'Ask whether to discard the unsaved draft.'
         }
       },
       states: {
-        previous: {
-          type: 'history',
-          description: 'Remember whether the draft was filtering or showing a failed save.'
-        },
         filtering: {
-          description: 'Filter the menu and offer to save the draft.',
-          always: {
-            guard: 'leftFieldWithBack',
-            target: '#gated-live-edit.confirmDiscard',
-            actions: 'restoreQuery',
-            description: 'Ask whether to discard after Back finishes an edit.'
-          },
+          description: 'Use the shared input to filter the menu.'
+        },
+        editing: {
+          description: 'Edit one field in the shared input before updating the draft.',
           meta: {
             view: {
-              title: 'Live edit — mixed menu',
-              menu: {
-                id: 'live-edit-mixed-menu',
-                focusBehaviour: 'none',
-                from: 'dirtyRows'
-              },
               input: {
-                kind: 'filter',
-                placeholder: 'Filter menu, then activate a field to edit...',
-                release: { from: 'editRelease' }
+                kind: 'claim',
+                owner: { from: 'editOwner' },
+                value: { from: 'editValue' },
+                placeholder: { from: 'editPlaceholder' }
               },
-              settings: {
-                enableFilter: true,
-                enableGoBack: true,
-                enableInputElement: true,
-                clearInputAfterAction: false,
-                clearInputAfterBack: false
-              }
+              settings: { enableFilter: false }
+            }
+          },
+          on: {
+            INPUT_CHANGED: {
+              actions: 'writeEdit',
+              description: 'Keep the current field text in the edit buffer.'
+            },
+            ITEM_ACTIVATED: {
+              guard: 'activatesOwner',
+              target: 'filtering',
+              actions: 'commitEdit',
+              description: 'Keep the edit in the draft and clear the filter query.'
+            },
+            ITEM_FOCUSED: {
+              guard: 'userFocusLeftOwner',
+              target: 'filtering',
+              actions: 'commitEdit',
+              description: 'Keep the edit when the user focuses another row.'
+            },
+            INPUT_RELEASED: {
+              guard: 'ownerReleasedForCommit',
+              target: 'filtering',
+              actions: 'commitEdit',
+              description: 'Keep the edit when Oneput releases the field input.'
+            },
+            BACK: {
+              guard: 'isDirty',
+              target: 'filtering',
+              actions: ['commitEdit', 'checkBackFromDraft'],
+              description: 'Keep the edit and handle Back from the draft menu.'
+            }
+          }
+        },
+        saving: {
+          description: 'Keep the menu, focus and draft visible while the store saves.',
+          entry: 'saveProfile',
+          meta: {
+            view: {
+              menu: { items: [{ id: 'live-edit-save', enabled: false }] },
+              input: {
+                kind: 'claim',
+                owner: 'live-edit-save',
+                value: { from: 'editValue' },
+                placeholder: ''
+              },
+              settings: { enableFilter: false, enableInputElement: false, enableGoBack: false }
+            }
+          },
+          on: {
+            ITEM_ACTIVATED: {
+              description: 'Ignore row activations until the save finishes.'
+            },
+            BACK: {
+              description: 'Keep the form open until the save finishes.'
+            },
+            SAVE_SUCCEEDED: {
+              target: 'filtering',
+              actions: 'storeSave',
+              description: 'Accept the saved draft and disable Save.'
+            },
+            SAVE_FAILED: {
+              target: 'saveFailed',
+              description: 'Keep the draft and show retry on Save.'
             }
           }
         },
@@ -269,16 +242,14 @@ export const gatedLiveEdit = liveEdit.createMachine({
           description: 'Keep the full menu and draft visible with a retry on Save.',
           meta: {
             view: {
-              title: 'Live edit — mixed menu',
               menu: {
-                id: 'live-edit-mixed-menu',
-                focusBehaviour: 'none',
-                from: 'dirtyRows',
-                rowOverride: {
-                  id: 'live-edit-save',
-                  detail: 'Could not save. Activate to retry.',
-                  icon: 'CircleAlert'
-                }
+                items: [
+                  {
+                    id: 'live-edit-save',
+                    detail: 'Could not save. Activate to retry.',
+                    icon: 'CircleAlert'
+                  }
+                ]
               },
               input: {
                 kind: 'claim',
@@ -286,53 +257,13 @@ export const gatedLiveEdit = liveEdit.createMachine({
                 value: { from: 'editValue' },
                 placeholder: ''
               },
-              settings: {
-                enableFilter: false,
-                enableGoBack: true,
-                enableInputElement: false,
-                clearInputAfterAction: false,
-                clearInputAfterBack: false
-              }
+              settings: { enableFilter: false, enableInputElement: false }
             }
           }
-        }
-      }
-    },
-    saving: {
-      description: 'Keep the menu, focus and draft visible while the store saves.',
-      entry: 'saveProfile',
-      meta: {
-        view: {
-          title: 'Live edit — mixed menu',
-          menu: {
-            id: 'live-edit-mixed-menu',
-            focusBehaviour: 'none',
-            from: 'cleanRows'
-          },
-          input: {
-            kind: 'claim',
-            owner: 'live-edit-save',
-            value: { from: 'editValue' },
-            placeholder: ''
-          },
-          settings: {
-            enableFilter: false,
-            enableInputElement: false,
-            clearInputAfterAction: false,
-            clearInputAfterBack: false,
-            enableGoBack: false
-          }
-        }
-      },
-      on: {
-        SAVE_SUCCEEDED: {
-          target: 'clean',
-          actions: 'storeSave',
-          description: 'Accept the saved draft and disable Save.'
         },
-        SAVE_FAILED: {
-          target: 'dirty.saveFailed',
-          description: 'Keep the draft and show retry on Save.'
+        history: {
+          type: 'history',
+          description: 'Return to the menu that opened the discard confirmation.'
         }
       }
     },
@@ -361,18 +292,18 @@ export const gatedLiveEdit = liveEdit.createMachine({
         ITEM_ACTIVATED: [
           {
             guard: 'activatesDiscard',
-            target: 'clean',
+            target: 'ready',
             actions: 'discardDraft',
             description: 'Restore the last saved profile and disable Save.'
           },
           {
             guard: 'activatesKeepEditing',
-            target: 'dirty.previous',
+            target: 'ready.history',
             description: 'Close the confirmation and keep the draft.'
           }
         ],
         BACK: {
-          target: 'dirty.previous',
+          target: 'ready.history',
           description: 'Close the confirmation and keep the draft.'
         }
       }

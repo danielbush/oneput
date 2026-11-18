@@ -2,6 +2,7 @@
 import { Controller, type FlexChildren } from '@oneput/oneput';
 import { describe, expect, it } from 'vitest';
 import { createActor, waitFor, type SnapshotFrom } from 'xstate';
+import { appObjectActor } from '../appObjectActor.js';
 import { renderActiveView } from '../interpreter.js';
 import { profileActions } from './actions.js';
 import { gatedLiveEdit } from './machine.js';
@@ -30,16 +31,54 @@ function rowContent(children: FlexChildren = []): string[] {
 }
 
 describe('gated live-edit form', () => {
+  it('saves the active field edit and disables Save', async () => {
+    // arrange
+    const profile = { name: 'Grace Hopper', role: 'Computer scientist' };
+    const store = ProfileStore.createNull({ profile });
+    const actor = createActor(gatedLiveEdit.provide({ actions: profileActions(store) })).start();
+    actor.send({ type: 'STARTED' });
+    await waitFor(actor, (snapshot) => snapshot.matches({ ready: 'filtering' }));
+
+    // act
+    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-name' });
+    actor.send({ type: 'INPUT_CHANGED', value: 'Ada' });
+    const edited = actor.getSnapshot();
+    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-save' });
+    const saved = await waitFor(actor, (snapshot) => snapshot.matches({ ready: 'filtering' }));
+
+    // assert
+    const draft = { ...profile, name: 'Ada' };
+    expect(edited.matches({ ready: 'editing' })).toBe(true);
+    expect(edited.context.draft).toEqual(profile);
+    expect(renderEditor(actor, edited).menu.items[3]).toHaveProperty(
+      'action',
+      expect.any(Function)
+    );
+    expect(saved.context.profile).toEqual(draft);
+    expect((await store.load())._unsafeUnwrap()).toEqual(draft);
+    expect(renderEditor(actor, saved).menu.items[3]).not.toHaveProperty(
+      'action',
+      expect.any(Function)
+    );
+    actor.stop();
+  });
+
   it('keeps the whole draft on a failed save and saves it on retry', async () => {
     // arrange
     const profile = { name: 'Grace Hopper', role: 'Computer scientist' };
     const store = ProfileStore.createNull({ profile, failNextSave: true });
     const actor = createActor(gatedLiveEdit.provide({ actions: profileActions(store) })).start();
     actor.send({ type: 'STARTED' });
-    const clean = await waitFor(actor, (snapshot) => snapshot.matches('clean'));
+    const clean = await waitFor(actor, (snapshot) => snapshot.matches({ ready: 'filtering' }));
     actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-role' });
     actor.send({ type: 'INPUT_CHANGED', value: 'Rear admiral' });
-    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-role' });
+    actor.send({
+      type: 'ITEM_FOCUSED',
+      menuId: 'live-edit-mixed-menu',
+      id: 'live-edit-mixed-name',
+      index: 0,
+      cause: 'keyboard'
+    });
     actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-name' });
     actor.send({ type: 'INPUT_CHANGED', value: 'Ada' });
     actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-name' });
@@ -52,13 +91,13 @@ describe('gated live-edit form', () => {
     actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-preview' });
     actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-save' });
     const saving = actor.getSnapshot();
-    const failed = await waitFor(actor, (snapshot) => snapshot.matches({ dirty: 'saveFailed' }));
+    const failed = await waitFor(actor, (snapshot) => snapshot.matches({ ready: 'saveFailed' }));
     const storeAfterFailure = (await store.load())._unsafeUnwrap();
     actor.send({ type: 'BACK' });
     actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-keep-editing' });
     const kept = actor.getSnapshot();
     actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-save' });
-    const saved = await waitFor(actor, (snapshot) => snapshot.matches('clean'));
+    const saved = await waitFor(actor, (snapshot) => snapshot.matches({ ready: 'filtering' }));
 
     // assert
     const cleanView = renderEditor(actor, clean);
@@ -68,9 +107,9 @@ describe('gated live-edit form', () => {
     const savedView = renderEditor(actor, saved);
     expect(cleanView.menu.items[3]).toMatchObject({ id: 'live-edit-save', canFilter: false });
     expect(cleanView.menu.items[3]).not.toHaveProperty('action', expect.any(Function));
-    expect(dirty.matches({ dirty: 'filtering' })).toBe(true);
+    expect(dirty.matches({ ready: 'filtering' })).toBe(true);
     expect(dirtyView.menu.items[3]).toHaveProperty('action', expect.any(Function));
-    expect(saving.matches('saving')).toBe(true);
+    expect(saving.matches({ ready: 'saving' })).toBe(true);
     expect(savingView.menu.items[3]).not.toHaveProperty('action', expect.any(Function));
     expect(failedView.menu.items[3]).toHaveProperty('action', expect.any(Function));
     expect(savedView.menu.items[3]).not.toHaveProperty('action', expect.any(Function));
@@ -93,7 +132,7 @@ describe('gated live-edit form', () => {
       ['Preview values'],
       ['CircleAlert', 'Save', 'Could not save. Activate to retry.']
     ]);
-    expect(kept.matches({ dirty: 'saveFailed' })).toBe(true);
+    expect(kept.matches({ ready: 'saveFailed' })).toBe(true);
     for (const view of [savingView, failedView]) {
       expect(view.settings.enableFilter).toBe(false);
       expect(view.settings.enableInputElement).toBe(false);
@@ -104,13 +143,34 @@ describe('gated live-edit form', () => {
     actor.stop();
   });
 
+  it('returns to the parent AppObject on Back when the draft matches the saved profile', async () => {
+    // arrange
+    const ctl = Controller.createNull();
+    const parent = { onStart() {} };
+    const profile = { name: 'Grace Hopper', role: 'Computer scientist' };
+    const store = ProfileStore.createNull({ profile });
+    const actor = createActor(gatedLiveEdit.provide({ actions: profileActions(store) }));
+    const app = appObjectActor(ctl, actor, sources, () => {});
+    ctl.app.run(parent);
+    ctl.app.run(app);
+    const loaded = await waitFor(actor, (snapshot) => snapshot.matches({ ready: 'filtering' }));
+
+    // act
+    ctl.app.goBack();
+
+    // assert
+    expect(loaded.can({ type: 'BACK' })).toBe(false);
+    expect(ctl.app.isCurrent(parent)).toBe(true);
+    expect(ctl.app.contains(app)).toBe(false);
+  });
+
   it('keeps or discards unsaved changes from Back', async () => {
     // arrange
     const profile = { name: 'Grace Hopper', role: 'Computer scientist' };
     const store = ProfileStore.createNull({ profile });
     const actor = createActor(gatedLiveEdit.provide({ actions: profileActions(store) })).start();
     actor.send({ type: 'STARTED' });
-    await waitFor(actor, (snapshot) => snapshot.matches('clean'));
+    await waitFor(actor, (snapshot) => snapshot.matches({ ready: 'filtering' }));
     actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-role' });
     actor.send({ type: 'INPUT_CHANGED', value: 'Rear admiral' });
 
@@ -131,9 +191,9 @@ describe('gated live-edit form', () => {
       ['Discard'],
       ['Keep editing']
     ]);
-    expect(kept.matches({ dirty: 'filtering' })).toBe(true);
+    expect(kept.matches({ ready: 'filtering' })).toBe(true);
     expect(kept.context.draft).toEqual({ ...profile, role: 'Rear admiral' });
-    expect(discarded.matches('clean')).toBe(true);
+    expect(discarded.matches({ ready: 'filtering' })).toBe(true);
     expect(discarded.context.draft).toEqual(profile);
     expect((await store.load())._unsafeUnwrap()).toEqual(profile);
     actor.stop();
@@ -145,7 +205,7 @@ describe('gated live-edit form', () => {
     const store = ProfileStore.createNull({ profile });
     const actor = createActor(gatedLiveEdit.provide({ actions: profileActions(store) })).start();
     actor.send({ type: 'STARTED' });
-    await waitFor(actor, (snapshot) => snapshot.matches('clean'));
+    await waitFor(actor, (snapshot) => snapshot.matches({ ready: 'filtering' }));
     actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-name' });
     actor.send({ type: 'INPUT_CHANGED', value: 'Ada' });
     actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-name' });
@@ -156,12 +216,12 @@ describe('gated live-edit form', () => {
     if (editingView.input?.kind !== 'claim') throw new Error('Expected the editing input claim.');
     const reopenedValue = editingView.input.options.value.read();
     actor.send({ type: 'INPUT_CHANGED', value: 'Grace Hopper' });
-    actor.send({ type: 'ITEM_ACTIVATED', id: 'live-edit-mixed-name' });
+    actor.send({ type: 'INPUT_RELEASED', id: 'live-edit-mixed-name', reason: 'submit' });
     const clean = actor.getSnapshot();
 
     // assert
     expect(reopenedValue).toBe('Ada');
-    expect(clean.matches('clean')).toBe(true);
+    expect(clean.matches({ ready: 'filtering' })).toBe(true);
     expect(clean.context.draft).toEqual(profile);
     expect(renderEditor(actor, clean).menu.items[3]).not.toHaveProperty(
       'action',

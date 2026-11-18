@@ -4,11 +4,10 @@ import {
   emit,
   enqueueActions,
   forwardTo,
+  sendTo,
   setup,
   type ActionArgs,
-  type DoneActorEvent,
-  type SnapshotEvent,
-  type SnapshotFrom
+  type DoneActorEvent
 } from 'xstate';
 import type { ViewDef } from '../interpreter.js';
 import type { OneputEvent } from '../oneputEvents.js';
@@ -20,6 +19,7 @@ import {
   type ProfileSaveError
 } from './profileStore.js';
 import {
+  activeEdit,
   fieldId,
   fieldValue,
   isDirty,
@@ -41,9 +41,6 @@ type RowEvent =
 type LiveEditEvent =
   | OneputEvent
   | RowEvent
-  | (SnapshotEvent<SnapshotFrom<typeof gatedFieldEdit>> & {
-      type: 'xstate.snapshot.gatedFieldEdit';
-    })
   | DoneActorEvent<EditResult<Field>, 'gatedFieldEdit'>
   | { type: 'LOAD_SUCCEEDED'; profile: Profile }
   | { type: 'LOAD_FAILED'; error: ProfileLoadError }
@@ -93,40 +90,29 @@ export const liveEdit = setup({
   },
   actors: { gatedFieldEdit },
   guards: {
-    isDirty: ({ context }) => isDirty(context),
-    isEditInputEvent: ({ event }) =>
-      event.type === 'INPUT_CHANGED' ||
-      event.type === 'INPUT_RELEASED' ||
-      event.type === 'ITEM_FOCUSED' ||
-      event.type === 'BACK'
+    isDirty: ({ context }) => isDirty(context, null)
   },
   actions: {
     ...profileActions(ProfileStore.create()),
     storeProfile: assign(({ event }) =>
       event.type === 'LOAD_SUCCEEDED' ? { profile: event.profile, draft: event.profile } : {}
     ),
-    beginEdit: enqueueActions(({ context, event, enqueue }) => {
+    beginEdit: sendTo('gatedFieldEdit', ({ context, event }) => {
       assertEvent(event, 'EDIT_FIELD');
-      const edit = { field: event.field, value: context.draft?.[event.field] ?? '' };
-      enqueue.assign({ edit });
-      enqueue.sendTo('gatedFieldEdit', {
+      return {
         type: 'BEGIN_EDIT',
-        ...edit,
-        owner: fieldId(edit.field),
+        field: event.field,
+        value: context.draft?.[event.field] ?? '',
+        owner: fieldId(event.field),
         menuId: 'live-edit-mixed-menu'
-      });
-    }),
-    showEdit: enqueueActions(({ context, event, enqueue }) => {
-      assertEvent(event, 'xstate.snapshot.gatedFieldEdit');
-      const { edit } = event.snapshot.context;
-      if (edit && edit.value !== context.edit?.value) {
-        enqueue.assign({ edit: { field: edit.field, value: edit.value } });
-      }
+      };
     }),
     forwardEditEvent: forwardTo('gatedFieldEdit'),
-    submitEdit: enqueueActions(({ context, event, enqueue }) => {
+    submitEdit: enqueueActions(({ context, event, self, enqueue }) => {
       assertEvent(event, ['EDIT_FIELD', 'SAVE']);
-      if (event.type === 'EDIT_FIELD' && event.field === context.edit?.field) {
+      const edit = activeEdit(self.getSnapshot());
+      if (event.type === 'SAVE' && !isDirty(context, edit)) return;
+      if (event.type === 'EDIT_FIELD' && event.field === edit?.field) {
         enqueue.sendTo('gatedFieldEdit', event);
       } else {
         enqueue.assign({ afterEdit: event });
@@ -140,8 +126,7 @@ export const liveEdit = setup({
       if (draft === null) return;
       enqueue.assign({
         draft: { ...draft, [field]: value },
-        edit: null,
-        lastEditValue: value,
+        lastEditedField: field,
         afterEdit: null,
         releaseReason: reason
       });
@@ -153,19 +138,22 @@ export const liveEdit = setup({
         ? {
             profile: event.profile,
             draft: event.profile,
-            lastEditValue: '',
+            lastEditedField: null,
             releaseReason: 'submit'
           }
         : {}
     ),
     discardDraft: assign(({ context }) => ({
       draft: context.profile,
-      lastEditValue: '',
+      lastEditedField: null,
       releaseReason: 'back'
     })),
-    preview: emit(({ context }) => ({
-      type: 'preview',
-      message: `${fieldValue(context, 'name')} — ${fieldValue(context, 'role')}`
-    }))
+    preview: emit(({ context, self }) => {
+      const edit = activeEdit(self.getSnapshot());
+      return {
+        type: 'preview',
+        message: `${fieldValue(context, edit, 'name')} — ${fieldValue(context, edit, 'role')}`
+      };
+    })
   }
 });

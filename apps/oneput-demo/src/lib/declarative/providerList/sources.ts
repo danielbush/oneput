@@ -7,6 +7,7 @@ export type ProviderContext = {
   providers: readonly Provider[];
   fetchError: FetchError | null;
 };
+type ProviderSnapshot = { context: ProviderContext };
 
 export type SelectProvider = { type: 'SELECT_PROVIDER'; providerId: string };
 export type ProviderLoad = Result<readonly Provider[], FetchError>;
@@ -34,10 +35,10 @@ export function simulateProviderLoad({ failFirst = false, empty = false } = {}):
 /** Read the latest provider rows and failure detail from the actor snapshot. */
 export const sources = {
   text: {
-    fetchMessage: ({ fetchError }: ProviderContext) => fetchError?.message ?? ''
+    fetchMessage: ({ context: { fetchError } }: ProviderSnapshot) => fetchError?.message ?? ''
   },
   lists: {
-    providers: ({ providers }: ProviderContext) =>
+    providers: ({ context: { providers } }: ProviderSnapshot) =>
       providers.map(({ id, name, statusText }) => ({
         id,
         text: name,

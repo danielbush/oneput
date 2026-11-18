@@ -27,8 +27,9 @@ again, to return to filtering or to the save error.
 
 The `ready` view defines the four profile rows. Its child states inherit those
 rows and change the input mode or a row property. Text and enabled bindings
-read from the draft, the current field edit, or the saved profile. Saving and
-save failure claim the disabled input for **Save** so the last edited value
+read the current field edit from the invoked actor's snapshot and use the
+form's draft for the other fields. Save compares these values with the saved
+profile. Saving and save failure claim the disabled input for **Save** so the last edited value
 stays visible. The profile menu retains focus by row ID and restores it after
 the confirmation menu closes.
 

@@ -7,22 +7,21 @@ import {
 } from './interpreter.js';
 import type { OneputEvent } from './oneputEvents.js';
 
-type ViewActor<
-  Context,
-  Source extends string,
-  List extends string,
-  ReleaseSource extends string,
-  EnabledSource extends string,
-  Event extends { type: string }
-> = {
+type ViewActor<Snapshot, Event extends { type: string }> = {
   start(): void;
   stop(): void;
   send: (event: OneputEvent | Event) => void;
-  getSnapshot(): ViewSnapshot<Context, Source, List, ReleaseSource, EnabledSource, Event> & {
+  getSnapshot(): Snapshot & {
     can: (event: OneputEvent | Event) => boolean;
   };
   subscribe(onChange: () => void): { unsubscribe(): void };
 };
+
+type ChildActors = { children: Record<string, { getSnapshot(): unknown } | undefined> };
+
+function childSnapshots({ children }: ChildActors) {
+  return Object.values(children).map((child) => child?.getSnapshot());
+}
 
 /**
  * Stub for a Oneput update that applies the layout, settings, menu and input together.
@@ -39,16 +38,19 @@ export type ApplyView = (ctl: Controller, view: OneputView) => void;
 
 /** Give the AppObject's actor Oneput events and refresh its view while current. */
 export function appObjectActor<
-  Context,
   Source extends string,
   List extends string,
   ReleaseSource extends string,
   EnabledSource extends string,
-  Event extends { type: string }
+  Event extends { type: string },
+  Snapshot extends ChildActors
 >(
   ctl: Controller,
-  actor: ViewActor<Context, Source, List, ReleaseSource, EnabledSource, Event>,
-  sources: ViewSources<Context, Source, List, ReleaseSource, EnabledSource>,
+  actor: ViewActor<
+    Snapshot & ViewSnapshot<Source, List, ReleaseSource, EnabledSource, Event>,
+    Event
+  >,
+  sources: ViewSources<NoInfer<Snapshot>, Source, List, ReleaseSource, EnabledSource>,
   apply: ApplyView
 ): AppObject {
   const send = (event: OneputEvent | Event) => actor.send(event);
@@ -97,10 +99,15 @@ export function appObjectActor<
       {
         subscribe(onChange) {
           let previous = actor.getSnapshot();
+          let previousChildren = childSnapshots(previous);
           const subscription = actor.subscribe(() => {
             const next = actor.getSnapshot();
-            if (next === previous) return;
+            const children = childSnapshots(next);
+            // An invocation can notify the actor without changing its own snapshot.
+            if (next === previous && children.every((child, i) => child === previousChildren[i]))
+              return;
             previous = next;
+            previousChildren = children;
             onChange();
           });
           return () => subscription.unsubscribe();
@@ -111,7 +118,7 @@ export function appObjectActor<
       const rendered = renderActiveView(
         ctl,
         actor.getSnapshot(),
-        () => actor.getSnapshot().context,
+        () => actor.getSnapshot(),
         sources,
         {
           activate: sendIfCurrent,

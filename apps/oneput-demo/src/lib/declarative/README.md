@@ -26,9 +26,10 @@ check Back availability. Oneput must route Back and focus to the actor in
 place of imperative `setOnBack` and per-row `onFocus`.
 
 [Gated field edit](./patterns/gatedFieldEdit.ts) is the first reusable
-pattern. The form invokes it and forwards input, focus and Back events.
-The pattern buffers one field and returns the completed value. The form
-keeps ownership of its menu, input claim view and profile draft.
+pattern. The form invokes it and forwards `INPUT_CHANGED`, `ITEM_FOCUSED`,
+`INPUT_RELEASED` and `BACK`. The pattern buffers one field and returns the
+completed value. The form keeps ownership of its menu, input claim view and
+profile draft. Its view sources read the child actor's snapshot during an edit.
 
 Machine configs use literals and implementation names for actions and
 guards. The pattern's `output: editResult` is the one exception. XState v5

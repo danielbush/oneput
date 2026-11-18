@@ -1,6 +1,6 @@
 import { liveEdit } from './actions.js';
 
-/** Edit a profile draft independently of its last saved values. */
+/** Edit a profile draft with a child actor that buffers the active field. */
 export const gatedLiveEdit = liveEdit.createMachine({
   id: 'gated-live-edit',
   description: 'Edit a profile draft and save it in one operation.',
@@ -8,8 +8,7 @@ export const gatedLiveEdit = liveEdit.createMachine({
   context: {
     profile: null,
     draft: null,
-    edit: null,
-    lastEditValue: '',
+    lastEditedField: null,
     afterEdit: null,
     releaseReason: 'released'
   },
@@ -173,8 +172,7 @@ export const gatedLiveEdit = liveEdit.createMachine({
             src: 'gatedFieldEdit',
             id: 'gatedFieldEdit',
             onSnapshot: {
-              actions: 'showEdit',
-              description: 'Show the current edit in the form.'
+              description: 'Notify the view when the field editor updates.'
             },
             onDone: {
               target: 'filtering',
@@ -188,14 +186,24 @@ export const gatedLiveEdit = liveEdit.createMachine({
               description: 'Finish the edit and open the selected field if it differs.'
             },
             SAVE: {
-              guard: 'isDirty',
               actions: 'submitEdit',
-              description: 'Finish the edit before saving the draft.'
+              description: 'Finish the edit before saving when a field value has changed.'
             },
-            '*': {
-              guard: 'isEditInputEvent',
+            INPUT_CHANGED: {
               actions: 'forwardEditEvent',
-              description: 'Route Oneput input, focus and Back events to the field editor.'
+              description: 'Send the current input text to the field editor.'
+            },
+            ITEM_FOCUSED: {
+              actions: 'forwardEditEvent',
+              description: 'Let the field editor check whether focus left its input owner.'
+            },
+            INPUT_RELEASED: {
+              actions: 'forwardEditEvent',
+              description: 'Let the field editor handle the input release.'
+            },
+            BACK: {
+              actions: 'forwardEditEvent',
+              description: 'Let the field editor complete the edit before handling Back.'
             }
           }
         },

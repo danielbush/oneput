@@ -67,14 +67,12 @@ export type ViewDef<
 };
 
 export type ViewSnapshot<
-  Context,
   Source extends string,
   List extends string,
   ReleaseSource extends string,
   EnabledSource extends string,
   Event extends RowEvent
 > = {
-  context: Context;
   machine: { getStateNodeById(id: string): { path: readonly string[] } };
   getMeta(): Record<
     string,
@@ -83,16 +81,16 @@ export type ViewSnapshot<
 };
 
 export type ViewSources<
-  Context,
+  Snapshot,
   Source extends string,
   List extends string,
   ReleaseSource extends string,
   EnabledSource extends string
 > = {
-  text: Record<Source, (context: Context) => string>;
-  lists: Record<List, (context: Context) => readonly Row<string>[]>;
-  release: Record<ReleaseSource, (context: Context) => InputClaimReleaseReason>;
-  enabled?: Record<EnabledSource, (context: Context) => boolean>;
+  text: Record<Source, (snapshot: Snapshot) => string>;
+  lists: Record<List, (snapshot: Snapshot) => readonly Row<string>[]>;
+  release: Record<ReleaseSource, (snapshot: Snapshot) => InputClaimReleaseReason>;
+  enabled?: Record<EnabledSource, (snapshot: Snapshot) => boolean>;
 };
 
 export type OneputView = {
@@ -114,19 +112,20 @@ type ViewCallbacks<Event extends RowEvent> = {
  * Child view fields replace parent fields. Settings and menu fields merge by key.
  * A child row updates fields of the same ID and keeps its position in the menu.
  * A row with a send event or activate flag can run an action when enabled.
+ * Sources read the actor snapshot. The claimed value reads the latest snapshot on demand.
  */
 export function renderActiveView<
-  Context,
   Source extends string,
   List extends string,
   ReleaseSource extends string,
   EnabledSource extends string,
-  Event extends RowEvent
+  Event extends RowEvent,
+  Snapshot
 >(
   ctl: Controller,
-  snapshot: ViewSnapshot<Context, Source, List, ReleaseSource, EnabledSource, Event>,
-  currentContext: () => Context,
-  sources: ViewSources<Context, Source, List, ReleaseSource, EnabledSource>,
+  snapshot: Snapshot & ViewSnapshot<Source, List, ReleaseSource, EnabledSource, Event>,
+  currentSnapshot: () => Snapshot,
+  sources: ViewSources<NoInfer<Snapshot>, Source, List, ReleaseSource, EnabledSource>,
   callbacks: ViewCallbacks<Event>
 ): Result<OneputView, 'Expected a complete active view' | 'Expected text for each menu row'> {
   const views = Object.entries(snapshot.getMeta())
@@ -149,12 +148,12 @@ export function renderActiveView<
   const { title, menu, input } = view;
   if (title === undefined || menu?.id === undefined) return err('Expected a complete active view');
 
-  const read = (text: Text<Source>, context = snapshot.context) =>
-    typeof text === 'string' ? text : sources.text[text.from](context);
+  const read = (text: Text<Source>, sourceSnapshot: Snapshot = snapshot) =>
+    typeof text === 'string' ? text : sources.text[text.from](sourceSnapshot);
 
   const rows = new Map<string, RowPatch<Text<Source>, Binding<boolean, EnabledSource>, Event>>();
   if (menu.from !== undefined) {
-    for (const row of sources.lists[menu.from](snapshot.context)) rows.set(row.id, row);
+    for (const row of sources.lists[menu.from](snapshot)) rows.set(row.id, row);
   }
   for (const { menu } of views) {
     for (const row of menu?.items ?? []) rows.set(row.id, { ...rows.get(row.id), ...row });
@@ -167,9 +166,7 @@ export function renderActiveView<
     const { id, icon, enabled } = row;
     const canActivate =
       (row.activate ?? row.send !== undefined) &&
-      (typeof enabled === 'object'
-        ? sources.enabled?.[enabled.from](snapshot.context)
-        : enabled !== false);
+      (typeof enabled === 'object' ? sources.enabled?.[enabled.from](snapshot) : enabled !== false);
     items.push(
       stdMenuItem({
         id,
@@ -186,6 +183,7 @@ export function renderActiveView<
       })
     );
   }
+  const claimOwner = input?.kind === 'claim' ? read(input.owner) : '';
   return ok({
     layout: { menuTitle: read(title) },
     menu: {
@@ -199,16 +197,16 @@ export function renderActiveView<
         ? {
             kind: 'claim',
             options: {
-              owner: { type: 'menu-item', itemId: read(input.owner) },
+              owner: { type: 'menu-item', itemId: claimOwner },
               value: {
-                read: () => read(input.value, currentContext()),
+                read: () => read(input.value, currentSnapshot()),
                 write: callbacks.change
               },
               placeholder: read(input.placeholder),
               select: 'all',
               resumePrevious: (reason) => (reason === 'submit' ? 'clear' : 'restore'),
               release: { ownerRemoved: true },
-              onRelease: (reason) => callbacks.release(read(input.owner), reason)
+              onRelease: (reason) => callbacks.release(claimOwner, reason)
             }
           }
         : input && {
@@ -216,7 +214,7 @@ export function renderActiveView<
             placeholder: read(input.placeholder),
             release:
               typeof input.release === 'object'
-                ? sources.release[input.release.from](snapshot.context)
+                ? sources.release[input.release.from](snapshot)
                 : input.release
           }
   });

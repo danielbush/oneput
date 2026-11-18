@@ -19,7 +19,10 @@ export const pickerSources = {
 };
 
 export const formSources = {
-  text: { colourLabel: ({ colour }: FormContext) => colour ?? 'No colour selected' },
+  text: {
+    colourLabel: ({ context: { colour } }: { context: FormContext }) =>
+      colour ?? 'No colour selected'
+  },
   lists: {},
   release: {}
 };

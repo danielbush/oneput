@@ -3,7 +3,7 @@ import { Controller, type FlexChildren } from '@oneput/oneput';
 import { describe, expect, it } from 'vitest';
 import { createActor, waitFor, type SnapshotFrom } from 'xstate';
 import { appObjectActor } from '../appObjectActor.js';
-import { renderActiveView } from '../interpreter.js';
+import { renderActiveView, type OneputView } from '../interpreter.js';
 import { profileActions } from './actions.js';
 import { gatedLiveEdit } from './machine.js';
 import { ProfileStore } from './profileStore.js';
@@ -13,7 +13,7 @@ type EditActor = ReturnType<typeof createActor<typeof gatedLiveEdit>>;
 type EditSnapshot = SnapshotFrom<typeof gatedLiveEdit>;
 
 function renderEditor(actor: EditActor, snapshot: EditSnapshot) {
-  return renderActiveView(Controller.createNull(), snapshot, () => snapshot.context, sources, {
+  return renderActiveView(Controller.createNull(), snapshot, () => snapshot, sources, {
     activate: (event) => actor.send(event),
     change: (value) => actor.send({ type: 'INPUT_CHANGED', value }),
     release: (id, reason) => actor.send({ type: 'INPUT_RELEASED', id, reason })
@@ -33,38 +33,53 @@ function rowContent(children: FlexChildren = []): string[] {
 describe('gated live-edit form', () => {
   it('saves the active field edit and disables Save', async () => {
     // arrange
+    const ctl = Controller.createNull();
     const profile = { name: 'Grace Hopper', role: 'Computer scientist' };
     const store = ProfileStore.createNull({ profile });
-    const actor = createActor(gatedLiveEdit.provide({ actions: profileActions(store) })).start();
-    actor.send({ type: 'STARTED' });
+    const actor = createActor(gatedLiveEdit.provide({ actions: profileActions(store) }));
+    const previewMessages: string[] = [];
+    actor.on('preview', ({ message }) => previewMessages.push(message));
+    let view: OneputView | undefined;
+    const app = appObjectActor(ctl, actor, sources, (_, next) => {
+      view = next;
+    });
+    ctl.app.run(app);
     await waitFor(actor, (snapshot) => snapshot.matches({ ready: 'filtering' }));
 
-    // act
-    const name = renderEditor(actor, actor.getSnapshot()).menu.items[0];
+    const name = view?.menu.items[0];
     if (!name || !name.action) throw new Error('Expected Name to be editable.');
-    name.action(Controller.createNull());
-    actor.send({ type: 'INPUT_CHANGED', value: 'Ada' });
+    name.action(ctl);
+    await Promise.resolve();
+    const claim = view?.input;
+    if (claim?.kind !== 'claim') throw new Error('Expected the editing input claim.');
+
+    // act
+    app.onInputChange?.({ value: 'Ada' });
+    await Promise.resolve();
     const edited = actor.getSnapshot();
-    const save = renderEditor(actor, edited).menu.items[3];
+    const editedView = view;
+    const liveValue = claim.options.value.read();
+    actor.send({ type: 'PREVIEW' });
+    const save = editedView?.menu.items[3];
     if (!save || !save.action) throw new Error('Expected Save to be enabled.');
-    save.action(Controller.createNull());
+    save.action(ctl);
     const saved = await waitFor(actor, (snapshot) => snapshot.matches({ ready: 'filtering' }));
 
     // assert
     const draft = { ...profile, name: 'Ada' };
     expect(edited.matches({ ready: 'editing' })).toBe(true);
     expect(edited.context.draft).toEqual(profile);
-    expect(renderEditor(actor, edited).menu.items[3]).toHaveProperty(
-      'action',
-      expect.any(Function)
-    );
+    expect(liveValue).toBe('Ada');
+    expect(previewMessages).toEqual(['Ada — Computer scientist']);
+    const nameRow = editedView?.menu.items[0];
+    expect(rowContent(nameRow ? nameRow.children : undefined)).toContain('Name: Ada');
     expect(saved.context.profile).toEqual(draft);
     expect((await store.load())._unsafeUnwrap()).toEqual(draft);
     expect(renderEditor(actor, saved).menu.items[3]).not.toHaveProperty(
       'action',
       expect.any(Function)
     );
-    actor.stop();
+    ctl.app.exit();
   });
 
   it('keeps the whole draft on a failed save and saves it on retry', async () => {

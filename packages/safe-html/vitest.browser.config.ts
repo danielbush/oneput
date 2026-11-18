@@ -40,7 +40,7 @@ export default defineConfig({
           provider: playwright({ launchOptions: { channel: "chrome" } }),
           provide: { requireNativeSanitizer: true },
         },
-        { browser: "firefox" },
+        { browser: "firefox", provide: { requireNativeSanitizer: true } },
         { browser: "webkit" },
       ],
       api: { port: 3010 },

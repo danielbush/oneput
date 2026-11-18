@@ -13,7 +13,7 @@ declare module "vitest" {
 }
 
 test.runIf(inject("requireNativeSanitizer"))(
-  "Chrome provides native sanitisation and Trusted Types",
+  "browser provides native sanitisation and Trusted Types",
   () => {
     // arrange
     const target = document.createElement("div");

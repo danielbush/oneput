@@ -160,10 +160,17 @@ describe('gated live-edit form', () => {
     const loaded = await waitFor(actor, (snapshot) => snapshot.matches({ ready: 'filtering' }));
 
     // act
+    actor.send({ type: 'EDIT_FIELD', field: 'name' });
+    ctl.app.goBack();
+    const afterEdit = actor.getSnapshot();
+    const stayedInForm = ctl.app.isCurrent(app);
     ctl.app.goBack();
 
     // assert
     expect(loaded.can({ type: 'BACK' })).toBe(false);
+    expect(afterEdit.matches({ ready: 'filtering' })).toBe(true);
+    expect(afterEdit.context.draft).toEqual(profile);
+    expect(stayedInForm).toBe(true);
     expect(ctl.app.isCurrent(parent)).toBe(true);
     expect(ctl.app.contains(app)).toBe(false);
   });
@@ -200,6 +207,30 @@ describe('gated live-edit form', () => {
     expect(discarded.matches({ ready: 'filtering' })).toBe(true);
     expect(discarded.context.draft).toEqual(profile);
     expect((await store.load())._unsafeUnwrap()).toEqual(profile);
+    actor.stop();
+  });
+
+  it('keeps the value before opening a different field', async () => {
+    // arrange
+    const profile = { name: 'Grace Hopper', role: 'Computer scientist' };
+    const store = ProfileStore.createNull({ profile });
+    const actor = createActor(gatedLiveEdit.provide({ actions: profileActions(store) })).start();
+    actor.send({ type: 'STARTED' });
+    await waitFor(actor, (snapshot) => snapshot.matches({ ready: 'filtering' }));
+    actor.send({ type: 'EDIT_FIELD', field: 'name' });
+    actor.send({ type: 'INPUT_CHANGED', value: 'Ada' });
+
+    // act
+    actor.send({ type: 'EDIT_FIELD', field: 'role' });
+    const editing = actor.getSnapshot();
+
+    // assert
+    expect(editing.matches({ ready: 'editing' })).toBe(true);
+    expect(editing.context.draft).toEqual({ ...profile, name: 'Ada' });
+    const view = renderEditor(actor, editing);
+    if (view.input?.kind !== 'claim') throw new Error('Expected the editing input claim.');
+    expect(view.input.options.owner).toEqual({ type: 'menu-item', itemId: 'live-edit-mixed-role' });
+    expect(view.input.options.value.read()).toBe(profile.role);
     actor.stop();
   });
 

@@ -18,8 +18,20 @@ together. If the write fails, **Save** offers a retry. See the
 
 Click and keyboard activation send the row’s literal `send` event. Rows with
 `activate: true` and no named event send `ITEM_ACTIVATED` with their row ID.
-Claim writes and regular input use `INPUT_CHANGED`. A submit by row activation uses that activation
-and `INPUT_RELEASED` with reason `submit`. Host events stay app-specific.
+Claim writes and regular input use `INPUT_CHANGED`. Oneput can also send
+`INPUT_RELEASED` with reason `submit` when it releases the claim. Host events
+stay app-specific.
 The adapter uses `watch` and `onRefresh` to render and `hasBackLevel` to
 check Back availability. Oneput must route Back and focus to the actor in
 place of imperative `setOnBack` and per-row `onFocus`.
+
+[Gated field edit](./patterns/gatedFieldEdit.ts) is the first reusable
+pattern. The form invokes it and forwards input, focus and Back events.
+The pattern buffers one field and returns the completed value. The form
+keeps ownership of its menu, input claim view and profile draft.
+
+Machine configs use literals and implementation names for actions and
+guards. The pattern's `output: editResult` is the one exception. XState v5
+needs a function reference to produce output from the current context.
+The form sends the starting field and value through the named `beginEdit`
+action, so the invocation needs no dynamic `input` mapper.

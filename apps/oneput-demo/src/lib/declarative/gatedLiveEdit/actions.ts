@@ -1,18 +1,39 @@
-import { assign, emit, raise, setup, type ActionArgs } from 'xstate';
+import {
+  assertEvent,
+  assign,
+  emit,
+  enqueueActions,
+  forwardTo,
+  setup,
+  type ActionArgs,
+  type DoneActorEvent,
+  type SnapshotEvent,
+  type SnapshotFrom
+} from 'xstate';
 import type { ViewDef } from '../interpreter.js';
 import type { OneputEvent } from '../oneputEvents.js';
+import { createGatedFieldEdit, type EditResult } from '../patterns/gatedFieldEdit.js';
 import {
   ProfileStore,
   type Profile,
   type ProfileLoadError,
   type ProfileSaveError
 } from './profileStore.js';
-import { fieldId, fieldValue, isDirty, sources, type EditContext, type Field } from './sources.js';
+import {
+  fieldId,
+  fieldValue,
+  isDirty,
+  sources,
+  type AfterEdit,
+  type EditContext,
+  type Field
+} from './sources.js';
+
+const gatedFieldEdit = createGatedFieldEdit<Field>();
 
 type Preview = { type: 'preview'; message: string };
 type RowEvent =
-  | { type: 'EDIT_FIELD'; field: Field }
-  | { type: 'SAVE' }
+  | AfterEdit
   | { type: 'PREVIEW' }
   | { type: 'DISCARD' }
   | { type: 'KEEP_EDITING' }
@@ -20,6 +41,10 @@ type RowEvent =
 type LiveEditEvent =
   | OneputEvent
   | RowEvent
+  | (SnapshotEvent<SnapshotFrom<typeof gatedFieldEdit>> & {
+      type: 'xstate.snapshot.gatedFieldEdit';
+    })
+  | DoneActorEvent<EditResult<Field>, 'gatedFieldEdit'>
   | { type: 'LOAD_SUCCEEDED'; profile: Profile }
   | { type: 'LOAD_FAILED'; error: ProfileLoadError }
   | { type: 'SAVE_SUCCEEDED'; profile: Profile }
@@ -58,22 +83,6 @@ export function profileActions(store: ProfileStore) {
   };
 }
 
-function editReleaseReason(event: LiveEditEvent) {
-  switch (event.type) {
-    case 'EDIT_FIELD':
-    case 'SAVE':
-      return 'submit';
-    case 'ITEM_FOCUSED':
-      return 'focus-changed';
-    case 'BACK':
-      return 'back';
-    case 'INPUT_RELEASED':
-      return event.reason;
-    default:
-      return 'released';
-  }
-}
-
 /** XState implementations for the names in the machine document. */
 export const liveEdit = setup({
   types: {
@@ -82,63 +91,76 @@ export const liveEdit = setup({
     emitted: {} as Preview,
     meta: {} as { view?: LiveEditView }
   },
+  actors: { gatedFieldEdit },
   guards: {
-    isCurrentField: ({ context, event }) =>
-      event.type === 'EDIT_FIELD' && context.editField === event.field,
-    userFocusLeftOwner: ({ context, event }) =>
-      context.editField !== null &&
-      event.type === 'ITEM_FOCUSED' &&
-      event.menuId === 'live-edit-mixed-menu' &&
-      (event.cause === 'keyboard' || event.cause === 'pointer') &&
-      fieldId(context.editField) !== event.id,
-    ownerReleasedForCommit: ({ context, event }) =>
-      context.editField !== null &&
-      event.type === 'INPUT_RELEASED' &&
-      fieldId(context.editField) === event.id &&
-      (event.reason === 'submit' ||
-        event.reason === 'back' ||
-        event.reason === 'focus-changed' ||
-        event.reason === 'released'),
-    isDirty: ({ context }) => isDirty(context)
+    isDirty: ({ context }) => isDirty(context),
+    isEditInputEvent: ({ event }) =>
+      event.type === 'INPUT_CHANGED' ||
+      event.type === 'INPUT_RELEASED' ||
+      event.type === 'ITEM_FOCUSED' ||
+      event.type === 'BACK'
   },
   actions: {
     ...profileActions(ProfileStore.create()),
     storeProfile: assign(({ event }) =>
       event.type === 'LOAD_SUCCEEDED' ? { profile: event.profile, draft: event.profile } : {}
     ),
-    startEdit: assign(({ context, event }) =>
-      context.draft !== null && event.type === 'EDIT_FIELD'
-        ? { editField: event.field, editValue: context.draft[event.field] }
-        : {}
-    ),
-    writeEdit: assign(({ event }) =>
-      event.type === 'INPUT_CHANGED' ? { editValue: event.value } : {}
-    ),
-    commitEdit: assign(({ context, event }) => {
-      const { draft, editField, editValue } = context;
-      if (draft === null || editField === null) return {};
-      return {
-        draft: { ...draft, [editField]: editValue },
-        editField: null,
-        releaseReason: editReleaseReason(event)
-      };
+    beginEdit: enqueueActions(({ context, event, enqueue }) => {
+      assertEvent(event, 'EDIT_FIELD');
+      const edit = { field: event.field, value: context.draft?.[event.field] ?? '' };
+      enqueue.assign({ edit });
+      enqueue.sendTo('gatedFieldEdit', {
+        type: 'BEGIN_EDIT',
+        ...edit,
+        owner: fieldId(edit.field),
+        menuId: 'live-edit-mixed-menu'
+      });
     }),
-    checkBackFromDraft: raise({ type: 'BACK' }),
+    showEdit: enqueueActions(({ context, event, enqueue }) => {
+      assertEvent(event, 'xstate.snapshot.gatedFieldEdit');
+      const { edit } = event.snapshot.context;
+      if (edit && edit.value !== context.edit?.value) {
+        enqueue.assign({ edit: { field: edit.field, value: edit.value } });
+      }
+    }),
+    forwardEditEvent: forwardTo('gatedFieldEdit'),
+    submitEdit: enqueueActions(({ context, event, enqueue }) => {
+      assertEvent(event, ['EDIT_FIELD', 'SAVE']);
+      if (event.type === 'EDIT_FIELD' && event.field === context.edit?.field) {
+        enqueue.sendTo('gatedFieldEdit', event);
+      } else {
+        enqueue.assign({ afterEdit: event });
+        enqueue.sendTo('gatedFieldEdit', { type: 'SUBMIT_EDIT' });
+      }
+    }),
+    commitEdit: enqueueActions(({ context, event, enqueue }) => {
+      assertEvent(event, 'xstate.done.actor.gatedFieldEdit');
+      const { field, value, reason, backRequested } = event.output;
+      const { draft, afterEdit } = context;
+      if (draft === null) return;
+      enqueue.assign({
+        draft: { ...draft, [field]: value },
+        edit: null,
+        lastEditValue: value,
+        afterEdit: null,
+        releaseReason: reason
+      });
+      if (afterEdit) enqueue.raise(afterEdit);
+      else if (backRequested) enqueue.raise({ type: 'BACK' });
+    }),
     storeSave: assign(({ event }) =>
       event.type === 'SAVE_SUCCEEDED'
         ? {
             profile: event.profile,
             draft: event.profile,
-            editField: null,
-            editValue: '',
+            lastEditValue: '',
             releaseReason: 'submit'
           }
         : {}
     ),
     discardDraft: assign(({ context }) => ({
       draft: context.profile,
-      editField: null,
-      editValue: '',
+      lastEditValue: '',
       releaseReason: 'back'
     })),
     preview: emit(({ context }) => ({

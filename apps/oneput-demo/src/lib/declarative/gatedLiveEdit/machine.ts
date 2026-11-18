@@ -8,8 +8,9 @@ export const gatedLiveEdit = liveEdit.createMachine({
   context: {
     profile: null,
     draft: null,
-    editField: null,
-    editValue: '',
+    edit: null,
+    lastEditValue: '',
+    afterEdit: null,
     releaseReason: 'released'
   },
   states: {
@@ -133,13 +134,11 @@ export const gatedLiveEdit = liveEdit.createMachine({
       on: {
         EDIT_FIELD: {
           target: '.editing',
-          actions: ['commitEdit', 'startEdit'],
-          description: 'Open the selected field after keeping any current edit.'
+          description: 'Open the selected field.'
         },
         SAVE: {
           guard: 'isDirty',
           target: '.saving',
-          actions: 'commitEdit',
           description: 'Save the complete draft when it has changed.'
         },
         PREVIEW: {
@@ -169,34 +168,34 @@ export const gatedLiveEdit = liveEdit.createMachine({
               settings: { enableFilter: false }
             }
           },
+          entry: 'beginEdit',
+          invoke: {
+            src: 'gatedFieldEdit',
+            id: 'gatedFieldEdit',
+            onSnapshot: {
+              actions: 'showEdit',
+              description: 'Show the current edit in the form.'
+            },
+            onDone: {
+              target: 'filtering',
+              actions: 'commitEdit',
+              description: 'Keep the completed field value in the draft.'
+            }
+          },
           on: {
-            INPUT_CHANGED: {
-              actions: 'writeEdit',
-              description: 'Keep the current field text in the edit buffer.'
-            },
             EDIT_FIELD: {
-              guard: 'isCurrentField',
-              target: 'filtering',
-              actions: 'commitEdit',
-              description: 'Keep the edit in the draft and clear the filter query.'
+              actions: 'submitEdit',
+              description: 'Finish the edit and open the selected field if it differs.'
             },
-            ITEM_FOCUSED: {
-              guard: 'userFocusLeftOwner',
-              target: 'filtering',
-              actions: 'commitEdit',
-              description: 'Keep the edit when the user focuses another row.'
-            },
-            INPUT_RELEASED: {
-              guard: 'ownerReleasedForCommit',
-              target: 'filtering',
-              actions: 'commitEdit',
-              description: 'Keep the edit when Oneput releases the field input.'
-            },
-            BACK: {
+            SAVE: {
               guard: 'isDirty',
-              target: 'filtering',
-              actions: ['commitEdit', 'checkBackFromDraft'],
-              description: 'Keep the edit and handle Back from the draft menu.'
+              actions: 'submitEdit',
+              description: 'Finish the edit before saving the draft.'
+            },
+            '*': {
+              guard: 'isEditInputEvent',
+              actions: 'forwardEditEvent',
+              description: 'Route Oneput input, focus and Back events to the field editor.'
             }
           }
         },
@@ -209,7 +208,7 @@ export const gatedLiveEdit = liveEdit.createMachine({
               input: {
                 kind: 'claim',
                 owner: 'live-edit-save',
-                value: { from: 'editValue' },
+                value: { from: 'lastEditValue' },
                 placeholder: ''
               },
               settings: { enableFilter: false, enableInputElement: false, enableGoBack: false }
@@ -246,7 +245,7 @@ export const gatedLiveEdit = liveEdit.createMachine({
               input: {
                 kind: 'claim',
                 owner: 'live-edit-save',
-                value: { from: 'editValue' },
+                value: { from: 'lastEditValue' },
                 placeholder: ''
               },
               settings: { enableFilter: false, enableInputElement: false }

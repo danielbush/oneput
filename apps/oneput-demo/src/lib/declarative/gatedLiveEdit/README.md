@@ -6,8 +6,10 @@ fails, the retry row sends `RETRY_LOAD`. After a load, the form enters
 
 Suppose the store loads **Grace Hopper**. Activate **Name** to send
 `EDIT_FIELD` with `field: name`, then type **Ada** in
-`ready.editing`. Activate **Name** again, release the field input, or move focus
-to another row to keep the change in the draft and return to filtering.
+`ready.editing`. The invoked [gated field editor](../patterns/gatedFieldEdit.ts)
+keeps the input text. Activate **Name** again, release the field input, move
+focus away, or press Back to complete the edit. The form commits the result
+to the draft and returns to filtering.
 **Preview values** shows the values currently in the menu. **Save** is enabled
 when the current values differ from the saved profile.
 
@@ -17,8 +19,9 @@ full draft and shows the `CircleAlert` icon and **Could not save. Activate to
 retry.** on the focused **Save** row. Activate **Save** again to retry, or activate
 a field to edit it. A successful save returns to filtering and disables **Save**.
 
-Oneput handles Back when the draft matches the saved profile. With unsaved
-changes, Back opens **Changes not saved**. Select **Discard** to restore the
+From filtering, Oneput handles Back when the draft matches the saved profile.
+With unsaved changes, Back opens **Changes not saved**, including after it
+completes an active field edit. Select **Discard** to restore the
 saved values and return to filtering. Select **Keep editing**, or press Back
 again, to return to filtering or to the save error.
 

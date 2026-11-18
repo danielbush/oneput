@@ -68,6 +68,18 @@ setHTML(element, html, policy):                    // this package's
 Only the `document` policy takes its own path (below), because it keeps far
 more.
 
+Oneput cleans menu content once, up front, rather than calling `setHTML` each
+time it renders:
+
+- menus re-render often, so cleaning once is cheaper;
+- the token carries the plain text that the fuzzy filter searches, with no DOM;
+- a cleaning failure shows where the item is made, not deep inside rendering;
+- no unchecked HTML travels through menu data, filters or copies of items.
+
+This is enforced twice. The `SafeHtml` type stops a plain string at compile
+time, and the private registry (next section) refuses at runtime anything that
+`sanitiseHtml` did not make, including casts.
+
 There are two things called `setHTML`. This package's `setHTML(element, html,
 policy)` is the one your code calls. The browser's native `Element.setHTML` is
 used only inside the package, as the first step of some policies (below).

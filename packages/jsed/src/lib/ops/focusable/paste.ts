@@ -1,6 +1,7 @@
+import { sanitiseDocumentNodes } from '@oneput/safe-html';
 /**
  * Place caller-supplied elements relative to a target — the destination half of
- * cut/copy/paste.
+ * cut/copy/paste. Remove active content before insertion without parsing.
  *
  * Each op has a `pasteCopy*` twin that clones first, so the same source can be
  * pasted repeatedly. None of these consult DOM_RULES; the caller decides what is
@@ -16,29 +17,35 @@ import { anchorize } from '../anchor.js';
 import { removeFocus } from '../focus.js';
 
 export function pasteBefore(pasted: HTMLElement, before: HTMLElement): HTMLElement | null {
+  if (!sanitiseDocumentNodes(pasted)) return null;
   return before.insertAdjacentElement('beforebegin', pasted) as HTMLElement | null;
 }
 
 export function pasteCopyBefore(pasted: HTMLElement, before: HTMLElement): HTMLElement | null {
   const copy = pasted.cloneNode(true) as HTMLElement;
+  if (!sanitiseDocumentNodes(copy)) return null;
   return before.insertAdjacentElement('beforebegin', copy) as HTMLElement | null;
 }
 
 export function pasteAfter(pasted: HTMLElement, after: HTMLElement): HTMLElement | null {
+  if (!sanitiseDocumentNodes(pasted)) return null;
   return after.insertAdjacentElement('afterend', pasted) as HTMLElement | null;
 }
 
 export function pasteCopyAfter(pasted: HTMLElement, after: HTMLElement): HTMLElement | null {
   const copy = pasted.cloneNode(true) as HTMLElement;
+  if (!sanitiseDocumentNodes(copy)) return null;
   return after.insertAdjacentElement('afterend', copy) as HTMLElement | null;
 }
 
 export function pasteWithin(pasted: HTMLElement, within: HTMLElement): HTMLElement | null {
+  if (!sanitiseDocumentNodes(pasted)) return null;
   return within.insertAdjacentElement('beforeend', pasted) as HTMLElement | null;
 }
 
 export function pasteCopyWithin(pasted: HTMLElement, within: HTMLElement): HTMLElement | null {
   const copy = pasted.cloneNode(true) as HTMLElement;
+  if (!sanitiseDocumentNodes(copy)) return null;
   return within.insertAdjacentElement('beforeend', copy) as HTMLElement | null;
 }
 
@@ -48,6 +55,7 @@ export function copyEmptyNext(target: HTMLElement): HTMLElement | null {
     return null;
   }
   const empty = target.cloneNode(false) as HTMLElement;
+  if (!sanitiseDocumentNodes(empty)) return null;
   removeFocus(empty);
   target.insertAdjacentElement('afterend', empty);
   if (canCreateWithAnchor(empty.tagName)) {
@@ -62,6 +70,7 @@ export function copyEmptyPrevious(target: HTMLElement): HTMLElement | null {
     return null;
   }
   const empty = target.cloneNode(false) as HTMLElement;
+  if (!sanitiseDocumentNodes(empty)) return null;
   removeFocus(empty);
   target.insertAdjacentElement('beforebegin', empty);
   if (canCreateWithAnchor(empty.tagName)) {

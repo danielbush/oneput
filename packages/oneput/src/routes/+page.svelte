@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { sanitiseHtml } from '@oneput/safe-html';
   import './_demo-styles.css';
   import '$lib/oneput/shared/styles/oneput-defaults.css';
   import Oneput from '$lib/oneput/shared/components/Oneput.svelte';
@@ -129,12 +130,15 @@
                   {
                     id: 'alert-title',
                     type: 'fchild',
-                    htmlContentUnsafe: '<h2>Alert Title!</h2>'
+                    htmlContent: sanitiseHtml('<h2>Alert Title!</h2>', 'ui').unwrapOr(null)
                   },
                   {
                     id: 'alert-message',
                     type: 'fchild',
-                    htmlContentUnsafe: '<p>This is the sentence below the alert title.</p>'
+                    htmlContent: sanitiseHtml(
+                      '<p>This is the sentence below the alert title.</p>',
+                      'ui'
+                    ).unwrapOr(null)
                   },
                   {
                     id: 'alert-button',
@@ -181,12 +185,15 @@
                   {
                     id: 'alert-title',
                     type: 'fchild',
-                    htmlContentUnsafe: '<h2>Confirm?</h2>'
+                    htmlContent: sanitiseHtml('<h2>Confirm?</h2>', 'ui').unwrapOr(null)
                   },
                   {
                     id: 'alert-message',
                     type: 'fchild',
-                    htmlContentUnsafe: '<p>This is the sentence below the confirm title.</p>'
+                    htmlContent: sanitiseHtml(
+                      '<p>This is the sentence below the confirm title.</p>',
+                      'ui'
+                    ).unwrapOr(null)
                   },
                   {
                     id: 'confirm-button-group',

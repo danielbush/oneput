@@ -1,3 +1,4 @@
+import { documentMarkupForExport } from '@oneput/safe-html';
 import { Nav } from '../../focus/Nav.js';
 import { Cursor } from '../../cursor/Cursor.js';
 import { Tokenizer } from '../../lib/ops/Tokenizer.js';
@@ -26,7 +27,9 @@ import { addImplicitLines } from '../../lib/ops/implicitLine.js';
 import { removeArtifacts } from '../../lib/ops/document.js';
 
 export type EditorError = { type: 'no-token-under-focus' } | CursorError;
-export type SerializeElementError = { type: 'element-outside-document' };
+export type SerializeElementError =
+  | { type: 'element-outside-document' }
+  | { type: 'document-export-refused'; cause: Error };
 export type EditorTextChangeEvent =
   | {
       type: 'token-text-change';
@@ -272,19 +275,22 @@ export class EditorState {
   }
 
   /**
-   * Clone the document, strip editing artifacts from the clone, return its html.
+   * Clone the document, strip editing artifacts, remove active content, and return its HTML.
    *
-   * Works mid-session. The live document keeps its artifacts.
+   * Works mid-session. The live document keeps its artifacts. Throws if export is refused.
    */
   serialize(): string {
     const clone = this.document.root.cloneNode(true) as HTMLElement;
     removeArtifacts(clone);
-    return clone.innerHTML;
+    const result = documentMarkupForExport(clone);
+    if (result.isErr()) throw result.error;
+    return result.value;
   }
 
   /**
    * Clone one element in this document, strip editing artifacts from the
    * clone, and return its authored inner HTML.
+   * Return document-export-refused if the export check refuses the clone.
    */
   serializeElement(element: HTMLElement): Result<string, SerializeElementError> {
     if (!this.document.root.contains(element)) {
@@ -293,7 +299,10 @@ export class EditorState {
 
     const clone = element.cloneNode(true) as HTMLElement;
     removeArtifacts(clone);
-    return ok(clone.innerHTML);
+    return documentMarkupForExport(clone).mapErr((cause) => ({
+      type: 'document-export-refused' as const,
+      cause
+    }));
   }
 
   isEditing(): boolean {

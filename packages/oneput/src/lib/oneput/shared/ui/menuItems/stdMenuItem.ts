@@ -1,3 +1,5 @@
+import { sanitiseHtml } from '@oneput/safe-html';
+import type { SafeHtml } from '@oneput/safe-html';
 import type { Controller } from '../../../controllers/controller.js';
 import { vflex, type FlexChildBuilder } from '../../../lib/builder.js';
 import { randomId } from '../../../lib/utils.js';
@@ -68,7 +70,7 @@ export type StdMenuItemParams<D extends Record<string, unknown> = Record<string,
   canFilter?: boolean;
   classes?: Array<string | false | undefined>;
   style?: Partial<CSSStyleDeclaration>;
-  htmlContentUnsafe?: string;
+  htmlContent?: SafeHtml | null;
   textContent?: string;
   left?: false | ((b: FlexChildBuilder) => FlexChildren);
   right?: false | ((b: FlexChildBuilder) => FlexChildren);
@@ -80,7 +82,7 @@ export type StdMenuItemParams<D extends Record<string, unknown> = Record<string,
   bottom?: {
     left?: false | ((b: FlexChildBuilder) => FlexChildren);
     right?: false | ((b: FlexChildBuilder) => FlexChildren);
-    htmlContentUnsafe?: string;
+    htmlContent?: SafeHtml | null;
     textContent?: string;
   };
   onMount?: (node: HTMLElement) => void | (() => void);
@@ -152,7 +154,7 @@ export function stdMenuItem(params: StdMenuItemParams): StdMenuItem {
                 id: ids.title,
                 classes: ['oneput__std-menu-item-title'],
                 textContent: itemParams.textContent,
-                htmlContentUnsafe: itemParams.htmlContentUnsafe
+                htmlContent: itemParams.htmlContent
               })
             ]
           }),
@@ -168,7 +170,7 @@ export function stdMenuItem(params: StdMenuItemParams): StdMenuItem {
                         b.fchild({
                           id: ids.bindingHint,
                           style: { flex: '0' },
-                          innerHTMLUnsafe: bindingToKbdHtml(hint),
+                          htmlContent: sanitiseHtml(bindingToKbdHtml(hint), 'ui').unwrapOr(null),
                           classes: ['oneput__kbd']
                         })
                       ]
@@ -209,7 +211,7 @@ export function stdMenuItem(params: StdMenuItemParams): StdMenuItem {
                 b.fchild({
                   id: ids.bottomCenter,
                   textContent: itemParams.bottom?.textContent,
-                  htmlContentUnsafe: itemParams.bottom?.htmlContentUnsafe,
+                  htmlContent: itemParams.bottom?.htmlContent,
                   classes: ['oneput__std-menu-item-bottom']
                 }),
 

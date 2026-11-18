@@ -1,3 +1,4 @@
+import { safeHtmlText } from '@oneput/safe-html';
 import uFuzzy from '@leeoniya/ufuzzy';
 import { walk } from '../../lib/utils.js';
 import type { FChildParams, MenuItemAny, MenuItemsFilterFn } from '../../types.js';
@@ -16,7 +17,7 @@ export type HaystackData =
       fchild: FChildParams;
       menuItemIndex: number;
       menuItem: MenuItemAny;
-      htmlContentUnsafe: string;
+      htmlContent: string;
     };
 
 function getHaystack(menuItems: MenuItemAny[]) {
@@ -24,21 +25,18 @@ function getHaystack(menuItems: MenuItemAny[]) {
   const haystackInfo: HaystackData[] = [];
   menuItems.forEach((item, index) => {
     walk(item, (child) => {
-      if (child.type === 'fchild' && child.htmlContentUnsafe) {
+      if (child.type === 'fchild' && child.textContent !== undefined)
+        child.textSegments = undefined;
+      if (child.type === 'fchild' && child.htmlContent) {
         haystackInfo.push({
           type: 'html',
           menuItemIndex: index,
           menuItem: item,
           fchild: child,
-          htmlContentUnsafe: child.htmlContentUnsafe
+          htmlContent: safeHtmlText(child.htmlContent)
         });
-        // TODO: we should probably strip the tags:
-        haystack.push(child.htmlContentUnsafe);
+        haystack.push(safeHtmlText(child.htmlContent));
       } else if (child.type === 'fchild' && child.textContent) {
-        // Important: clean up previous derivedHTML.
-        if (child.derivedHTML) {
-          child.derivedHTML = undefined;
-        }
         haystackInfo.push({
           type: 'plainText',
           menuItemIndex: index,
@@ -57,17 +55,12 @@ function getHaystack(menuItems: MenuItemAny[]) {
 }
 
 /**
- * Any menu item that has one or more children that match the ENTIRE input using
- * uFuzzy are included.  For children that use textNode, highlight any
- * match using the derivedHTML mechanism.
+ * Keeps the menu items that have one child whose text matches the whole query
+ * with uFuzzy. For `htmlContent`, it searches the text without tags.
  *
- * This approach makes highlighting easier because we require a complete match
- * on individual textContent nodes within the menuItem, but it requires that at
- * least one single child needs to satisfy the fuzzy search rather than the
- * totality of text in the menu item.  We could search against the totality of
- * text but that would make highlighting harder.  If we assume that most
- * important visible text is in a single textContent property or htmlContentUnsafe
- * then the first approach works well and is relatively simple.
+ * It highlights matches in `textContent` children by setting `textSegments`,
+ * with the matched parts in `b`. Every search first clears the old highlights,
+ * also when the query is empty.
  */
 export class FuzzyFilter {
   static create() {
@@ -93,6 +86,7 @@ export class FuzzyFilter {
    * (WordFilter differs: order-preserving, so it keeps a mid-list pin in place.)
    */
   filter: MenuItemsFilterFn = (input, menuItems) => {
+    getHaystack(menuItems);
     if (!input || !/\S/.test(input)) {
       return { items: menuItems };
     }
@@ -134,14 +128,14 @@ export class FuzzyFilter {
       const infoIdx = order[i];
       const item = haystackInfo[info.idx[infoIdx]];
       if (item.type === 'plainText') {
-        // We need the p-tags because fchild's are flexed by default and this
-        // will do weird things to spaces for text interspersed with markup.
-        item.fchild.derivedHTML =
-          '<p>' +
-          uFuzzy.highlight(item.textContent, info.ranges[infoIdx], (part, matched) =>
-            matched ? '<b>' + part + '</b>' : part
-          ) +
-          '</p>';
+        // Put all pieces in one `textSegments` list, so they render in one
+        // inline span and the spaces between them stay.
+        const segments: NonNullable<FChildParams['textSegments']> = [];
+        uFuzzy.highlight(item.textContent, info.ranges[infoIdx], (text, emphasis) => {
+          segments.push({ text, emphasis });
+          return '';
+        });
+        item.fchild.textSegments = segments;
       }
       if (ids[item.menuItem.id]) {
         continue;

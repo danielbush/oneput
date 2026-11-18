@@ -41,9 +41,7 @@ export class AsyncSearchExample implements AppObject {
     this.ctl.menu.setGenerativeAsync(
       async (input) => {
         try {
-          this.outerRightStatus.withNode((node) => {
-            node.innerHTML = 'Fetching data...';
-          });
+          this.outerRightStatus.setText('Fetching data...');
           const results = await this.testInputService.fetchData(input);
           return results.map((result) => {
             this.ctl.clearNotifications();
@@ -52,9 +50,7 @@ export class AsyncSearchExample implements AppObject {
               textContent: `Result: '${result.text}'`,
               left: (b) => [b.icon(icons.Dot)],
               action: () => {
-                this.outerRightStatus.withNode((node) => {
-                  node.innerHTML = `Selected: ${result}`;
-                });
+                this.outerRightStatus.setText(`Selected: ${result.text}`);
               }
             });
           });
@@ -68,9 +64,7 @@ export class AsyncSearchExample implements AppObject {
           if (this.isError && !isDebouncing) {
             return;
           } else {
-            this.outerRightStatus.withNode((node) => {
-              node.innerHTML = isDebouncing ? 'Debouncing...' : 'Ready';
-            });
+            this.outerRightStatus.setText(isDebouncing ? 'Debouncing...' : 'Ready');
             this.setBusy(isDebouncing);
           }
         },
@@ -97,9 +91,7 @@ export class AsyncSearchExample implements AppObject {
 
   private setError(error: Error) {
     console.error(error);
-    this.outerRightStatus.withNode((node) => {
-      node.innerHTML = '⚠️ Error';
-    });
+    this.outerRightStatus.setText('⚠️ Error');
     this.isError = true;
     const alert = this.ctl.alert({
       message: 'An error!',

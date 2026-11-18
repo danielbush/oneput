@@ -1,6 +1,12 @@
 <script lang="ts">
+  /**
+   * Renders a builder `hflex` or `vflex` and its children. Each element's tag,
+   * attributes and styles pass through `checkedElement`, and its attachments
+   * through `checkedAttachments`, before Svelte writes them.
+   */
   import FChild from './FChild.svelte';
-  import { createStyleAttribute } from '../../lib/utils.js';
+  import { checkedElement, checkedAttachments } from '../../lib/domSafety.js';
+  import { defaultVoidElements } from '../../lib/defaultVoidElements.js';
   import { onMount } from 'svelte';
   import {
     isFlexRealChild,
@@ -18,7 +24,7 @@
     { node: HTMLElement; onMount?: (node: HTMLElement, ctx: MountContext) => void | (() => void) }
   >;
   const mountContext = getMountContext();
-  let mounts = $state<Mountables>(new Map());
+  const mounts: Mountables = new Map();
   onMount(() => {
     const unmounts: (() => void)[] = [];
     mounts.forEach(({ node, onMount }) => {
@@ -36,21 +42,22 @@
 </script>
 
 {#snippet flex(params: FlexParams, nested: boolean = false)}
-  {#if props.tag === 'hr'}
+  {@const checked = checkedElement(params)}
+  {#if defaultVoidElements.has(checked.tag)}
     <svelte:element
-      this={params.tag}
+      this={checked.tag}
       id={params.id}
-      style={params.style && createStyleAttribute(params.style)}
+      style={checked.style || undefined}
       class={[
         !nested && topLevelClass,
         params.type == 'hflex' ? 'oneput__hflex' : 'oneput__vflex',
         ...(params.classes || [])
       ]}
-      {...params.attr}
+      {...checked.attr}
     />
   {:else}
     <svelte:element
-      this={params.tag || 'div'}
+      this={checked.tag}
       bind:this={
         () => this,
         (n) => {
@@ -61,14 +68,14 @@
         }
       }
       id={params.id}
-      style={params.style && createStyleAttribute(params.style)}
+      style={checked.style || undefined}
       class={[
         !nested && topLevelClass,
         params.type == 'hflex' ? 'oneput__hflex' : 'oneput__vflex',
         ...(params.classes || [])
       ]}
-      {...params.attr}
-      {...params.attachments}
+      {...checked.attr}
+      {...checkedAttachments(params.attachments)}
     >
       {#if params.children}
         {#each params.children.filter(isFlexRealChild) as child (child.id)}

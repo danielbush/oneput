@@ -4,6 +4,10 @@
 
 This codebase is new. Avoid preserving old apis or features, do not keep legacy code. Always prefer replacing with better implementations and apis. It's paramount that we get the foundations right so that future changes can be added easily and in a modular fashion.
 
+## Demo app
+
+`apps/oneput-demo` shows Oneput. It is not meant to be consumed. Track its issues here, in this package: security findings in `THREAT_MODEL.md`, and other issues in this package's docs and backlog. Do not create separate docs for the demo.
+
 ## Testing
 
 See `TESTING.md` for a high-level testing policy.
@@ -19,6 +23,13 @@ Offer to flesh this out with the user. Look for obvious things to tackle.
 ## Key systems (packages/oneput)
 
 Below are pointers for agents — read the source files for full detail via JSDoc.
+
+### Safe UI content
+
+Strings stay text. Rich fields require `SafeHtml` from `@oneput/safe-html`.
+`lib/domSafety.ts` checks tags, attributes, URLs, and styles before rendering.
+`lib/icons.ts` checks bounded SVG geometry and renders it with DOM calls.
+See `docs/safe-content.md` for policies, failure states, and deferred sinks.
 
 ### Bindings
 

@@ -76,7 +76,23 @@ Jsed is a headless library — it contains all the navigation and editing logic 
 
 ## The foundation: document and input
 
-Everything starts with a thin document wrapper around an HTML root element. It tags IMPLICIT_LINEs in the DOM and exposes the root, the owning document, and a set of SIB_HIGHLIGHT elements. That's it. Every other layer takes the wrapped document, or its root, as input.
+`JsedDocument` starts with an HTML root. `JsedDocument.create(root, html)`
+checks HTML in an inert template before insertion. Hosts must use this path,
+or `setHTML(root, html, 'document')`, before untrusted HTML becomes live.
+The root-only factory checks caller-built nodes in place before editor setup.
+It preserves safe node identity; it cannot undo script run before that call.
+The editor then adds IMPLICIT_LINEs and ANCHORs. The wrapper exposes the root,
+its owning document, and SIB_HIGHLIGHT elements.
+
+One document policy in `@oneput/safe-html` removes active content while keeping
+normal document markup, attributes, CSS, images, SVG and comments. Paste checks
+nodes before insertion. Creation and conversion check caller tags; recursive
+creation has depth and node limits. Patches use the same policy before writes
+and history capture. Clipboard paste records one undo step and keeps node
+identity on replay. Export removes editor artifacts from a clone, then checks
+that clone and its saved markup. No content check parses the live editor root.
+Remote resource loads and document CSS remain accepted risks; see
+[the threat model](../THREAT_MODEL.md#most-at-risk-now).
 
 Alongside it, the host input contract describes how jsed talks to an external input control. It covers setting values, selecting text, moving the input cursor, and subscribing to input and selection changes. Input change subscriptions carry before/after value and range snapshots so editing logic can reason about the user transition rather than only the final input string. Jsed stays headless by depending on this contract instead of owning a concrete input element.
 

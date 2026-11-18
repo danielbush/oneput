@@ -20,7 +20,8 @@
     "@oneput/oneput": "workspace:",
     "lucide": "^1.70.0",
     "neverthrow": "catalog:",
-    "xstate": "^5.0.0"
+    "xstate": "^5.0.0",
+    "@oneput/safe-html": "workspace:*"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.5",
@@ -34,6 +35,7 @@
     "eslint-plugin-svelte": "catalog:",
     "globals": "^16.0.0",
     "idb": "^8.0.3",
+    "jsdom": "^30.1.1",
     "katex": "^0.16.25",
     "prettier": "^3.4.2",
     "prettier-plugin-svelte": "catalog:",

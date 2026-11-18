@@ -1,3 +1,4 @@
+import { setHTML } from '@oneput/safe-html';
 import { Fetch, type FetchError } from '@oneput/oneput/shared/Fetch.js';
 import { errAsync, ResultAsync } from 'neverthrow';
 
@@ -25,7 +26,7 @@ export class TestDocService {
         )
       )
       .map((html) => {
-        docRoot.innerHTML = html;
+        setHTML(docRoot, html, 'document');
         return docRoot;
       });
   }

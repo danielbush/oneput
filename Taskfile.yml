@@ -56,9 +56,16 @@ tasks:
       - task: oneput:format:check
       - task: oneput-demo:format:check
       - task: jsed-demo:format:check
+  check:html-sinks:
+    desc: Check raw HTML sinks without changing source files
+    cmds:
+      - node scripts/safe-html/check.mjs
+      - pnpm exec vitest run --config scripts/safe-html/vitest.config.mjs
+
   check:
     desc: run checks (eg types, linting) on all important packages
     deps:
+      - task: check:html-sinks
       - task: oneput:check
       - task: oneput-demo:check
       - task: jsed:check
@@ -71,6 +78,7 @@ tasks:
       - task: jsed:test
       - task: safe-html:test
       - task: oneput:test
+      - task: oneput-demo:test
 
   todo:
     cmds:

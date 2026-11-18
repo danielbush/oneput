@@ -13,7 +13,7 @@ export * as utils from './oneput/lib/utils.js';
 export * as bindings from './oneput/lib/bindings.js';
 export { KeyEventBindings } from './oneput/lib/bindings.js';
 export { mountSvelte, randomId } from './oneput/lib/utils.js';
-export { registerIcon, registerIcons, element, unsafeHTML } from './oneput/lib/icons.js';
+export { registerIcon, registerIcons, checkIconGeometry } from './oneput/lib/icons.js';
 export { DOMUpdater } from './oneput/lib/DOMUpdater.js';
 export {
   cell,
@@ -46,3 +46,7 @@ export {
 // Shared
 // This is exposed under shared/ as individual paths -- see "exports" in package.json.
 export { routeApp } from './oneput/shared/routing/routeApp.js';
+
+export type { IconDefinition, IconNode } from './oneput/lib/icons.js';
+
+export { renderMessage, type Message } from './oneput/shared/ui/Message.js';

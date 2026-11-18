@@ -1,4 +1,4 @@
-import { element, registerIcons } from '@oneput/oneput';
+import { registerIcons } from '@oneput/oneput';
 import * as lu from 'lucide';
 
 export const iconData = {
@@ -39,4 +39,4 @@ export const iconData = {
   ChevronRight: lu.ChevronRight
 };
 
-export const icons = registerIcons(iconData, (icon) => element(() => lu.createElement(icon)));
+export const icons = registerIcons(iconData);

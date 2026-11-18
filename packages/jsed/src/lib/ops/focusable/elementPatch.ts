@@ -1,5 +1,13 @@
+import { err, ok, type Result } from 'neverthrow';
+import { checkPatchContent, checkPatchAttributes } from './lib/patchSafety.js';
+
 /**
  * A declarative update to one existing element.
+ *
+ * Child patches accept caller-built nodes. The shared document policy checks
+ * both new children and the undo snapshot. It refuses active content.
+ * Each write uses new clones, so caller changes and live edits cannot change
+ * undo or redo data.
  */
 export type ElementPatch = {
   /** Set an attribute, or remove it with `null`. */
@@ -10,8 +18,8 @@ export type ElementPatch = {
     /** Class tokens to remove before additions are applied. */
     readonly remove?: readonly string[];
   };
-  /** Replace presentation-only child markup. */
-  readonly html?: string;
+  /** Replace children with copies of caller-built nodes. No HTML is parsed. */
+  readonly children?: DocumentFragment;
 };
 
 /**
@@ -20,7 +28,7 @@ export type ElementPatch = {
 type TouchedElementState = {
   attributes?: ReadonlyMap<string, string | null>;
   classes?: ReadonlyMap<string, boolean>;
-  html?: string;
+  children?: DocumentFragment;
 };
 
 /**
@@ -40,6 +48,7 @@ export function patchElement(
   element: HTMLElement,
   input: ElementPatch
 ): PatchElementOperation | null {
+  if (checkElementPatch(element, input).isErr()) return null;
   const patch = copyElementPatch(input);
   if (!wouldChangeElement(element, patch)) {
     return null;
@@ -53,6 +62,32 @@ export function patchElement(
     patch,
     before
   };
+}
+
+/** The part of a patch that failed its content check. */
+export type PatchError = { type: 'patch-refused'; field: 'attributes' | 'children' | 'classes' };
+
+/** Check all touched content before the editor changes focus or history. */
+export function checkElementPatch(
+  element: HTMLElement,
+  input: ElementPatch
+): Result<void, PatchError> {
+  if (!checkPatchAttributes(element, input.attributes))
+    return err({ type: 'patch-refused', field: 'attributes' });
+  if (
+    input.children !== undefined &&
+    (!checkPatchContent(input.children) || !checkPatchContent(element))
+  )
+    return err({ type: 'patch-refused', field: 'children' });
+  const previousAttributes = Object.fromEntries(
+    Object.keys(input.attributes ?? {}).map((name) => [name, element.getAttribute(name)])
+  );
+  if (!checkPatchAttributes(element, previousAttributes))
+    return err({ type: 'patch-refused', field: 'attributes' });
+  const tokens = [...(input.classes?.add ?? []), ...(input.classes?.remove ?? [])];
+  if (tokens.some((token) => !token || /\s/.test(token)))
+    return err({ type: 'patch-refused', field: 'classes' });
+  return ok(undefined);
 }
 
 /**
@@ -81,7 +116,7 @@ function copyElementPatch(patch: ElementPatch): ElementPatch {
           remove: patch.classes.remove ? [...patch.classes.remove] : undefined
         }
       : undefined,
-    html: patch.html
+    children: patch.children?.cloneNode(true) as DocumentFragment | undefined
   };
 }
 
@@ -105,11 +140,14 @@ function wouldChangeElement(element: HTMLElement, patch: ElementPatch): boolean 
     }
   }
 
-  return patch.html !== undefined && element.innerHTML !== patch.html;
+  if (patch.children === undefined) return false;
+  const current = [...element.childNodes];
+  const next = [...patch.children.childNodes];
+  return current.length !== next.length || current.some((node, i) => !node.isEqualNode(next[i]));
 }
 
 /**
- * Capture only the attributes, class tokens, and markup named by a patch.
+ * Capture only the attributes, class tokens, and children named by a patch.
  */
 function captureTouchedState(element: HTMLElement, patch: ElementPatch): TouchedElementState {
   const attributes = patch.attributes
@@ -123,12 +161,12 @@ function captureTouchedState(element: HTMLElement, patch: ElementPatch): Touched
   return {
     attributes,
     classes,
-    html: patch.html === undefined ? undefined : element.innerHTML
+    children: patch.children === undefined ? undefined : cloneChildren(element)
   };
 }
 
 /**
- * Apply attributes, class removals, class additions, and markup in order.
+ * Apply attributes, class removals, class additions, and children in order.
  */
 function applyElementPatch(element: HTMLElement, patch: ElementPatch): void {
   for (const [name, value] of Object.entries(patch.attributes ?? {})) {
@@ -146,8 +184,8 @@ function applyElementPatch(element: HTMLElement, patch: ElementPatch): void {
     element.classList.add(token);
   }
 
-  if (patch.html !== undefined) {
-    element.innerHTML = patch.html;
+  if (patch.children !== undefined) {
+    element.replaceChildren(patch.children.cloneNode(true));
   }
 }
 
@@ -167,7 +205,14 @@ function restoreTouchedState(element: HTMLElement, state: TouchedElementState): 
     element.classList.toggle(token, present);
   }
 
-  if (state.html !== undefined) {
-    element.innerHTML = state.html;
+  if (state.children !== undefined) {
+    element.replaceChildren(state.children.cloneNode(true));
   }
+}
+
+/** Copy children without parsing or moving live nodes. */
+function cloneChildren(element: HTMLElement): DocumentFragment {
+  const fragment = element.ownerDocument.createDocumentFragment();
+  for (const child of element.childNodes) fragment.append(child.cloneNode(true));
+  return fragment;
 }

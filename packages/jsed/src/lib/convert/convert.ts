@@ -5,8 +5,8 @@ import mk from '@iktakahiro/markdown-it-katex';
  * Convert markdown content to html but handle katex.
  */
 export function convertMd(markdown: string): string {
-  const md = new MarkdownIt({ html: true });
-  md.use(mk);
+  const md = new MarkdownIt({ html: false });
+  md.use(mk, { trust: false, maxExpand: 1000, maxSize: 20, strict: 'error' });
   return md.render(markdown);
 }
 
@@ -30,14 +30,14 @@ function template(
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <meta name="Description" content="${description}">
+  <meta name="Description" content="${escapeMetadata(description)}">
   <base href="/">
 
   <style></style>
   <link rel="stylesheet" href="${stylePath}" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css"/>
-  <title>${title}</title>
+  <title>${escapeMetadata(title)}</title>
 </head>
 
 <body>
@@ -47,4 +47,19 @@ function template(
 </body>
 
 </html>`;
+}
+
+/** Escape both text and quoted attribute contexts in the export template. */
+function escapeMetadata(value: string): string {
+  return value.replace(
+    /[&<>"']/g,
+    (char) =>
+      ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      })[char]!
+  );
 }

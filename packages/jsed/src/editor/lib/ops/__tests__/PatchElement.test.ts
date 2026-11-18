@@ -63,7 +63,7 @@ describe('PatchElement.run', () => {
 
     // act
     const record = PatchElement.run(state, target, {
-      html: '<section id="changed">changed</section>'
+      children: fragment('<section id="changed">changed</section>')
     });
 
     // assert
@@ -88,7 +88,9 @@ describe('PatchElement.run', () => {
     state.enterEditing(target);
 
     // act
-    const record = PatchElement.run(state, target, { html: '<strong>changed</strong>' });
+    const record = PatchElement.run(state, target, {
+      children: fragment('<strong>changed</strong>')
+    });
 
     // assert
     expect(record).toBeDefined();
@@ -111,7 +113,9 @@ describe('PatchElement.run', () => {
     target.innerHTML = 'Keep <span class="jsed-token jsed-deleted jsed-ignore">Delete</span>';
 
     // act
-    const record = PatchElement.run(state, target, { html: '<strong>After</strong>' });
+    const record = PatchElement.run(state, target, {
+      children: fragment('<strong>After</strong>')
+    });
 
     // assert
     expect(record).toBeDefined();
@@ -141,7 +145,9 @@ describe('PatchElement.run', () => {
     const target = byId(doc, 'p2');
 
     // act
-    const record = PatchElement.run(state, target, { html: '<strong>after</strong>' });
+    const record = PatchElement.run(state, target, {
+      children: fragment('<strong>after</strong>')
+    });
 
     // assert
     expect(record).toBeDefined();
@@ -165,3 +171,10 @@ describe('PatchElement.run', () => {
     state.destroy();
   });
 });
+
+/** Build test nodes at the caller boundary. */
+function fragment(html: string): DocumentFragment {
+  const template = document.createElement('template');
+  template.innerHTML = html;
+  return template.content;
+}

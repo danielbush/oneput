@@ -1,3 +1,4 @@
+import type { SafeHtml } from '@oneput/safe-html';
 import type { AppController } from './controllers/AppController.js';
 import type { Controller } from './controllers/controller.js';
 import type { InputController } from './controllers/InputController.js';
@@ -27,12 +28,6 @@ declare global {
       postMessage: (message: unknown) => void;
     };
   }
-  /**
-   * The controller will register an event listener for 'message'. Prevent this
-   * happening multiple times. Probably more an issue when hot reloading.
-   */
-  var messageListenerIsSetup: boolean;
-  var insertImage: (dataUrl: string, fileName: string) => void;
 }
 
 export type InputChangeListener = (evt: InputEvent) => void;
@@ -232,10 +227,6 @@ export type FlexParams = {
    * them.
    */
   children?: FlexChildren;
-  /**
-   * Instructs Oneput rendered to override default list of HTML void elements.
-   */
-  voidElements?: Set<string | undefined>;
   action?: (c: Controller) => void;
   attachments?: Record<symbol, (element: HTMLElement) => void>;
   onMount?: (node: HTMLElement, ctx: MountContext) => void | (() => void);
@@ -375,26 +366,24 @@ export type FChildParams = {
   classes?: Array<string | false | undefined>;
   style?: Partial<CSSStyleDeclaration>;
   textContent?: string;
-  htmlContentUnsafe?: string;
   /**
-   * Use innerHTMLUnsafe for icons or decorative content.  Use
-   * htmlContentUnsafe for actual content.
+   * HTML from `sanitiseHtml`. Pass `null` when sanitising failed; it shows
+   * "Content unavailable". A string is a type error.
    */
-  innerHTMLUnsafe?: string;
+  htmlContent?: SafeHtml | null;
   /**
    * Name of a registered icon to render.
    * Use registerIcon() or registerIcons() to register icons before use.
-   * Takes precedence over innerHTMLUnsafe when both are specified.
+   * Takes precedence over rich content.
    */
   icon?: string;
   /**
-   * Is set by a menuItemsFn (via Oneput controller) usually to show
-   * highlighted text when user is filtering menu items by typing.
+   * Text in pieces, each shown as text in a `b` (`emphasis`) or a `span` (with
+   * `classes`). Menu filters set it to highlight matches, and clear it on the
+   * next search.
    */
-  derivedHTML?: string;
+  textSegments?: Array<{ text: string; emphasis?: boolean; classes?: string[] }>;
   onMount?: (node: HTMLElement, ctx: MountContext) => void | (() => void);
-  /** List of HTML void elements. */
-  voidElements?: Set<string | undefined>;
 };
 
 /**

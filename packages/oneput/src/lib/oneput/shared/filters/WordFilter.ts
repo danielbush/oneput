@@ -1,3 +1,4 @@
+import { safeHtmlText } from '@oneput/safe-html';
 import { walk } from '../../lib/utils.js';
 import type { FChildParams, MenuItemAny, MenuItemsFilterFn } from '../../types.js';
 
@@ -19,7 +20,7 @@ function getHaystack(menuItems: MenuItemAny[]): HaystackInfo {
     walk(menuItem, (child) => {
       if (child.type === 'fchild') {
         // IMPORTANT remove stale highlighting.
-        child.derivedHTML = undefined;
+        child.textSegments = undefined;
         children.push(child);
       }
     });
@@ -32,10 +33,12 @@ function getHaystack(menuItems: MenuItemAny[]): HaystackInfo {
 }
 
 /**
- * If each word in the input is a prefix for at least one text-bearing child in
- * a menu item, then include the menu item.  For html, we just test the html
- * string contains the word (TODO: strip tags?).  For children that use
- * textNode, highlight any prefixed match using the derivedHTML mechanism.
+ * Keeps a menu item when each word in the query starts a word in one of its
+ * children. For `htmlContent`, it checks whether the text without tags contains
+ * the query word.
+ *
+ * It highlights the matched prefixes in `textContent` children by setting
+ * `textSegments`, with the prefix in `b`. The text is never parsed as HTML.
  */
 export class WordFilter {
   static create() {
@@ -43,7 +46,7 @@ export class WordFilter {
   }
 
   filter: MenuItemsFilterFn = (input, menuItems) => {
-    // ALWAYS call haystack because it clears derivedHTML in FChild
+    // ALWAYS call haystack because it clears textSegments in FChild
     // elements.  Example: user types some text, then deletes all of it
     // using backspace, the last character to be deleted (which is the first
     // one) will remain highlighted.
@@ -54,7 +57,10 @@ export class WordFilter {
     const words = input.split(/\s+/).filter(Boolean);
     const matchingItems: MenuItemAny[] = [];
     let focusItemId: string | undefined;
-    const tokenInfo: Record<string, { tokens: string[]; derived: string[] }> = {};
+    const tokenInfo: Record<
+      string,
+      { tokens: string[]; derived: NonNullable<FChildParams['textSegments']>[] }
+    > = {};
     const pushed: Record<string, boolean> = {};
     for (const menuItemData of haystack.menuItems) {
       // Pinned items (canFilter === false) are always shown, in place, and never
@@ -71,9 +77,11 @@ export class WordFilter {
       for (const word of words) {
         let wordMatchesSomething = false;
         for (const child of menuItemData.children) {
-          if (child.htmlContentUnsafe) {
+          if (child.htmlContent) {
             // For a given menu item and a given word, try to match on non-svg html...
-            const matches = child.htmlContentUnsafe.toLowerCase().includes(word.toLowerCase());
+            const matches = safeHtmlText(child.htmlContent)
+              .toLowerCase()
+              .includes(word.toLowerCase());
             if (matches) {
               wordMatchesSomething = true;
               break;
@@ -89,14 +97,18 @@ export class WordFilter {
             for (let i = 0; i < tinfo.tokens.length; i++) {
               if (tinfo.tokens[i].toLowerCase().startsWith(word.toLowerCase())) {
                 matches = true;
-                tinfo.derived[i] =
-                  `<b>${tinfo.tokens[i].slice(0, word.length)}</b>${tinfo.tokens[i].slice(word.length)}`;
+                tinfo.derived[i] = [
+                  { text: tinfo.tokens[i].slice(0, word.length), emphasis: true },
+                  { text: tinfo.tokens[i].slice(word.length) }
+                ];
               }
             }
             if (matches) {
               wordMatchesSomething = true;
               // This now sits on the menu item and could become stale very quickly showing unwanted highlight.
-              child.derivedHTML = `<p>${tinfo.derived.map((d, index) => d || tinfo.tokens[index]).join('')}</p>`;
+              child.textSegments = tinfo.tokens.flatMap(
+                (text, index) => tinfo.derived[index] || [{ text }]
+              );
               break;
             }
           }

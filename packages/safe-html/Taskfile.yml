@@ -8,7 +8,7 @@ tasks:
     cmds:
       - pnpm run test
   test:browser:
-    desc: Test safe HTML insertion in Chromium
+    desc: Test shared policies and CSP in Chromium, Firefox and WebKit
     cmds:
       - pnpm run test:browser
   check:

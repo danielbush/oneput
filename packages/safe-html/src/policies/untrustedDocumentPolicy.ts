@@ -1,28 +1,25 @@
-import type { SanitizerPolicy } from "./types.js";
-
 /**
- * Allow the markup of a document from an untrusted file.
- *
- * Keep normal HTML and SVG, `class`, `id`, `aria-*` and `data-*` attributes,
- * so structures in the document still work. Remove active content, and
- * elements that load other resources or change the page around the document.
- *
- * Example: use this for an HTML file that the user opens.
+ * One policy for editor documents. Keep document structure, CSS, images, SVG,
+ * MathML and comments. Remove active content before nodes become live.
+ * Remote resources and document CSS are accepted risks.
  */
-export const untrustedDocumentPolicy: SanitizerPolicy = {
-  removeElements: [
-    "base",
-    "embed",
-    "form",
-    "frame",
-    "frameset",
-    "iframe",
-    "link",
-    "meta",
-    "noscript",
-    "object",
+export const untrustedDocumentPolicy = Object.freeze({
+  removeElements: Object.freeze([
     "script",
-    "style",
-  ],
+    "iframe",
+    "frame",
+    "object",
+    "embed",
+    "base",
+    "foreignobject",
+  ]),
   comments: true,
-};
+});
+
+/** Check caller tag names before creating or converting an element. */
+export function isDocumentTagAllowed(tag: string): boolean {
+  return (
+    /^[a-z][a-z0-9-]*$/i.test(tag) &&
+    !untrustedDocumentPolicy.removeElements.includes(tag.toLowerCase())
+  );
+}

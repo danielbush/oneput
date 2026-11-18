@@ -81,7 +81,7 @@ export function chatSessionItem(params: ChatSessionItemParams): MenuItem {
             children: [
               {
                 id: `${id}-busy-bubble`,
-                type: 'fchild' as const,
+                type: 'hflex' as const,
                 classes: [
                   'oneput__chat-session-bubble',
                   'oneput__chat-session-bubble--agent',
@@ -92,10 +92,12 @@ export function chatSessionItem(params: ChatSessionItemParams): MenuItem {
                   'aria-live': 'polite',
                   'aria-label': 'Thinking'
                 },
-                htmlContentUnsafe:
-                  '<span class="oneput__chat-session-dot"></span>' +
-                  '<span class="oneput__chat-session-dot"></span>' +
-                  '<span class="oneput__chat-session-dot"></span>'
+                children: [0, 1, 2].map((index) => ({
+                  id: `${id}-dot-${index}`,
+                  type: 'fchild' as const,
+                  tag: 'span',
+                  classes: ['oneput__chat-session-dot']
+                }))
               }
             ]
           },

@@ -5,7 +5,7 @@ describe('convert', () => {
   describe('convert', () => {
     it('should return a filled-in template', () => {
       // act
-      const content = convertMd('# test');
+      const content = '# test';
       const title = 'the title';
       const description = 'the description';
       const template = convert(content, title, description);

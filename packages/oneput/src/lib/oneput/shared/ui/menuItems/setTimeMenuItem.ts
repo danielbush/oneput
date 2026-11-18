@@ -126,7 +126,10 @@ export function setTimeMenuItem(params: SetTimeMenuItemParams): MenuItem {
             classes: ['oneput__set-time-value'],
             // One inline run so the label shares the digit baseline; outer
             // fchild flex centering is unchanged.
-            htmlContentUnsafe: `<span class="oneput__set-time-value-text">${hourDigits}<span class="oneput__set-time-hour-label">${hourLabel}</span></span>`
+            textSegments: [
+              { text: hourDigits },
+              { text: hourLabel, classes: ['oneput__set-time-hour-label'] }
+            ]
           }
         : {
             id: `${id}-hh-value`,

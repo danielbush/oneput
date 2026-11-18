@@ -1,3 +1,4 @@
+import { renderMessage, type Message } from './Message.js';
 import { hflex } from '../../lib/builder.js';
 import type { Controller } from '../../controllers/controller.js';
 
@@ -18,7 +19,7 @@ export class Notification {
   /**
    * Run the notification.
    */
-  run(message: string, params: NotificationParams = {}) {
+  run(message: Message, params: NotificationParams = {}) {
     if (this.timeoutHandle) {
       clearTimeout(this.timeoutHandle);
     }
@@ -33,9 +34,7 @@ export class Notification {
         classes: ['oneput__notification'],
         style: { width: '100%' },
         children: (b) => [
-          b.fchild({
-            textContent: message
-          }),
+          renderMessage(message),
           b.iconButton('CloseNotification', {
             classes: ['oneput__icon-button'],
             title: 'Close',

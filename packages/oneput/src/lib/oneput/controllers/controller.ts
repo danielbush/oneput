@@ -1,3 +1,4 @@
+import type { Message } from '../shared/ui/Message.js';
 import { AppEventsController } from './AppEventsController.js';
 import { MenuController } from './MenuController.js';
 import { InternalEventEmitter } from './InternalEventEmitter.js';
@@ -9,7 +10,6 @@ import type { AppObject, OneputProps } from '../types.js';
 import { Alert } from '../shared/ui/Alert.js';
 import { Confirm } from '../shared/ui/Confirm.js';
 import { AppController, type AppChange, type AppChangeTracker } from './AppController.js';
-import { NativeController } from './NativeController.js';
 import { notifier } from '../lib/pull.js';
 
 export class Controller {
@@ -19,8 +19,7 @@ export class Controller {
       input: InputController.create(controller),
       keys: KeysController.create(controller),
       ui: UIController.create(controller),
-      app: AppController.create(controller),
-      native: NativeController.create(controller)
+      app: AppController.create(controller)
     });
     return new Controller(currentProps, createControllers);
   }
@@ -32,8 +31,7 @@ export class Controller {
       input: InputController.createNull(controller),
       keys: KeysController.createNull(controller),
       ui: UIController.createNull(controller),
-      app: AppController.createNull(controller),
-      native: NativeController.createNull(controller)
+      app: AppController.createNull(controller)
     });
     return new Controller(currentProps, createControllers);
   }
@@ -46,7 +44,6 @@ export class Controller {
   public keys: KeysController;
   public ui: UIController;
   public app: AppController;
-  public native: NativeController;
   /**
    * Tells the mounted pull widgets of this instance to paint again.
    *
@@ -68,7 +65,6 @@ export class Controller {
       keys: KeysController;
       ui: UIController;
       app: AppController;
-      native: NativeController;
     }
   ) {
     const controllers = createControllers(this);
@@ -77,7 +73,6 @@ export class Controller {
     this.keys = controllers.keys;
     this.ui = controllers.ui;
     this.app = controllers.app;
-    this.native = controllers.native;
   }
 
   toggleHide() {
@@ -86,7 +81,7 @@ export class Controller {
 
   private notification = Notification.create(this);
 
-  notify(message: string, params: NotificationParams = {}): Notification {
+  notify(message: Message, params: NotificationParams = {}): Notification {
     this.notification.run(message, params);
     return this.notification;
   }
@@ -94,13 +89,13 @@ export class Controller {
     this.notification.clear();
   }
 
-  alert(params: { message: string; additional: string }): Alert {
+  alert(params: { message: Message; additional?: Message }): Alert {
     const alert = Alert.create(this, params);
     alert.run();
     return alert;
   }
 
-  confirm(params: { additional?: string; message: string }): Confirm {
+  confirm(params: { additional?: Message; message: Message }): Confirm {
     const confirm = Confirm.create(this, params);
     confirm.run();
     return confirm;

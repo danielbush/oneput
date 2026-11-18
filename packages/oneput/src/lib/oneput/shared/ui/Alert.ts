@@ -1,3 +1,4 @@
+import { renderMessage, type Message } from './Message.js';
 import { vflex } from '../../lib/builder.js';
 import type { Controller } from '../../controllers/controller.js';
 
@@ -8,7 +9,7 @@ import type { Controller } from '../../controllers/controller.js';
  * Or you can just run and forget.
  */
 export class Alert {
-  static create(controller: Controller, params: { additional?: string; message: string }) {
+  static create(controller: Controller, params: { additional?: Message; message: Message }) {
     return new Alert(controller, params);
   }
 
@@ -19,7 +20,7 @@ export class Alert {
 
   constructor(
     private ctl: Controller,
-    private params: { additional?: string; message: string },
+    private params: { additional?: Message; message: Message },
     private resolve?: () => void
   ) {
     this.previousActiveElement = document.activeElement as HTMLElement;
@@ -74,13 +75,8 @@ export class Alert {
         id: 'oneput-alert',
         classes: ['oneput__menu-body-content', 'oneput__alert'],
         children: (b) => [
-          b.fchild({
-            htmlContentUnsafe: `<h2>${this.params.message}</h2>`
-          }),
-          this.params.additional &&
-            b.fchild({
-              htmlContentUnsafe: `<p>${this.params.additional}</p>`
-            }),
+          renderMessage(this.params.message, 'h2'),
+          this.params.additional && renderMessage(this.params.additional, 'p'),
           b.button({
             classes: ['oneput__primary-button'],
             title: 'Ok',

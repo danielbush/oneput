@@ -85,7 +85,8 @@
     "commander": "^11.1.0",
     "lucide": "^1.70.0",
     "markdown-it": "^13.0.1",
-    "neverthrow": "catalog:"
+    "neverthrow": "catalog:",
+    "@oneput/safe-html": "workspace:"
   },
   "nodemonConfig": {
     "ext": "css,ts,js,mjs,yaml,yml,json",

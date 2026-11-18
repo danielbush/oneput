@@ -1,3 +1,4 @@
+import { sanitiseDocumentNodes } from '@oneput/safe-html';
 /**
  * Place an element into the tree: appended into a parent, or inserted before or
  * after a sibling.
@@ -54,6 +55,7 @@ export function appendNew(parent: HTMLElement, spec: ElementSpec): AppendElement
  * already owns the element (e.g. a library specimen).
  */
 export function appendElement(element: HTMLElement, parent: HTMLElement): AppendElement {
+  if (!sanitiseDocumentNodes(element)) throw new Error('Active document element refused');
   parent.appendChild(element);
   return {
     action: 'append-element',
@@ -104,6 +106,7 @@ export function insertNewAfter(spec: ElementSpec, target: HTMLElement): InsertEl
  * the caller already owns the element (e.g. a library specimen).
  */
 export function insertElementAfter(element: HTMLElement, target: HTMLElement): InsertElementAfter {
+  if (!sanitiseDocumentNodes(element)) throw new Error('Active document element refused');
   target.insertAdjacentElement('afterend', element);
   return {
     action: 'insert-element-after',

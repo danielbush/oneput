@@ -42,9 +42,6 @@ export class NavCrumbs {
   }
 }
 
-const escapeHTML = (s: string) =>
-  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-
 const qualifierFor = (step: FocusAncestorStep): string | undefined =>
   step.id ? `#${step.id}` : undefined;
 
@@ -73,7 +70,7 @@ const navCrumb = (c: NavCrumb, index: number): FChildParams => ({
   classes: ['jsed-nav-crumb', c.current && 'jsed-nav-crumb--current'],
   ...(c.qualifier
     ? {
-        htmlContentUnsafe: `${escapeHTML(c.label)}<span class="jsed-nav-crumb-qual">${escapeHTML(c.qualifier)}</span>`
+        textSegments: [{ text: c.label }, { text: c.qualifier, classes: ['jsed-nav-crumb-qual'] }]
       }
     : { textContent: c.label }),
   attr: {

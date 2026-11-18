@@ -2,7 +2,8 @@ import type { MenuItemsFilterFn, MenuItemAny } from '../../types.js';
 
 /**
  * The FILTER channel — sync derivation of the displayed layer from the base:
- * `(query, base) => subset` (+highlight via derivedHTML).
+ * `(query, base) => subset`. A filter can also highlight matches by setting
+ * `textSegments` on children.
  *
  * This is deliberately a separate module from {@link MenuItemsFnController}
  * (the generative channel) so the two menu kinds come in through different

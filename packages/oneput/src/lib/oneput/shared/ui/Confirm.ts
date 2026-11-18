@@ -1,10 +1,11 @@
+import { renderMessage, type Message } from './Message.js';
 import { vflex } from '../../lib/builder.js';
 import type { Controller } from '../../controllers/controller.js';
 
 export class Confirm {
   static create(
     controller: Controller,
-    { additional, message }: { additional?: string; message: string }
+    { additional, message }: { additional?: Message; message: Message }
   ) {
     return new Confirm(controller, { additional, message });
   }
@@ -15,7 +16,7 @@ export class Confirm {
 
   constructor(
     private ctl: Controller,
-    private params: { additional?: string; message: string },
+    private params: { additional?: Message; message: Message },
     private resolve?: (value: boolean) => void,
     private promise?: Promise<boolean>,
     private okButton?: HTMLElement,
@@ -69,9 +70,8 @@ export class Confirm {
         id: 'oneput-confirm',
         classes: ['oneput__menu-body-content', 'oneput__alert'],
         children: (b) => [
-          // Text, not HTML: a message can quote what the user typed.
-          b.fchild({ tag: 'h2', textContent: this.params.message }),
-          this.params.additional && b.fchild({ tag: 'p', textContent: this.params.additional }),
+          renderMessage(this.params.message, 'h2'),
+          this.params.additional && renderMessage(this.params.additional, 'p'),
           b.hflex({
             children: (b) => [
               b.button({

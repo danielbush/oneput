@@ -21,5 +21,14 @@ export class DOMUpdater {
     }
   };
 
-  destroy = () => {};
+  /** Sets the node's text. HTML in `text` shows as text, for example `<b>`. */
+  setText(text: string) {
+    this.withNode((node) => {
+      node.textContent = text;
+    });
+  }
+
+  destroy = () => {
+    this.node = undefined;
+  };
 }

@@ -1,6 +1,13 @@
 <script lang="ts">
+  /**
+   * Renders one builder child (`FChildParams`). Its tag, attributes and styles
+   * pass through `checkedElement` before Svelte writes them, on the server and
+   * in the browser. It shows the first content that is set: `icon`,
+   * `textSegments`, `htmlContent`,
+   * `textContent`.
+   */
   import { onMount } from 'svelte';
-  import { createStyleAttribute } from '../../lib/utils.js';
+  import { checkedElement, checkedRichContent } from '../../lib/domSafety.js';
   import { defaultVoidElements } from '../../lib/defaultVoidElements.js';
   import { renderIcon } from '../../lib/icons.js';
   import type { FChildParams } from '../../types.js';
@@ -8,20 +15,17 @@
 
   type Props = FChildParams;
   let node: HTMLElement | null = $state(null);
-  let { voidElements, ...props }: Props = $props();
-  let voidElementsSet = $derived(voidElements || defaultVoidElements);
+  let props: Props = $props();
+  let checked = $derived(checkedElement(props));
   const mountContext = getMountContext();
 
   onMount(() => {
-    if (props.style) {
-      Object.assign(node!.style, props.style);
-    }
     if (props.onMount) {
       return props.onMount(node!, mountContext);
     }
   });
 
-  // Render icon if specified (takes precedence over innerHTMLUnsafe)
+  // Render icon if specified (takes precedence over all other content)
   // Use $effect, not onMount because fchild with same id in an array may
   // conditionally render an icon or spacer etc.
   $effect(() => {
@@ -31,38 +35,35 @@
   });
 </script>
 
-{#if voidElementsSet.has(props.tag)}
+{#if defaultVoidElements.has(checked.tag)}
   <svelte:element
-    this={props.tag}
+    this={checked.tag}
     id={props.id}
     bind:this={node}
-    style={props.style && createStyleAttribute(props.style)}
+    style={checked.style || undefined}
     class={['oneput__fchild', ...(props.classes || [])]}
-    {...props.attr}
+    {...checked.attr}
   />
 {:else}
   <svelte:element
-    this={props.tag || 'div'}
+    this={checked.tag}
     id={props.id}
     bind:this={node}
-    style={props.style && createStyleAttribute(props.style)}
+    style={checked.style || undefined}
     class={['oneput__fchild', ...(props.classes || [])]}
-    {...props.attr}
+    {...checked.attr}
   >
     {#if props.icon}
-      <!-- Icon is rendered via onMount using renderIcon() -->
-    {:else if props.derivedHTML}
-      <!-- eslint-disable svelte/no-at-html-tags -->
-      {@html props.derivedHTML}
-      <!-- eslint-enable svelte/no-at-html-tags -->
-    {:else if props.htmlContentUnsafe}
-      <!-- eslint-disable svelte/no-at-html-tags -->
-      {@html props.htmlContentUnsafe}
-      <!-- eslint-enable svelte/no-at-html-tags -->
-    {:else if props.innerHTMLUnsafe}
-      <!-- eslint-disable svelte/no-at-html-tags -->
-      {@html props.innerHTMLUnsafe}
-      <!-- eslint-enable svelte/no-at-html-tags -->
+      <!-- Icon is rendered via $effect using renderIcon() -->
+    {:else if props.textSegments}
+      <span>
+        {#each props.textSegments as segment, index (index)}{#if segment.emphasis}<b
+              >{segment.text}</b
+            >{:else}<span class={segment.classes}>{segment.text}</span>{/if}{/each}
+      </span>
+    {:else if props.htmlContent !== undefined}
+      <!-- sanitiseHtml cleaned this HTML inside a div, so it must go in a div. -->
+      <div class="oneput__rich-content">{@html checkedRichContent(props.htmlContent)}</div>
     {:else if props.textContent}
       {props.textContent}
     {/if}

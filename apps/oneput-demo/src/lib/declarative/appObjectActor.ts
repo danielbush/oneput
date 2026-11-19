@@ -34,6 +34,7 @@ function childSnapshots({ children }: ChildActors) {
  * Clear and focus the filter input on first entry.
  * For an editor, apply the placeholder and value without replacing the textarea.
  * Keep selection and focus when the input already has the requested value.
+ * Apply the outer-right status and replace or clear the input-right busy icon.
  * Avoid repeating a menu update when its feedback event leaves the view the same.
  */
 export type ApplyView = (ctl: Controller, view: OneputView) => void;
@@ -53,7 +54,7 @@ export function appObjectActor<
     Snapshot & ViewSnapshot<Source, List, ReleaseSource, EnabledSource, Event, Html>,
     Event
   >,
-  sources: ViewSources<NoInfer<Snapshot>, Source, List, ReleaseSource, EnabledSource, Html>,
+  sources: ViewSources<NoInfer<Snapshot>, Source, List, ReleaseSource, EnabledSource, Html, Event>,
   apply: ApplyView
 ): AppObject {
   const send = (event: OneputEvent | Event) => actor.send(event);

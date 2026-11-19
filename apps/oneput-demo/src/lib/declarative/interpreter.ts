@@ -1,7 +1,9 @@
 import {
   divider,
+  hflex,
   type AppLayoutParams,
   type Controller,
+  type FlexParams,
   type InputClaimOptions,
   type InputClaimReleaseReason,
   type Menu,
@@ -12,6 +14,7 @@ import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { infoMenuItem } from '@oneput/oneput/shared/ui/menuItems/infoMenuItem.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
+import type { StandardLayoutParams } from '@oneput/oneput/shared/ui/layout/StandardLayout.js';
 import { err, ok, type Result } from 'neverthrow';
 
 type Binding<Value, Source extends string> = Value | { from: Source };
@@ -62,6 +65,8 @@ export type ViewDef<
   Html extends string = never
 > = {
   title?: Text<Source>;
+  inputStatus?: Text<Source>;
+  inputBusyIcon?: string;
   menu?: {
     id?: string;
     focusBehaviour?: Menu['focusBehaviour'];
@@ -108,17 +113,19 @@ export type ViewSources<
   List extends string,
   ReleaseSource extends string,
   EnabledSource extends string,
-  Html extends string = never
+  Html extends string = never,
+  Event extends RowEvent = never
 > = {
   text: Record<Source, (snapshot: Snapshot) => string>;
   html?: Record<Html, (snapshot: Snapshot) => SafeHtml | null>;
-  lists: Record<List, (snapshot: Snapshot) => readonly Row<string>[]>;
+  lists: Record<List, (snapshot: Snapshot) => readonly Row<string, boolean, Event>[]>;
   release: Record<ReleaseSource, (snapshot: Snapshot) => InputClaimReleaseReason>;
   enabled?: Record<EnabledSource, (snapshot: Snapshot) => boolean>;
 };
 
 export type OneputView = {
-  layout: AppLayoutParams;
+  layout: StandardLayoutParams;
+  inputRight?: FlexParams;
   menu: Menu;
   settings: ViewSettings;
   input?:
@@ -152,7 +159,7 @@ export function renderActiveView<
   ctl: Controller,
   snapshot: Snapshot & ViewSnapshot<Source, List, ReleaseSource, EnabledSource, Event, Html>,
   currentSnapshot: () => Snapshot,
-  sources: ViewSources<NoInfer<Snapshot>, Source, List, ReleaseSource, EnabledSource, Html>,
+  sources: ViewSources<NoInfer<Snapshot>, Source, List, ReleaseSource, EnabledSource, Html, Event>,
   callbacks: ViewCallbacks<Event>
 ): Result<OneputView, 'Expected a complete active view' | 'Expected text for each menu row'> {
   const views = Object.entries(snapshot.getMeta())
@@ -172,7 +179,7 @@ export function renderActiveView<
     }),
     {}
   );
-  const { title, menu, input } = view;
+  const { title, menu, input, inputStatus, inputBusyIcon } = view;
   if (title === undefined || menu?.id === undefined) return err('Expected a complete active view');
 
   const read = (text: Text<Source>, sourceSnapshot: Snapshot = snapshot) =>
@@ -240,9 +247,11 @@ export function renderActiveView<
     );
   }
   const claimOwner = input?.kind === 'claim' ? read(input.owner) : '';
+  const status = inputStatus === undefined ? undefined : read(inputStatus);
   return ok({
     layout: {
       menuTitle: read(title),
+      ...(status !== undefined && { outerRight: (b) => b.fchild({ textContent: status }) }),
       ...(input?.kind === 'editor' && {
         input: input.layout,
         inputSend: {
@@ -251,6 +260,12 @@ export function renderActiveView<
         }
       })
     },
+    ...(inputBusyIcon !== undefined && {
+      inputRight: hflex({
+        id: 'input-right-busy',
+        children: (b) => [b.icon(inputBusyIcon, { classes: ['oneput__rotate'] })]
+      })
+    }),
     menu: {
       id: menu.id,
       focusBehaviour: menu.focusBehaviour,

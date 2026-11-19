@@ -126,6 +126,22 @@ actions = {
 
 When an AppObject starts, `AppController.runBefore()` extracts bindings from `actions` and registers them with `KeysController`.
 
+### Declarative AppObject
+
+`appObjectActor(ctl, actor, sources, options)` in `shared/declarative/` connects
+an actor to Oneput. The actor receives AppObject lifecycle, Back, input, and
+row activation events. Its active states declare `meta.view`. The interpreter
+merges views from parent to child and reads named sources from the snapshot
+for changing text and rows. Oneput owns the stack and applies the view to the
+current AppObject through `watch` and `onRefresh`.
+
+Async search uses `StandardLayout` to show status text and a busy icon.
+The menu refresh uses the view's `focusBehaviour`. With
+`inputRequiresOpenMenu`, the adapter checks `ctl.menu.immediateMenuOpen`
+when it receives input. After reopening, a fresh edit starts the next search.
+Editor and claim views, and menu focus, menu update, and claim release events
+are not supported.
+
 ## Bindings System
 
 Key bindings map keyboard shortcuts to actions. The system has several layers:

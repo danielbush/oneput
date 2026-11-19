@@ -175,6 +175,11 @@ export class MenuController {
     return this.ctl.currentProps.menuOpen;
   }
 
+  /** Menu state as soon as an open or close is accepted, before the view updates. */
+  get immediateMenuOpen() {
+    return this.isMenuOpenImmediate;
+  }
+
   /**
    * Covers MENU_OPEN_CLOSE_RACE .
    *

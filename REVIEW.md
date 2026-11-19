@@ -19,6 +19,10 @@ Checkable rules: how to tell that work was done well. Work must also follow the 
 - Do not preserve obsolete prototypes, schemas, APIs or tests unless explicitly requested.
 - Step back and rethink if we are going down the wrong path.
 
+## Tests
+
+- Unit tests stay fast: a unit test over 100ms needs a stated reason. Each unit-test project sets `testTimeout: 1000`.
+
 ## Before you report work as done
 
 - Check the work against this file and CODE.md.

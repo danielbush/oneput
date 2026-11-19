@@ -36,6 +36,7 @@ export default defineConfig({
   },
   test: {
     environment: 'happy-dom',
+    testTimeout: 1000,
     coverage: {
       exclude: ['src/**/*.test.ts', '**/*.d.ts', 'src/cli/**', 'src/app/sketch.ts', 'src/index.ts'],
       include: ['src/**/*.ts'],

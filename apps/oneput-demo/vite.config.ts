@@ -11,6 +11,7 @@ export default defineConfig({
         extends: './vite.config.ts',
         test: {
           name: 'server',
+          testTimeout: 1000,
           environment: 'node',
           include: ['src/**/*.{test,spec}.{js,ts}']
         }

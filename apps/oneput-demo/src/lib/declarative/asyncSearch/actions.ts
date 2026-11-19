@@ -4,7 +4,7 @@ import type { OneputEvent } from '../oneputEvents.js';
 import { SearchService, type SearchFailure, type SearchItem } from './searchService.js';
 import { resultById, sources, type SearchContext } from './sources.js';
 
-type RowEvent = Extract<OneputEvent, { type: 'ITEM_ACTIVATED' }> | { type: 'RETRY_SEARCH' };
+type RowEvent = { type: 'RETRY_SEARCH' };
 type FetchEvent =
   | { type: 'SEARCH_SUCCEEDED'; results: readonly SearchItem[] }
   | { type: 'SEARCH_FAILED'; error: SearchFailure };
@@ -40,15 +40,12 @@ export function searchActions(service: SearchService) {
     actors: { fetchResults: fetchResults(service) },
     delays: { debounce: 500 },
     guards: {
-      menuIsClosed: ({ context }) => !context.menuOpen,
       isBlankInput: ({ event }) => event.type === 'INPUT_CHANGED' && !/\S/.test(event.value),
       hasResults: ({ event }) => event.type === 'SEARCH_SUCCEEDED' && event.results.length > 0,
       resultExists: ({ context, event }) =>
         event.type === 'ITEM_ACTIVATED' && resultById(context, event.id) !== undefined
     },
     actions: {
-      openMenu: assign({ menuOpen: true }),
-      closeMenu: assign({ menuOpen: false }),
       writeQuery: assign(({ event }) => {
         assertEvent(event, 'INPUT_CHANGED');
         return { query: event.value, results: [], selected: null, error: null };

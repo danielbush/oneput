@@ -12,10 +12,6 @@ export type OneputEvent =
   | { type: 'EXITED' }
   /** Replaces AppObject.onBack and setOnBack. */
   | { type: 'BACK' }
-  /** Replaces AppObject.onMenuOpenChange when the menu opens. */
-  | { type: 'MENU_OPENED' }
-  /** Replaces AppObject.onMenuOpenChange when the menu closes. */
-  | { type: 'MENU_CLOSED' }
   /** Replaces AppObject.onMenuUpdate after the displayed rows and focus resolve. */
   | { type: 'MENU_UPDATED'; menuId: string; id?: string; index: number; cause: MenuUpdateCause }
   /** Replaces AppObject.onMenuItemFocus and MenuItem.onFocus. */

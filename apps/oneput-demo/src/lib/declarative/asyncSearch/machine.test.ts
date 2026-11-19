@@ -4,6 +4,7 @@ import { err, ok } from 'neverthrow';
 import { describe, expect, it } from 'vitest';
 import { createActor, SimulatedClock, waitFor, type ActorRefFrom } from 'xstate';
 import { renderActiveView, type OneputView } from '../interpreter.js';
+import { createAsyncSearchAppObject } from './appObject.js';
 import { createAsyncSearchMachine } from './machine.js';
 import { SearchService } from './searchService.js';
 import { sources } from './sources.js';
@@ -138,30 +139,37 @@ describe('async search', () => {
     actor.stop();
   });
 
-  it('invalidates a request when the input changes with the menu closed', async () => {
+  it('skips edits during menu close and searches on the next open edit', async () => {
     // arrange
-    const ctl = Controller.createNull();
-    const clock = new SimulatedClock();
-    const service = SearchService.createNull({
-      clock,
-      response: (text) => ({ result: ok([{ id: text, text }]), delayMs: 100 })
-    });
-    const actor = createActor(createAsyncSearchMachine(service), { clock }).start();
-    actor.send({ type: 'INPUT_CHANGED', value: 'ap' });
-    clock.increment(500);
+    const ctl = Controller.createNull({ menuOpen: true });
+    // The rendered menu is still open while Oneput has already begun to close it.
+    let menuOpenImmediate = false;
+    let view: OneputView | undefined;
+    const app = createAsyncSearchAppObject(
+      ctl,
+      (_, next) => {
+        view = next;
+      },
+      () => menuOpenImmediate,
+      SearchService.createNull()
+    );
+    ctl.app.run(app);
+    await Promise.resolve();
 
     // act
-    actor.send({ type: 'MENU_CLOSED' });
-    actor.send({ type: 'INPUT_CHANGED', value: 'app' });
-    clock.increment(100);
+    await ctl.input.typeText('ap');
+    const closed = view;
+    menuOpenImmediate = true;
     await Promise.resolve();
-    await Promise.resolve();
-    actor.send({ type: 'MENU_OPENED' });
-    clock.increment(500);
+    const reopened = view;
+    await ctl.input.typeText('p');
+    const searching = view;
 
     // assert
-    expect(actor.getSnapshot().matches('unsearched')).toBe(true);
-    expect(renderSearch(ctl, actor).menu.items).toEqual([]);
-    actor.stop();
+    expect(ctl.input.getInputValue()).toBe('app');
+    expect(closed?.menu.items[0]).toMatchObject({ id: 'instructions' });
+    expect(reopened?.menu.items[0]).toMatchObject({ id: 'instructions' });
+    expect(searching && outerRightText(searching)).toBe('Debouncing...');
+    ctl.app.exit();
   });
 });

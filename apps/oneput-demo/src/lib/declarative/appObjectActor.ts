@@ -39,7 +39,10 @@ function childSnapshots({ children }: ChildActors) {
  */
 export type ApplyView = (ctl: Controller, view: OneputView) => void;
 
-/** Give the AppObject's actor Oneput events and refresh its view while current. */
+/**
+ * Give the AppObject's actor Oneput events and refresh its view while current.
+ * Only search input requires the menu to be open before an edit reaches the actor.
+ */
 export function appObjectActor<
   Source extends string,
   List extends string,
@@ -55,11 +58,17 @@ export function appObjectActor<
     Event
   >,
   sources: ViewSources<NoInfer<Snapshot>, Source, List, ReleaseSource, EnabledSource, Html, Event>,
-  apply: ApplyView
+  apply: ApplyView,
+  // Stub: Oneput must expose its immediate menu state for this read at input dispatch.
+  searchInput?: { isMenuOpenImmediate(): boolean }
 ): AppObject {
   const send = (event: OneputEvent | Event) => actor.send(event);
   const sendIfCurrent = (event: OneputEvent | Event) => {
     if (ctl.app.isCurrent(app)) send(event);
+  };
+  const changeInput = (value: string) => {
+    if (searchInput && !searchInput.isMenuOpenImmediate()) return;
+    sendIfCurrent({ type: 'INPUT_CHANGED', value });
   };
   const back = { type: 'BACK' } as const;
 
@@ -87,9 +96,6 @@ export function appObjectActor<
       // An imperative setOnBack handler or an auto-release claim can bypass this hook today.
       if (!handled && ctl.app.isCurrent(app) && ctl.app.canGoBack()) ctl.app.exit();
     },
-    onMenuOpenChange({ open }) {
-      send({ type: open ? 'MENU_OPENED' : 'MENU_CLOSED' });
-    },
     onMenuItemFocus({ menuId, menuItem, index, cause }) {
       send({ type: 'ITEM_FOCUSED', menuId, id: menuItem?.id, index, cause });
     },
@@ -97,7 +103,7 @@ export function appObjectActor<
       send({ type: 'MENU_UPDATED', menuId, id: menuItem?.id, index, cause });
     },
     onInputChange({ value }) {
-      send({ type: 'INPUT_CHANGED', value });
+      changeInput(value);
     },
     watch: () => [
       {
@@ -126,7 +132,7 @@ export function appObjectActor<
         sources,
         {
           activate: sendIfCurrent,
-          change: (value) => sendIfCurrent({ type: 'INPUT_CHANGED', value }),
+          change: changeInput,
           release: (id, reason) => sendIfCurrent({ type: 'INPUT_RELEASED', id, reason })
         }
       );

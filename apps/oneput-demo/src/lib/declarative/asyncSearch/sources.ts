@@ -1,16 +1,13 @@
-import type { OneputEvent } from '../oneputEvents.js';
 import type { SearchFailure, SearchItem } from './searchService.js';
 
 export type SearchContext = {
   query: string | null;
-  menuOpen: boolean;
   results: readonly SearchItem[];
   error: SearchFailure | null;
   selected: string | null;
 };
 
 type SearchSnapshot = { context: SearchContext };
-type Selection = Extract<OneputEvent, { type: 'ITEM_ACTIVATED' }>;
 
 export function resultById(context: SearchContext, id: string) {
   return context.results.find((result) => result.id === id);
@@ -30,7 +27,7 @@ export const sources = {
         id,
         text: `Result: '${text}'`,
         icon: 'Dot',
-        send: { type: 'ITEM_ACTIVATED', id } satisfies Selection
+        activate: true
       }))
   },
   release: {}

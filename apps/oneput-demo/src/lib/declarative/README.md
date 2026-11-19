@@ -8,6 +8,8 @@ row with the same ID changes only the specified fields and keeps its
 position. Define fixed rows in the view and use sources for changing values
 and lists of rows from data.
 
+A machine owns only its screen state. Oneput owns its state and gives the machine what it needs through events.
+
 Suppose the profile loads and you filter the gated editor for **Name** and
 activate that row.
 `EDIT_FIELD` enters `editing` and the view claims the input. Each

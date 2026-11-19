@@ -7,7 +7,7 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
     id: 'async-search',
     description: 'Search from the Oneput input and show the current response in the menu.',
     initial: 'empty',
-    context: { query: null, menuOpen: true, results: [], error: null, selected: null },
+    context: { query: null, results: [], error: null, selected: null },
     meta: {
       view: {
         title: 'Async Search Example',
@@ -18,26 +18,12 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
       }
     },
     on: {
-      MENU_OPENED: {
-        actions: 'openMenu',
-        description: 'Allow new searches while the menu is open.'
-      },
-      MENU_CLOSED: {
-        actions: 'closeMenu',
-        description: 'Prevent new searches while the menu is closed.'
-      },
       INPUT_CHANGED: [
         {
           guard: 'isBlankInput',
           actions: 'writeQuery',
           target: '.empty',
           description: 'Stop pending work and show the instructions for blank input.'
-        },
-        {
-          guard: 'menuIsClosed',
-          actions: 'writeQuery',
-          target: '.unsearched',
-          description: 'Discard work for the old input without starting a search while closed.'
         },
         {
           actions: 'writeQuery',
@@ -127,9 +113,6 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
       },
       noResults: {
         description: 'Keep the ready status and empty menu for a response with no results.'
-      },
-      unsearched: {
-        description: 'Wait for a new input change while the menu is open.'
       },
       error: {
         description: 'Keep the input available and offer to search again with the same query.',

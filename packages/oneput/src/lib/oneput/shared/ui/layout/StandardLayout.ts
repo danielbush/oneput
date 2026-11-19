@@ -1,7 +1,13 @@
 import { hflex, type FlexChildBuilder } from '../../../lib/builder.js';
 import { mountSvelte } from '../../../lib/utils.js';
 import type { Controller } from '../../../controllers/controller.js';
-import type { AppLayoutParams, FChildParams, LayoutAffordance, UILayout } from '../../../types.js';
+import type {
+  AppLayoutParams,
+  FChildParams,
+  FlexParams,
+  LayoutAffordance,
+  UILayout
+} from '../../../types.js';
 import { DateTimeToggle } from '../../components/DateTimeToggle.js';
 import MenuStatus from '../../components/MenuStatus.svelte';
 import { acceptButton, rejectButton, sendButton } from '../buttons.js';
@@ -35,6 +41,8 @@ export type StandardLayoutIcons = {
  * with an optional outer-right slot.
  */
 export type StandardLayoutParams = AppLayoutParams & {
+  /** Custom input-right content, when supplied in place of the default action buttons. */
+  inputRight?: FlexParams;
   /**
    * Bottom-right outer chrome. When omitted, shows {@link DateTimeToggle}
    * (date by default; click switches to time).
@@ -174,7 +182,7 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
   get inputUI() {
     return {
       input: this.settings.input,
-      right: this.inputRight(),
+      right: this.settings.inputRight ?? this.inputRight(),
       outerRight: hflex({
         id: 'root-input-right',
         children: (b) => [

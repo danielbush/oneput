@@ -1,7 +1,7 @@
 import { err, ok, type Result } from 'neverthrow';
 import { emit, enqueueActions, setup } from 'xstate';
 import type { ViewDef } from '../interpreter.js';
-import type { OneputEvent } from '../oneputEvents.js';
+import type { OneputEvent } from '@oneput/oneput/shared/declarative/oneputEvents.js';
 import {
   isColour,
   type Colour,

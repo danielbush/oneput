@@ -1,7 +1,11 @@
 # AppObject machines
 
-Oneput sends each AppObject actor the events in `oneputEvents.ts`. The actor
-handles the events it needs. When the actor changes, `appObjectActor.ts` uses
+The [async search demo](./asyncSearch/README.md) runs through the shared
+Oneput declarative module. This folder holds sketches for other AppObjects.
+
+The shared module defines the event vocabulary in
+`@oneput/oneput/shared/declarative/oneputEvents.js`. In the sketches, the
+actor handles the events it needs. When the actor changes, `appObjectActor.ts` uses
 the interpreter to combine `meta.view` from the active parent and child
 states. A child can change individual settings and menu fields. A child
 row with the same ID changes only the specified fields and keeps its

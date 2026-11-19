@@ -1,6 +1,6 @@
 import type { InputClaimReleaseReason } from '@oneput/oneput';
 import { assign, setup } from 'xstate';
-import type { OneputEvent } from '../oneputEvents.js';
+import type { OneputEvent } from '@oneput/oneput/shared/declarative/oneputEvents.js';
 
 type Edit<Field extends string> = {
   field: Field;

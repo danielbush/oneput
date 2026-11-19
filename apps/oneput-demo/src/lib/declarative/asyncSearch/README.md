@@ -1,30 +1,22 @@
 # Async search AppObject
 
-| Original async menu demo                                                                                                                                                                                                                                                                      | Declarative sketch                                                                                                                                                                      |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Oneput starts with instructions and focuses the input. The generator skips blank or whitespace-only input and ignores changes while the menu is closed.                                                                                                                                       | `empty` shows the instructions. The adapter skips closed-menu edits for this AppObject. Opening the menu does not start a search.                                                       |
-| The generator waits 500 ms after typing, then calls `TestInputService` with the raw input. The service returns one row per string code unit. The first request has a 2 s success delay and later requests take 1 s. The simulated failure rate is 30%, although the old instructions say 10%. | `debouncing` uses a named XState delay. `fetching` invokes the search actor. The typed service wrapper calls the original service.                                                      |
-| The input area shows **Debouncing...**, **Fetching data...**, **Ready** and a spinner while busy.                                                                                                                                                                                             | State views set the outer-right status and the input-right spinner. Typing clears the previous rows while the current query is pending.                                                 |
-| The menu focuses the last result. Selecting a row shows **Selected: …**. Oneput clears the input after the action. A successful empty response gives an empty menu.                                                                                                                           | `results` uses the named result list and each row sends `ITEM_ACTIVATED`. `noResults` has an empty menu and **Ready** status.                                                           |
-| An error opens an alert and shows **⚠️ Error**. The input refresh icon closes the alert and re-runs the input through the same debounce.                                                                                                                                                      | `error` shows **⚠️ Error** in the input area and puts a **Retry search** row with the refresh icon and error detail in the same menu. The row sends `RETRY_SEARCH` and keeps the query. |
+Open the Oneput demo menu and select **Async menu items demo (declarative)...**.
+The original demo is beside it. The runnable AppObject, machine, actions,
+and sources are in [main/asyncSearch](../../main/asyncSearch).
 
-`createAsyncSearchAppObject` opts in to this adapter rule. The host must supply
-a reader for Oneput's immediate menu state. That read is a stub for a future
-Oneput API because the public menu state changes after a delay.
+Type text to start a 500 ms debounce. Then the search starts and the input
+area shows **Fetching data...**. The demo service returns a row for each
+character and simulates a 30% failure rate. On failure, the menu shows
+**Retry search** with the error detail. Activate that row to retry the
+current query, or type a new query.
 
-Suppose you type `ap` and its fetch starts. Type `app` before the fetch
-returns. That input stops the `ap` actor immediately and starts a fresh
-debounce. The original service can still finish, but its stopped actor
-cannot send a result or failure to the machine. The `app` fetch fails.
-Activate **Retry search** to debounce and fetch `app` again.
+Suppose you type `ap` and then type `app` while the first fetch is pending.
+The machine stops the first request actor and debounces the new input.
+The first service request can still finish, but its result cannot replace
+the results for `app`. When rows appear, Oneput focuses the last result.
+Activate a result to show **Selected: …** and clear the input.
 
-The failure follows an action that needs the result, so the NFR allows
-showing it at the search input. A modal interrupts typing and takes over the
-screen. The inline status and refresh row keep the input available and let
-the user retry or type a different query.
-
-## Open questions
-
-- Where should the host apply the outer-right status and input-right spinner in
-  the same update as the menu, while keeping the input focused?
-- Should a shared input-action slot eventually let Retry sit beside the status?
+When you close the menu, edits to the input do not reach the machine.
+Reopening it shows the current view. The next edit searches the full
+input value. The adapter checks the immediate menu state when it receives
+each edit.

@@ -5,7 +5,7 @@ import {
   type ViewSnapshot,
   type ViewSources
 } from './interpreter.js';
-import type { OneputEvent } from './oneputEvents.js';
+import type { OneputEvent } from '@oneput/oneput/shared/declarative/oneputEvents.js';
 
 type ViewActor<Snapshot, Event extends { type: string }> = {
   start(): void;
@@ -41,7 +41,6 @@ export type ApplyView = (ctl: Controller, view: OneputView) => void;
 
 /**
  * Give the AppObject's actor Oneput events and refresh its view while current.
- * Only search input requires the menu to be open before an edit reaches the actor.
  */
 export function appObjectActor<
   Source extends string,
@@ -58,16 +57,13 @@ export function appObjectActor<
     Event
   >,
   sources: ViewSources<NoInfer<Snapshot>, Source, List, ReleaseSource, EnabledSource, Html, Event>,
-  apply: ApplyView,
-  // Stub: Oneput must expose its immediate menu state for this read at input dispatch.
-  searchInput?: { isMenuOpenImmediate(): boolean }
+  apply: ApplyView
 ): AppObject {
   const send = (event: OneputEvent | Event) => actor.send(event);
   const sendIfCurrent = (event: OneputEvent | Event) => {
     if (ctl.app.isCurrent(app)) send(event);
   };
   const changeInput = (value: string) => {
-    if (searchInput && !searchInput.isMenuOpenImmediate()) return;
     sendIfCurrent({ type: 'INPUT_CHANGED', value });
   };
   const back = { type: 'BACK' } as const;

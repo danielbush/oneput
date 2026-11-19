@@ -10,7 +10,7 @@ import {
   type DoneActorEvent
 } from 'xstate';
 import type { ViewDef } from '../interpreter.js';
-import type { OneputEvent } from '../oneputEvents.js';
+import type { OneputEvent } from '@oneput/oneput/shared/declarative/oneputEvents.js';
 import { createGatedFieldEdit, type EditResult } from '../patterns/gatedFieldEdit.js';
 import {
   ProfileStore,

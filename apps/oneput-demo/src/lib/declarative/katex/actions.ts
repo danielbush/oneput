@@ -1,7 +1,7 @@
 import { assertEvent, assign, emit, setup } from 'xstate';
 import { formulaMarkup, type DemoDocument } from '../../main/FormulaMarkup.js';
 import type { ViewDef } from '../interpreter.js';
-import type { OneputEvent } from '../oneputEvents.js';
+import type { OneputEvent } from '@oneput/oneput/shared/declarative/oneputEvents.js';
 import { canInsert, sources, type FormulaContext } from './sources.js';
 
 type RowEvent = { type: 'INSERT_FORMULA'; focusInput?: true } | { type: 'TOGGLE_DISPLAY_MODE' };

@@ -29,6 +29,5 @@ export const sources = {
         icon: 'Dot',
         activate: true
       }))
-  },
-  release: {}
+  }
 };

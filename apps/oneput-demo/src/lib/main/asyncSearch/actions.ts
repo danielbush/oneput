@@ -1,6 +1,6 @@
 import { assertEvent, assign, fromCallback, sendTo, setup } from 'xstate';
-import type { ViewDef } from '../interpreter.js';
-import type { OneputEvent } from '../oneputEvents.js';
+import type { ViewDef } from '@oneput/oneput/shared/declarative/interpreter.js';
+import type { OneputEvent } from '@oneput/oneput/shared/declarative/oneputEvents.js';
 import { SearchService, type SearchFailure, type SearchItem } from './searchService.js';
 import { resultById, sources, type SearchContext } from './sources.js';
 
@@ -8,13 +8,7 @@ type RowEvent = { type: 'RETRY_SEARCH' };
 type FetchEvent =
   | { type: 'SEARCH_SUCCEEDED'; results: readonly SearchItem[] }
   | { type: 'SEARCH_FAILED'; error: SearchFailure };
-type SearchView = ViewDef<
-  keyof typeof sources.text,
-  keyof typeof sources.lists,
-  never,
-  never,
-  RowEvent
->;
+type SearchView = ViewDef<keyof typeof sources.text, keyof typeof sources.lists, RowEvent>;
 
 function fetchResults(service: SearchService) {
   return fromCallback<{ type: 'SEARCH'; query: string }>(({ receive, sendBack }) => {

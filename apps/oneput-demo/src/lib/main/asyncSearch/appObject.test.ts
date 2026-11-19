@@ -25,6 +25,21 @@ async function flushSearchView() {
 }
 
 describe('declarative async search AppObject', () => {
+  it('starts a debounce with the default clock', async () => {
+    // arrange
+    const ctl = createController();
+    ctl.app.run(createAsyncSearchAppObject(ctl, SearchService.createNull()));
+
+    // act
+    await ctl.input.typeText('app');
+    await flushSearchView();
+
+    // assert
+    expect(status(ctl)).toBe('Debouncing...');
+    ctl.app.exit();
+    ctl.destroy();
+  });
+
   it('restarts the debounce, draws the results, and selects the last row', async () => {
     // arrange
     const ctl = createController();

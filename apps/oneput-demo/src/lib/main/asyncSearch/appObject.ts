@@ -11,6 +11,6 @@ export function createAsyncSearchAppObject(
   service?: SearchService,
   clock?: ActorOptions<ReturnType<typeof createAsyncSearchMachine>>['clock']
 ): AppObject {
-  const actor = createActor(createAsyncSearchMachine(service), { clock });
+  const actor = createActor(createAsyncSearchMachine(service), clock && { clock });
   return appObjectActor(ctl, actor, sources, { inputRequiresOpenMenu: true });
 }

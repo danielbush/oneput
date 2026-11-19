@@ -15,7 +15,21 @@ export function createElement(
   return buildElement(checkedSpec, options);
 }
 
-// Copy the checked data so custom element constructors cannot change it during creation.
+/**
+ * Check a whole spec as plain data, before any DOM node exists, and return a
+ * checked copy, or null to refuse.
+ *
+ * Refuses more than MAX_SPEC_NODES nodes, nesting deeper than MAX_SPEC_DEPTH,
+ * a spec that contains itself (a cycle), and tags `isDocumentTagAllowed`
+ * rejects. Checking first makes a refusal cost microseconds and create nothing.
+ *
+ * Why a copy: building calls `document.createElement(tag)`. Allowed tags
+ * include custom elements (`my-widget`), and creating a registered one runs its
+ * constructor, which is page code. If we built from the caller's spec, that
+ * code could change the spec mid-build, for example by adding 50,000 children
+ * after the check passed. The copy holds only `tagName` and `children`, and
+ * only this function has it, so what gets built is exactly what was checked.
+ */
 function checkSpec(spec: ElementSpec): ElementSpec | null {
   let count = 0;
   const ancestors = new Set<ElementSpec>();

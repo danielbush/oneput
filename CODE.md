@@ -8,6 +8,10 @@ How the code meets [NFR.md](./NFR.md): how it is structured, tested and document
   - stand-alone top-level types should be surfaced in the same way
   - both humans and agents can peruse the top-level code and types without having to descend into the implementation details (unless they need to)
 
+## State
+
+- State has one owner. Don't keep a copy of state another part owns (for example whether the menu is open, which Oneput's MenuController owns); read it from the owner, or receive it with the event that needs it. A copy drifts at exactly the moments the owner handles carefully.
+
 ## Errors
 
 - Use neverthrow to type check errors not just the happy path.

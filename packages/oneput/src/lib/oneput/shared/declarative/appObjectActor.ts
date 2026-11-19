@@ -1,5 +1,5 @@
 import type { Controller } from '../../controllers/controller.js';
-import type { AppObject } from '../../types.js';
+import type { AppObject, Menu } from '../../types.js';
 import {
   renderActiveView,
   type OneputView,
@@ -16,7 +16,30 @@ type ViewActor<Snapshot, Event extends { type: string }> = {
   subscribe(onChange: () => void): { unsubscribe(): void };
 };
 
-export type ApplyView = (ctl: Controller, view: OneputView) => void;
+export type AppObjectActorOptions = {
+  /** Drop input events while the menu is closed, including during its close animation. */
+  inputRequiresOpenMenu?: boolean;
+};
+
+function applyView(ctl: Controller, view: OneputView) {
+  ctl.ui.update({
+    params: view.layout,
+    flags: {
+      enableFilter: view.settings.enableFilter,
+      enableInputElement: view.settings.enableInputElement,
+      enableMenuItemFocus: view.settings.enableMenuItemFocus,
+      clearInputAfterAction: view.settings.clearInputAfterAction
+    },
+    replace: true
+  });
+  ctl.input.setPlaceholder(view.placeholder);
+  if (ctl.menu.immediateMenuOpen && ctl.menu.isMenuOpen) {
+    // Merge with watch's redraw and give the view's focus rule precedence.
+    void ctl.menu.invalidate({ fresh: true });
+  } else {
+    ctl.menu.setMenu(view.menu);
+  }
+}
 
 /** Connect an actor to its AppObject. Oneput owns the AppObject stack and the input. */
 export function appObjectActor<
@@ -28,14 +51,16 @@ export function appObjectActor<
   ctl: Controller,
   actor: ViewActor<Snapshot & ViewSnapshot<Source, List, Event>, Event>,
   sources: ViewSources<NoInfer<Snapshot>, Source, List, Event>,
-  applyView: ApplyView
+  { inputRequiresOpenMenu }: AppObjectActorOptions = {}
 ): AppObject {
   const sendIfCurrent = (event: OneputEvent | Event) => {
     if (ctl.app.isCurrent(app)) actor.send(event);
   };
   const back = { type: 'BACK' } as const;
+  let menu: Menu = { id: '', items: [] };
 
   const app: AppObject = {
+    menu: () => menu,
     onStart() {
       actor.start();
       actor.send({ type: 'STARTED' });
@@ -58,6 +83,7 @@ export function appObjectActor<
       if (!handled && ctl.app.isCurrent(app) && ctl.app.canGoBack()) ctl.app.exit();
     },
     onInputChange({ value }) {
+      if (inputRequiresOpenMenu && !ctl.menu.immediateMenuOpen) return;
       sendIfCurrent({ type: 'INPUT_CHANGED', value });
     },
     watch: () => [
@@ -76,8 +102,12 @@ export function appObjectActor<
     ],
     onRefresh() {
       const rendered = renderActiveView(actor.getSnapshot(), sources, sendIfCurrent);
-      if (rendered.isErr()) ctl.notify(rendered.error);
-      else applyView(ctl, rendered.value);
+      if (rendered.isErr()) {
+        ctl.notify(rendered.error);
+        return;
+      }
+      menu = rendered.value.menu;
+      applyView(ctl, rendered.value);
     }
   };
 

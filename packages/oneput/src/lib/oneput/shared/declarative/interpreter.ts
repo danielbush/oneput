@@ -1,3 +1,4 @@
+import { hflex } from '../../lib/builder.js';
 import type { Menu, UIFlags } from '../../types.js';
 import type { StandardLayoutParams } from '../ui/layout/StandardLayout.js';
 import { infoMenuItem } from '../ui/menuItems/infoMenuItem.js';
@@ -31,6 +32,7 @@ export type ViewDef<
 > = {
   title?: Text<Source>;
   inputStatus?: Text<Source>;
+  inputBusyIcon?: string;
   menu?: {
     id?: string;
     focusBehaviour?: Menu['focusBehaviour'];
@@ -97,7 +99,7 @@ export function renderActiveView<
     }),
     {}
   );
-  const { title, menu, input, inputStatus } = view;
+  const { title, menu, input, inputStatus, inputBusyIcon } = view;
   if (title === undefined || menu?.id === undefined) return err('Expected a complete active view');
 
   const read = (text: Text<Source>) =>
@@ -120,16 +122,14 @@ export function renderActiveView<
       items.push(infoMenuItem({ id, msg: textContent, icon: icon ?? 'Info' }));
       continue;
     }
+    const canActivate = row.activate ?? send !== undefined;
     items.push(
       stdMenuItem({
         id,
         textContent,
         bottom: detail === undefined ? undefined : { textContent: read(detail) },
         left: icon === undefined ? undefined : (b) => [b.icon(icon)],
-        action:
-          (row.activate ?? send !== undefined)
-            ? () => activate(send ?? { type: 'ITEM_ACTIVATED', id })
-            : undefined
+        action: canActivate ? () => activate(send ?? { type: 'ITEM_ACTIVATED', id }) : undefined
       })
     );
   }
@@ -138,7 +138,14 @@ export function renderActiveView<
   return ok({
     layout: {
       menuTitle: read(title),
-      outerRight: status === undefined ? undefined : (b) => b.fchild({ textContent: status })
+      outerRight: status === undefined ? undefined : (b) => b.fchild({ textContent: status }),
+      inputRight:
+        inputBusyIcon === undefined
+          ? undefined
+          : hflex({
+              id: 'input-right-busy',
+              children: (b) => [b.icon(inputBusyIcon, { classes: ['oneput__rotate'] })]
+            })
     },
     menu: { id: menu.id, focusBehaviour: menu.focusBehaviour, items },
     settings: view.settings ?? {},

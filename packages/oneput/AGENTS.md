@@ -47,6 +47,12 @@ AppObjects represent screens/states in the app stack with actions, menu, and lif
 - Type: `packages/oneput/src/lib/oneput/types.ts` — `AppObject`
 - Controller: `packages/oneput/src/lib/oneput/controllers/AppController.ts`
 
+### Declarative AppObject
+
+`shared/declarative/appObjectActor.ts` connects an actor to the AppObject stack.
+`shared/declarative/interpreter.ts` builds the async search view from active
+state metadata and named sources. See `docs/architecture.md`.
+
 ### Routing
 
 `routeApp(ctl, source, appFor, key?)` replaces the caller (the current

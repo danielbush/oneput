@@ -5,7 +5,7 @@ import { byId, makeRoot } from '../../../../test/util.js';
 import { EditorState } from '../../EditorState.js';
 import { PatchElement } from '../PatchElement.js';
 import * as paste from '../../../../lib/ops/focusable/paste.js';
-import { createElement } from '../../../../lib/ops/focusable/create.js';
+import { createElement, SpecRefusedError } from '../../../../lib/ops/focusable/create.js';
 import { convert } from '../../../../lib/ops/focusable/convert.js';
 import type { ElementSpec } from '../../../../lib/core/dom-rules.js';
 
@@ -96,18 +96,73 @@ describe('document boundaries', () => {
     }
   );
 
-  test('bounded creation', () => {
-    // arrange
-    const cyclic: ElementSpec = { tagName: 'div', children: [] };
-    cyclic.children!.push(cyclic);
-    const wide: ElementSpec = {
-      tagName: 'div',
-      children: Array.from({ length: 10001 }, () => ({ tagName: 'p' }))
+  describe('bounded creation', () => {
+    const refusal = (spec: ElementSpec) => {
+      try {
+        createElement(spec);
+      } catch (error) {
+        return error instanceof SpecRefusedError ? error : undefined;
+      }
     };
 
-    // act & assert
-    expect(() => createElement(cyclic)).toThrow('specification refused');
-    expect(() => createElement(wide)).toThrow('specification refused');
+    test('cycle', () => {
+      // arrange
+      const cyclic: ElementSpec = { tagName: 'div', children: [] };
+      cyclic.children!.push(cyclic);
+
+      // act
+      const error = refusal(cyclic);
+
+      // assert
+      expect(error?.reason).toEqual({ type: 'cycle' });
+      expect(error?.message).toBe(
+        'Document element specification refused: the spec contains itself'
+      );
+    });
+
+    test('too many nodes', () => {
+      // arrange
+      const wide: ElementSpec = {
+        tagName: 'div',
+        children: Array.from({ length: 10001 }, () => ({ tagName: 'p' }))
+      };
+
+      // act
+      const error = refusal(wide);
+
+      // assert
+      expect(error?.reason).toEqual({ type: 'too-many-nodes', limit: 10000 });
+      expect(error?.message).toBe('Document element specification refused: more than 10000 nodes');
+    });
+
+    test('too deep', () => {
+      // arrange
+      let deep: ElementSpec = { tagName: 'p' };
+      for (let i = 0; i < 70; i++) deep = { tagName: 'div', children: [deep] };
+
+      // act
+      const error = refusal(deep);
+
+      // assert
+      expect(error?.reason).toEqual({ type: 'too-deep', limit: 64 });
+      expect(error?.message).toBe(
+        'Document element specification refused: nested deeper than 64 levels'
+      );
+    });
+
+    test('tag not allowed', () => {
+      // arrange
+      const spec: ElementSpec = { tagName: 'div', children: [{ tagName: 'script' }] };
+
+      // act
+      const error = refusal(spec);
+
+      // assert
+      expect(error?.reason).toEqual({ type: 'tag-not-allowed', tagName: 'script' });
+      expect(error?.message).toBe(
+        'Document element specification refused: tag "script" is not allowed'
+      );
+    });
   });
 
   it('cleans export clones and keeps live nodes and FOCUS', () => {

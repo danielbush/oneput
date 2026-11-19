@@ -10,10 +10,9 @@
  * - `KatexDemo` is the AppObject: the UI adapter. It shows the model's state
  *   and calls the model on user events. It holds no rules.
  *
- * These parts share one file because the demo is small.
+ * The declarative sketch shares the compiler and document wrapper in FormulaMarkup.
  */
 import type { Controller } from '@oneput/oneput';
-import katex from 'katex';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { divider, menuItem } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
@@ -24,80 +23,10 @@ import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
 import { icons } from '../common/_icons.js';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import './KatexDemo.css';
-import { insertSafeHtml, sanitiseHtml, type SafeHtml } from '@oneput/safe-html';
-import { err, type Result } from 'neverthrow';
+import { insertSafeHtml, type SafeHtml } from '@oneput/safe-html';
+import { DemoDocument, formulaMarkup } from './FormulaMarkup.js';
 
-/**
- * Checks formula output and inserts accepted formulas into the page.
- *
- * Infrastructure wrapper: `create()` appends to `#katex-demo`. `createNull()`
- * appends to a detached root. Tests can supply a root and read its DOM.
- */
-export class DemoDocument {
-  static create() {
-    return new DemoDocument(document.getElementById('katex-demo')!);
-  }
-
-  static createNull(
-    root = document.createElement('div'),
-    { sanitiseErrors = [] }: { sanitiseErrors?: (Error | null)[] } = {}
-  ) {
-    return new DemoDocument(root, [...sanitiseErrors]);
-  }
-
-  constructor(
-    private root: HTMLElement,
-    private sanitiseErrors: (Error | null)[] = []
-  ) {}
-
-  /** Check output before the model publishes it to subscribers. */
-  prepare(output: string): Result<SafeHtml, Error> {
-    const refusal = this.sanitiseErrors.shift();
-    return refusal ? err(refusal) : sanitiseHtml(output, 'math');
-  }
-
-  append(formula: SafeHtml, displayMode: boolean) {
-    const output = this.root.ownerDocument.createElement('div');
-    insertSafeHtml(output, formula);
-    const nodes = this.root.ownerDocument.createDocumentFragment();
-    nodes.append(...output.childNodes);
-    if (displayMode) this.root.append(nodes);
-    else {
-      const paragraph = this.root.ownerDocument.createElement('p');
-      paragraph.append(nodes);
-      this.root.append(paragraph);
-    }
-  }
-}
-
-/** The result of compiling katex source. */
-type RenderResult =
-  | { empty: true } // nothing typed
-  | { html: SafeHtml } // valid katex
-  | { error: string }; // invalid katex
-
-/**
- * Compile bounded source with fixed options. Store only accepted output.
- */
-function renderToString(source: string, displayMode: boolean, doc: DemoDocument): RenderResult {
-  if (source.length > 4096) return { error: 'Formula source is too large.' };
-  if (source.trim() === '') return { empty: true };
-  try {
-    const output = katex.renderToString(source, {
-      displayMode,
-      throwOnError: true,
-      trust: false,
-      strict: 'error',
-      maxExpand: 1000,
-      maxSize: 20
-    });
-    if (output.length > 200000) return { error: 'Formula output is too large.' };
-    const content = doc.prepare(output);
-    return content.isErr() ? { error: content.error.message } : { html: content.value };
-  } catch (err) {
-    return { error: (err as Error).message };
-  }
-}
+export { DemoDocument } from './FormulaMarkup.js';
 
 type FormulaState = { source: string; displayMode: boolean };
 
@@ -143,15 +72,14 @@ export class KatexFormula {
   ) {
     this.state = writable({ source: '', displayMode });
     this.view = derived(this.state, ({ source, displayMode }) => {
-      const compiled = renderToString(source, displayMode, this.doc);
-      if ('empty' in compiled) this.lastValid = null;
-      else if ('html' in compiled) this.lastValid = compiled.html;
+      const compiled = formulaMarkup(source, displayMode, this.doc);
+      if (compiled.isOk()) this.lastValid = compiled.value;
       return {
         source,
         displayMode,
         preview: this.lastValid,
-        error: 'error' in compiled ? compiled.error : undefined,
-        canInsert: 'html' in compiled
+        error: compiled.isErr() ? compiled.error.message : undefined,
+        canInsert: compiled.isOk() && compiled.value !== null
       };
     });
   }

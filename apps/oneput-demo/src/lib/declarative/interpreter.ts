@@ -1,12 +1,16 @@
-import type {
-  AppLayoutParams,
-  Controller,
-  InputClaimOptions,
-  InputClaimReleaseReason,
-  Menu,
-  UIFlags
+import {
+  divider,
+  type AppLayoutParams,
+  type Controller,
+  type InputClaimOptions,
+  type InputClaimReleaseReason,
+  type Menu,
+  type UIFlags
 } from '@oneput/oneput';
+import type { SafeHtml } from '@oneput/safe-html';
 import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
+import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
+import { infoMenuItem } from '@oneput/oneput/shared/ui/menuItems/infoMenuItem.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { err, ok, type Result } from 'neverthrow';
 
@@ -17,26 +21,35 @@ type ViewSettings = Pick<
   | 'enableFilter'
   | 'enableGoBack'
   | 'enableInputElement'
+  | 'enableMenuItemFocus'
+  | 'enableMenuOpenClose'
   | 'clearInputAfterAction'
   | 'clearInputAfterBack'
 >;
 
 type RowEvent = { type: string };
 
-type Row<Label, Enabled = boolean, Event extends RowEvent = never> = {
+type Row<Label, Enabled = boolean, Event extends RowEvent = never, Html extends string = never> = {
   id: string;
+  kind?: 'divider' | 'info';
   text: Label;
   detail?: Label;
+  html?: { from: Html };
   icon?: string;
   showActionBinding?: boolean;
+  binding?: string;
+  checked?: Enabled;
   activate?: boolean;
   send?: Event;
   enabled?: Enabled;
   canFilter?: boolean;
 };
 
-type RowPatch<Label, Enabled, Event extends RowEvent> = Pick<Row<Label, Enabled, Event>, 'id'> &
-  Partial<Row<Label, Enabled, Event>>;
+type RowPatch<Label, Enabled, Event extends RowEvent, Html extends string> = Pick<
+  Row<Label, Enabled, Event, Html>,
+  'id'
+> &
+  Partial<Row<Label, Enabled, Event, Html>>;
 
 type Release<Source extends string> = InputClaimReleaseReason | { from: Source };
 
@@ -45,18 +58,26 @@ export type ViewDef<
   ListSource extends string = never,
   ReleaseSource extends string = never,
   EnabledSource extends string = never,
-  Event extends RowEvent = never
+  Event extends RowEvent = never,
+  Html extends string = never
 > = {
   title?: Text<Source>;
   menu?: {
     id?: string;
     focusBehaviour?: Menu['focusBehaviour'];
-    items?: readonly RowPatch<Text<Source>, Binding<boolean, EnabledSource>, Event>[];
+    items?: readonly RowPatch<Text<Source>, Binding<boolean, EnabledSource>, Event, Html>[];
     from?: ListSource;
     empty?: { id: string; text: string };
   };
   input?:
     | { kind: 'filter'; placeholder: Text<Source>; release?: Release<ReleaseSource> }
+    | {
+        kind: 'editor';
+        layout: NonNullable<AppLayoutParams['input']>;
+        value: Text<Source>;
+        placeholder: Text<Source>;
+        submit: { send: Event; enabled: Binding<boolean, EnabledSource> };
+      }
     | {
         kind: 'claim';
         owner: Text<Source>;
@@ -71,12 +92,13 @@ export type ViewSnapshot<
   List extends string,
   ReleaseSource extends string,
   EnabledSource extends string,
-  Event extends RowEvent
+  Event extends RowEvent,
+  Html extends string = never
 > = {
   machine: { getStateNodeById(id: string): { path: readonly string[] } };
   getMeta(): Record<
     string,
-    { view?: ViewDef<Source, List, ReleaseSource, EnabledSource, Event> } | undefined
+    { view?: ViewDef<Source, List, ReleaseSource, EnabledSource, Event, Html> } | undefined
   >;
 };
 
@@ -85,9 +107,11 @@ export type ViewSources<
   Source extends string,
   List extends string,
   ReleaseSource extends string,
-  EnabledSource extends string
+  EnabledSource extends string,
+  Html extends string = never
 > = {
   text: Record<Source, (snapshot: Snapshot) => string>;
+  html?: Record<Html, (snapshot: Snapshot) => SafeHtml | null>;
   lists: Record<List, (snapshot: Snapshot) => readonly Row<string>[]>;
   release: Record<ReleaseSource, (snapshot: Snapshot) => InputClaimReleaseReason>;
   enabled?: Record<EnabledSource, (snapshot: Snapshot) => boolean>;
@@ -99,6 +123,7 @@ export type OneputView = {
   settings: ViewSettings;
   input?:
     | { kind: 'filter'; placeholder: string; release?: InputClaimReleaseReason }
+    | { kind: 'editor'; value: string; placeholder: string }
     | { kind: 'claim'; options: InputClaimOptions };
 };
 
@@ -112,7 +137,8 @@ type ViewCallbacks<Event extends RowEvent> = {
  * Child view fields replace parent fields. Settings and menu fields merge by key.
  * A child row updates fields of the same ID and keeps its position in the menu.
  * A row with a send event or activate flag can run an action when enabled.
- * Sources read the actor snapshot. The claimed value reads the latest snapshot on demand.
+ * Rich rows take a SafeHtml token from a named source and fall back to text when it is empty.
+ * Sources read the actor snapshot. Claim values and live controls read the latest snapshot.
  */
 export function renderActiveView<
   Source extends string,
@@ -120,12 +146,13 @@ export function renderActiveView<
   ReleaseSource extends string,
   EnabledSource extends string,
   Event extends RowEvent,
-  Snapshot
+  Snapshot,
+  Html extends string = never
 >(
   ctl: Controller,
-  snapshot: Snapshot & ViewSnapshot<Source, List, ReleaseSource, EnabledSource, Event>,
+  snapshot: Snapshot & ViewSnapshot<Source, List, ReleaseSource, EnabledSource, Event, Html>,
   currentSnapshot: () => Snapshot,
-  sources: ViewSources<NoInfer<Snapshot>, Source, List, ReleaseSource, EnabledSource>,
+  sources: ViewSources<NoInfer<Snapshot>, Source, List, ReleaseSource, EnabledSource, Html>,
   callbacks: ViewCallbacks<Event>
 ): Result<OneputView, 'Expected a complete active view' | 'Expected text for each menu row'> {
   const views = Object.entries(snapshot.getMeta())
@@ -136,7 +163,7 @@ export function renderActiveView<
     )
     .sort((a, b) => a.depth - b.depth)
     .map(({ view }) => view);
-  const view = views.reduce<ViewDef<Source, List, ReleaseSource, EnabledSource, Event>>(
+  const view = views.reduce<ViewDef<Source, List, ReleaseSource, EnabledSource, Event, Html>>(
     (parent, child) => ({
       ...parent,
       ...child,
@@ -151,7 +178,13 @@ export function renderActiveView<
   const read = (text: Text<Source>, sourceSnapshot: Snapshot = snapshot) =>
     typeof text === 'string' ? text : sources.text[text.from](sourceSnapshot);
 
-  const rows = new Map<string, RowPatch<Text<Source>, Binding<boolean, EnabledSource>, Event>>();
+  const readFlag = (flag: Binding<boolean, EnabledSource>, sourceSnapshot: Snapshot = snapshot) =>
+    typeof flag === 'object' ? sources.enabled?.[flag.from](sourceSnapshot) === true : flag;
+
+  const rows = new Map<
+    string,
+    RowPatch<Text<Source>, Binding<boolean, EnabledSource>, Event, Html>
+  >();
   if (menu.from !== undefined) {
     for (const row of sources.lists[menu.from](snapshot)) rows.set(row.id, row);
   }
@@ -162,30 +195,62 @@ export function renderActiveView<
 
   const items: Menu['items'] = [];
   for (const row of rows.values()) {
+    if (row.kind === 'divider') {
+      items.push(divider({ id: row.id }));
+      continue;
+    }
     if (row.text === undefined) return err('Expected text for each menu row');
-    const { id, icon, enabled } = row;
+    const { id, icon, enabled, checked } = row;
     const canActivate =
-      (row.activate ?? row.send !== undefined) &&
-      (typeof enabled === 'object' ? sources.enabled?.[enabled.from](snapshot) : enabled !== false);
+      (row.activate ?? row.send !== undefined) && (enabled === undefined || readFlag(enabled));
+    const action = canActivate
+      ? () => callbacks.activate(row.send ?? { type: 'ITEM_ACTIVATED', id })
+      : undefined;
+    const binding = row.binding ?? (row.showActionBinding ? OneputAction.DO_ACTION : undefined);
+    const bindingHint = binding && ctl.keys.getCurrentBindings()[binding]?.bindings[0];
+    const textContent = read(row.text);
+    if (row.kind === 'info') {
+      items.push(infoMenuItem({ id, msg: textContent, icon: icon ?? 'Info' }));
+      continue;
+    }
+    if (checked !== undefined && action) {
+      items.push(
+        checkboxMenuItem({
+          id,
+          textContent,
+          bindingHint,
+          action,
+          source: { get: () => readFlag(checked, currentSnapshot()) }
+        })
+      );
+      continue;
+    }
     items.push(
       stdMenuItem({
         id,
         canFilter: row.canFilter,
-        textContent: read(row.text),
+        attr: row.send && !action ? { role: 'button', 'aria-disabled': 'true' } : undefined,
+        textContent,
+        htmlContent: row.html && (sources.html?.[row.html.from](snapshot) ?? undefined),
         bottom: row.detail === undefined ? undefined : { textContent: read(row.detail) },
         left: icon === undefined ? undefined : (b) => [b.icon(icon)],
-        bindingHint: row.showActionBinding
-          ? ctl.keys.getCurrentBindings()[OneputAction.DO_ACTION]?.bindings[0]
-          : undefined,
-        action: canActivate
-          ? () => callbacks.activate(row.send ?? { type: 'ITEM_ACTIVATED', id })
-          : undefined
+        bindingHint,
+        action
       })
     );
   }
   const claimOwner = input?.kind === 'claim' ? read(input.owner) : '';
   return ok({
-    layout: { menuTitle: read(title) },
+    layout: {
+      menuTitle: read(title),
+      ...(input?.kind === 'editor' && {
+        input: input.layout,
+        inputSend: {
+          enabled: () => readFlag(input.submit.enabled, currentSnapshot()),
+          run: () => callbacks.activate(input.submit.send)
+        }
+      })
+    },
     menu: {
       id: menu.id,
       focusBehaviour: menu.focusBehaviour,
@@ -209,13 +274,15 @@ export function renderActiveView<
               onRelease: (reason) => callbacks.release(claimOwner, reason)
             }
           }
-        : input && {
-            kind: 'filter',
-            placeholder: read(input.placeholder),
-            release:
-              typeof input.release === 'object'
-                ? sources.release[input.release.from](snapshot)
-                : input.release
-          }
+        : input?.kind === 'editor'
+          ? { kind: 'editor', value: read(input.value), placeholder: read(input.placeholder) }
+          : input && {
+              kind: 'filter',
+              placeholder: read(input.placeholder),
+              release:
+                typeof input.release === 'object'
+                  ? sources.release[input.release.from](snapshot)
+                  : input.release
+            }
   });
 }

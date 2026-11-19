@@ -32,6 +32,8 @@ function childSnapshots({ children }: ChildActors) {
  * Release the previous claim with the filter view's reason before restoring or clearing input.
  * Send each release once and ignore late callbacks from replaced claims.
  * Clear and focus the filter input on first entry.
+ * For an editor, apply the placeholder and value without replacing the textarea.
+ * Keep selection and focus when the input already has the requested value.
  * Avoid repeating a menu update when its feedback event leaves the view the same.
  */
 export type ApplyView = (ctl: Controller, view: OneputView) => void;
@@ -43,14 +45,15 @@ export function appObjectActor<
   ReleaseSource extends string,
   EnabledSource extends string,
   Event extends { type: string },
-  Snapshot extends ChildActors
+  Snapshot extends ChildActors,
+  Html extends string = never
 >(
   ctl: Controller,
   actor: ViewActor<
-    Snapshot & ViewSnapshot<Source, List, ReleaseSource, EnabledSource, Event>,
+    Snapshot & ViewSnapshot<Source, List, ReleaseSource, EnabledSource, Event, Html>,
     Event
   >,
-  sources: ViewSources<NoInfer<Snapshot>, Source, List, ReleaseSource, EnabledSource>,
+  sources: ViewSources<NoInfer<Snapshot>, Source, List, ReleaseSource, EnabledSource, Html>,
   apply: ApplyView
 ): AppObject {
   const send = (event: OneputEvent | Event) => actor.send(event);

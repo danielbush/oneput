@@ -6,6 +6,7 @@ import { WordFilter } from '../shared/filters/WordFilter.js';
 import { OneputAction } from '../shared/actions/OneputAction.js';
 import { cell, notifier } from '../lib/pull.js';
 import { routeApp } from '../shared/routing/routeApp.js';
+import { waitForState } from '../shared/test/index.js';
 import { StandardLayout, type StandardLayoutParams } from '../shared/ui/layout/StandardLayout.js';
 
 function layout(id: string): UILayout {
@@ -779,6 +780,39 @@ describe('AppController', () => {
       };
       return { app, model, refreshes };
     }
+
+    it('a stale notify from a replaced app does not drop the current refresh', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      let staleNotify = () => {};
+      const replaced: AppObject = {
+        // A model that keeps the listener after unsubscribe, as a queued task can.
+        watch: () => [
+          {
+            subscribe: (onChange) => {
+              staleNotify = onChange;
+              return () => {};
+            }
+          }
+        ],
+        onStart: () => {}
+      };
+      const current = watchedApp(() => 'current');
+      ctl.app.run(replaced);
+      const refreshed = waitForState(ctl, 'set-menu-items', {
+        name: 'the current app to refresh',
+        reached: () => current.refreshes.length > 0,
+        seen: () => `${current.refreshes.length} refreshes`
+      });
+
+      // act
+      ctl.app.replace(current.app);
+      staleNotify();
+      await refreshed;
+
+      // assert
+      expect(current.refreshes).toEqual(['current']);
+    });
 
     it('notify - onRefresh runs and the menu rebuilds', async () => {
       // arrange

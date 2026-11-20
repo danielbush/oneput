@@ -182,6 +182,9 @@ importers:
       neverthrow:
         specifier: 'catalog:'
         version: 8.2.0
+      signal-polyfill:
+        specifier: 0.2.3
+        version: 0.2.3
       xstate:
         specifier: ^5.0.0
         version: 5.33.4
@@ -236,7 +239,7 @@ importers:
         version: 5.58.0(@typescript-eslint/types@8.54.0)
       svelte-check:
         specifier: 'catalog:'
-        version: 4.3.6(picomatch@4.0.7)(svelte@5.58.0(@typescript-eslint/types@8.54.0))(typescript@5.9.3)
+        version: 4.3.6(picomatch@4.0.4)(svelte@5.58.0(@typescript-eslint/types@8.54.0))(typescript@5.9.3)
       typescript:
         specifier: ^5.0.0
         version: 5.9.3
@@ -2981,6 +2984,9 @@ packages:
 
   siginfo@2.0.0:
     resolution: {integrity: sha512-ybx0WO1/8bSBLEWXZvEd7gMW3Sn3JFlW3TvX1nREbDLRNQNaeNN8WK0meBwPdAaOI7TtRRRJn/Es1zhrrCHu7g==}
+
+  signal-polyfill@0.2.3:
+    resolution: {integrity: sha512-9lnybFqkhtuH5xJ0IoRMs+k0HhiNEHAqcedRL2gKGI9bLyPWqlhrNSXTi8PRTwx5XiMktQh954gR5q3dBimwXA==}
 
   sirv@3.0.2:
     resolution: {integrity: sha512-2wcC/oGxHis/BoHkkPwldgiPSYcpZK3JU28WoMVv55yHJgcZ8rlXvuG9iZggz+sU1d4bRgIGASwyWqjxu3FM0g==}
@@ -5966,6 +5972,8 @@ snapshots:
 
   siginfo@2.0.0: {}
 
+  signal-polyfill@0.2.3: {}
+
   sirv@3.0.2:
     dependencies:
       '@polka/url': 1.0.0-next.29
@@ -6012,6 +6020,18 @@ snapshots:
       has-flag: 4.0.0
 
   supports-preserve-symlinks-flag@1.0.0: {}
+
+  svelte-check@4.3.6(picomatch@4.0.4)(svelte@5.58.0(@typescript-eslint/types@8.54.0))(typescript@5.9.3):
+    dependencies:
+      '@jridgewell/trace-mapping': 0.3.31
+      chokidar: 4.0.3
+      fdir: 6.5.0(picomatch@4.0.4)
+      picocolors: 1.1.1
+      sade: 1.8.1
+      svelte: 5.58.0(@typescript-eslint/types@8.54.0)
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - picomatch
 
   svelte-check@4.3.6(picomatch@4.0.7)(svelte@5.58.0(@typescript-eslint/types@8.54.0))(typescript@5.9.3):
     dependencies:

@@ -153,7 +153,9 @@ The interpreter reads each source by its mark, and the adapter's `watch`
 subscribes to the actor and to every marked source in the registry, so a
 change redraws the view with no new snapshot. The mark, not the shape of a
 source, decides both, so a callable object with `get` and `subscribe` is a
-snapshot function unless it is marked. Oneput ignores a watch notification
+snapshot function unless it is marked. In the demo, async search keeps its
+query and results in context, and its title reads the host's `online` signal
+through one readable source. Oneput ignores a watch notification
 from an AppObject that it no longer watches, so a late one cannot replace the
 current AppObject's refresh.
 

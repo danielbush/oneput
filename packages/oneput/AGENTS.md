@@ -51,7 +51,7 @@ AppObjects represent screens/states in the app stack with actions, menu, and lif
 
 `shared/declarative/appObjectActor.ts` connects an actor to the AppObject stack.
 `shared/declarative/interpreter.ts` builds the async search view from active
-state metadata and named sources. See `docs/architecture.md`.
+state metadata, named sources, and named row builders. See `docs/architecture.md`.
 
 ### Routing
 

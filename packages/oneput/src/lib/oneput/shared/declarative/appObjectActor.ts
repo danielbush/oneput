@@ -54,11 +54,12 @@ export function appObjectActor<
   Source extends string,
   List extends string,
   Event extends { type: string },
+  Item extends string,
   Snapshot
 >(
   ctl: Controller,
-  actor: ViewActor<Snapshot & ViewSnapshot<Source, List, Event>, Event>,
-  sources: ViewSources<NoInfer<Snapshot>, Source, List, Event>,
+  actor: ViewActor<Snapshot & ViewSnapshot<Source, List, Event, Item>, Event>,
+  sources: ViewSources<NoInfer<Snapshot>, Source, List, Event, Item>,
   { inputRequiresOpenMenu }: AppObjectActorOptions = {}
 ): AppObject {
   const sendIfCurrent = (event: OneputEvent | Event) => {

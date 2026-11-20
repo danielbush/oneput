@@ -1,7 +1,6 @@
-/// <reference types="vitest/config" />
 import devtoolsJson from 'vite-plugin-devtools-json';
 import { sveltekit } from '@sveltejs/kit/vite';
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 // import mkcert from 'vite-plugin-mkcert';
 
 // mkcert generates self-signed cert so we can run dev with https.  To revert to
@@ -21,7 +20,7 @@ export default defineConfig({
     expect: { requireAssertions: true },
     projects: [
       {
-        extends: './vite.config.ts',
+        extends: true,
         // Svelte's browser build, so that tests can mount components in happy-dom.
         resolve: { conditions: ['browser'] },
         test: {

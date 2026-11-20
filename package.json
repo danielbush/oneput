@@ -17,11 +17,13 @@
   },
   "devDependencies": {
     "@devcontainers/cli": "^0.75.0",
+    "@vitest/coverage-v8": "^4.1.12",
+    "@vitest/ui": "^4.1.12",
     "btca": "^1.0.961",
     "knip": "^6.11.0",
     "prettier": "^3.8.1",
     "skills": "^1.4.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.12"
   }
 }

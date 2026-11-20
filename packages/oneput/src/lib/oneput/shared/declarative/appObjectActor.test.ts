@@ -83,7 +83,7 @@ test('a row sends its named event and the child view patches the row in place', 
     }
   };
   ctl.app.run(home);
-  const app = appObjectActor(ctl, createPageActor(), { text: {}, lists: {} });
+  const app = appObjectActor(ctl, createPageActor(), { text: {}, lists: {}, items: {} });
   ctl.app.run(app);
   await new Promise<void>((resolve) => setImmediate(resolve));
 

@@ -135,6 +135,15 @@ merges views from parent to child and reads named sources from the snapshot
 for changing text and rows. Oneput owns the stack and applies the view to the
 current AppObject through `watch` and `onRefresh`.
 
+A row has standard fields (`text`, `detail`, `icon`, `send`) or names a
+builder: `{ id, build: 'name', send? }`. The builder in `sources.items` gets
+the snapshot, the row, and a function that sends the row's event to the actor,
+and returns the menu item. The interpreter sets the item's ID to the row's ID.
+Thus the view stays data, and a click still goes through the machine. Rows
+merge by key. `build` and the standard fields exclude each other: the later
+row's choice wins, and a row with only `id` and `send` keeps the earlier one.
+A name with no source gives an error, not an exception.
+
 Async search uses `StandardLayout` to show status text and a busy icon.
 The menu refresh uses the view's `focusBehaviour`. With
 `inputRequiresOpenMenu`, the adapter checks `ctl.menu.immediateMenuOpen`

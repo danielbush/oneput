@@ -10,10 +10,10 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
     context: { query: null, results: [], error: null, selected: null },
     meta: {
       view: {
-        title: 'Async Search Example',
+        layout: 'standard',
+        slots: { title: 'Async Search Example', status: 'Ready' },
         menu: { id: 'async-search', focusBehaviour: 'last' },
         input: { kind: 'filter', placeholder: 'Start typing something...' },
-        inputStatus: 'Ready',
         settings: { enableFilter: false, enableInputElement: true, clearInputAfterAction: false }
       }
     },
@@ -38,7 +38,7 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
         description: 'Show the instructions. Blank input needs no request.',
         meta: {
           view: {
-            inputStatus: { from: 'emptyStatus' },
+            slots: { status: { from: 'emptyStatus' } },
             menu: {
               items: [
                 {
@@ -55,11 +55,11 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
       pending: {
         description: 'Keep the input available and show the busy icon while the query is pending.',
         initial: 'debouncing',
-        meta: { view: { inputBusyIcon: 'RefreshCw' } },
+        meta: { view: { slots: { busyIcon: 'RefreshCw' } } },
         states: {
           debouncing: {
             description: 'Wait for a pause in typing before making the request.',
-            meta: { view: { inputStatus: 'Debouncing...' } },
+            meta: { view: { slots: { status: 'Debouncing...' } } },
             after: {
               debounce: {
                 target: 'fetching',
@@ -69,7 +69,7 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
           },
           fetching: {
             description: 'Run one request for the current query.',
-            meta: { view: { inputStatus: 'Fetching data...' } },
+            meta: { view: { slots: { status: 'Fetching data...' } } },
             entry: 'startFetch',
             invoke: { id: 'request', src: 'fetchResults' },
             on: {
@@ -99,7 +99,7 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
         meta: {
           view: {
             menu: { from: 'results' },
-            inputStatus: { from: 'resultStatus' },
+            slots: { status: { from: 'resultStatus' } },
             settings: { clearInputAfterAction: true }
           }
         },
@@ -118,7 +118,7 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
         description: 'Keep the input available and offer to search again with the same query.',
         meta: {
           view: {
-            inputStatus: '⚠️ Error',
+            slots: { status: '⚠️ Error' },
             menu: {
               items: [
                 {

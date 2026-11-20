@@ -1,18 +1,59 @@
 import { afterEach, expect, test } from 'vitest';
 import { Controller } from '../../controllers/controller.js';
+import { fchild, hflex } from '../../lib/builder.js';
+import type { AppLayoutParams, UILayout } from '../../types.js';
 import { StandardLayout } from '../ui/layout/StandardLayout.js';
 import { StdMenuItemIds } from '../ui/menuItems/stdMenuItem.js';
+import { waitForState } from '../test/index.js';
 import { appObjectActor } from './appObjectActor.js';
-import type { ViewDef, ViewSnapshot } from './interpreter.js';
+import { viewLayout, type LayoutSlots, type ViewDef, type ViewSnapshot } from './interpreter.js';
 import type { OneputEvent } from './oneputEvents.js';
+import { standardLayout } from './standardLayout.js';
 
 type PageEvent = { type: 'NEXT_PAGE' };
-type Page = ViewSnapshot<never, never, PageEvent> & {
+
+const icons = {
+  Close: 'x',
+  Accept: 'check',
+  Reject: 'x',
+  Send: 'send',
+  Back: 'left',
+  MenuToggle: 'down'
+};
+
+type BannerParams = AppLayoutParams & { banner?: string };
+
+/** A test-only layout component: it shows only its banner, in the outer UI. */
+const bannerLayout = viewLayout({
+  slots: ['banner'],
+  create: (_ctl, initial: BannerParams) => {
+    let settings = initial;
+    const layout: UILayout<BannerParams> = {
+      configure: ({ params, replace }) => {
+        settings = replace ? { ...params } : { ...settings, ...params };
+      },
+      get outerUI() {
+        return hflex({
+          id: 'banner',
+          children: [fchild({ id: 'banner-text', textContent: settings.banner })]
+        });
+      }
+    };
+    return layout;
+  },
+  params: ({ banner }): BannerParams => ({ banner })
+});
+
+const layouts = { standard: standardLayout(icons), banner: bannerLayout };
+type Layouts = LayoutSlots<typeof layouts>;
+type PageView = ViewDef<never, never, PageEvent, never, Layouts>;
+type Page = ViewSnapshot<never, never, PageEvent, never, Layouts> & {
   can(event: OneputEvent | PageEvent): boolean;
 };
 
-const rootView: ViewDef<never, never, PageEvent> = {
-  title: 'Pages',
+const rootView: PageView = {
+  layout: 'standard',
+  slots: { title: 'Pages' },
   menu: {
     id: 'pages',
     items: [
@@ -21,12 +62,12 @@ const rootView: ViewDef<never, never, PageEvent> = {
     ]
   }
 };
-const secondView: ViewDef<never, never, PageEvent> = {
+const secondView: PageView = {
   menu: { items: [{ id: 'next', text: 'Second page' }] }
 };
 
 /** A two-state actor: root > first | second. NEXT_PAGE moves first to second. */
-function createPageActor() {
+function createPageActor(second: PageView = secondView) {
   let state: 'first' | 'second' = 'first';
   const listeners = new Set<() => void>();
   const snapshot = (): Page => ({
@@ -35,7 +76,7 @@ function createPageActor() {
     },
     getMeta: () => ({
       root: { view: rootView },
-      ...(state === 'second' && { second: { view: secondView } })
+      ...(state === 'second' && { second: { view: second } })
     }),
     can: () => false
   });
@@ -57,14 +98,6 @@ function createPageActor() {
   };
 }
 
-const icons = {
-  Close: 'x',
-  Accept: 'check',
-  Reject: 'x',
-  Send: 'send',
-  Back: 'left',
-  MenuToggle: 'down'
-};
 const controllers: Controller[] = [];
 
 afterEach(() => {
@@ -72,8 +105,16 @@ afterEach(() => {
   controllers.length = 0;
 });
 
-test('a row sends its named event and the child view patches the row in place', async () => {
-  // arrange
+/** Wait until the menu publishes rows that show `text`. */
+function menuShows(ctl: Controller, text: string) {
+  return waitForState(ctl, 'set-menu-items', {
+    name: `menu rows to show "${text}"`,
+    reached: () => JSON.stringify(ctl.currentProps.menuItems).includes(text),
+    seen: () => `rows [${ctl.currentProps.menuItems?.map((item) => item.id).join(', ') ?? ''}]`
+  });
+}
+
+function runPages(second?: PageView) {
   const ctl = Controller.createNull({ menuOpen: true });
   controllers.push(ctl);
   const home = {
@@ -83,13 +124,26 @@ test('a row sends its named event and the child view patches the row in place', 
     }
   };
   ctl.app.run(home);
-  const app = appObjectActor(ctl, createPageActor(), { text: {}, lists: {}, items: {} });
+  const app = appObjectActor(
+    ctl,
+    createPageActor(second),
+    { text: {}, lists: {}, items: {} },
+    layouts
+  );
+  const shown = menuShows(ctl, 'Next page');
   ctl.app.run(app);
-  await new Promise<void>((resolve) => setImmediate(resolve));
+  return { ctl, home, app, shown };
+}
+
+test('a row sends its named event and the child view patches the row in place', async () => {
+  // arrange
+  const { ctl, home, app, shown } = runPages();
+  await shown;
+  const patched = menuShows(ctl, 'Second page');
 
   // act
   ctl.simulateMenuItemClick('next');
-  await new Promise<void>((resolve) => setImmediate(resolve));
+  await patched;
 
   // assert
   const rows = ctl.currentProps.menuItems;
@@ -106,4 +160,28 @@ test('a row sends its named event and the child view patches the row in place', 
   expect(ctl.app.isCurrent(app)).toBe(true);
   ctl.app.goBack();
   expect(ctl.app.isCurrent(home)).toBe(true);
+});
+
+test('a view that names another layout shows that layout component', async () => {
+  // arrange
+  const { ctl, shown } = runPages({
+    layout: 'banner',
+    slots: { banner: 'Offline' },
+    menu: { items: [{ id: 'next', text: 'Second page' }] }
+  });
+  await shown;
+  const firstLayout = ctl.ui.getLayout();
+  const switched = menuShows(ctl, 'Second page');
+
+  // act
+  ctl.simulateMenuItemClick('next');
+  await switched;
+
+  // assert
+  expect(firstLayout).toBeInstanceOf(StandardLayout);
+  expect(ctl.ui.getLayout()).not.toBeInstanceOf(StandardLayout);
+  expect(ctl.currentProps.outerUI).toMatchObject({
+    id: 'banner',
+    children: [expect.objectContaining({ textContent: 'Offline' })]
+  });
 });

@@ -128,7 +128,7 @@ When an AppObject starts, `AppController.runBefore()` extracts bindings from `ac
 
 ### Declarative AppObject
 
-`appObjectActor(ctl, actor, sources, options)` in `shared/declarative/` connects
+`appObjectActor(ctl, actor, sources, layouts, options)` in `shared/declarative/` connects
 an actor to Oneput. The actor receives AppObject lifecycle, Back, input, and
 row activation events. Its active states declare `meta.view`. The interpreter
 merges views from parent to child and reads named sources from the snapshot
@@ -144,7 +144,26 @@ merge by key. `build` and the standard fields exclude each other: the later
 row's choice wins, and a row with only `id` and `send` keeps the earlier one.
 A name with no source gives an error, not an exception.
 
-Async search uses `StandardLayout` to show status text and a busy icon.
+The interpreter knows no layout. A view names a registered layout and fills
+its slots with text or `{ from: 'textSource' }`, for example
+`{ layout: 'standard', slots: { title: 'Search', status: { from: 'status' } } }`.
+`viewLayout({ slots, create, params })` makes a registry entry: its slot
+names, the layout component (`create`, as in `AppObject.layout`), and how the
+resolved slot values become that component's params. The registry is shared
+across AppObjects. When the active view names a layout other than the one the
+AppObject shows, the adapter shows its component with `ctl.ui.setLayout`.
+Children inherit it, and it comes back when the AppObject resumes.
+
+A child view can name a different layout; then the parent's slots do not
+apply. Otherwise slots merge by key. The registry types the layout names and
+slots. A view without `layout` can name any registered slot, so rendering
+gives an error for a slot that the active layout does not declare, and for
+an unknown layout name. The menu, the input placeholder and the settings are
+not slots.
+
+`standardLayout(icons)` in `shared/declarative/standardLayout.ts` shows
+`StandardLayout`: `title`, `status` (bottom-right text) and `busyIcon` (a
+turning icon at the right of the input). Async search uses it.
 The menu refresh uses the view's `focusBehaviour`. With
 `inputRequiresOpenMenu`, the adapter checks `ctl.menu.immediateMenuOpen`
 when it receives input. After reopening, a fresh edit starts the next search.

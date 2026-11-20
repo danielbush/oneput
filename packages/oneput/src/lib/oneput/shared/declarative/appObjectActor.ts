@@ -3,6 +3,8 @@ import type { AppObject, Menu } from '../../types.js';
 import {
   renderActiveView,
   type OneputView,
+  type LayoutSlots,
+  type ViewLayouts,
   type ViewSnapshot,
   type ViewSources
 } from './interpreter.js';
@@ -33,7 +35,7 @@ function rowKey(menu: Menu) {
  */
 function applyView(ctl: Controller, view: OneputView, rowsChanged: boolean) {
   ctl.ui.update({
-    params: view.layout,
+    params: view.layout.params,
     flags: {
       enableFilter: view.settings.enableFilter,
       enableInputElement: view.settings.enableInputElement,
@@ -49,17 +51,27 @@ function applyView(ctl: Controller, view: OneputView, rowsChanged: boolean) {
   if (rowsChanged) ctl.menu.setMenu(view.menu);
 }
 
-/** Connect an actor to its AppObject. Oneput owns the AppObject stack and the input. */
+/**
+ * Connect an actor to its AppObject. Oneput owns the AppObject stack and the input.
+ * `layouts` are the layouts that the actor's views can name, shared across AppObjects.
+ * When the active view names a layout other than the one this AppObject shows,
+ * the adapter shows that layout's component.
+ */
 export function appObjectActor<
   Source extends string,
   List extends string,
   Event extends { type: string },
   Item extends string,
+  Layouts extends ViewLayouts,
   Snapshot
 >(
   ctl: Controller,
-  actor: ViewActor<Snapshot & ViewSnapshot<Source, List, Event, Item>, Event>,
+  actor: ViewActor<
+    Snapshot & ViewSnapshot<Source, List, Event, Item, NoInfer<LayoutSlots<Layouts>>>,
+    Event
+  >,
   sources: ViewSources<NoInfer<Snapshot>, Source, List, Event, Item>,
+  layouts: Layouts,
   { inputRequiresOpenMenu }: AppObjectActorOptions = {}
 ): AppObject {
   const sendIfCurrent = (event: OneputEvent | Event) => {
@@ -67,6 +79,7 @@ export function appObjectActor<
   };
   const back = { type: 'BACK' } as const;
   let menu: Menu = { id: '', items: [] };
+  let shownLayout: string | undefined;
   let shownRows: string | undefined;
 
   const app: AppObject = {
@@ -111,12 +124,19 @@ export function appObjectActor<
       }
     ],
     onRefresh() {
-      const rendered = renderActiveView(actor.getSnapshot(), sources, sendIfCurrent);
+      const rendered = renderActiveView(actor.getSnapshot(), sources, layouts, sendIfCurrent);
       if (rendered.isErr()) {
         ctl.notify(rendered.error);
         return;
       }
       menu = rendered.value.menu;
+      const { name, create, params } = rendered.value.layout;
+      if (name !== shownLayout) {
+        // Show the component; applyView sets its params. A child inherits it,
+        // and Oneput shows it again when this AppObject resumes.
+        ctl.ui.setLayout(create(ctl, params));
+        shownLayout = name;
+      }
       const rows = rowKey(rendered.value.menu);
       applyView(ctl, rendered.value, rows !== shownRows);
       shownRows = rows;

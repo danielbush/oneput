@@ -53,7 +53,8 @@ Each AppObject on the stack owns its layout params: declared `layout.params`, or
 
 `shared/declarative/appObjectActor.ts` connects an actor to the AppObject stack.
 `shared/declarative/interpreter.ts` builds the async search view from active
-state metadata, named sources, and named row builders. See `docs/architecture.md`.
+state metadata, named sources, named row builders, and named layouts
+(`standardLayout.ts` is one). See `docs/architecture.md`.
 
 ### Routing
 

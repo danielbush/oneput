@@ -1,6 +1,5 @@
-import { hflex } from '../../lib/builder.js';
-import type { Menu, MenuItem, UIFlags } from '../../types.js';
-import type { StandardLayoutParams } from '../ui/layout/StandardLayout.js';
+import type { Controller } from '../../controllers/controller.js';
+import type { AppLayoutParams, Menu, MenuItem, UIFlags, UILayout } from '../../types.js';
 import { infoMenuItem } from '../ui/menuItems/infoMenuItem.js';
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
 import { err, ok, Result } from 'neverthrow';
@@ -70,6 +69,16 @@ function mergeRow<Label, Event extends RowEvent, Item extends string>(
 }
 
 type NameError = 'Expected a source for each name';
+type ViewError =
+  | NameError
+  | 'Expected a complete active view'
+  | 'Expected text for each menu row'
+  | 'Expected only slots that the layout declares';
+
+/** Slot values by slot name, with no prototype, so any slot name is safe as a key. */
+function slotRecord<Value>(): Record<string, Value | undefined> {
+  return Object.create(null) as Record<string, Value | undefined>;
+}
 
 /** Find a named source. A widened view type can name a source that is not there. */
 function named<Name extends string, Source>(
@@ -81,16 +90,73 @@ function named<Name extends string, Source>(
     : err('Expected a source for each name');
 }
 
-/** Metadata for one state's contribution to the view. Use named sources for changing data. */
+/**
+ * A layout that a view names: its slot names, the layout component that shows
+ * it, and how the resolved slot values become that component's params. Make
+ * one with {@link viewLayout}. Register layouts once and share them across
+ * AppObjects.
+ */
+export type ViewLayout<Slot extends string, Params extends AppLayoutParams = AppLayoutParams> = {
+  slots: readonly Slot[];
+  create(ctl: Controller, params: Params): UILayout<Params>;
+  params(values: Partial<Record<Slot, string>>): Params;
+};
+
+/** A slot name that an object inherits, such as `toString`, would clash with it. */
+type OwnSlot<Slot extends string> = Slot extends keyof typeof Object.prototype | '__proto__'
+  ? never
+  : Slot;
+
+/**
+ * Make a {@link ViewLayout}. The slot names type the values that `params` gets.
+ * Slot names from `Object.prototype` are type errors.
+ */
+export function viewLayout<const Slot extends string, Params extends AppLayoutParams>(
+  layout: ViewLayout<Slot, Params> & { slots: readonly OwnSlot<Slot>[] }
+): ViewLayout<Slot, Params> {
+  return layout;
+}
+
+/** Layouts by name. */
+export type ViewLayouts = Record<string, ViewLayout<string>>;
+
+/** The slot names of each layout in a registry, by layout name. */
+export type LayoutSlots<Layouts extends ViewLayouts> = {
+  [Name in keyof Layouts]: Layouts[Name]['slots'][number];
+};
+
+/** A layout with no slots takes none. */
+type SlotValues<Slot extends string, Source extends string> = [Slot] extends [never]
+  ? Record<string, never>
+  : { [Name in Slot]?: Text<Source> };
+
+/**
+ * A view that names a layout fills only that layout's slots. A view that does
+ * not name one fills the slots of the layout a parent names; the type allows
+ * any registered slot there, and rendering checks it.
+ */
+type LayoutChoice<Layouts extends Record<string, string>, Source extends string> =
+  | {
+      [Name in keyof Layouts & string]: {
+        layout: Name;
+        slots?: SlotValues<Layouts[Name], Source>;
+      };
+    }[keyof Layouts & string]
+  | { layout?: never; slots?: SlotValues<Layouts[keyof Layouts & string], Source> };
+
+type NoLayouts = Record<never, never>;
+
+/**
+ * Metadata for one state's contribution to the view. Use named sources for
+ * changing data. `layout` names a registered layout, and `slots` fill it.
+ */
 export type ViewDef<
   Source extends string = never,
   List extends string = never,
   Event extends RowEvent = never,
-  Item extends string = never
-> = {
-  title?: Text<Source>;
-  inputStatus?: Text<Source>;
-  inputBusyIcon?: string;
+  Item extends string = never,
+  Layouts extends Record<string, string> = NoLayouts
+> = LayoutChoice<Layouts, Source> & {
   menu?: {
     id?: string;
     focusBehaviour?: Menu['focusBehaviour'];
@@ -106,10 +172,11 @@ export type ViewSnapshot<
   Source extends string,
   List extends string,
   Event extends RowEvent,
-  Item extends string = never
+  Item extends string = never,
+  Layouts extends Record<string, string> = NoLayouts
 > = {
   machine: { getStateNodeById(id: string): { path: readonly string[] } };
-  getMeta(): Record<string, { view?: ViewDef<Source, List, Event, Item> } | undefined>;
+  getMeta(): Record<string, { view?: ViewDef<Source, List, Event, Item, Layouts> } | undefined>;
 };
 
 /**
@@ -138,7 +205,8 @@ export type ViewSources<
 };
 
 export type OneputView = {
-  layout: StandardLayoutParams;
+  /** The named layout and its params. */
+  layout: { name: string; create: ViewLayout<string>['create']; params: AppLayoutParams };
   menu: Menu;
   settings: ViewSettings;
   placeholder?: string;
@@ -148,23 +216,28 @@ type Activation<Event extends RowEvent> = Event | { type: 'ITEM_ACTIVATED'; id: 
 
 /**
  * Resolve the active states' metadata, with parents first.
- * Child settings and menu fields merge by key. Rows merge by ID in the same
- * order (see {@link mergeRow}). A name with no source gives an error.
+ * A child's `layout` replaces its parent's; when it names a different layout,
+ * the parent's slots do not apply. Slots, settings and menu fields merge by
+ * key, and a child can clear `input` with `input: undefined`. Rows merge by ID
+ * in the same order (see {@link mergeRow}). A name with no source or layout,
+ * or a slot that the active layout does not declare, gives an error.
+ *
+ * The registry `layouts` types the layout names and slots that the views can
+ * use.
  */
 export function renderActiveView<
   Source extends string,
   List extends string,
   Event extends RowEvent,
   Item extends string,
+  Layouts extends ViewLayouts,
   Snapshot
 >(
-  snapshot: Snapshot & ViewSnapshot<Source, List, Event, Item>,
+  snapshot: Snapshot & ViewSnapshot<Source, List, Event, Item, NoInfer<LayoutSlots<Layouts>>>,
   sources: ViewSources<NoInfer<Snapshot>, Source, List, Event, Item>,
+  layouts: Layouts,
   activate: (event: Activation<Event>) => void
-): Result<
-  OneputView,
-  'Expected a complete active view' | 'Expected text for each menu row' | NameError
-> {
+): Result<OneputView, ViewError> {
   const views = Object.entries(snapshot.getMeta())
     .flatMap(([id, meta]) =>
       meta?.view
@@ -173,20 +246,33 @@ export function renderActiveView<
     )
     .sort((a, b) => a.depth - b.depth)
     .map(({ view }) => view);
-  const view = views.reduce<ViewDef<Source, List, Event, Item>>(
-    (parent, child) => ({
-      ...parent,
-      ...child,
-      settings: { ...parent.settings, ...child.settings },
-      menu: { ...parent.menu, ...child.menu }
-    }),
-    {}
-  );
-  const { title, menu, input, inputStatus, inputBusyIcon } = view;
-  const menuId = menu?.id;
-  if (title === undefined || menu === undefined || menuId === undefined) {
+  let layoutName: string | undefined;
+  let input: ViewDef<Source>['input'];
+  let menu: NonNullable<ViewDef<Source, List, Event, Item>['menu']> = {};
+  let settings: ViewSettings = {};
+  let slots = slotRecord<Text<Source>>();
+  for (const view of views) {
+    if (view.layout !== undefined && view.layout !== layoutName) {
+      layoutName = view.layout;
+      slots = slotRecord();
+    }
+    if ('input' in view) input = view.input;
+    menu = { ...menu, ...view.menu };
+    settings = { ...settings, ...view.settings };
+    Object.assign(slots, view.slots);
+  }
+  const menuId = menu.id;
+  if (layoutName === undefined || menuId === undefined) {
     return err('Expected a complete active view');
   }
+  const found = named(layouts, layoutName);
+  if (found.isErr()) return err(found.error);
+  // The values come from the merged slots, so they are keyed by any slot name.
+  const layout: ViewLayout<string> = found.value;
+  if (Object.keys(slots).some((slot) => !layout.slots.includes(slot))) {
+    return err('Expected only slots that the layout declares');
+  }
+  const filled = Object.keys(slots).filter((slot) => slots[slot] !== undefined);
 
   const read = (text: Text<Source>): Result<string, NameError> =>
     typeof text === 'string'
@@ -205,9 +291,7 @@ export function renderActiveView<
     for (const row of menu?.items ?? []) rows.set(row.id, mergeRow(rows.get(row.id), row));
   }
 
-  const renderRow = (
-    row: ViewRow<Text<Source>, Event, Item>
-  ): Result<MenuItem, NameError | 'Expected text for each menu row'> => {
+  const renderRow = (row: ViewRow<Text<Source>, Event, Item>): Result<MenuItem, ViewError> => {
     const { id, send } = row;
     const raise = () => activate(send ?? { type: 'ITEM_ACTIVATED', id });
     if (isBuilt(row)) {
@@ -233,25 +317,22 @@ export function renderActiveView<
     );
   };
 
+  const slotValues = Result.combine(
+    filled.map((slot) => readOptional(slots[slot]).map((value) => [slot, value] as const))
+  ).map((entries) => {
+    const values = slotRecord<string>();
+    for (const [slot, value] of entries) values[slot] = value;
+    return values;
+  });
+
   return Result.combine([
     Result.combine([...rows.values()].map(renderRow)),
-    read(title),
-    readOptional(inputStatus),
+    slotValues,
     readOptional(input?.placeholder)
-  ]).map(([items, menuTitle, status, placeholder]) => ({
-    layout: {
-      menuTitle,
-      outerRight: status === undefined ? undefined : (b) => b.fchild({ textContent: status }),
-      inputRight:
-        inputBusyIcon === undefined
-          ? undefined
-          : hflex({
-              id: 'input-right-busy',
-              children: (b) => [b.icon(inputBusyIcon, { classes: ['oneput__rotate'] })]
-            })
-    },
+  ]).map(([items, values, placeholder]) => ({
+    layout: { name: layoutName, create: layout.create, params: layout.params(values) },
     menu: { id: menuId, focusBehaviour: menu.focusBehaviour, items },
-    settings: view.settings ?? {},
+    settings,
     placeholder
   }));
 }

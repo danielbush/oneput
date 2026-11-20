@@ -1,6 +1,7 @@
 import { assertEvent, assign, fromCallback, sendTo, setup } from 'xstate';
-import type { ViewDef } from '@oneput/oneput/shared/declarative/interpreter.js';
+import type { LayoutSlots, ViewDef } from '@oneput/oneput/shared/declarative/interpreter.js';
 import type { OneputEvent } from '@oneput/oneput/shared/declarative/oneputEvents.js';
+import { viewLayouts } from '../../common/_layout.js';
 import { SearchService, type SearchFailure, type SearchItem } from './searchService.js';
 import { resultById, sources, type SearchContext } from './sources.js';
 
@@ -12,7 +13,8 @@ type SearchView = ViewDef<
   keyof typeof sources.text,
   keyof typeof sources.lists,
   RowEvent,
-  keyof typeof sources.items
+  keyof typeof sources.items,
+  LayoutSlots<typeof viewLayouts>
 >;
 
 function fetchResults(service: SearchService) {

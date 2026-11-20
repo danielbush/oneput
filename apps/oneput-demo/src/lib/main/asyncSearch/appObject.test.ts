@@ -20,6 +20,13 @@ function status(ctl: Controller) {
   return outerRight && outerRight.type === 'fchild' ? outerRight.textContent : undefined;
 }
 
+function title(ctl: Controller) {
+  const header = ctl.currentProps.menuUI?.layoutHeader?.children?.find(
+    (child) => child && child.classes?.includes('oneput__menu-item-header')
+  );
+  return header && header.type === 'fchild' ? header.textContent : undefined;
+}
+
 /** Track each view that the menu publishes, as status and row IDs. */
 function trackViews(ctl: Controller) {
   const data: string[] = [];
@@ -113,6 +120,7 @@ describe('declarative async search AppObject', () => {
 
     // assert
     expect(initialRows).toEqual(['instructions']);
+    expect(title(ctl)).toBe('Async Search Example');
     expect(ctl.input.getPlaceholder()).toBe('Start typing something...');
     expect(debouncingStatus).toBe('Debouncing...');
     expect(pendingRows).toEqual([]);

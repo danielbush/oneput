@@ -832,6 +832,31 @@ describe('AppController', () => {
       return { app, model, refreshes };
     }
 
+    it('destroy stops watching the current app', () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const subscriptions = { open: 0 };
+      ctl.app.run({
+        watch: () => [
+          {
+            subscribe: () => {
+              subscriptions.open += 1;
+              return () => (subscriptions.open -= 1);
+            }
+          }
+        ],
+        onStart: () => {}
+      });
+      const openBefore = subscriptions.open;
+
+      // act
+      ctl.destroy();
+
+      // assert
+      expect(openBefore).toBe(1);
+      expect(subscriptions.open).toBe(0);
+    });
+
     it('a stale notify from a replaced app does not drop the current refresh', async () => {
       // arrange
       const ctl = Controller.createNull({ menuOpen: true });

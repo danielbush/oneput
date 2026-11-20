@@ -33,8 +33,13 @@ type AnyAppObject = AppObject<any, any>;
 
 type AppObjectState = {
   lastMenuActionIds: Record<string, string>;
+  /** The layout that the AppObject declares, created when it starts. */
   layout?: UILayout;
+  /** The params that it declares; with no declaration, it keeps what is shown. */
   layoutParams?: Partial<AppLayoutParams>;
+  declaresLayout?: boolean;
+  /** What the screen showed when a child started, to show again on resume. */
+  suspended?: { layout?: UILayout; params?: Partial<AppLayoutParams> };
 };
 
 /**
@@ -102,16 +107,13 @@ export class AppController {
    * - no layout + no params => inherit active parent layout unchanged
    *
    */
-  private resolveLayout(app: AnyAppObject, inheritedLayout?: UILayout) {
+  /** Create the layout that `app` declares, if any. */
+  private resolveLayout(app: AnyAppObject): Partial<AppObjectState> {
     const declaration = app.layout;
-    if (!declaration) {
-      return { layout: inheritedLayout, layoutParams: undefined };
-    }
     return {
-      layout: declaration.layout
-        ? declaration.layout(this.ctl, declaration.params)
-        : inheritedLayout,
-      layoutParams: declaration.params
+      layout: declaration?.layout ? declaration.layout(this.ctl, declaration.params) : undefined,
+      layoutParams: declaration?.params,
+      declaresLayout: declaration !== undefined
     };
   }
 
@@ -390,15 +392,12 @@ export class AppController {
   }
 
   private setCurrent(app: AnyAppObject | undefined, fromParent = true) {
-    const previous = this.current;
     this.current = app;
     this.generation += 1;
-    // If layout not set use parent's (INHERIT_LAYOUT).
-    // Trivial edge-case: If we never set a layout, then the AppState layout
-    // will always be blank.
+    // An AppObject that declares no layout component keeps the one shown
+    // (INHERIT_LAYOUT).
     if (app && fromParent) {
-      const previousLayout = previous ? this.getAppState(previous).layout : this.ctl.ui.getLayout();
-      Object.assign(this.getAppState(app), this.resolveLayout(app, previousLayout));
+      Object.assign(this.getAppState(app), this.resolveLayout(app));
     }
   }
 
@@ -501,14 +500,18 @@ export class AppController {
       );
     }
     if (this.current) {
-      const { layout, layoutParams } = this.getAppState(this.current);
-      if (layout) {
-        this.ctl.ui.setLayout(layout);
-      }
-      if (layout || layoutParams) {
-        // Baseline for this AppObject: replace so child mid-flight params
-        // (e.g. inputAccept) don't stick on resume.
-        this.ctl.ui.update({ params: layoutParams, replace: true });
+      const state = this.getAppState(this.current);
+      const suspended = state.suspended;
+      state.suspended = undefined;
+      if (suspended) {
+        // Resume: show what this AppObject showed when its child started, so
+        // the child's layout and params (e.g. inputAccept) do not stick.
+        this.ctl.ui.setLayout(suspended.layout);
+        this.ctl.ui.update({ params: suspended.params, replace: true });
+      } else if (state.declaresLayout) {
+        if (state.layout) this.ctl.ui.setLayout(state.layout);
+        // Its declared params are the baseline for this AppObject.
+        this.ctl.ui.update({ params: state.layoutParams, replace: true });
       }
     }
     this.installInputScope();
@@ -549,6 +552,10 @@ export class AppController {
     this.pendingPop = undefined;
     this.runBeforeSuspend();
     if (this.current) {
+      this.getAppState(this.current).suspended = {
+        layout: this.ctl.ui.getLayout(),
+        params: this.ctl.ui.getParams()
+      };
       this.appParents.push(this.current);
     }
     this.setCurrent(appObject);

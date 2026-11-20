@@ -63,9 +63,17 @@ export class UIController {
   }
 
   private layout?: UILayout;
+  /** The params that the layout shows: the last baseline and the patches after it. */
+  private params?: Partial<AppLayoutParams>;
 
-  setLayout(layout: UILayout) {
+  /** Show `layout`, or no layout. Then set its params with {@link update}. */
+  setLayout(layout: UILayout | undefined) {
     this.layout = layout;
+  }
+
+  /** The params that the layout shows. */
+  getParams(): Partial<AppLayoutParams> | undefined {
+    return this.params;
   }
 
   getLayout<D extends UILayout = UILayout>(): D | undefined {
@@ -103,6 +111,11 @@ export class UIController {
       this.ctl.app.reset(settings.flags);
     } else {
       this.ctl.app.applyFlags(settings.flags);
+    }
+    if (settings.replace) {
+      this.params = settings.params;
+    } else if (settings.params) {
+      this.params = { ...this.params, ...settings.params };
     }
     this.layout?.configure({ params: settings.params, replace: settings.replace });
     this.invalidate();

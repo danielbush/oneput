@@ -1,16 +1,51 @@
 import { afterEach, describe, expect, test } from 'vitest';
 import { Controller } from '../../controllers/controller.js';
 import { menuItem } from '../../lib/builder.js';
-import type { FChildParams, MenuItem } from '../../types.js';
-import { renderActiveView, type ViewDef, type ViewSources } from './interpreter.js';
+import type { AppLayoutParams, FChildParams, MenuItem, UILayout } from '../../types.js';
+import {
+  renderActiveView,
+  viewLayout,
+  type LayoutSlots,
+  type ViewDef,
+  type ViewLayouts,
+  type ViewSources
+} from './interpreter.js';
+
+/** A layout component that keeps its params. These tests do not show it. */
+function component(_ctl: Controller, params: AppLayoutParams): UILayout {
+  let settings = params;
+  return { configure: ({ params: next }) => (settings = { ...settings, ...next }) };
+}
+
+/** Test-only layouts: the interpreter knows no layout of its own. */
+const layouts = {
+  plain: viewLayout({
+    slots: ['heading', 'note'],
+    create: component,
+    params: ({ heading, note }) => ({ menuTitle: [heading, note].filter(Boolean).join(' / ') })
+  }),
+  bare: viewLayout({
+    slots: ['heading'],
+    create: component,
+    params: ({ heading }) => ({ menuTitle: `[${heading ?? ''}]` })
+  })
+};
+
+type Layouts = LayoutSlots<typeof layouts>;
 
 type PageEvent = { type: 'NEXT_PAGE' } | { type: 'PREVIOUS_PAGE' };
-type PageView = ViewDef<'pageText', 'pages', PageEvent, 'badge' | 'anonymous'>;
+type PageView = ViewDef<'pageText', 'pages', PageEvent, 'badge' | 'anonymous', Layouts>;
 /** A view type that a machine declares apart from its sources: any name type-checks. */
-type WideView = ViewDef<string, string, PageEvent, string>;
+type WideView = ViewDef<string, string, PageEvent, string, Record<string, string>>;
 
-/** A one-state actor whose events change its page and its last activated row. */
-function createPages<View extends PageView | WideView>(view: View) {
+/** The same layouts, typed with any names as a registry declared apart from its views. */
+const wideLayouts: ViewLayouts = layouts;
+
+/**
+ * An actor whose events change its page and its last activated row.
+ * Its active states are nested: each view is the child of the one before.
+ */
+function createPages<View extends PageView | WideView>(...views: View[]) {
   const state = { page: 1, activated: null as string | null };
   const pages = {
     send(event: PageEvent | { type: 'ITEM_ACTIVATED'; id: string }) {
@@ -24,8 +59,10 @@ function createPages<View extends PageView | WideView>(view: View) {
   function snapshotOf() {
     return {
       ...state,
-      machine: { getStateNodeById: () => ({ path: [] }) },
-      getMeta: () => ({ root: { view } })
+      machine: {
+        getStateNodeById: (id: string) => ({ path: Array.from({ length: Number(id) }, String) })
+      },
+      getMeta: () => Object.fromEntries(views.map((view, depth) => [String(depth), { view }]))
     };
   }
   return pages;
@@ -58,10 +95,13 @@ const sources = {
 /** The same sources, typed with any names as a registry declared apart from its views. */
 const wideSources: ViewSources<Snapshot, string, string, PageEvent, string> = sources;
 
+function renderView(pages: ReturnType<typeof createPages<PageView>>) {
+  return renderActiveView(pages.snapshot, sources, layouts, pages.send);
+}
+
 /** The interpreter puts only menu items in the menu. */
 function render(pages: ReturnType<typeof createPages<PageView>>) {
-  const view = renderActiveView(pages.snapshot, sources, pages.send)._unsafeUnwrap();
-  return view.menu.items as MenuItem[];
+  return renderView(pages)._unsafeUnwrap().menu.items as MenuItem[];
 }
 
 const controllers: Controller[] = [];
@@ -83,7 +123,7 @@ function segments(item: MenuItem | undefined) {
 }
 
 function pagesWith(items: NonNullable<PageView['menu']>['items']) {
-  return createPages<PageView>({ title: 'Pages', menu: { id: 'pages', items } });
+  return createPages<PageView>({ layout: 'plain', menu: { id: 'pages', items } });
 }
 
 describe('built rows', () => {
@@ -103,7 +143,7 @@ describe('built rows', () => {
 
   test('list row without send activates its id', () => {
     // arrange
-    const pages = createPages<PageView>({ title: 'Pages', menu: { id: 'pages', from: 'pages' } });
+    const pages = createPages<PageView>({ layout: 'plain', menu: { id: 'pages', from: 'pages' } });
     const [item] = render(pages);
 
     // act
@@ -176,21 +216,126 @@ describe('merging built rows', () => {
   });
 });
 
+describe('layouts', () => {
+  test('slots merge by key', () => {
+    // arrange
+    const pages = createPages<PageView>(
+      { layout: 'plain', slots: { heading: 'Parent', note: 'Parent note' }, menu: { id: 'pages' } },
+      { slots: { note: { from: 'pageText' } } }
+    );
+
+    // act
+    const view = renderView(pages);
+
+    // assert
+    expect(view._unsafeUnwrap().layout).toMatchObject({
+      name: 'plain',
+      params: { menuTitle: 'Parent / Page 1' }
+    });
+  });
+
+  test('another layout drops the parent slots', () => {
+    // arrange
+    const pages = createPages<PageView>(
+      { layout: 'plain', slots: { heading: 'Pages', note: 'Note' }, menu: { id: 'pages' } },
+      { layout: 'bare', slots: { heading: 'Child' } }
+    );
+
+    // act
+    const view = renderView(pages);
+
+    // assert
+    expect(view._unsafeUnwrap().layout).toMatchObject({
+      name: 'bare',
+      params: { menuTitle: '[Child]' }
+    });
+  });
+
+  test('slot the layout does not declare', () => {
+    // arrange
+    const pages = createPages<PageView>(
+      { layout: 'bare', menu: { id: 'pages' } },
+      { slots: { note: 'Offline' } }
+    );
+
+    // act
+    const view = renderView(pages);
+
+    // assert
+    expect(view._unsafeUnwrapErr()).toBe('Expected only slots that the layout declares');
+  });
+
+  test('undeclared slot with no value', () => {
+    // arrange
+    const pages = createPages<PageView>(
+      { layout: 'bare', menu: { id: 'pages' } },
+      { slots: { note: undefined } }
+    );
+
+    // act
+    const view = renderView(pages);
+
+    // assert
+    expect(view._unsafeUnwrapErr()).toBe('Expected only slots that the layout declares');
+  });
+
+  // Layouts cannot declare these names; a view typed apart can still fill them.
+  test.each(['toString', '__proto__'])('slot named %s from a view typed apart', (slot) => {
+    // arrange
+    const pages = createPages<WideView>(
+      { layout: 'plain', slots: { heading: 'A' }, menu: { id: 'pages' } },
+      { slots: Object.fromEntries([[slot, 'B']]) }
+    );
+
+    // act
+    const view = renderActiveView(pages.snapshot, wideSources, wideLayouts, pages.send);
+
+    // assert
+    expect(view._unsafeUnwrapErr()).toBe('Expected only slots that the layout declares');
+  });
+
+  test('child clears the input', () => {
+    // arrange
+    const pages = createPages<PageView>(
+      { layout: 'plain', input: { kind: 'filter', placeholder: 'Type' }, menu: { id: 'pages' } },
+      { input: undefined }
+    );
+
+    // act
+    const view = renderView(pages);
+
+    // assert
+    expect(view._unsafeUnwrap().placeholder).toBeUndefined();
+  });
+
+  test('no layout', () => {
+    // arrange
+    const pages = createPages<PageView>({ menu: { id: 'pages' } });
+
+    // act
+    const view = renderView(pages);
+
+    // assert
+    expect(view._unsafeUnwrapErr()).toBe('Expected a complete active view');
+  });
+});
+
 describe('missing names', () => {
   test.each<[string, WideView]>([
-    ['builder', { title: 'Pages', menu: { id: 'pages', items: [{ id: 'row', build: 'gone' }] } }],
-    ['list', { title: 'Pages', menu: { id: 'pages', from: 'gone' } }],
-    ['text', { title: { from: 'gone' }, menu: { id: 'pages' } }],
+    ['layout', { layout: 'gone', menu: { id: 'pages' } }],
+    ['builder', { layout: 'plain', menu: { id: 'pages', items: [{ id: 'row', build: 'gone' }] } }],
+    ['list', { layout: 'plain', menu: { id: 'pages', from: 'gone' } }],
+    ['slot text', { layout: 'plain', slots: { heading: { from: 'gone' } }, menu: { id: 'pages' } }],
     [
       'row text',
-      { title: 'Pages', menu: { id: 'pages', items: [{ id: 'row', text: { from: 'gone' } }] } }
+      { layout: 'plain', menu: { id: 'pages', items: [{ id: 'row', text: { from: 'gone' } }] } }
     ]
   ])('%s', (_, view) => {
     // arrange
     const pages = createPages(view);
 
     // act
-    const result = renderActiveView(pages.snapshot, wideSources, pages.send);
+    const result = renderActiveView(pages.snapshot, wideSources, wideLayouts, pages.send);
 
     // assert
     expect(result._unsafeUnwrapErr()).toBe('Expected a source for each name');

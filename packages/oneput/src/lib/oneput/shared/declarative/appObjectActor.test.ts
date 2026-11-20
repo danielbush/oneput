@@ -1,12 +1,19 @@
 import { afterEach, expect, test } from 'vitest';
 import { Controller } from '../../controllers/controller.js';
 import { fchild, hflex } from '../../lib/builder.js';
+import { cell } from '../../lib/pull.js';
 import type { AppLayoutParams, UILayout } from '../../types.js';
 import { StandardLayout } from '../ui/layout/StandardLayout.js';
 import { StdMenuItemIds } from '../ui/menuItems/stdMenuItem.js';
 import { waitForState } from '../test/index.js';
 import { appObjectActor } from './appObjectActor.js';
-import { viewLayout, type LayoutSlots, type ViewDef, type ViewSnapshot } from './interpreter.js';
+import {
+  readable,
+  viewLayout,
+  type LayoutSlots,
+  type ViewDef,
+  type ViewSnapshot
+} from './interpreter.js';
 import type { OneputEvent } from './oneputEvents.js';
 import { standardLayout } from './standardLayout.js';
 
@@ -184,4 +191,62 @@ test('a view that names another layout shows that layout component', async () =>
     id: 'banner',
     children: [expect.objectContaining({ textContent: 'Offline' })]
   });
+});
+
+type LabelView = ViewDef<'label', 'rows', never, never, Layouts>;
+
+/** An actor with one state whose snapshot never changes. */
+function createStillActor(view: LabelView) {
+  const snapshot = {
+    machine: { getStateNodeById: () => ({ path: [] }) },
+    getMeta: () => ({ root: { view } }),
+    can: () => false
+  };
+  return {
+    start() {},
+    stop() {},
+    send() {},
+    getSnapshot: () => snapshot,
+    subscribe: () => ({ unsubscribe() {} })
+  };
+}
+
+test('a readable source change redraws the view with no new snapshot', async () => {
+  // arrange
+  const ctl = Controller.createNull({ menuOpen: true });
+  controllers.push(ctl);
+  const label = cell('First label');
+  const rows = cell<readonly { id: string; text: string }[]>([{ id: 'a', text: 'Row A' }]);
+  const app = appObjectActor(
+    ctl,
+    createStillActor({
+      layout: 'standard',
+      slots: { title: { from: 'label' } },
+      menu: { id: 'labels', from: 'rows' }
+    }),
+    { text: { label: readable(label) }, lists: { rows: readable(rows) }, items: {} },
+    layouts
+  );
+  const shown = menuShows(ctl, 'Row A');
+  ctl.app.run(app);
+  await shown;
+  const header = () => JSON.stringify(ctl.currentProps.menuUI?.layoutHeader);
+  const retitled = waitForState(ctl, 'set-menu-items', {
+    name: 'title "Second label"',
+    reached: () => header().includes('Second label'),
+    seen: () => (header().includes('First label') ? 'title "First label"' : 'another title')
+  });
+
+  // act
+  label.set('Second label');
+  await retitled;
+  const rowsAfterTitle = ctl.currentProps.menuItems?.map((item) => item.id);
+  const redrawn = menuShows(ctl, 'Row B');
+  rows.set([{ id: 'b', text: 'Row B' }]);
+  await redrawn;
+
+  // assert
+  expect(rowsAfterTitle).toEqual(['a']);
+  expect(ctl.currentProps.menuItems?.map((item) => item.id)).toEqual(['b']);
+  expect(header()).toContain('Second label');
 });

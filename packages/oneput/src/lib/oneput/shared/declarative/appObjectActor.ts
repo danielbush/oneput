@@ -1,8 +1,10 @@
 import type { Controller } from '../../controllers/controller.js';
 import type { AppObject, Menu } from '../../types.js';
 import {
+  sourceSubscriptions,
   renderActiveView,
   type OneputView,
+  type Readable,
   type LayoutSlots,
   type ViewLayouts,
   type ViewSnapshot,
@@ -56,6 +58,9 @@ function applyView(ctl: Controller, view: OneputView, rowsChanged: boolean) {
  * `layouts` are the layouts that the actor's views can name, shared across AppObjects.
  * When the active view names a layout other than the one this AppObject shows,
  * the adapter shows that layout's component.
+ *
+ * The view redraws when the actor has a new snapshot, and when any readable
+ * source changes (see {@link Readable}).
  */
 export function appObjectActor<
   Source extends string,
@@ -121,7 +126,10 @@ export function appObjectActor<
           });
           return () => subscription.unsubscribe();
         }
-      }
+      },
+      // All readable sources, not only those the active view reads: a change
+      // to an unused one costs one coalesced refresh, and the set stays fixed.
+      ...sourceSubscriptions(sources)
     ],
     onRefresh() {
       const rendered = renderActiveView(actor.getSnapshot(), sources, layouts, sendIfCurrent);

@@ -144,6 +144,19 @@ merge by key. `build` and the standard fields exclude each other: the later
 row's choice wins, and a row with only `id` and `send` keeps the earlier one.
 A name with no source gives an error, not an exception.
 
+A source is a function of the actor snapshot, for data that the machine owns
+in its context; this is the main pattern. A source marked with
+`readable(source)` reads data that something else owns, for example a signal
+of the host. The marked source is a `Pull` with `subscribe` (`{ get, subscribe }`),
+for example a small adapter over a signal. One registry can mix both kinds.
+The interpreter reads each source by its mark, and the adapter's `watch`
+subscribes to the actor and to every marked source in the registry, so a
+change redraws the view with no new snapshot. The mark, not the shape of a
+source, decides both, so a callable object with `get` and `subscribe` is a
+snapshot function unless it is marked. Oneput ignores a watch notification
+from an AppObject that it no longer watches, so a late one cannot replace the
+current AppObject's refresh.
+
 The interpreter knows no layout. A view names a registered layout and fills
 its slots with text or `{ from: 'textSource' }`, for example
 `{ layout: 'standard', slots: { title: 'Search', status: { from: 'status' } } }`.

@@ -1,12 +1,15 @@
 import { afterEach, describe, expect, test } from 'vitest';
 import { Controller } from '../../controllers/controller.js';
-import { menuItem } from '../../lib/builder.js';
+import { fchild, menuItem } from '../../lib/builder.js';
+import { cell } from '../../lib/pull.js';
 import type { AppLayoutParams, FChildParams, MenuItem, UILayout } from '../../types.js';
 import {
   renderActiveView,
   viewLayout,
   type LayoutSlots,
   type ViewDef,
+  readable,
+  sourceSubscriptions,
   type ViewLayouts,
   type ViewSources
 } from './interpreter.js';
@@ -339,5 +342,177 @@ describe('missing names', () => {
 
     // assert
     expect(result._unsafeUnwrapErr()).toBe('Expected a source for each name');
+  });
+});
+
+describe('readable sources', () => {
+  /** A registry that mixes readable sources with snapshot functions. */
+  function mixedPages() {
+    const heading = cell('First');
+    const rows = cell<readonly { id: string; build: 'badge' | 'anonymous' }[]>([
+      { id: 'list-row', build: 'badge' },
+      { id: 'snapshot-row', build: 'anonymous' }
+    ]);
+    const label = cell('Label A');
+    const badge = cell((row: { id: string }, activate: () => void) =>
+      menuItem({ id: row.id, action: activate, children: [fchild({ textContent: label.get() })] })
+    );
+    const mixed = {
+      text: { pageText: readable(heading) },
+      lists: { pages: readable(rows) },
+      items: { badge: readable(badge), anonymous: sources.items.anonymous }
+    } satisfies ViewSources<Snapshot, 'pageText', 'pages', PageEvent, 'badge' | 'anonymous'>;
+    const pages = createPages<PageView>({
+      layout: 'plain',
+      slots: { heading: { from: 'pageText' } },
+      menu: { id: 'pages', from: 'pages' }
+    });
+    const render = () =>
+      renderActiveView(pages.snapshot, mixed, layouts, pages.send)._unsafeUnwrap();
+    return { heading, rows, label, badge, mixed, pages, render };
+  }
+
+  test('each source is read by its own mark', () => {
+    // arrange
+    const { heading, label, render } = mixedPages();
+    const before = render();
+
+    // act
+    heading.set('Second');
+    label.set('Label B');
+    const after = render();
+
+    // assert
+    expect(before.layout.params).toEqual({ menuTitle: 'First' });
+    expect(after.layout.params).toEqual({ menuTitle: 'Second' });
+    expect(after.menu.items.map((item) => item && item.id)).toEqual(['list-row', 'snapshot-row']);
+    expect(JSON.stringify(after.menu.items)).toContain('Label B');
+    expect(JSON.stringify(after.menu.items)).toContain('"textContent":"1"');
+  });
+
+  test('built row from a readable builder activates its id', () => {
+    // arrange
+    const { pages, render } = mixedPages();
+    const [item] = render().menu.items as MenuItem[];
+
+    // act
+    click(item);
+
+    // assert
+    expect(item?.id).toBe('list-row');
+    expect(pages.snapshot.activated).toBe('list-row');
+  });
+
+  test('subscriptions are the marked sources only', () => {
+    // arrange
+    const { heading, rows, badge, mixed } = mixedPages();
+
+    // act
+    const subscriptions = sourceSubscriptions(mixed);
+
+    // assert
+    expect(subscriptions).toEqual([heading, rows, badge]);
+  });
+
+  // A callable object with get and subscribe looks like both kinds; only the mark counts.
+  const both = Object.assign(() => 'Called', { get: () => 'Got', subscribe: () => () => {} });
+
+  test.each([
+    ['unmarked callable is called and not subscribed', both, 'Called', []],
+    ['marked callable is read with get and subscribed', readable(both), 'Got', [both]]
+  ])('%s', (_, pageText, title, subscribed) => {
+    // arrange
+    const registry = { ...sources, text: { pageText } };
+    const pages = createPages<PageView>({
+      layout: 'plain',
+      slots: { heading: { from: 'pageText' } },
+      menu: { id: 'pages' }
+    });
+
+    // act
+    const view = renderActiveView(pages.snapshot, registry, layouts, pages.send);
+
+    // assert
+    expect(view._unsafeUnwrap().layout.params).toEqual({ menuTitle: title });
+    expect(sourceSubscriptions(registry)).toEqual(subscribed);
+  });
+
+  test('an unmarked object with subscribe is not subscribed', () => {
+    // arrange
+    const registry = { text: {}, lists: {}, items: { odd: { subscribe: true } } };
+
+    // act
+    const subscriptions = sourceSubscriptions(registry);
+
+    // assert
+    expect(subscriptions).toEqual([]);
+  });
+
+  const throwing = {
+    get: (): never => {
+      throw new Error('Broken');
+    },
+    subscribe: () => () => {}
+  };
+
+  test.each([
+    [
+      'text',
+      { ...sources, text: { pageText: readable(throwing) } },
+      { menu: { id: 'pages' }, slots: { heading: { from: 'pageText' } } }
+    ],
+    [
+      'list',
+      { ...sources, lists: { pages: readable(throwing) } },
+      { menu: { id: 'pages', from: 'pages' } }
+    ],
+    [
+      'builder',
+      { ...sources, items: { ...sources.items, badge: readable(throwing) } },
+      { menu: { id: 'pages', items: [{ id: 'row', build: 'badge' }] } }
+    ]
+  ] as const)('readable %s that throws gives the read error', (_, registry, view) => {
+    // arrange
+    const pages = createPages<PageView>({ layout: 'plain', ...view });
+
+    // act
+    const result = renderActiveView(pages.snapshot, registry, layouts, pages.send);
+
+    // assert
+    expect(result._unsafeUnwrapErr()).toBe('Expected each source to read without an error');
+  });
+
+  test('a name that is not enumerable is neither read nor subscribed', () => {
+    // arrange
+    const text = {};
+    Object.defineProperty(text, 'pageText', { value: readable(cell('Hidden')), enumerable: false });
+    const registry = { ...sources, text } as typeof sources;
+    const pages = createPages<PageView>({
+      layout: 'plain',
+      slots: { heading: { from: 'pageText' } },
+      menu: { id: 'pages' }
+    });
+
+    // act
+    const result = renderActiveView(pages.snapshot, registry, layouts, pages.send);
+
+    // assert
+    expect(result._unsafeUnwrapErr()).toBe('Expected a source for each name');
+    expect(sourceSubscriptions(registry)).toEqual([]);
+  });
+
+  test('a mark around a source with no get or subscribe is not subscribed', () => {
+    // arrange
+    const registry = {
+      text: {},
+      lists: {},
+      items: { unused: readable({} as never), fake: { kind: 'readable' } }
+    };
+
+    // act
+    const subscriptions = sourceSubscriptions(registry);
+
+    // assert
+    expect(subscriptions).toEqual([]);
   });
 });

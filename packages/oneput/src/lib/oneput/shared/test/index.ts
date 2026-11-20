@@ -1,38 +1,58 @@
 import type { Controller } from '../../controllers/controller.js';
 import type { InternalEvent } from '../../controllers/InternalEventEmitter.js';
 
+/** A named state that a test waits for, with what it saw instead for the failure message. */
+export type NamedState = {
+  /** What the state is, for the failure message. */
+  name: string;
+  reached: () => boolean;
+  /** What the test saw instead, for the failure message. */
+  seen: () => string;
+};
+
 /**
- * Wait for the first `event` after which the named state is reached, as read
- * from the controller. Set it up before the step that leads to the state.
+ * Wait for the first change after which the named state is reached. Set it up
+ * before the step that leads to the state. `subscribe` is any change source,
+ * for example a readable source.
  *
  * It fails after `timeoutMs`, before the test timeout, with the name of the
  * state and the last value seen, for example:
  * `Expected view to show status "Ready" (last: status "Fetching data...")`.
  */
-export function waitForState<Name extends InternalEvent['type']>(
-  ctl: Controller,
-  event: Name,
-  state: {
-    /** What the state is, for the failure message. */
-    name: string;
-    reached: () => boolean;
-    /** What the test saw instead, for the failure message. */
-    seen: () => string;
-  },
+export function waitFor(
+  subscribe: (onChange: () => void) => () => void,
+  state: NamedState,
   timeoutMs = 500
 ): Promise<void> {
   return new Promise((resolve, reject) => {
+    let settled = false;
+    let stop: (() => void) | undefined;
     const timeout = setTimeout(() => {
-      stop();
+      settled = true;
+      stop?.();
       reject(new Error(`Expected ${state.name} (last: ${state.seen()})`));
     }, timeoutMs);
-    const stop = ctl.events.on(event, () => {
-      if (!state.reached()) return;
+    const check = () => {
+      if (settled || !state.reached()) return;
+      settled = true;
       clearTimeout(timeout);
-      stop();
+      stop?.();
       resolve();
-    });
+    };
+    stop = subscribe(check);
+    // A source can call back while it subscribes, before `stop` exists.
+    if (settled) stop();
   });
+}
+
+/** Wait for the first controller `event` after which the named state is reached. */
+export function waitForState<Name extends InternalEvent['type']>(
+  ctl: Controller,
+  event: Name,
+  state: NamedState,
+  timeoutMs = 500
+): Promise<void> {
+  return waitFor((onChange) => ctl.events.on(event, onChange), state, timeoutMs);
 }
 
 /** Wait for the next menu-items event with the expected menu ID. */

@@ -1,4 +1,5 @@
 import type { Controller } from '../../controllers/controller.js';
+import type { Pull } from '../../lib/pull.js';
 import type { AppLayoutParams, Menu, MenuItem, UIFlags, UILayout } from '../../types.js';
 import { infoMenuItem } from '../ui/menuItems/infoMenuItem.js';
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
@@ -71,6 +72,7 @@ function mergeRow<Label, Event extends RowEvent, Item extends string>(
 type NameError = 'Expected a source for each name';
 type ViewError =
   | NameError
+  | ReadError
   | 'Expected a complete active view'
   | 'Expected text for each menu row'
   | 'Expected only slots that the layout declares';
@@ -85,7 +87,8 @@ function named<Name extends string, Source>(
   registry: Record<Name, Source>,
   name: Name
 ): Result<Source, NameError> {
-  return Object.hasOwn(registry, name)
+  // Own enumerable names only, as Object.keys lists them.
+  return Object.prototype.propertyIsEnumerable.call(registry, name)
     ? ok(registry[name])
     : err('Expected a source for each name');
 }
@@ -179,12 +182,88 @@ export type ViewSnapshot<
   getMeta(): Record<string, { view?: ViewDef<Source, List, Event, Item, Layouts> } | undefined>;
 };
 
+type ListRow<Event extends RowEvent, Item extends string> =
+  | Row<string, Event>
+  | BuiltRow<Item, Event>;
+type Builder<Event extends RowEvent, Item extends string> = (
+  row: BuiltRow<Item, Event>,
+  activate: () => void
+) => MenuItem;
+
+/**
+ * A value that a source reads, and a way to hear that it changed. A computed
+ * from a signals library fits through a small adapter.
+ */
+export type ReadableSource<T> = Required<Pull<T>>;
+
+/**
+ * A source marked as readable. Only {@link readable} makes one: the private
+ * field means no other object has this type.
+ */
+export class Readable<T> {
+  readonly #source: ReadableSource<T>;
+
+  private constructor(source: ReadableSource<T>) {
+    this.#source = source;
+  }
+
+  /** Use {@link readable}. */
+  static mark<T>(source: ReadableSource<T>): Readable<T> {
+    return new Readable(source);
+  }
+
+  get source(): ReadableSource<T> {
+    return this.#source;
+  }
+}
+
+/**
+ * Mark a source as readable: data that something else owns, for example a
+ * signal of the host. The interpreter reads it with `get`, and the adapter
+ * subscribes to it, so a change redraws the view with no new snapshot.
+ */
+export function readable<T>(source: ReadableSource<T>): Readable<T> {
+  return Readable.mark(source);
+}
+
+/**
+ * True for a source made by {@link readable} around a source with `get` and
+ * `subscribe`. Reads and subscriptions both use it, so they always agree.
+ */
+function isReadable(source: unknown): source is Readable<unknown> {
+  return (
+    source instanceof Readable &&
+    typeof source.source.get === 'function' &&
+    typeof source.source.subscribe === 'function'
+  );
+}
+
+/** Each registry's sources, in the same way that {@link named} finds them. */
+function sourcesOf(registry: object): unknown[] {
+  return Object.keys(registry).map((name) => (registry as Record<string, unknown>)[name]);
+}
+
+type ReadError = 'Expected each source to read without an error';
+
+/** Read a source. A source that throws gives the typed error, not an exception. */
+function attempt<T>(read: () => T): Result<T, ReadError> {
+  return Result.fromThrowable(
+    read,
+    (): ReadError => 'Expected each source to read without an error'
+  )();
+}
+
 /**
  * Named code that a view refers to by name, so the view stays data.
  * `text` gives changing text, `lists` gives changing rows, and `items` builds
  * a row that names it in `build`. The interpreter sets the built item's ID to
  * the row's ID. The builder's `activate` sends the row's event (`send`, else
  * `ITEM_ACTIVATED`) to the actor; use it as the item's action.
+ *
+ * A plain function reads the actor snapshot: use it for data that the machine
+ * owns in its context. A source marked with {@link readable} reads data that
+ * something else owns. One registry can hold both kinds. A readable builder
+ * gives the builder that fits the current state.
  */
 export type ViewSources<
   Snapshot,
@@ -193,16 +272,30 @@ export type ViewSources<
   Event extends RowEvent = never,
   Item extends string = never
 > = {
-  text: Record<Source, (snapshot: Snapshot) => string>;
+  text: Record<Source, ((snapshot: Snapshot) => string) | Readable<string>>;
   lists: Record<
     List,
-    (snapshot: Snapshot) => readonly (Row<string, Event> | BuiltRow<Item, Event>)[]
+    | ((snapshot: Snapshot) => readonly ListRow<Event, Item>[])
+    | Readable<readonly ListRow<Event, Item>[]>
   >;
   items: Record<
     Item,
-    (snapshot: Snapshot, row: BuiltRow<Item, Event>, activate: () => void) => MenuItem
+    | ((snapshot: Snapshot, row: BuiltRow<Item, Event>, activate: () => void) => MenuItem)
+    | Readable<Builder<Event, Item>>
   >;
 };
+
+/** The readable sources in a registry, to subscribe to, so that their changes redraw the view. */
+export function sourceSubscriptions(sources: {
+  text: object;
+  lists: object;
+  items: object;
+}): ReadableSource<unknown>[] {
+  return [sources.text, sources.lists, sources.items]
+    .flatMap(sourcesOf)
+    .filter(isReadable)
+    .map(({ source }) => source);
+}
 
 export type OneputView = {
   /** The named layout and its params. */
@@ -274,18 +367,24 @@ export function renderActiveView<
   }
   const filled = Object.keys(slots).filter((slot) => slots[slot] !== undefined);
 
-  const read = (text: Text<Source>): Result<string, NameError> =>
+  const read = (text: Text<Source>): Result<string, NameError | ReadError> =>
     typeof text === 'string'
       ? ok(text)
-      : named(sources.text, text.from).map((source) => source(snapshot));
-  const readOptional = (text: Text<Source> | undefined): Result<string | undefined, NameError> =>
+      : named(sources.text, text.from).andThen((source) =>
+          attempt(() => (isReadable(source) ? source.source.get() : source(snapshot)))
+        );
+  const readOptional = (
+    text: Text<Source> | undefined
+  ): Result<string | undefined, NameError | ReadError> =>
     text === undefined ? ok(undefined) : read(text);
 
   const rows = new Map<string, ViewRow<Text<Source>, Event, Item>>();
   if (menu.from !== undefined) {
-    const list = named(sources.lists, menu.from);
+    const list = named(sources.lists, menu.from).andThen((source) =>
+      attempt(() => (isReadable(source) ? source.source.get() : source(snapshot)))
+    );
     if (list.isErr()) return err(list.error);
-    for (const row of list.value(snapshot)) rows.set(row.id, row);
+    for (const row of list.value) rows.set(row.id, row);
   }
   for (const { menu } of views) {
     for (const row of menu?.items ?? []) rows.set(row.id, mergeRow(rows.get(row.id), row));
@@ -295,10 +394,12 @@ export function renderActiveView<
     const { id, send } = row;
     const raise = () => activate(send ?? { type: 'ITEM_ACTIVATED', id });
     if (isBuilt(row)) {
-      return named(sources.items, row.build).map((build) => ({
-        ...build(snapshot, row, raise),
-        id
-      }));
+      const built = named(sources.items, row.build).andThen((build) =>
+        attempt(() =>
+          isReadable(build) ? build.source.get()(row, raise) : build(snapshot, row, raise)
+        )
+      );
+      return built.map((item) => ({ ...item, id }));
     }
     const { text, detail, icon } = row;
     if (text === undefined) return err('Expected text for each menu row');

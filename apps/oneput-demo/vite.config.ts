@@ -1,6 +1,5 @@
-/// <reference types="vitest/config" />
 import { sveltekit } from '@sveltejs/kit/vite';
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   plugins: [sveltekit()],
@@ -8,7 +7,7 @@ export default defineConfig({
     expect: { requireAssertions: true },
     projects: [
       {
-        extends: './vite.config.ts',
+        extends: true,
         test: {
           name: 'server',
           testTimeout: 1000,

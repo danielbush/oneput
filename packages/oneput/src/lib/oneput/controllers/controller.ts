@@ -112,6 +112,7 @@ export class Controller {
   /** Release controller resources that can outlive the mounted Oneput UI. */
   destroy() {
     this.keys.destroy();
+    this.app.destroy();
   }
 
   /**

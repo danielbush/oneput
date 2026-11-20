@@ -858,6 +858,11 @@ export class AppController {
     return this.current === app;
   }
 
+  /** Stop watching the current AppObject's models, when the controller goes away. */
+  destroy() {
+    this.stopWatch();
+  }
+
   /** True when `app` is current or suspended below a child in the stack. */
   contains(app: AnyAppObject): boolean {
     return this.isCurrent(app) || this.appParents.includes(app);

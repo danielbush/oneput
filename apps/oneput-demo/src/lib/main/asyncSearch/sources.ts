@@ -1,3 +1,4 @@
+import { menuItem } from '@oneput/oneput';
 import type { SearchFailure, SearchItem } from './searchService.js';
 
 export type SearchContext = {
@@ -9,11 +10,12 @@ export type SearchContext = {
 
 type SearchSnapshot = { context: SearchContext };
 
+/** Find the last result with the ID, as the menu keeps the last row with an ID. */
 export function resultById(context: SearchContext, id: string) {
-  return context.results.find((result) => result.id === id);
+  return context.results.findLast((result) => result.id === id);
 }
 
-/** Read the changing status and derive the result rows from the current response. */
+/** Read the changing status, derive the result rows, and build each result row. */
 export const sources = {
   text: {
     emptyStatus: ({ context }: SearchSnapshot) => (context.query === null ? '' : 'Ready'),
@@ -23,11 +25,20 @@ export const sources = {
   },
   lists: {
     results: ({ context }: SearchSnapshot) =>
-      context.results.map(({ id, text }) => ({
-        id,
-        text: `Result: '${text}'`,
-        icon: 'Dot',
-        activate: true
-      }))
+      context.results.map(({ id }) => ({ id, build: 'result' as const }))
+  },
+  items: {
+    // Built with menuItem, not stdMenuItem, to show a custom builder.
+    result: ({ context }: SearchSnapshot, row: { id: string }, activate: () => void) =>
+      menuItem({
+        id: row.id,
+        tag: 'button',
+        attr: { type: 'button' },
+        action: activate,
+        children: (b) => [
+          b.icon('Dot'),
+          b.fchild({ textContent: `Result: '${resultById(context, row.id)?.text ?? ''}'` })
+        ]
+      })
   }
 };

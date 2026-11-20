@@ -1,6 +1,12 @@
 import type { Controller } from '../../controllers/controller.js';
 import type { AppLayoutParams, UILayout } from '../../types.js';
-import { renderActiveView, viewLayout, type LayoutSlots, type ViewDef } from './interpreter.js';
+import {
+  renderActiveView,
+  viewLayout,
+  type LayoutSlots,
+  type Readable,
+  type ViewDef
+} from './interpreter.js';
 
 declare function component<Params extends AppLayoutParams>(
   ctl: Controller,
@@ -87,5 +93,9 @@ viewLayout({
 const inheritedLiteral: PlainView = { slots: { heading: 'A' } };
 
 void [missing, mixed, unknownLayout, wrongSlot, unknownSlot, unknownSource, inherited];
+// @ts-expect-error Only readable() makes a Readable.
+const forged: Readable<string> = { source: { get: () => '', subscribe: () => () => {} } };
+
 void inheritedLiteral;
+void forged;
 void [emptySlot, inferredSnapshot];

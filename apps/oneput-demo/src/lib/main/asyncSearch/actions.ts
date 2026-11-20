@@ -8,7 +8,12 @@ type RowEvent = { type: 'RETRY_SEARCH' };
 type FetchEvent =
   | { type: 'SEARCH_SUCCEEDED'; results: readonly SearchItem[] }
   | { type: 'SEARCH_FAILED'; error: SearchFailure };
-type SearchView = ViewDef<keyof typeof sources.text, keyof typeof sources.lists, RowEvent>;
+type SearchView = ViewDef<
+  keyof typeof sources.text,
+  keyof typeof sources.lists,
+  RowEvent,
+  keyof typeof sources.items
+>;
 
 function fetchResults(service: SearchService) {
   return fromCallback<{ type: 'SEARCH'; query: string }>(({ receive, sendBack }) => {

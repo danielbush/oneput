@@ -5,6 +5,7 @@ import { err, ok } from 'neverthrow';
 import { describe, expect, it } from 'vitest';
 import { SimulatedClock } from 'xstate';
 import { Layout } from '../../common/_layout.js';
+import { Online } from '../../common/online.js';
 import { createAsyncSearchAppObject } from './appObject.js';
 import { SearchService } from './searchService.js';
 import { waitForState } from '@oneput/oneput/shared/test/index.js';
@@ -58,10 +59,35 @@ function viewShows(ctl: Controller, expected: { status: string; rows?: readonly 
 }
 
 describe('declarative async search AppObject', () => {
+  it('shows the host going offline with no machine event', async () => {
+    // arrange
+    const ctl = createController();
+    const online = Online.createNull();
+    const shown = viewShows(ctl, { status: '', rows: ['instructions'] });
+    ctl.app.run(createAsyncSearchAppObject(ctl, online, SearchService.createNull()));
+    await shown;
+    const onlineTitle = title(ctl);
+    const offline = waitForState(ctl, 'set-menu-items', {
+      name: 'title "Async Search Example (offline)"',
+      reached: () => title(ctl) === 'Async Search Example (offline)',
+      seen: () => `title "${title(ctl) ?? ''}"`
+    });
+
+    // act
+    online.simulate(false);
+    await offline;
+
+    // assert
+    expect(onlineTitle).toBe('Async Search Example');
+    expect(rowIds(ctl)).toEqual(['instructions']);
+    ctl.app.exit();
+    ctl.destroy();
+  });
+
   it('starts a debounce with the default clock', async () => {
     // arrange
     const ctl = createController();
-    ctl.app.run(createAsyncSearchAppObject(ctl, SearchService.createNull()));
+    ctl.app.run(createAsyncSearchAppObject(ctl, Online.createNull(), SearchService.createNull()));
     const debouncing = viewShows(ctl, { status: 'Debouncing...', rows: [] });
 
     // act
@@ -85,7 +111,7 @@ describe('declarative async search AppObject', () => {
         delayMs: 50
       })
     });
-    const app = createAsyncSearchAppObject(ctl, service, clock);
+    const app = createAsyncSearchAppObject(ctl, Online.createNull(), service, clock);
     const empty = viewShows(ctl, { status: '', rows: ['instructions'] });
     ctl.app.run(app);
     await empty;
@@ -155,7 +181,7 @@ describe('declarative async search AppObject', () => {
           : { result: ok([{ id: 'latest', text: query }]), delayMs: 400 }
     });
     const searches = service.trackSearches();
-    ctl.app.run(createAsyncSearchAppObject(ctl, service, clock));
+    ctl.app.run(createAsyncSearchAppObject(ctl, Online.createNull(), service, clock));
 
     // act
     const fetching = viewShows(ctl, { status: 'Fetching data...' });
@@ -230,7 +256,7 @@ describe('declarative async search AppObject', () => {
       clock,
       response: (query) => ({ result: query === 'app' ? (responses.shift() ?? ok([])) : ok([]) })
     });
-    ctl.app.run(createAsyncSearchAppObject(ctl, service, clock));
+    ctl.app.run(createAsyncSearchAppObject(ctl, Online.createNull(), service, clock));
 
     // act
     const failed = viewShows(ctl, { status: '⚠️ Error', rows: ['retry-search'] });
@@ -278,7 +304,7 @@ describe('declarative async search AppObject', () => {
       response: (query) => ({ result: ok([{ id: query, text: query }]) })
     });
     const empty = viewShows(ctl, { status: '', rows: ['instructions'] });
-    ctl.app.run(createAsyncSearchAppObject(ctl, service, clock));
+    ctl.app.run(createAsyncSearchAppObject(ctl, Online.createNull(), service, clock));
     await empty;
 
     // act
@@ -322,7 +348,9 @@ describe('declarative async search AppObject', () => {
     // arrange
     const ctl = createController();
     const clock = new SimulatedClock();
-    ctl.app.run(createAsyncSearchAppObject(ctl, SearchService.createNull(), clock));
+    ctl.app.run(
+      createAsyncSearchAppObject(ctl, Online.createNull(), SearchService.createNull(), clock)
+    );
 
     // act
     const blank = viewShows(ctl, { status: 'Ready', rows: ['instructions'] });

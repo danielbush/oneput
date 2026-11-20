@@ -11,7 +11,7 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
     meta: {
       view: {
         layout: 'standard',
-        slots: { title: 'Async Search Example', status: 'Ready' },
+        slots: { title: { from: 'title' }, status: 'Ready' },
         menu: { id: 'async-search', focusBehaviour: 'last' },
         input: { kind: 'filter', placeholder: 'Start typing something...' },
         settings: { enableFilter: false, enableInputElement: true, clearInputAfterAction: false }

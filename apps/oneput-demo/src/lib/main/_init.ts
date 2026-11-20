@@ -1,11 +1,12 @@
 import { KeyEventBindings, type Controller } from '@oneput/oneput';
 import { Root } from './Root.js';
+import type { Online } from '../common/online.js';
 import { WordFilter } from '@oneput/oneput/shared/filters/WordFilter.js';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { BindingsIDB } from '@oneput/oneput/shared/bindings/BindingsIDB.js';
 import { OneputActionProvider } from '@oneput/oneput/shared/actions/OneputActionProvider.js';
 
-export function init(ctl: Controller) {
+export function init(ctl: Controller, online: Online) {
   const dynamicPlaceholder = DynamicPlaceholder.create(ctl, (params) =>
     params.menuOpenBinding
       ? params.isMenuOpen
@@ -39,5 +40,5 @@ export function init(ctl: Controller) {
   ctl.input.setDefaultPlaceholder(dynamicPlaceholder);
   ctl.menu.setDefaultFilter(WordFilter.create().filter);
   ctl.menu.setDefaultFocusBehaviour('last-action,first');
-  return Root.create(ctl);
+  return Root.create(ctl, online);
 }

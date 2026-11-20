@@ -3,17 +3,17 @@ import type { LayoutSlots, ViewDef } from '@oneput/oneput/shared/declarative/int
 import type { OneputEvent } from '@oneput/oneput/shared/declarative/oneputEvents.js';
 import { viewLayouts } from '../../common/_layout.js';
 import { SearchService, type SearchFailure, type SearchItem } from './searchService.js';
-import { resultById, sources, type SearchContext } from './sources.js';
+import { resultById, type SearchContext, type SearchSources } from './sources.js';
 
 type RowEvent = { type: 'RETRY_SEARCH' };
 type FetchEvent =
   | { type: 'SEARCH_SUCCEEDED'; results: readonly SearchItem[] }
   | { type: 'SEARCH_FAILED'; error: SearchFailure };
 type SearchView = ViewDef<
-  keyof typeof sources.text,
-  keyof typeof sources.lists,
+  keyof SearchSources['text'],
+  keyof SearchSources['lists'],
   RowEvent,
-  keyof typeof sources.items,
+  keyof SearchSources['items'],
   LayoutSlots<typeof viewLayouts>
 >;
 

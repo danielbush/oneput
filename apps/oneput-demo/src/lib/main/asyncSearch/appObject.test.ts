@@ -100,7 +100,7 @@ describe('declarative async search AppObject', () => {
     ctl.destroy();
   });
 
-  it('restarts the debounce, draws the results, and selects the last row', async () => {
+  it('restarts the debounce, draws the results, and focuses the first row', async () => {
     // arrange
     const ctl = createController();
     const clock = new SimulatedClock();
@@ -156,7 +156,7 @@ describe('declarative async search AppObject', () => {
       classes: expect.arrayContaining(['oneput__rotate'])
     });
     expect(resultIds).toEqual(['a', 'p']);
-    expect(focusedId).toBe('p');
+    expect(focusedId).toBe('a');
     expect(readyStatus).toBe('Ready');
     expect(busyAfterResults).toBeUndefined();
     expect(status(ctl)).toBe('Selected: p');
@@ -210,38 +210,71 @@ describe('declarative async search AppObject', () => {
     ctl.destroy();
   });
 
-  it('keeps focus on a selected row, and focuses the last row of new results', async () => {
-    // arrange
-    const ctl = createController();
-    const clock = new SimulatedClock();
-    const service = SearchService.createNull({
-      clock,
-      response: (query) => ({ result: ok(Array.from(query, (text) => ({ id: text, text }))) })
+  describe('focus after a new search', () => {
+    /** Search 'ap', move to the first row and click it, so 'a' is the last activated row. */
+    async function activateFirstRow() {
+      const ctl = createController();
+      const clock = new SimulatedClock();
+      const service = SearchService.createNull({
+        clock,
+        response: (query) => ({ result: ok(Array.from(query, (text) => ({ id: text, text }))) })
+      });
+      ctl.app.run(createAsyncSearchAppObject(ctl, Online.createNull(), service, clock));
+      const results = viewShows(ctl, { status: 'Ready', rows: ['a', 'p'] });
+      await ctl.input.typeText('ap');
+      clock.increment(500);
+      await results;
+      ctl.menu.focusMenuItemById('a');
+      const selected = viewShows(ctl, { status: 'Selected: a', rows: ['a', 'p'] });
+      ctl.simulateMenuItemClick('a');
+      await selected;
+      return { ctl, clock };
+    }
+
+    it('keeps focus on a clicked row that is not the last', async () => {
+      // arrange
+      const { ctl } = await activateFirstRow();
+
+      // act
+      const focusAfterSelect = ctl.menu.focusedMenuItem?.id;
+
+      // assert
+      expect(focusAfterSelect).toBe('a');
+      ctl.app.exit();
+      ctl.destroy();
     });
-    ctl.app.run(createAsyncSearchAppObject(ctl, Online.createNull(), service, clock));
-    const results = viewShows(ctl, { status: 'Ready', rows: ['a', 'p'] });
-    await ctl.input.typeText('ap');
-    clock.increment(500);
-    await results;
 
-    // The user moves to the first row, as the pointer or arrow keys do, and clicks it.
-    ctl.menu.focusMenuItemById('a');
+    it('focuses the last activated row when new results still include it', async () => {
+      // arrange
+      const { ctl, clock } = await activateFirstRow();
 
-    // act
-    const selected = viewShows(ctl, { status: 'Selected: a', rows: ['a', 'p'] });
-    ctl.simulateMenuItemClick('a');
-    await selected;
-    const focusAfterSelect = ctl.menu.focusedMenuItem?.id;
-    const newResults = viewShows(ctl, { status: 'Ready', rows: ['a', 'x'] });
-    await ctl.input.typeText('ax');
-    clock.increment(500);
-    await newResults;
+      // act
+      const newResults = viewShows(ctl, { status: 'Ready', rows: ['a', 'x'] });
+      await ctl.input.typeText('ax');
+      clock.increment(500);
+      await newResults;
 
-    // assert
-    expect(focusAfterSelect).toBe('a');
-    expect(ctl.menu.focusedMenuItem?.id).toBe('x');
-    ctl.app.exit();
-    ctl.destroy();
+      // assert
+      expect(ctl.menu.focusedMenuItem?.id).toBe('a');
+      ctl.app.exit();
+      ctl.destroy();
+    });
+
+    it('focuses the first row when new results lack the last activated row', async () => {
+      // arrange
+      const { ctl, clock } = await activateFirstRow();
+
+      // act
+      const newResults = viewShows(ctl, { status: 'Ready', rows: ['x', 'y'] });
+      await ctl.input.typeText('xy');
+      clock.increment(500);
+      await newResults;
+
+      // assert
+      expect(ctl.menu.focusedMenuItem?.id).toBe('x');
+      ctl.app.exit();
+      ctl.destroy();
+    });
   });
 
   it('shows the error and retries the same input', async () => {

@@ -159,6 +159,16 @@ gives an error for a slot that the active layout does not declare, and for
 an unknown layout name. The menu, the input placeholder and the settings are
 not slots.
 
+A view's `input` is Oneput's `InputKind` with an optional `placeholder`
+(text or `{ from: ... }`), for example
+`{ kind: 'textarea', rows: 3, placeholder: 'Note...' }`; no `kind` is a text
+input. A child's `input` replaces its parent's whole input, and
+`input: undefined` clears it. The adapter sends the kind as the `input` layout
+param with the other params on each redraw, as an AppObject's `layout.params`
+does, so a layout that renders `inputUI.input` (as `StandardLayout` does) shows
+it. With no view input, the layout's own `input` stays. The typed text stays
+when the kind changes.
+
 `standardLayout(icons)` in `shared/declarative/standardLayout.ts` shows
 `StandardLayout`: `title`, `status` (bottom-right text) and `busyIcon` (a
 turning icon at the right of the input). Async search uses it.

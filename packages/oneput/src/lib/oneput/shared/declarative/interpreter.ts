@@ -1,6 +1,6 @@
 import type { Controller } from '../../controllers/controller.js';
 import type { Pull } from '../../lib/pull.js';
-import type { AppLayoutParams, Menu, MenuItem, UIFlags, UILayout } from '../../types.js';
+import type { AppLayoutParams, InputKind, Menu, MenuItem, UIFlags, UILayout } from '../../types.js';
 import { infoMenuItem } from '../ui/menuItems/infoMenuItem.js';
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
 import { err, ok, Result } from 'neverthrow';
@@ -82,6 +82,25 @@ function slotRecord<Value>(): Record<string, Value | undefined> {
   return Object.create(null) as Record<string, Value | undefined>;
 }
 
+/**
+ * Put the view's input kind in the layout params, as `AppLayoutParams.input`,
+ * the param through which Oneput sets the input. With no view input, the
+ * layout's own `input` stays (no value is a text input).
+ */
+function withInput<Source extends string>(
+  params: AppLayoutParams,
+  input: ViewInput<Source> | undefined
+): AppLayoutParams {
+  if (input === undefined) return params;
+  const kind: InputKind =
+    input.kind === 'textarea'
+      ? { kind: 'textarea', rows: input.rows }
+      : input.kind === 'password'
+        ? { kind: 'password' }
+        : { kind: 'text' };
+  return { ...params, input: kind };
+}
+
 /** Find a named source. A widened view type can name a source that is not there. */
 function named<Name extends string, Source>(
   registry: Record<Name, Source>,
@@ -150,6 +169,17 @@ type LayoutChoice<Layouts extends Record<string, string>, Source extends string>
 type NoLayouts = Record<never, never>;
 
 /**
+ * The input for a view: Oneput's {@link InputKind}, with no `kind` meaning a
+ * text input, and an optional placeholder. A child's `input` replaces its
+ * parent's whole input, so a `textarea`'s `rows` never stays on a text input.
+ */
+export type ViewInput<Source extends string = never> = (
+  | { kind?: 'text' }
+  | { kind: 'password' }
+  | { kind: 'textarea'; rows?: number }
+) & { placeholder?: Text<Source> };
+
+/**
  * Metadata for one state's contribution to the view. Use named sources for
  * changing data. `layout` names a registered layout, and `slots` fill it.
  */
@@ -166,7 +196,7 @@ export type ViewDef<
     items?: readonly ViewRow<Text<Source>, Event, Item>[];
     from?: List;
   };
-  input?: { kind: 'filter'; placeholder: Text<Source> };
+  input?: ViewInput<Source>;
   settings?: ViewSettings;
 };
 
@@ -431,7 +461,11 @@ export function renderActiveView<
     slotValues,
     readOptional(input?.placeholder)
   ]).map(([items, values, placeholder]) => ({
-    layout: { name: layoutName, create: layout.create, params: layout.params(values) },
+    layout: {
+      name: layoutName,
+      create: layout.create,
+      params: withInput(layout.params(values), input)
+    },
     menu: { id: menuId, focusBehaviour: menu.focusBehaviour, items },
     settings,
     placeholder

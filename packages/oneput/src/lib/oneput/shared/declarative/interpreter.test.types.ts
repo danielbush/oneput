@@ -96,6 +96,15 @@ void [missing, mixed, unknownLayout, wrongSlot, unknownSlot, unknownSource, inhe
 // @ts-expect-error Only readable() makes a Readable.
 const forged: Readable<string> = { source: { get: () => '', subscribe: () => () => {} } };
 
+// @ts-expect-error A view's input is Oneput's InputKind; there is no 'filter' kind.
+const filterInput: PlainView = { input: { kind: 'filter' } };
+// @ts-expect-error Only a textarea has rows.
+const textRows: PlainView = { input: { kind: 'text', rows: 3 } };
+const textarea: PlainView = {
+  input: { kind: 'textarea', rows: 3, placeholder: { from: 'known' } }
+};
+
 void inheritedLiteral;
+void [filterInput, textRows, textarea];
 void forged;
 void [emptySlot, inferredSnapshot];

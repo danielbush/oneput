@@ -2,9 +2,21 @@ import { describe, expect, it, test } from 'vitest';
 import { Controller } from './controller.js';
 import { stdMenuItem } from '../shared/ui/menuItems/stdMenuItem.js';
 import { WordFilter } from '../shared/filters/WordFilter.js';
+import type { MenuUpdateCause } from '../types.js';
 
 const item = (id: string, text: string, canFilter?: boolean) =>
   stdMenuItem({ id, textContent: text, canFilter, action: () => {} });
+
+function waitForMenuUpdate(ctl: Controller, expectedCause: MenuUpdateCause) {
+  return new Promise<void>((resolve) => {
+    const stop = ctl.events.on('set-menu-items', ({ cause }) => {
+      if (cause === expectedCause) {
+        stop();
+        resolve();
+      }
+    });
+  });
+}
 
 const inputChangePayload = {
   evt: new InputEvent('input'),
@@ -425,6 +437,63 @@ describe('MenuController', () => {
     // assert
     expect(ctl.currentProps.menuItems?.map((menuItem) => menuItem.id)).toEqual(['generated-empty']);
   });
+
+  it('keeps focus on the clicked result when an action clears the input', async () => {
+    // arrange
+    const ctl = Controller.createNull({ menuOpen: true });
+    ctl.app.run({ onStart: () => {} });
+    ctl.menu.setGenerativeAsync(async () => [item('a', 'A'), item('b', 'B'), item('c', 'C')], {
+      debounceMS: 0,
+      focusBehaviour: 'last'
+    });
+    const resultsShown = waitForMenuUpdate(ctl, 'set-menu');
+    await ctl.input.typeText('query');
+    await resultsShown;
+    expect(ctl.menu.focusedMenuItem?.id).toBe('c');
+
+    // act
+    const actionRefresh = waitForMenuUpdate(ctl, 'invalidate');
+    ctl.simulateMenuItemClick('b');
+    await actionRefresh;
+
+    // assert
+    expect(ctl.input.getInputValue()).toBe('');
+    expect(ctl.menu.focusedMenuItem?.id).toBe('b');
+  });
+
+  test.each([
+    { nextResults: ['new', 'picked'], expectedFocus: 'picked' },
+    { nextResults: ['new', 'other'], expectedFocus: 'new' }
+  ])(
+    'focuses $expectedFocus in new results $nextResults',
+    async ({ nextResults, expectedFocus }) => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({ onStart: () => {} });
+      ctl.menu.setGenerativeAsync(
+        async (query) =>
+          (query === 'initial' ? ['first', 'other', 'picked'] : nextResults).map((id) =>
+            item(id, id)
+          ),
+        { debounceMS: 0, focusBehaviour: 'last-action,first' }
+      );
+      const initialResults = waitForMenuUpdate(ctl, 'set-menu');
+      await ctl.input.typeText('initial');
+      await initialResults;
+      const actionRefresh = waitForMenuUpdate(ctl, 'invalidate');
+      ctl.simulateMenuItemClick('picked');
+      await actionRefresh;
+
+      // act
+      const updatedResults = waitForMenuUpdate(ctl, 'set-menu');
+      await ctl.input.typeText('updated');
+      await updatedResults;
+
+      // assert
+      expect(ctl.currentProps.menuItems?.map((menuItem) => menuItem.id)).toEqual(nextResults);
+      expect(ctl.menu.focusedMenuItem?.id).toBe(expectedFocus);
+    }
+  );
 
   it('uses filter mode instead of a previous generative listener', () => {
     // arrange

@@ -71,13 +71,15 @@ share `liveEditClaim.ts`: `MenuLiveEdit` (claim on activate) and
 
 **Layout** is inherited through the AppObject stack. A root AppObject can provide
 `layout: { layout: (ctl, params) => UILayout, params }`; child AppObjects can
-omit `layout.layout` to reuse the active parent layout, and provide `{ params }`
-to configure the inherited layout before `onStart` / `onResume`. Use
-`ctl.ui.update({ params })` for later layout changes during the life of the
-AppObject (merged into current settings). When an AppObject becomes current,
-`runBefore` applies its declared params with `replace: true` so mid-flight
-child params (e.g. menu footer) do not stick on resume. Handle UI flags
-separately with `ctl.ui.update({ flags })`.
+omit `layout.layout` to reuse the layout shown, and provide `{ params }` to
+configure it before `onStart` / `onResume`. A child with no `layout` keeps the
+layout and the params that are shown. Use `ctl.ui.update({ params })` for later
+layout changes during the life of the AppObject (merged into current
+settings), and `ctl.ui.setLayout` to show another component. When a child
+starts, Oneput keeps the layout and params that its parent shows, and shows
+them again when the parent resumes, so the child's layout and mid-flight
+params (e.g. menu footer) do not stick. Handle UI flags separately with
+`ctl.ui.update({ flags })`.
 
 When a child exits, `onResume` runs only if the parent defines it. There is no
 fallback to `onStart`. Declared settings, layout, menu, and actions are still
@@ -106,6 +108,75 @@ actions = {
 ```
 
 When an AppObject starts, `AppController.runBefore()` extracts bindings from `actions` and registers them with `KeysController`.
+
+### Declarative AppObject
+
+`appObjectActor(ctl, actor, sources, layouts, options)` in `shared/declarative/` connects
+an actor to Oneput. The actor receives AppObject lifecycle, Back, input, and
+row activation events. Its active states declare `meta.view`. The interpreter
+merges views from parent to child and reads named sources from the snapshot
+for changing text and rows. Oneput owns the stack and applies the view to the
+current AppObject through `watch` and `onRefresh`.
+
+A row has standard fields (`text`, `detail`, `icon`, `send`) or names a
+builder: `{ id, build: 'name', send? }`. The builder in `sources.items` gets
+the snapshot, the row, and a function that sends the row's event to the actor,
+and returns the menu item. The interpreter sets the item's ID to the row's ID.
+Thus the view stays data, and a click still goes through the machine. Rows
+merge by key. `build` and the standard fields exclude each other: the later
+row's choice wins, and a row with only `id` and `send` keeps the earlier one.
+A name with no source gives an error, not an exception.
+
+A source is a function of the actor snapshot, for data that the machine owns
+in its context; this is the main pattern. A source marked with
+`readable(source)` reads data that something else owns, for example a signal
+of the host. The marked source is a `Pull` with `subscribe` (`{ get, subscribe }`),
+for example a small adapter over a signal. One registry can mix both kinds.
+The interpreter reads each source by its mark, and the adapter's `watch`
+subscribes to the actor and to every marked source in the registry, so a
+change redraws the view with no new snapshot. The mark, not the shape of a
+source, decides both, so a callable object with `get` and `subscribe` is a
+snapshot function unless it is marked. In the demo, async search keeps its
+query and results in context, and its title reads the host's `online` signal
+through one readable source. Oneput ignores a watch notification
+from an AppObject that it no longer watches, so a late one cannot replace the
+current AppObject's refresh.
+
+The interpreter knows no layout. A view names a registered layout and fills
+its slots with text or `{ from: 'textSource' }`, for example
+`{ layout: 'standard', slots: { title: 'Search', status: { from: 'status' } } }`.
+`viewLayout({ slots, create, params })` makes a registry entry: its slot
+names, the layout component (`create`, as in `AppObject.layout`), and how the
+resolved slot values become that component's params. The registry is shared
+across AppObjects. When the active view names a layout other than the one the
+AppObject shows, the adapter shows its component with `ctl.ui.setLayout`.
+Children inherit it, and it comes back when the AppObject resumes.
+
+A child view can name a different layout; then the parent's slots do not
+apply. Otherwise slots merge by key. The registry types the layout names and
+slots. A view without `layout` can name any registered slot, so rendering
+gives an error for a slot that the active layout does not declare, and for
+an unknown layout name. The menu, the input placeholder and the settings are
+not slots.
+
+A view's `input` is Oneput's `InputKind` with an optional `placeholder`
+(text or `{ from: ... }`), for example
+`{ kind: 'textarea', rows: 3, placeholder: 'Note...' }`; no `kind` is a text
+input. A child's `input` replaces its parent's whole input, and
+`input: undefined` clears it. The adapter sends the kind as the `input` layout
+param with the other params on each redraw, as an AppObject's `layout.params`
+does, so a layout that renders `inputUI.input` (as `StandardLayout` does) shows
+it. With no view input, the layout's own `input` stays. The typed text stays
+when the kind changes.
+
+`standardLayout(icons)` in `shared/declarative/standardLayout.ts` shows
+`StandardLayout`: `title`, `status` (bottom-right text) and `busyIcon` (a
+turning icon at the right of the input). Async search uses it.
+The menu refresh uses the view's `focusBehaviour`. With
+`inputRequiresOpenMenu`, the adapter checks `ctl.menu.immediateMenuOpen`
+when it receives input. After reopening, a fresh edit starts the next search.
+Editor and claim views, and menu focus, menu update, and claim release events
+are not supported.
 
 ## Bindings System
 

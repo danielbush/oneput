@@ -4,6 +4,7 @@ import {
   type StandardLayoutIcons,
   type StandardLayoutParams
 } from '@oneput/oneput/shared/ui/layout/StandardLayout.js';
+import { standardLayout } from '@oneput/oneput/shared/declarative/standardLayout.js';
 import { icons } from './_icons.js';
 
 /** StandardLayout slots (roles) mapped to this demo's icons. */
@@ -28,3 +29,6 @@ export const Layout = {
   create: (ctl: Controller, params: LayoutSettings = {}) =>
     StandardLayout.create(ctl, params, layoutIcons)
 };
+
+/** The layouts that declarative views can name: StandardLayout with this app's icons. */
+export const viewLayouts = { standard: standardLayout(layoutIcons) };

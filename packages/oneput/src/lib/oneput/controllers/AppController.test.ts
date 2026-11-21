@@ -6,6 +6,8 @@ import { WordFilter } from '../shared/filters/WordFilter.js';
 import { OneputAction } from '../shared/actions/OneputAction.js';
 import { cell, notifier } from '../lib/pull.js';
 import { routeApp } from '../shared/routing/routeApp.js';
+import { waitForState } from '../shared/test/index.js';
+import { StandardLayout, type StandardLayoutParams } from '../shared/ui/layout/StandardLayout.js';
 
 function layout(id: string): UILayout {
   return {
@@ -38,6 +40,27 @@ function trackedLayout(id: string) {
   };
 
   return { appLayout, params, replaces, getSettings: () => settings };
+}
+
+const icons = {
+  Close: 'x',
+  Accept: 'check',
+  Reject: 'x',
+  Send: 'send',
+  Back: 'left',
+  MenuToggle: 'down'
+};
+
+function standardLayout(ctl: Controller, params: StandardLayoutParams) {
+  return StandardLayout.create(ctl, params, icons);
+}
+
+/** The menu title that the layout shows. */
+function menuTitle(ctl: Controller) {
+  const header = ctl.currentProps.menuUI?.layoutHeader?.children?.find(
+    (child) => child && child.classes?.includes('oneput__menu-item-header')
+  );
+  return header && header.type === 'fchild' ? header.textContent : undefined;
 }
 
 function layoutFactory(id: string) {
@@ -101,6 +124,61 @@ describe('AppController', () => {
 
       // assert
       expect(ctl.ui.getLayout()).toBe(appLayout.appLayout);
+    });
+
+    it('a child with no layout declaration keeps the title it inherits', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const parent: AppObject = {
+        layout: { layout: standardLayout, params: { menuTitle: 'Home' } },
+        onStart: () => {}
+      };
+      ctl.app.run(parent);
+
+      // act
+      ctl.app.run({ onStart: () => {} });
+
+      // assert
+      expect(menuTitle(ctl)).toBe('Home');
+    });
+
+    it('a parent with no layout declaration gets back what it showed on resume', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const host = standardLayout(ctl, {});
+      ctl.ui.setLayout(host);
+      ctl.ui.update({ params: { menuTitle: 'Host' }, replace: true });
+      ctl.app.run({ onStart: () => {} });
+      ctl.app.run({
+        layout: { layout: standardLayout, params: { menuTitle: 'Child' } },
+        onStart: () => {}
+      });
+      const childTitle = menuTitle(ctl);
+
+      // act
+      ctl.app.exit();
+
+      // assert
+      expect(childTitle).toBe('Child');
+      expect(ctl.ui.getLayout()).toBe(host);
+      expect(menuTitle(ctl)).toBe('Host');
+    });
+
+    it('a parent that started with no layout shows none again on resume', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      ctl.app.run({ onStart: () => {} });
+      ctl.app.run({
+        layout: { layout: standardLayout, params: { menuTitle: 'Child' } },
+        onStart: () => {}
+      });
+
+      // act
+      ctl.app.exit();
+
+      // assert
+      expect(ctl.ui.getLayout()).toBeUndefined();
+      expect(menuTitle(ctl)).toBeUndefined();
     });
 
     it('configures an inherited layout before starting an app object', () => {
@@ -702,6 +780,64 @@ describe('AppController', () => {
       };
       return { app, model, refreshes };
     }
+
+    it('destroy stops watching the current app', () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const subscriptions = { open: 0 };
+      ctl.app.run({
+        watch: () => [
+          {
+            subscribe: () => {
+              subscriptions.open += 1;
+              return () => (subscriptions.open -= 1);
+            }
+          }
+        ],
+        onStart: () => {}
+      });
+      const openBefore = subscriptions.open;
+
+      // act
+      ctl.destroy();
+
+      // assert
+      expect(openBefore).toBe(1);
+      expect(subscriptions.open).toBe(0);
+    });
+
+    it('a stale notify from a replaced app does not drop the current refresh', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      let staleNotify = () => {};
+      const replaced: AppObject = {
+        // A model that keeps the listener after unsubscribe, as a queued task can.
+        watch: () => [
+          {
+            subscribe: (onChange) => {
+              staleNotify = onChange;
+              return () => {};
+            }
+          }
+        ],
+        onStart: () => {}
+      };
+      const current = watchedApp(() => 'current');
+      ctl.app.run(replaced);
+      const refreshed = waitForState(ctl, 'set-menu-items', {
+        name: 'the current app to refresh',
+        reached: () => current.refreshes.length > 0,
+        seen: () => `${current.refreshes.length} refreshes`
+      });
+
+      // act
+      ctl.app.replace(current.app);
+      staleNotify();
+      await refreshed;
+
+      // assert
+      expect(current.refreshes).toEqual(['current']);
+    });
 
     it('notify - onRefresh runs and the menu rebuilds', async () => {
       // arrange

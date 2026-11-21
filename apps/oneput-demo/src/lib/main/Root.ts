@@ -2,6 +2,7 @@ import { sanitiseHtml } from '@oneput/safe-html';
 import { fchild, type Controller, type UILayout } from '@oneput/oneput';
 import { Settings } from './Settings.js';
 import { AsyncSearchExample } from './AsyncSearchExample.js';
+import { createAsyncSearchAppObject } from './asyncSearch/appObject.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
 import { KatexDemo } from './KatexDemo.js';
 import { DirectoryBrowser } from './DirectoryBrowser.js';
@@ -14,10 +15,12 @@ import { MenuLiveEditExample } from './liveEdit/MenuLiveEditExample.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { Layout, type LayoutSettings } from '../common/_layout.js';
 import { icons } from '../common/_icons.js';
+import { Online } from '../common/online.js';
 import type { AppObject, UIFlags } from '@oneput/oneput';
 
 export class Root implements AppObject {
-  static create(ctl: Controller) {
+  /** `online` belongs to the host that mounts Oneput, which disposes it. */
+  static create(ctl: Controller, online: Online) {
     return new Root(ctl, {
       // Direct factory form. A nullable/test Root.createNull could inject
       // `Layout.createNull` here with the same `(ctl, params) => UILayout` shape.
@@ -27,6 +30,7 @@ export class Root implements AppObject {
       TomatoTimer: () => TomatoTimer.create(ctl),
       KatexDemo: () => KatexDemo.create(ctl),
       AsyncSearchExample: () => AsyncSearchExample.create(ctl),
+      AsyncSearchAppObject: () => createAsyncSearchAppObject(ctl, online),
       DirectoryBrowser: () => DirectoryBrowser.create(ctl),
       FilePicker: () => FilePicker.create(ctl),
       FocusedMenuLiveEditExample: () => FocusedMenuLiveEditExample.create(ctl),
@@ -54,6 +58,7 @@ export class Root implements AppObject {
       TomatoTimer: () => TomatoTimer;
       KatexDemo: () => KatexDemo;
       AsyncSearchExample: () => AsyncSearchExample;
+      AsyncSearchAppObject: () => AppObject;
       DirectoryBrowser: () => DirectoryBrowser;
       FilePicker: () => FilePicker;
       FocusedMenuLiveEditExample: () => FocusedMenuLiveEditExample;
@@ -232,6 +237,14 @@ export class Root implements AppObject {
           textContent: 'Async menu items demo...',
           action: () => {
             this.ctl.app.run(this.create.AsyncSearchExample());
+          }
+        }),
+        stdMenuItem({
+          id: 'async-search-declarative',
+          left: (b) => [b.icon(icons.Search)],
+          textContent: 'Async menu items demo (declarative)...',
+          action: () => {
+            this.ctl.app.run(this.create.AsyncSearchAppObject());
           }
         }),
         stdMenuItem({

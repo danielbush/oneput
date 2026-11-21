@@ -13,7 +13,7 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
         layout: 'standard',
         slots: { title: { from: 'title' }, status: 'Ready' },
         menu: { id: 'async-search', focusBehaviour: 'last-action,first' },
-        input: { kind: 'filter', placeholder: 'Start typing something...' },
+        input: { placeholder: 'Start typing something...' },
         settings: { enableFilter: false, enableInputElement: true, clearInputAfterAction: false }
       }
     },

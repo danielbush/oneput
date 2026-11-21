@@ -61,6 +61,8 @@ type Page = ViewSnapshot<never, never, PageEvent, never, Layouts> & {
 const rootView: PageView = {
   layout: 'standard',
   slots: { title: 'Pages' },
+  // Keep typed text after a row click, to see what an input switch does to it.
+  settings: { clearInputAfterAction: false },
   menu: {
     id: 'pages',
     items: [
@@ -167,6 +169,28 @@ test('a row sends its named event and the child view patches the row in place', 
   expect(ctl.app.isCurrent(app)).toBe(true);
   ctl.app.goBack();
   expect(ctl.app.isCurrent(home)).toBe(true);
+});
+
+test('a child view switches the input kind on the redraw and keeps the typed text', async () => {
+  // arrange
+  const { ctl, shown } = runPages({
+    input: { kind: 'textarea', rows: 3, placeholder: 'Note...' },
+    menu: { items: [{ id: 'next', text: 'Second page' }] }
+  });
+  await shown;
+  const firstInput = ctl.currentProps.inputUI?.input;
+  await ctl.input.typeText('hello');
+  const switched = menuShows(ctl, 'Second page');
+
+  // act
+  ctl.simulateMenuItemClick('next');
+  await switched;
+
+  // assert
+  expect(firstInput).toBeUndefined();
+  expect(ctl.currentProps.inputUI?.input).toEqual({ kind: 'textarea', rows: 3 });
+  expect(ctl.input.getPlaceholder()).toBe('Note...');
+  expect(ctl.input.getInputValue()).toBe('hello');
 });
 
 test('a view that names another layout shows that layout component', async () => {

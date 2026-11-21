@@ -297,18 +297,50 @@ describe('layouts', () => {
     expect(view._unsafeUnwrapErr()).toBe('Expected only slots that the layout declares');
   });
 
+  test('input with no kind is a text input', () => {
+    // arrange
+    const pages = createPages<PageView>({
+      layout: 'plain',
+      input: { placeholder: 'Type' },
+      menu: { id: 'pages' }
+    });
+
+    // act
+    const view = renderView(pages)._unsafeUnwrap();
+
+    // assert
+    expect(view.layout.params.input).toEqual({ kind: 'text' });
+    expect(view.placeholder).toBe('Type');
+  });
+
+  test('child replaces the input', () => {
+    // arrange
+    const pages = createPages<PageView>(
+      { layout: 'plain', input: { placeholder: 'Type' }, menu: { id: 'pages' } },
+      { input: { kind: 'textarea', rows: 3, placeholder: { from: 'pageText' } } }
+    );
+
+    // act
+    const view = renderView(pages)._unsafeUnwrap();
+
+    // assert
+    expect(view.layout.params.input).toEqual({ kind: 'textarea', rows: 3 });
+    expect(view.placeholder).toBe('Page 1');
+  });
+
   test('child clears the input', () => {
     // arrange
     const pages = createPages<PageView>(
-      { layout: 'plain', input: { kind: 'filter', placeholder: 'Type' }, menu: { id: 'pages' } },
+      { layout: 'plain', input: { kind: 'password', placeholder: 'Key' }, menu: { id: 'pages' } },
       { input: undefined }
     );
 
     // act
-    const view = renderView(pages);
+    const view = renderView(pages)._unsafeUnwrap();
 
     // assert
-    expect(view._unsafeUnwrap().placeholder).toBeUndefined();
+    expect(view.layout.params.input).toBeUndefined();
+    expect(view.placeholder).toBeUndefined();
   });
 
   test('no layout', () => {

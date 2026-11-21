@@ -57,6 +57,7 @@ export class AppController {
   private appParents: AnyAppObject[] = [];
   private appStates = new WeakMap<AnyAppObject, AppObjectState>();
   private current?: AnyAppObject;
+  private generation = 0;
   /** The current AppObject of the last `app-change`. See {@link announce}. */
   private announced?: AnyAppObject;
   private onBack?: () => void;
@@ -383,9 +384,15 @@ export class AppController {
 
   // #region AppObject lifecycle
 
+  /** Identifies the current activation, including when an AppObject resumes. */
+  get currentGeneration() {
+    return this.generation;
+  }
+
   private setCurrent(app: AnyAppObject | undefined, fromParent = true) {
     const previous = this.current;
     this.current = app;
+    this.generation += 1;
     // If layout not set use parent's (INHERIT_LAYOUT).
     // Trivial edge-case: If we never set a layout, then the AppState layout
     // will always be blank.
@@ -608,9 +615,7 @@ export class AppController {
     // later rebuilds. When closed, seed the base menu so claim owner-removed
     // checks see the rows (setDisplayed no-ops while closed).
     if (this.ctl.menu.isMenuOpen) {
-      // `fresh`: this menu's own focus rule, whatever the AppObject before
-      // asked for in the same batch.
-      this.ctl.menu.invalidate({ fresh: true });
+      this.ctl.menu.invalidate();
     } else {
       const menu = this.getMenu();
       if (menu) {
@@ -651,8 +656,7 @@ export class AppController {
   /**
    * One refresh per burst of notifies. See {@link coalesce}.
    *
-   * A refresh scheduled before a suspend or exit does nothing, because that
-   * AppObject is no longer the one being watched.
+   * Stop if the watched AppObject has left or onRefresh changes the activation.
    */
   private scheduleRefresh = coalesce<AnyAppObject, void>(
     { merge: (_current, next) => next },
@@ -660,9 +664,13 @@ export class AppController {
       if (this.watching?.app !== app || this.current !== app) {
         return;
       }
+      const generation = this.generation;
       app.onRefresh?.();
+      if (this.generation !== generation) {
+        return;
+      }
       this.ctl.ui.invalidate();
-      void this.ctl.menu.invalidate({ focusBehaviour: 'none' });
+      void this.ctl.menu._invalidateFromWatch();
       if (typeof app.actions === 'function') {
         this.invalidate();
       }

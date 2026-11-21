@@ -1,5 +1,3 @@
-import { randomId } from '@oneput/oneput';
-
 export class TestInputService {
   static create() {
     return new TestInputService();
@@ -16,8 +14,13 @@ export class TestInputService {
       // if (this.counter % 4 === 3) {
       throw new Error('TestInputService: simulated error');
     }
+    // Match each character across queries and give repeated characters unique IDs.
+    const occurrences = new Map<string, number>();
     for (let i = 0; i < input.length; i++) {
-      results.push({ id: randomId(), text: input[i] });
+      const text = input[i];
+      const occurrence = (occurrences.get(text) ?? 0) + 1;
+      occurrences.set(text, occurrence);
+      results.push({ id: `result-${input.charCodeAt(i)}-${occurrence}`, text });
     }
     console.warn(`${input} will fetch with delay of ${delay}ms`);
     await new Promise((resolve) => setTimeout(resolve, delay));

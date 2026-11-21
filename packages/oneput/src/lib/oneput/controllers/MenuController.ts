@@ -19,7 +19,8 @@ import { tick } from 'svelte';
 
 type MenuInputMode = 'none' | 'filter' | 'generative';
 type InvalidateOptions = { focusBehaviour?: FocusBehaviour };
-type InvalidateRequest = InvalidateOptions & { generation: number };
+type RefreshMenuOptions = InvalidateOptions & { preserveGeneratedFocus?: boolean };
+type InvalidateRequest = RefreshMenuOptions & { generation: number };
 type SetDisplayedOptions = InvalidateOptions & { cause: MenuUpdateCause; buildsMenu?: boolean };
 type FocusedMenuItemPayload = {
   index: number;
@@ -124,8 +125,8 @@ export class MenuController {
     // A click acts on the item under the pointer, not on the focused item.
     // Menu item focus can be off (`enableMenuItemFocus: false`), and a click
     // must still work. See ENTER_SEMANTICS in `docs/CONCEPTS.md`.
-    this.ctl.currentProps.onMenuAction = (_evt, menuItem) => {
-      this.runMenuItemAction(menuItem);
+    this.ctl.currentProps.onMenuAction = (_evt, menuItem, index) => {
+      this.runMenuItemAction(menuItem, index);
     };
     this.ctl.currentProps.onPointerMove = (evt) => {
       this.pointerFocusGuard.onPointerMove(evt);
@@ -261,12 +262,32 @@ export class MenuController {
   /**
    * Run one menu item's action. Returns false when nothing ran.
    */
-  private runMenuItemAction(menuItem?: MenuItemAny): boolean {
+  private runMenuItemAction(menuItem?: MenuItemAny, clickedIndex?: number): boolean {
     if (this.disableActions) {
       return false;
     }
     if (menuItem && !menuItem.ignored && menuItem.action) {
-      this.ctl.app.handleMenuAction(menuItem, this.currentMenu.menuId);
+      const menuId = this.currentMenu.menuId;
+      if (
+        this.inputChannel.mode === 'generative' &&
+        this.enableMenuItemFocus &&
+        clickedIndex !== undefined &&
+        clickedIndex !== this.currentMenu.focusedMenuItemIndex &&
+        this.currentMenu.getFocusable(clickedIndex) === menuItem
+      ) {
+        // A click can activate a result without a preceding pointer enter.
+        const generation = this.ctl.app.currentGeneration;
+        this.setMenuItemFocus(clickedIndex, menuItem, false, 'pointer');
+        if (
+          generation !== this.ctl.app.currentGeneration ||
+          this.currentMenu.menuId !== menuId ||
+          this.currentMenu.getFocusable(clickedIndex) !== menuItem ||
+          this.disableActions
+        ) {
+          return false;
+        }
+      }
+      this.ctl.app.handleMenuAction(menuItem, menuId);
       return true;
     }
     return false;
@@ -277,22 +298,33 @@ export class MenuController {
   }
 
   /** Pull the declarative menu if present, then run the filter and focus rules. */
-  private refreshMenu({ focusBehaviour }: InvalidateOptions, cause: MenuUpdateCause): boolean {
+  private refreshMenu(
+    { focusBehaviour, preserveGeneratedFocus }: RefreshMenuOptions,
+    cause: MenuUpdateCause
+  ): boolean {
     if (!this.isMenuOpenImmediate || !this.ctl.menu.isMenuOpen) {
       return false;
     }
     const generation = this.ctl.app.currentGeneration;
     const menu = this.ctl.app.getMenu();
     if (generation === this.ctl.app.currentGeneration && (!menu || this.setMenuOnly(menu))) {
-      this.setDisplayed({ cause, focusBehaviour, buildsMenu: true });
+      const keepFocus =
+        preserveGeneratedFocus &&
+        !menu &&
+        this.inputChannel.mode === 'generative' &&
+        this.heldFilter === undefined;
+      this.setDisplayed({
+        cause,
+        focusBehaviour: keepFocus ? 'none' : focusBehaviour,
+        buildsMenu: true
+      });
     }
     return true;
   }
 
   private invalidateNow = async (request: InvalidateRequest): Promise<boolean> => {
-    const focusBehaviour =
-      request.generation === this.ctl.app.currentGeneration ? request.focusBehaviour : undefined;
-    if (!this.refreshMenu({ focusBehaviour }, 'invalidate')) {
+    const options = request.generation === this.ctl.app.currentGeneration ? request : {};
+    if (!this.refreshMenu(options, 'invalidate')) {
       return false;
     }
     await tick();
@@ -305,7 +337,11 @@ export class MenuController {
   private invalidateCoalesced = coalesce<InvalidateRequest, boolean>(
     {
       merge: (current, next) => {
-        if (current.generation !== next.generation || next.focusBehaviour !== undefined) {
+        if (
+          current.generation !== next.generation ||
+          next.focusBehaviour !== undefined ||
+          (current.preserveGeneratedFocus && !next.preserveGeneratedFocus)
+        ) {
           return next;
         }
         return current;
@@ -328,15 +364,22 @@ export class MenuController {
    * requests queued before an activation change. A late async callback from
    * an old AppObject still uses the current generation when it calls invalidate().
    */
-  invalidate = (opts: InvalidateOptions = {}): Promise<boolean> => {
+  invalidate = (opts: InvalidateOptions = {}): Promise<boolean> => this.requestInvalidate(opts);
+
+  /** Keep focus if clearing the input after an action leaves generated rows in place. */
+  _invalidateAfterAction() {
+    return this.requestInvalidate({ preserveGeneratedFocus: true });
+  }
+
+  private requestInvalidate(opts: RefreshMenuOptions): Promise<boolean> {
     if (!this.ctl.menu.isMenuOpen) {
       return Promise.resolve(false);
     }
     return this.invalidateCoalesced({
-      focusBehaviour: opts.focusBehaviour,
+      ...opts,
       generation: this.ctl.app.currentGeneration
     });
-  };
+  }
 
   /** Keep focus on watch refreshes after the activation's first menu rebuild. */
   _invalidateFromWatch() {

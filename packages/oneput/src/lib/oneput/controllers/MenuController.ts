@@ -18,16 +18,9 @@ import { stdSkeletonMenuItems } from '../shared/ui/menuItems/stdSkeletonMenuItem
 import { tick } from 'svelte';
 
 type MenuInputMode = 'none' | 'filter' | 'generative';
-type InvalidateOptions = {
-  focusBehaviour?: FocusBehaviour;
-  /**
-   * The first build of a new AppObject's menu: use the menu's own focus rule.
-   * A `focusBehaviour` merged into the same batch (e.g. a refresh that the
-   * AppObject before asked for) does not change it.
-   */
-  fresh?: boolean;
-};
-type SetDisplayedOptions = { focusBehaviour?: FocusBehaviour; cause: MenuUpdateCause };
+type InvalidateOptions = { focusBehaviour?: FocusBehaviour };
+type InvalidateRequest = InvalidateOptions & { generation: number };
+type SetDisplayedOptions = InvalidateOptions & { cause: MenuUpdateCause; buildsMenu?: boolean };
 type FocusedMenuItemPayload = {
   index: number;
   menuItem: MenuItem | undefined;
@@ -189,6 +182,7 @@ export class MenuController {
   private menuNotificationDepth = 0;
   private pendingMenuUpdate?: MenuUpdatePayload;
   private pendingMenuItemFocus?: MenuItemFocusPayload;
+  private lastBuiltGeneration?: number;
 
   /**
    * True from {@link closeMenu} until {@link completeMenuOutro}.
@@ -282,37 +276,23 @@ export class MenuController {
     return this.currentMenu.displayedMenuItemCount;
   }
 
-  /**
-   * Re-pull declarative menu (if defined); for declarative and non-declarative it will re-run the filter.
-   *
-   * Call this whenever AppObject state that affects menu rendering changes.
-   * Pass `focusBehaviour: 'none'` to avoid moving the focused index.
-   *
-   * Returns a promise that resolves after Svelte has flushed the DOM (same as
-   * {@link InputController.setInputValue} / `tick()`), or `false` if the menu
-   * was closed and nothing was updated. Await before reading layout (e.g. scroll).
-   */
-  private refreshMenu(
-    { focusBehaviour: requested, fresh }: InvalidateOptions,
-    cause: MenuUpdateCause
-  ): boolean {
-    const focusBehaviour = fresh ? undefined : requested;
+  /** Pull the declarative menu if present, then run the filter and focus rules. */
+  private refreshMenu({ focusBehaviour }: InvalidateOptions, cause: MenuUpdateCause): boolean {
     if (!this.isMenuOpenImmediate || !this.ctl.menu.isMenuOpen) {
       return false;
     }
+    const generation = this.ctl.app.currentGeneration;
     const menu = this.ctl.app.getMenu();
-    if (menu) {
-      this.ctl.menu.setMenuOnly(menu);
-      this.ctl.menu.setDisplayed({ cause, focusBehaviour });
-    } else {
-      // menu undefined => AppObject not using .menu(), just re-display
-      this.ctl.menu.setDisplayed({ cause, focusBehaviour });
+    if (generation === this.ctl.app.currentGeneration && (!menu || this.setMenuOnly(menu))) {
+      this.setDisplayed({ cause, focusBehaviour, buildsMenu: true });
     }
     return true;
   }
 
-  private invalidateNow = async (opts: InvalidateOptions): Promise<boolean> => {
-    if (!this.refreshMenu(opts, 'invalidate')) {
+  private invalidateNow = async (request: InvalidateRequest): Promise<boolean> => {
+    const focusBehaviour =
+      request.generation === this.ctl.app.currentGeneration ? request.focusBehaviour : undefined;
+    if (!this.refreshMenu({ focusBehaviour }, 'invalidate')) {
       return false;
     }
     await tick();
@@ -322,12 +302,14 @@ export class MenuController {
   /**
    * See {@link coalesce}.
    */
-  private invalidateCoalesced = coalesce<InvalidateOptions, boolean>(
+  private invalidateCoalesced = coalesce<InvalidateRequest, boolean>(
     {
-      merge: (current, next) => ({
-        focusBehaviour: next.focusBehaviour ?? current.focusBehaviour,
-        fresh: next.fresh || current.fresh
-      }),
+      merge: (current, next) => {
+        if (current.generation !== next.generation || next.focusBehaviour !== undefined) {
+          return next;
+        }
+        return current;
+      },
       onBatch: ({ requestCount, input }) => {
         console.debug(`Coalesced ${requestCount} menu invalidations`, input);
       }
@@ -335,27 +317,49 @@ export class MenuController {
     this.invalidateNow
   );
 
-  /** Rebuild the current menu and wait for Svelte to update its DOM. */
+  /**
+   * Rebuild the current menu and wait for Svelte to update its DOM.
+   * Await this before reading layout such as scroll position. Returns false
+   * if the menu is closed. Pass `focusBehaviour: 'none'` to keep the
+   * focused index while it is still focusable.
+   *
+   * The last explicit focus request in the current activation wins.
+   * Otherwise the menu uses its own focus rule. The generation drops focus
+   * requests queued before an activation change. A late async callback from
+   * an old AppObject still uses the current generation when it calls invalidate().
+   */
   invalidate = (opts: InvalidateOptions = {}): Promise<boolean> => {
     if (!this.ctl.menu.isMenuOpen) {
       return Promise.resolve(false);
     }
-    return this.invalidateCoalesced(opts);
+    return this.invalidateCoalesced({
+      focusBehaviour: opts.focusBehaviour,
+      generation: this.ctl.app.currentGeneration
+    });
   };
+
+  /** Keep focus on watch refreshes after the activation's first menu rebuild. */
+  _invalidateFromWatch() {
+    return this.invalidate({
+      focusBehaviour:
+        this.lastBuiltGeneration === this.ctl.app.currentGeneration ? 'none' : undefined
+    });
+  }
 
   /**
    * Sets what will be displayed including re-running the filter.
    *
    * If the menu is closed you won't see the changes until it's opened.
    */
-  private setDisplayed({ cause, focusBehaviour }: SetDisplayedOptions) {
+  private setDisplayed({ cause, focusBehaviour, buildsMenu }: SetDisplayedOptions) {
     if (!this.isMenuOpenImmediate) {
       return;
     }
     if (!this.isMenuOpen) {
       return;
     }
-    // Hold callbacks until rows and focus agree.
+    const generation = this.ctl.app.currentGeneration;
+    // Hold notifications until rows and focus agree.
     this.batchMenuNotifications(() => {
       const focusCause = focusCauseFromMenuUpdate(cause);
       // A held filter keeps the rows; else filter only when the input
@@ -366,6 +370,12 @@ export class MenuController {
           : this.inputChannel.mode === 'filter' && this.inputChannel.filterEnabled
             ? this.filter.run(this.currentMenu.allMenuItems, this.ctl.input.getInputValue())
             : false;
+      if (generation !== this.ctl.app.currentGeneration) {
+        return;
+      }
+      if (buildsMenu) {
+        this.lastBuiltGeneration = generation;
+      }
       if (result === false) {
         // No active filter: show every row.
         this.ctl.currentProps.menuItems = this.currentMenu.allMenuItems;
@@ -397,8 +407,9 @@ export class MenuController {
     header?: FlexParams;
     footer?: FlexParams;
   }) {
-    this.setMenuOnly(params);
-    this.setDisplayed({ cause: 'set-menu' });
+    if (this.setMenuOnly(params)) {
+      this.setDisplayed({ cause: 'set-menu', buildsMenu: params !== undefined });
+    }
   }
 
   /**
@@ -429,6 +440,7 @@ export class MenuController {
     header?: FlexParams;
     footer?: FlexParams;
   }) {
+    const generation = this.ctl.app.currentGeneration;
     this.currentMenu = params
       ? CurrentMenu.create(this.ctl, params)
       : CurrentMenu.createBlank(this.ctl);
@@ -438,6 +450,7 @@ export class MenuController {
     });
     // Base menu changed — claims with ownerRemoved may release.
     this.ctl.input.notifyBaseMenuChanged(this.currentMenu.allMenuItems);
+    return generation === this.ctl.app.currentGeneration;
   }
 
   /**

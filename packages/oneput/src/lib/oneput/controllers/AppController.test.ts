@@ -847,6 +847,237 @@ describe('AppController', () => {
     });
   });
 
+  describe('menu focus on invalidation', () => {
+    it("uses the child's focus rule when the parent has a pending 'none' request", async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({
+        menu: () => ({
+          id: 'parent',
+          items: [stdMenuItem({ id: 'parent-row', action: () => {} })]
+        })
+      });
+      await ctl.menu.invalidate();
+
+      // act
+      const childMenuBuilt = ctl.menu.invalidate({ focusBehaviour: 'none' });
+      ctl.app.run({
+        menu: () => ({
+          id: 'child',
+          focusBehaviour: 'last',
+          items: [
+            stdMenuItem({ id: 'child-first', action: () => {} }),
+            stdMenuItem({ id: 'child-last', action: () => {} })
+          ]
+        })
+      });
+      await childMenuBuilt;
+
+      // assert
+      expect(ctl.menu.focusedMenuItem?.id).toBe('child-last');
+    });
+
+    it("uses the resumed parent's focus rule when the child has a pending 'none' request", async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({
+        menu: () => ({
+          id: 'parent',
+          focusBehaviour: 'last',
+          items: [
+            stdMenuItem({ id: 'parent-first', action: () => {} }),
+            stdMenuItem({ id: 'parent-last', action: () => {} })
+          ]
+        })
+      });
+      ctl.app.run({
+        menu: () => ({
+          id: 'child',
+          items: [stdMenuItem({ id: 'child-row', action: () => {} })]
+        })
+      });
+      await ctl.menu.invalidate();
+
+      // act
+      const parentMenuRebuilt = ctl.menu.invalidate({ focusBehaviour: 'none' });
+      ctl.app.exit();
+      await parentMenuRebuilt;
+
+      // assert
+      expect(ctl.menu.focusedMenuItem?.id).toBe('parent-last');
+    });
+
+    it("keeps 'none' when a plain request follows it in the same AppObject", async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({
+        menu: () => ({
+          id: 'menu',
+          focusBehaviour: 'first',
+          items: [
+            stdMenuItem({ id: 'first', action: () => {} }),
+            stdMenuItem({ id: 'second', action: () => {} })
+          ]
+        })
+      });
+      await ctl.menu.invalidate();
+      ctl.menu.focusMenuItemById('second');
+
+      // act
+      void ctl.menu.invalidate({ focusBehaviour: 'none' });
+      await ctl.menu.invalidate();
+
+      // assert
+      expect(ctl.menu.focusedMenuItem?.id).toBe('second');
+    });
+
+    it('honors a focus request made by the incoming AppObject in onStart', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const originalModel = notifier();
+      const incomingModel = notifier();
+      ctl.app.run({ watch: () => [originalModel] });
+      await ctl.menu.invalidate();
+
+      // act
+      originalModel.notify();
+      const newMenuBuilt = ctl.menu.invalidate({ focusBehaviour: 'none' });
+      ctl.app.run({
+        watch: () => [incomingModel],
+        onStart: () => {
+          void ctl.menu.invalidate({ focusBehaviour: 'last' });
+        },
+        menu: () => ({
+          id: 'new',
+          focusBehaviour: 'first',
+          items: [
+            stdMenuItem({ id: 'new-first', action: () => {} }),
+            stdMenuItem({ id: 'new-last', action: () => {} })
+          ]
+        })
+      });
+      await newMenuBuilt;
+
+      // assert
+      expect(ctl.menu.focusedMenuItem?.id).toBe('new-last');
+    });
+
+    it('keeps the replacement UI and focus when onRefresh replaces its AppObject', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const model = notifier();
+      const replacementMenuBuilt = Promise.withResolvers<void>();
+      const replacement: AppObject = {
+        onStart: () => {
+          ctl.ui.setInputUI({ input: { kind: 'textarea', rows: 3 } });
+        },
+        menu: () => ({
+          id: 'replacement',
+          focusBehaviour: 'last',
+          items: [
+            stdMenuItem({ id: 'replacement-first', action: () => {} }),
+            stdMenuItem({ id: 'replacement-last', action: () => {} })
+          ]
+        }),
+        onMenuUpdate: ({ menuId }) => {
+          if (menuId === 'replacement') replacementMenuBuilt.resolve();
+        }
+      };
+
+      // act
+      ctl.app.run({
+        watch: () => [model],
+        onRefresh: () => ctl.app.replace(replacement)
+      });
+      await replacementMenuBuilt.promise;
+
+      // assert
+      expect(ctl.input.isMultiline).toBe(true);
+      expect(ctl.menu.focusedMenuItem?.id).toBe('replacement-last');
+    });
+
+    it('uses the first menu focus rule when a pending watch refresh crosses replacement', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const originalModel = notifier();
+      const replacementModel = notifier();
+      ctl.app.run({
+        watch: () => [originalModel],
+        menu: () => ({
+          id: 'original',
+          items: [stdMenuItem({ id: 'original-row', action: () => {} })]
+        })
+      });
+      await ctl.menu.invalidate();
+
+      // act
+      originalModel.notify();
+      ctl.app.replace({
+        watch: () => [replacementModel],
+        menu: () => ({
+          id: 'replacement',
+          focusBehaviour: 'last',
+          items: [
+            stdMenuItem({ id: 'replacement-first', action: () => {} }),
+            stdMenuItem({ id: 'replacement-last', action: () => {} })
+          ]
+        })
+      });
+      const replacementMenuBuilt = ctl.menu.invalidate();
+      await replacementMenuBuilt;
+
+      // assert
+      expect(ctl.menu.focusedMenuItem?.id).toBe('replacement-last');
+    });
+
+    it('keeps replacement focus when a rebuild releases an input claim', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      let showOwner = true;
+      ctl.app.run({
+        menu: () => ({
+          id: 'original',
+          items: [showOwner && stdMenuItem({ id: 'owner', action: () => {} })]
+        })
+      });
+      await ctl.menu.invalidate();
+      const replacement: AppObject = {
+        onStart: () => {
+          ctl.menu.setMenu({
+            id: 'replacement',
+            focusBehaviour: 'last',
+            items: [
+              stdMenuItem({ id: 'replacement-first', action: () => {} }),
+              stdMenuItem({ id: 'replacement-last', action: () => {} })
+            ]
+          });
+        }
+      };
+      ctl.input.claim({
+        owner: { type: 'draft', itemId: 'owner' },
+        value: { read: () => '', write: () => {} },
+        release: { ownerRemoved: true },
+        onRelease: (reason) => {
+          if (reason === 'owner-removed') ctl.app.replace(replacement);
+        }
+      });
+      const replacementFocus: string[] = [];
+      ctl.events.on('menu-item-focus', ({ menuId, menuItem }) => {
+        if (menuId === 'replacement' && menuItem) replacementFocus.push(menuItem.id);
+      });
+
+      // act
+      showOwner = false;
+      const originalRebuildFinished = ctl.menu.invalidate({ focusBehaviour: 'first' });
+      await originalRebuildFinished;
+
+      // assert
+      expect(ctl.app.isCurrent(replacement)).toBe(true);
+      expect(ctl.menu.focusedMenuItem?.id).toBe('replacement-last');
+      expect(replacementFocus).not.toContain('replacement-first');
+    });
+  });
+
   describe('replacement and root exit', () => {
     test("replace: the new menu gets its own focus, though the old AppObject asked for a 'none' rebuild", async () => {
       // arrange

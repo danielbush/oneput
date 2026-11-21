@@ -83,6 +83,13 @@ When a child exits, `onResume` runs only if the parent defines it. There is no
 fallback to `onStart`. Declared settings, layout, menu, and actions are still
 restored by the controller.
 
+Oneput merges menu invalidations in the same turn. The last explicit focus
+request in the current activation wins. Otherwise the menu uses its own
+focus rule. The generation drops focus requests queued before an activation
+change, including when an AppObject resumes. A late async callback from an
+old AppObject still uses the current generation when it calls `invalidate()`.
+Await `invalidate()` before reading layout such as scroll position.
+
 **Actions** let an AppObject declare bindings alongside the action handler. The `binding` field uses `ActionBinding` (no `action` callback — the action is the sibling field):
 
 ```ts

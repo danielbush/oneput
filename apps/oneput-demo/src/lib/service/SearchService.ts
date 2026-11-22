@@ -1,5 +1,5 @@
 import { err, ok, type Result } from 'neverthrow';
-import { TestInputService } from '../../service/TestInputService.js';
+import { TestInputService } from './TestInputService.js';
 
 export type SearchItem = { id: string; text: string };
 export type SearchFailure = { message: string };

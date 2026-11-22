@@ -2,7 +2,7 @@ import { assign, fromCallback, sendTo, setup } from 'xstate';
 import type { LayoutSlots, ViewDef } from '@oneput/oneput/shared/declarative/interpreter.js';
 import type { OneputEvent } from '@oneput/oneput/shared/declarative/oneputEvents.js';
 import { viewLayouts } from '../../common/_layout.js';
-import { SearchService, type SearchFailure, type SearchItem } from './searchService.js';
+import { SearchService, type SearchFailure, type SearchItem } from '../../service/SearchService.js';
 import { resultById, type SearchContext, type SearchSources } from './sources.js';
 
 type RowEvent = { type: 'RETRY_SEARCH' };

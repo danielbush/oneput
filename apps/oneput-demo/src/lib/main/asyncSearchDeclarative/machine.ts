@@ -1,5 +1,5 @@
 import { searchActions } from './actions.js';
-import { SearchService } from './searchService.js';
+import { SearchService } from '../../service/SearchService.js';
 
 /** Show the state of the current query and stop the request actor when the input changes. */
 export function createAsyncSearchMachine(service = SearchService.create()) {

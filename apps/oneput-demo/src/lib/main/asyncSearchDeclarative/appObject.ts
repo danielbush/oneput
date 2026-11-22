@@ -4,7 +4,7 @@ import { createActor, type ActorOptions } from 'xstate';
 import { viewLayouts } from '../../common/_layout.js';
 import { createAsyncSearchMachine } from './machine.js';
 import type { Online } from '../../common/online.js';
-import type { SearchService } from './searchService.js';
+import type { SearchService } from '../../service/SearchService.js';
 import { createSources } from './sources.js';
 
 /** Run the search machine as a Oneput AppObject. The host owns `online`. */

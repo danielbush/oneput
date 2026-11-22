@@ -260,7 +260,8 @@ export class MenuController {
   }
 
   /**
-   * Run one menu item's action. Returns false when nothing ran.
+   * Run one menu item's action. A click can move menu focus before activation,
+   * even without a preceding pointer enter. Returns false when nothing ran.
    */
   private runMenuItemAction(menuItem?: MenuItemAny, clickedIndex?: number): boolean {
     if (this.disableActions) {
@@ -269,15 +270,14 @@ export class MenuController {
     if (menuItem && !menuItem.ignored && menuItem.action) {
       const menuId = this.currentMenu.menuId;
       if (
-        this.inputChannel.mode === 'generative' &&
         this.enableMenuItemFocus &&
         clickedIndex !== undefined &&
         clickedIndex !== this.currentMenu.focusedMenuItemIndex &&
         this.currentMenu.getFocusable(clickedIndex) === menuItem
       ) {
-        // A click can activate a result without a preceding pointer enter.
         const generation = this.ctl.app.currentGeneration;
         this.setMenuItemFocus(clickedIndex, menuItem, false, 'pointer');
+        // A focus hook can switch apps, replace menu rows, or disable actions.
         if (
           generation !== this.ctl.app.currentGeneration ||
           this.currentMenu.menuId !== menuId ||

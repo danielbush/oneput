@@ -1,8 +1,9 @@
 import { describe, expect, it, test } from 'vitest';
 import { Controller } from './controller.js';
+import { FocusedMenuLiveEdit } from '../shared/behaviors/liveEdit/FocusedMenuLiveEdit.js';
 import { stdMenuItem } from '../shared/ui/menuItems/stdMenuItem.js';
 import { WordFilter } from '../shared/filters/WordFilter.js';
-import type { MenuUpdateCause } from '../types.js';
+import type { MenuItem, MenuUpdateCause } from '../types.js';
 
 const item = (id: string, text: string, canFilter?: boolean) =>
   stdMenuItem({ id, textContent: text, canFilter, action: () => {} });
@@ -416,6 +417,153 @@ describe('MenuController', () => {
       // assert
       expect(ctl.input.getInputValue()).toBe('a');
       expect(label).toBe('a');
+    });
+  });
+
+  describe('click-to-focus', () => {
+    it('focuses a filtered result before running its action', () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      let chosenFruit: string | undefined;
+      ctl.app.run({ settings: { clearInputAfterAction: false } });
+      ctl.menu.setFilter(WordFilter.create().filter);
+      void ctl.input.setInputValue('ap');
+      ctl.menu.setMenu({
+        id: 'fruit',
+        items: [
+          item('banana', 'Banana'),
+          item('apple', 'Apple'),
+          stdMenuItem({
+            id: 'apricot',
+            textContent: 'Apricot',
+            action: (ctl) => {
+              chosenFruit = ctl.menu.focusedMenuItem?.id;
+            }
+          })
+        ]
+      });
+      expect(ctl.menu.displayedMenuItemCount).toBe(2);
+      expect(ctl.menu.focusedMenuItem?.id).toBe('apple');
+
+      // act
+      ctl.simulateMenuItemClick('apricot');
+
+      // assert
+      expect(chosenFruit).toBe('apricot');
+      expect(ctl.app.getLastMenuActionId('fruit')).toBe('apricot');
+    });
+
+    it('lets a static row claim input on focus before its action', () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const liveEdit = FocusedMenuLiveEdit.create(ctl);
+      let label = 'Draft';
+      let savedLabel: string | undefined;
+      ctl.app.run({});
+      const labelRow = liveEdit.bind(
+        stdMenuItem({
+          id: 'label',
+          textContent: 'Label',
+          action: (ctl) => {
+            savedLabel = ctl.input.getInputValue();
+          }
+        }),
+        {
+          value: {
+            read: () => label,
+            write: (value) => {
+              label = value;
+            }
+          }
+        }
+      );
+      ctl.menu.setMenu({ id: 'settings', items: [item('back', 'Back'), labelRow] });
+      expect(ctl.menu.focusedMenuItem?.id).toBe('back');
+
+      // act
+      ctl.simulateMenuItemClick('label');
+
+      // assert
+      expect(ctl.menu.focusedMenuItem?.id).toBe('label');
+      expect(savedLabel).toBe('Draft');
+      expect(ctl.input.getInputValue()).toBe('Draft');
+      expect(ctl.app.getLastMenuActionId('settings')).toBe('label');
+    });
+
+    it('drops the click when focus starts another AppObject with the same rows', () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      let openedFile: string | undefined;
+      const menu = {
+        id: 'files',
+        items: [
+          item('first', 'First'),
+          stdMenuItem({
+            id: 'second',
+            textContent: 'Second',
+            action: () => {
+              openedFile = 'second';
+            }
+          })
+        ]
+      };
+      const preview = { onStart: () => ctl.menu.setMenu(menu) };
+      ctl.app.run({
+        onStart: () => ctl.menu.setMenu(menu),
+        onMenuItemFocus: ({ cause, menuItem }) => {
+          if (cause === 'pointer' && menuItem?.id === 'second') {
+            ctl.app.run(preview);
+          }
+        }
+      });
+
+      // act
+      ctl.simulateMenuItemClick('second');
+
+      // assert
+      expect(ctl.app.isCurrent(preview)).toBe(true);
+      expect(openedFile).toBeUndefined();
+      expect(ctl.app.getLastMenuActionId('files')).toBeUndefined();
+    });
+
+    test.each<{
+      change: string;
+      onFocus: (ctl: Controller, menu: { id: string; items: MenuItem[] }) => void;
+    }>([
+      {
+        change: 'switches menus with the same rows',
+        onFocus: (ctl, menu) => ctl.menu.setMenu({ ...menu, id: 'trash' })
+      },
+      {
+        change: 'replaces the clicked row',
+        onFocus: (ctl, menu) =>
+          ctl.menu.setMenu({
+            ...menu,
+            items: [menu.items[0], item('confirm', 'Confirm delete')]
+          })
+      },
+      {
+        change: 'disables actions',
+        onFocus: (ctl) => ctl.ui.update({ flags: { enableMenuActions: false } })
+      }
+    ])('drops the click when focus $change', ({ onFocus }) => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const menu = { id: 'files', items: [item('back', 'Back'), item('delete', 'Delete')] };
+      ctl.app.run({
+        onStart: () => ctl.menu.setMenu(menu),
+        onMenuItemFocus: ({ cause, menuItem }) => {
+          if (cause === 'pointer' && menuItem?.id === 'delete') {
+            onFocus(ctl, menu);
+          }
+        }
+      });
+
+      // act
+      ctl.simulateMenuItemClick('delete');
+
+      // assert
+      expect(ctl.app.getLastMenuActionId('files')).toBeUndefined();
     });
   });
 

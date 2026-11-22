@@ -7,6 +7,7 @@ import {
   type Readable,
   type ViewDef
 } from './interpreter.js';
+import { standardRow } from './standardRow.js';
 
 declare function component<Params extends AppLayoutParams>(
   ctl: Controller,
@@ -74,7 +75,10 @@ function inferredSnapshot() {
   };
   const sources = { text: {}, lists: {}, items: {} };
   // @ts-expect-error The registry has no 'gone' layout.
-  return renderActiveView(snapshot, sources, layouts, () => {});
+  return renderActiveView(snapshot, sources, layouts, {
+    defaultRow: standardRow,
+    activate: () => {}
+  });
 }
 
 viewLayout({

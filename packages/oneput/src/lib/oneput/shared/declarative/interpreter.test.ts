@@ -13,6 +13,7 @@ import {
   type ViewLayouts,
   type ViewSources
 } from './interpreter.js';
+import { standardRow } from './standardRow.js';
 
 /** A layout component that keeps its params. These tests do not show it. */
 function component(_ctl: Controller, params: AppLayoutParams): UILayout {
@@ -99,7 +100,10 @@ const sources = {
 const wideSources: ViewSources<Snapshot, string, string, PageEvent, string> = sources;
 
 function renderView(pages: ReturnType<typeof createPages<PageView>>) {
-  return renderActiveView(pages.snapshot, sources, layouts, pages.send);
+  return renderActiveView(pages.snapshot, sources, layouts, {
+    defaultRow: standardRow,
+    activate: pages.send
+  });
 }
 
 /** The interpreter puts only menu items in the menu. */
@@ -128,6 +132,33 @@ function segments(item: MenuItem | undefined) {
 function pagesWith(items: NonNullable<PageView['menu']>['items']) {
   return createPages<PageView>({ layout: 'plain', menu: { id: 'pages', items } });
 }
+
+test('plain row uses the passed builder', () => {
+  // arrange
+  const pages = pagesWith([
+    { id: 'details', text: { from: 'pageText' }, detail: 'Details', activate: true }
+  ]);
+
+  // act
+  const view = renderActiveView(pages.snapshot, sources, layouts, {
+    defaultRow: ({ text, detail }, action) =>
+      menuItem({
+        id: 'builder-id',
+        action,
+        children: [fchild({ textContent: `${text}: ${detail}` })]
+      }),
+    activate: pages.send
+  })._unsafeUnwrap();
+  const [item] = view.menu.items as MenuItem[];
+  click(item);
+
+  // assert
+  expect(item).toMatchObject({
+    id: 'details',
+    children: [{ textContent: 'Page 1: Details' }]
+  });
+  expect(pages.snapshot.activated).toBe('details');
+});
 
 describe('built rows', () => {
   test('view row sends its event', () => {
@@ -291,7 +322,10 @@ describe('layouts', () => {
     );
 
     // act
-    const view = renderActiveView(pages.snapshot, wideSources, wideLayouts, pages.send);
+    const view = renderActiveView(pages.snapshot, wideSources, wideLayouts, {
+      defaultRow: standardRow,
+      activate: pages.send
+    });
 
     // assert
     expect(view._unsafeUnwrapErr()).toBe('Expected only slots that the layout declares');
@@ -370,7 +404,10 @@ describe('missing names', () => {
     const pages = createPages(view);
 
     // act
-    const result = renderActiveView(pages.snapshot, wideSources, wideLayouts, pages.send);
+    const result = renderActiveView(pages.snapshot, wideSources, wideLayouts, {
+      defaultRow: standardRow,
+      activate: pages.send
+    });
 
     // assert
     expect(result._unsafeUnwrapErr()).toBe('Expected a source for each name');
@@ -400,7 +437,10 @@ describe('readable sources', () => {
       menu: { id: 'pages', from: 'pages' }
     });
     const render = () =>
-      renderActiveView(pages.snapshot, mixed, layouts, pages.send)._unsafeUnwrap();
+      renderActiveView(pages.snapshot, mixed, layouts, {
+        defaultRow: standardRow,
+        activate: pages.send
+      })._unsafeUnwrap();
     return { heading, rows, label, badge, mixed, pages, render };
   }
 
@@ -462,7 +502,10 @@ describe('readable sources', () => {
     });
 
     // act
-    const view = renderActiveView(pages.snapshot, registry, layouts, pages.send);
+    const view = renderActiveView(pages.snapshot, registry, layouts, {
+      defaultRow: standardRow,
+      activate: pages.send
+    });
 
     // assert
     expect(view._unsafeUnwrap().layout.params).toEqual({ menuTitle: title });
@@ -508,7 +551,10 @@ describe('readable sources', () => {
     const pages = createPages<PageView>({ layout: 'plain', ...view });
 
     // act
-    const result = renderActiveView(pages.snapshot, registry, layouts, pages.send);
+    const result = renderActiveView(pages.snapshot, registry, layouts, {
+      defaultRow: standardRow,
+      activate: pages.send
+    });
 
     // assert
     expect(result._unsafeUnwrapErr()).toBe('Expected each source to read without an error');
@@ -526,7 +572,10 @@ describe('readable sources', () => {
     });
 
     // act
-    const result = renderActiveView(pages.snapshot, registry, layouts, pages.send);
+    const result = renderActiveView(pages.snapshot, registry, layouts, {
+      defaultRow: standardRow,
+      activate: pages.send
+    });
 
     // assert
     expect(result._unsafeUnwrapErr()).toBe('Expected a source for each name');

@@ -135,14 +135,22 @@ merges views from parent to child and reads named sources from the snapshot
 for changing text and rows. Oneput owns the stack and applies the view to the
 current AppObject through `watch` and `onRefresh`.
 
-A row has standard fields (`text`, `detail`, `icon`, `send`) or names a
-builder: `{ id, build: 'name', send? }`. The builder in `sources.items` gets
-the snapshot, the row, and a function that sends the row's event to the actor,
-and returns the menu item. The interpreter sets the item's ID to the row's ID.
-Thus the view stays data, and a click still goes through the machine. Rows
-merge by key. `build` and the standard fields exclude each other: the later
-row's choice wins, and a row with only `id` and `send` keeps the earlier one.
-A name with no source gives an error, not an exception.
+A plain row has standard fields such as `text`, `detail`, `icon`, and `send`.
+The required `defaultRow` option builds it from the row's ID, kind, resolved
+text and detail, and icon. An app can pass `standardRow` from
+`shared/declarative/standardRow.ts` or supply its own builder. The interpreter
+passes an activation function when the row enables activation. Information
+rows use only the main text and icon and have no activation function.
+
+A row can also name a builder with `{ id, build: 'name', send? }`. The
+builder in `sources.items` gets the snapshot, the row, and an activation
+function. For both kinds of builder, the interpreter sets the item's ID to
+the row's ID. The activation function sends the row's event to the actor,
+or sends `ITEM_ACTIVATED` with the row's ID when `send` is absent.
+
+Rows merge by key. `build` and the standard fields exclude each other. The
+later row's choice wins, and a row with only `id` and `send` keeps the
+earlier one. A name with no source gives an error.
 
 A source is a function of the actor snapshot, for data that the machine owns
 in its context; this is the main pattern. A source marked with

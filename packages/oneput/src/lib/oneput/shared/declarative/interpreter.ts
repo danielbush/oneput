@@ -1,8 +1,6 @@
 import type { Controller } from '../../controllers/controller.js';
 import type { Pull } from '../../lib/pull.js';
 import type { AppLayoutParams, InputKind, Menu, MenuItem, UIFlags, UILayout } from '../../types.js';
-import { infoMenuItem } from '../ui/menuItems/infoMenuItem.js';
-import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
 import { err, ok, Result } from 'neverthrow';
 
 type Text<Source extends string> = string | { from: Source };
@@ -24,6 +22,16 @@ type Row<Label, Event extends RowEvent> = {
 };
 type RowPatch<Label, Event extends RowEvent> = Pick<Row<Label, Event>, 'id'> &
   Partial<Row<Label, Event>>;
+
+/**
+ * Make a menu item from a plain row after the interpreter resolves its text.
+ * Use `activate` as the item's action when it is present. The interpreter
+ * sets the item's ID to the row's ID.
+ */
+export type PlainRowBuilder = (
+  row: Pick<Row<string, never>, 'id' | 'kind' | 'text' | 'detail' | 'icon'>,
+  activate?: () => void
+) => MenuItem;
 
 /**
  * A row that a named builder in `sources.items` makes. Use it when the standard
@@ -346,7 +354,7 @@ type Activation<Event extends RowEvent> = Event | { type: 'ITEM_ACTIVATED'; id: 
  * or a slot that the active layout does not declare, gives an error.
  *
  * The registry `layouts` types the layout names and slots that the views can
- * use.
+ * use. `defaultRow` makes each item whose row has no `build` name.
  */
 export function renderActiveView<
   Source extends string,
@@ -359,7 +367,10 @@ export function renderActiveView<
   snapshot: Snapshot & ViewSnapshot<Source, List, Event, Item, NoInfer<LayoutSlots<Layouts>>>,
   sources: ViewSources<NoInfer<Snapshot>, Source, List, Event, Item>,
   layouts: Layouts,
-  activate: (event: Activation<Event>) => void
+  {
+    defaultRow,
+    activate
+  }: { defaultRow: PlainRowBuilder; activate: (event: Activation<Event>) => void }
 ): Result<OneputView, ViewError> {
   const views = Object.entries(snapshot.getMeta())
     .flatMap(([id, meta]) =>
@@ -431,21 +442,14 @@ export function renderActiveView<
       );
       return built.map((item) => ({ ...item, id }));
     }
-    const { text, detail, icon } = row;
+    const { kind, text, detail, icon } = row;
     if (text === undefined) return err('Expected text for each menu row');
-    if (row.kind === 'info') {
-      return read(text).map((msg) => infoMenuItem({ id, msg, icon: icon ?? 'Info' }));
-    }
-    const canActivate = row.activate ?? send !== undefined;
-    return Result.combine([read(text), readOptional(detail)]).map(([textContent, detailText]) =>
-      stdMenuItem({
-        id,
-        textContent,
-        bottom: detailText === undefined ? undefined : { textContent: detailText },
-        left: icon === undefined ? undefined : (b) => [b.icon(icon)],
-        action: canActivate ? raise : undefined
-      })
-    );
+    const canActivate = kind !== 'info' && (row.activate ?? send !== undefined);
+    return Result.combine([read(text), readOptional(kind === 'info' ? undefined : detail)])
+      .andThen(([text, detail]) =>
+        attempt(() => defaultRow({ id, kind, text, detail, icon }, canActivate ? raise : undefined))
+      )
+      .map((item) => ({ ...item, id }));
   };
 
   const slotValues = Result.combine(

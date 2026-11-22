@@ -1,5 +1,6 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import { appObjectActor } from '@oneput/oneput/shared/declarative/appObjectActor.js';
+import { standardRow } from '@oneput/oneput/shared/declarative/standardRow.js';
 import { createActor, type ActorOptions } from 'xstate';
 import { viewLayouts } from '../../common/_layout.js';
 import { createAsyncSearchMachine } from './machine.js';
@@ -16,6 +17,7 @@ export function createAsyncSearchAppObject(
 ): AppObject {
   const actor = createActor(createAsyncSearchMachine(service), clock && { clock });
   return appObjectActor(ctl, actor, createSources(online), viewLayouts, {
+    defaultRow: standardRow,
     inputRequiresOpenMenu: true
   });
 }

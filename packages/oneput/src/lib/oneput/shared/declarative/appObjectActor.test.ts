@@ -16,6 +16,7 @@ import {
 } from './interpreter.js';
 import type { OneputEvent } from './oneputEvents.js';
 import { standardLayout } from './standardLayout.js';
+import { standardRow } from './standardRow.js';
 
 type PageEvent = { type: 'NEXT_PAGE' };
 
@@ -137,7 +138,8 @@ function runPages(second?: PageView) {
     ctl,
     createPageActor(second),
     { text: {}, lists: {}, items: {} },
-    layouts
+    layouts,
+    { defaultRow: standardRow }
   );
   const shown = menuShows(ctl, 'Next page');
   ctl.app.run(app);
@@ -249,7 +251,8 @@ test('a readable source change redraws the view with no new snapshot', async () 
       menu: { id: 'labels', from: 'rows' }
     }),
     { text: { label: readable(label) }, lists: { rows: readable(rows) }, items: {} },
-    layouts
+    layouts,
+    { defaultRow: standardRow }
   );
   const shown = menuShows(ctl, 'Row A');
   ctl.app.run(app);

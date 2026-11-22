@@ -6,6 +6,7 @@ import {
   type OneputView,
   type Readable,
   type LayoutSlots,
+  type PlainRowBuilder,
   type ViewLayouts,
   type ViewSnapshot,
   type ViewSources
@@ -21,6 +22,8 @@ type ViewActor<Snapshot, Event extends { type: string }> = {
 };
 
 export type AppObjectActorOptions = {
+  /** Build rows whose view has no `build` name. */
+  defaultRow: PlainRowBuilder;
   /** Drop input events while the menu is closed, including during its close animation. */
   inputRequiresOpenMenu?: boolean;
 };
@@ -56,6 +59,7 @@ function applyView(ctl: Controller, view: OneputView, rowsChanged: boolean) {
 /**
  * Connect an actor to its AppObject. Oneput owns the AppObject stack and the input.
  * `layouts` are the layouts that the actor's views can name, shared across AppObjects.
+ * `defaultRow` builds the rows that do not name a builder.
  * When the active view names a layout other than the one this AppObject shows,
  * the adapter shows that layout's component.
  *
@@ -77,7 +81,7 @@ export function appObjectActor<
   >,
   sources: ViewSources<NoInfer<Snapshot>, Source, List, Event, Item>,
   layouts: Layouts,
-  { inputRequiresOpenMenu }: AppObjectActorOptions = {}
+  { defaultRow, inputRequiresOpenMenu }: AppObjectActorOptions
 ): AppObject {
   const sendIfCurrent = (event: OneputEvent | Event) => {
     if (ctl.app.isCurrent(app)) actor.send(event);
@@ -132,7 +136,10 @@ export function appObjectActor<
       ...sourceSubscriptions(sources)
     ],
     onRefresh() {
-      const rendered = renderActiveView(actor.getSnapshot(), sources, layouts, sendIfCurrent);
+      const rendered = renderActiveView(actor.getSnapshot(), sources, layouts, {
+        defaultRow,
+        activate: sendIfCurrent
+      });
       if (rendered.isErr()) {
         ctl.notify(rendered.error);
         return;

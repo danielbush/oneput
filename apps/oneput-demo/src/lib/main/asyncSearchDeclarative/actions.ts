@@ -1,4 +1,4 @@
-import { assertEvent, assign, fromCallback, sendTo, setup } from 'xstate';
+import { assign, fromCallback, sendTo, setup } from 'xstate';
 import type { LayoutSlots, ViewDef } from '@oneput/oneput/shared/declarative/interpreter.js';
 import type { OneputEvent } from '@oneput/oneput/shared/declarative/oneputEvents.js';
 import { viewLayouts } from '../../common/_layout.js';
@@ -47,27 +47,24 @@ export function searchActions(service: SearchService) {
         event.type === 'ITEM_ACTIVATED' && resultById(context, event.id) !== undefined
     },
     actions: {
-      writeQuery: assign(({ event }) => {
-        assertEvent(event, 'INPUT_CHANGED');
-        return { query: event.value, results: [], selected: null, error: null };
-      }),
+      writeQuery: assign((_, params: { value: string }) => ({
+        query: params.value,
+        results: [],
+        selected: null,
+        error: null
+      })),
       startFetch: sendTo('request', ({ context }) => ({
         type: 'SEARCH',
         query: context.query ?? ''
       })),
-      storeResults: assign(({ event }) => {
-        assertEvent(event, 'SEARCH_SUCCEEDED');
-        return { results: event.results };
-      }),
-      storeFailure: assign(({ event }) => {
-        assertEvent(event, 'SEARCH_FAILED');
-        return { error: event.error };
-      }),
+      storeResults: assign((_, params: { results: readonly SearchItem[] }) => ({
+        results: params.results
+      })),
+      storeFailure: assign((_, params: { error: SearchFailure }) => ({ error: params.error })),
       clearFailure: assign({ error: null }),
-      selectResult: assign(({ context, event }) => {
-        assertEvent(event, 'ITEM_ACTIVATED');
-        return { selected: resultById(context, event.id)?.text ?? null };
-      })
+      selectResult: assign(({ context }, params: { id: string }) => ({
+        selected: resultById(context, params.id)?.text ?? null
+      }))
     }
   });
 }

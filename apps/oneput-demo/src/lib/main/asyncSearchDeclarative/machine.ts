@@ -21,12 +21,12 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
       INPUT_CHANGED: [
         {
           guard: 'isBlankInput',
-          actions: 'writeQuery',
+          actions: { type: 'writeQuery', params: ({ event }) => ({ value: event.value }) },
           target: '.empty',
           description: 'Stop pending work and show the instructions for blank input.'
         },
         {
-          actions: 'writeQuery',
+          actions: { type: 'writeQuery', params: ({ event }) => ({ value: event.value }) },
           target: '.pending.debouncing',
           reenter: true,
           description: 'Stop any previous request and restart the debounce with the new input.'
@@ -77,7 +77,10 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
                 {
                   guard: 'hasResults',
                   target: '#async-search.results',
-                  actions: 'storeResults',
+                  actions: {
+                    type: 'storeResults',
+                    params: ({ event }) => ({ results: event.results })
+                  },
                   description: 'Show the returned result rows.'
                 },
                 {
@@ -87,7 +90,10 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
               ],
               SEARCH_FAILED: {
                 target: '#async-search.error',
-                actions: 'storeFailure',
+                actions: {
+                  type: 'storeFailure',
+                  params: ({ event }) => ({ error: event.error })
+                },
                 description: 'Show the error next to the input and offer a retry in the menu.'
               }
             }
@@ -106,7 +112,7 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
         on: {
           ITEM_ACTIVATED: {
             guard: 'resultExists',
-            actions: 'selectResult',
+            actions: { type: 'selectResult', params: ({ event }) => ({ id: event.id }) },
             description: 'Show the selected result text if its row still exists.'
           }
         }

@@ -344,7 +344,7 @@ export class AppController {
         !this.ctl.input.hasActiveClaim
       ) {
         this.ctl.input.clearInput();
-        this.ctl.menu.invalidate();
+        this.ctl.menu._invalidateAfterAction();
       }
     }
   }

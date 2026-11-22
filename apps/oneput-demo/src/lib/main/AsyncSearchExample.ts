@@ -68,7 +68,7 @@ export class AsyncSearchExample implements AppObject {
             this.setBusy(isDebouncing);
           }
         },
-        focusBehaviour: 'last',
+        focusBehaviour: 'last-action,first',
         // The fn owns its whole displayed lifecycle: this placeholder shows
         // pre-typing (and whenever the input is cleared) with no setMenu/menu().
         whenEmpty: () => [

@@ -3,7 +3,7 @@ import type { LayoutSlots, ViewDef } from '@oneput/oneput/shared/declarative/int
 import type { OneputEvent } from '@oneput/oneput/shared/declarative/oneputEvents.js';
 import { viewLayouts } from '../../common/_layout.js';
 import { SearchService, type SearchFailure, type SearchItem } from '../../service/SearchService.js';
-import { resultById, type SearchContext, type SearchSources } from './sources.js';
+import { resultById, type SearchContext, type SearchSources } from './content.js';
 
 type RowEvent = { type: 'RETRY_SEARCH' };
 type FetchEvent =

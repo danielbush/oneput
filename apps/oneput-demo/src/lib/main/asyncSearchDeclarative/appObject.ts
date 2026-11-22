@@ -6,7 +6,7 @@ import { viewLayouts } from '../../common/_layout.js';
 import { createAsyncSearchMachine } from './machine.js';
 import type { Online } from '../../common/online.js';
 import type { SearchService } from '../../service/SearchService.js';
-import { createSources } from './sources.js';
+import { createSources } from './content.js';
 
 /** Run the search machine as a Oneput AppObject. The host owns `online`. */
 export function createAsyncSearchAppObject(

@@ -2,7 +2,7 @@ import { menuItem } from '@oneput/oneput';
 import { readable } from '@oneput/oneput/shared/declarative/interpreter.js';
 import { Signal } from 'signal-polyfill';
 import type { Online } from '../../common/online.js';
-import { signalSource } from '../../common/signalSource.js';
+import { signalSource } from '@oneput/oneput/shared/declarative/signalSource.js';
 import type { SearchFailure, SearchItem } from './searchService.js';
 
 export type SearchContext = {

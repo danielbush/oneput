@@ -1,5 +1,5 @@
-import { notifier } from '@oneput/oneput';
-import { waitFor } from '@oneput/oneput/shared/test/index.js';
+import { notifier } from '../../lib/pull.js';
+import { waitFor } from '../test/index.js';
 import { Signal } from 'signal-polyfill';
 import { describe, expect, test } from 'vitest';
 import { signalSource } from './signalSource.js';

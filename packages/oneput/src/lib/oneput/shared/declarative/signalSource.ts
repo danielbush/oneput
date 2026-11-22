@@ -1,4 +1,4 @@
-import type { ReadableSource } from '@oneput/oneput/shared/declarative/interpreter.js';
+import type { ReadableSource } from './interpreter.js';
 import { Signal } from 'signal-polyfill';
 
 /** Read the signal so that it tracks its sources. A throw shows on the view's own read. */

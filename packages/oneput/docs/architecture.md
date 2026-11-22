@@ -148,7 +148,8 @@ A source is a function of the actor snapshot, for data that the machine owns
 in its context; this is the main pattern. A source marked with
 `readable(source)` reads data that something else owns, for example a signal
 of the host. The marked source is a `Pull` with `subscribe` (`{ get, subscribe }`),
-for example a small adapter over a signal. One registry can mix both kinds.
+for example a small adapter over a signal. `signalSource` (`shared/declarative/signalSource.ts`)
+adapts a TC39 signal and needs the optional `signal-polyfill` peer. One registry can mix both kinds.
 The interpreter reads each source by its mark, and the adapter's `watch`
 subscribes to the actor and to every marked source in the registry, so a
 change redraws the view with no new snapshot. The mark, not the shape of a

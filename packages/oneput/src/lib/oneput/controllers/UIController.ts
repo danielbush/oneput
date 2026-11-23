@@ -64,8 +64,16 @@ export class UIController {
 
   private layout?: UILayout;
 
+  /**
+   * Show `layout`. Then call {@link invalidate} to show its UI.
+   *
+   * The current AppObject owns the layout, as it owns its params: its children
+   * inherit it, and it shows again when the AppObject resumes. With no current
+   * AppObject, the next root inherits it.
+   */
   setLayout(layout: UILayout) {
     this.layout = layout;
+    this.ctl.app._setLayout(layout);
   }
 
   getLayout<D extends UILayout = UILayout>(): D | undefined {

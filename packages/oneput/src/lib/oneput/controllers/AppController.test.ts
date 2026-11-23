@@ -96,6 +96,44 @@ describe('AppController', () => {
       expect(ctl.ui.getLayout()).toBe(appLayout.appLayout);
     });
 
+    it('setLayout - a child inherits the layout its parent set', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const { appLayout, shown } = trackedLayout('parent-layout');
+      ctl.app.run({
+        layout: { params: { menuTitle: 'Home' } },
+        onStart: () => ctl.ui.setLayout(appLayout)
+      });
+
+      // act
+      ctl.app.run({});
+
+      // assert
+      expect(ctl.ui.getLayout()).toBe(appLayout);
+      expect(shown()).toEqual({ menuTitle: 'Home' });
+    });
+
+    it('setLayout - the parent shows its layout again when a child with its own layout exits', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const parentLayout = trackedLayout('parent-layout');
+      const childLayout = trackedLayout('child-layout');
+      ctl.app.run({
+        layout: { params: { menuTitle: 'Home' } },
+        onStart: () => ctl.ui.setLayout(parentLayout.appLayout)
+      });
+      ctl.app.run({
+        layout: { layout: () => childLayout.appLayout, params: { menuTitle: 'Child' } }
+      });
+
+      // act
+      ctl.app.exit();
+
+      // assert
+      expect(ctl.ui.getLayout()).toBe(parentLayout.appLayout);
+      expect(parentLayout.shown()).toEqual({ menuTitle: 'Home' });
+    });
+
     it('child with declared params - shows only its own params', () => {
       // arrange
       const ctl = Controller.createNull();

@@ -38,6 +38,10 @@ type AnyAppObject = AppObject<any, any>;
  */
 type AppObjectState = {
   lastMenuActionIds: Record<string, string>;
+  /**
+   * The layout of this AppObject: declared, inherited, or set later with
+   * `ctl.ui.setLayout`.
+   */
   layout?: UILayout;
   /** The full layout params of this AppObject. See {@link layoutParams}. */
   layoutParams?: AppLayoutParams;
@@ -142,6 +146,17 @@ export class AppController {
       throw new Error('Layout params belong to an AppObject: no AppObject is current.');
     }
     this.getAppState(this.current).layoutParams = params;
+  }
+
+  /**
+   * Set the layout of the current AppObject. Use `ctl.ui.setLayout` instead:
+   * it also shows the layout. With no current AppObject there is no entry to
+   * own it; the next root inherits the layout that `ctl.ui` shows.
+   */
+  _setLayout(layout: UILayout) {
+    if (this.current) {
+      this.getAppState(this.current).layout = layout;
+    }
   }
 
   // #region ui settings

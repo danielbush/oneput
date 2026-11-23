@@ -74,8 +74,10 @@ share `liveEditClaim.ts`: `MenuLiveEdit` (claim on activate) and
 **Layout** is inherited through the AppObject stack. A root AppObject can provide
 `layout: { layout: (ctl, params) => UILayout, params }`; child AppObjects can
 omit `layout.layout` to reuse the active parent layout, and provide `{ params }`
-for their own params. Handle UI flags separately with
-`ctl.ui.update({ flags })`.
+for their own params. Use `ctl.ui.setLayout` to show another component later:
+the current AppObject owns it as it owns its params, thus its children inherit
+it and it shows again when the AppObject resumes. Handle UI flags separately
+with `ctl.ui.update({ flags })`.
 
 **Layout params** belong to one entry on the app stack, with its layout. When an
 AppObject starts (`run` / `replace`), its params are its declared

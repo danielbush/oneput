@@ -49,6 +49,14 @@ Each AppObject on the stack owns its layout params: declared `layout.params`, or
 - Type: `packages/oneput/src/lib/oneput/types.ts` — `AppObject`
 - Controller: `packages/oneput/src/lib/oneput/controllers/AppController.ts`
 
+### Declarative AppObject
+
+`shared/declarative/appObjectActor.ts` connects an actor to the AppObject stack.
+`shared/declarative/interpreter.ts` builds the async search view from active
+state metadata, named sources (snapshot functions or readable sources),
+named row builders, and named layouts
+(`standardLayout.ts` is one). See `docs/architecture.md`.
+
 ### Routing
 
 `routeApp(ctl, source, appFor, key?)` replaces the caller (the current

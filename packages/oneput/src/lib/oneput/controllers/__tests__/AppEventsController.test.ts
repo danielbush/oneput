@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { AppEventsController } from './AppEventsController.js';
+import { AppEventsController } from '../AppEventsController.js';
 
 describe('AppEventsController', () => {
   test('on: subscriber - receives the payload', () => {

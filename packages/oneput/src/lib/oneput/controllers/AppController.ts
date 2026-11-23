@@ -687,9 +687,13 @@ export class AppController {
     if (!app?.watch) {
       return;
     }
-    const unsubscribes = app
-      .watch()
-      .map((model) => model.subscribe(() => void this.scheduleRefresh(app)));
+    // A model can call back after its unsubscribe, for example from a queued
+    // task. Such a stale call must not replace the current app's refresh.
+    const unsubscribes = app.watch().map((model) =>
+      model.subscribe(() => {
+        if (this.watching?.app === app) void this.scheduleRefresh(app);
+      })
+    );
     this.watching = { app, unsubscribes };
     void this.scheduleRefresh(app);
   }
@@ -893,6 +897,11 @@ export class AppController {
    */
   isCurrent(app: AnyAppObject): boolean {
     return this.current === app;
+  }
+
+  /** Stop watching the current AppObject's models, when the controller goes away. */
+  destroy() {
+    this.stopWatch();
   }
 
   /** True when `app` is current or suspended below a child in the stack. */

@@ -1,11 +1,12 @@
 import { afterEach, describe, expect, it, test } from 'vitest';
-import { Controller } from './controller.js';
-import type { AppObject, UILayout } from '../types.js';
-import { stdMenuItem } from '../shared/ui/menuItems/stdMenuItem.js';
-import { WordFilter } from '../shared/filters/WordFilter.js';
-import { OneputAction } from '../shared/actions/OneputAction.js';
-import { cell, notifier } from '../lib/pull.js';
-import { routeApp } from '../shared/routing/routeApp.js';
+import { Controller } from '../controller.js';
+import type { AppObject, UILayout } from '../../types.js';
+import { stdMenuItem } from '../../shared/ui/menuItems/stdMenuItem.js';
+import { WordFilter } from '../../shared/filters/WordFilter.js';
+import { OneputAction } from '../../shared/actions/OneputAction.js';
+import { cell, notifier } from '../../lib/pull.js';
+import { routeApp } from '../../shared/routing/routeApp.js';
+import { waitForState } from '../../shared/test/index.js';
 
 function layout(id: string): UILayout {
   return {
@@ -830,6 +831,64 @@ describe('AppController', () => {
       };
       return { app, model, refreshes };
     }
+
+    it('destroy stops watching the current app', () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const subscriptions = { open: 0 };
+      ctl.app.run({
+        watch: () => [
+          {
+            subscribe: () => {
+              subscriptions.open += 1;
+              return () => (subscriptions.open -= 1);
+            }
+          }
+        ],
+        onStart: () => {}
+      });
+      const openBefore = subscriptions.open;
+
+      // act
+      ctl._destroy();
+
+      // assert
+      expect(openBefore).toBe(1);
+      expect(subscriptions.open).toBe(0);
+    });
+
+    it('a stale notify from a replaced app does not drop the current refresh', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      let staleNotify = () => {};
+      const replaced: AppObject = {
+        // A model that keeps the listener after unsubscribe, as a queued task can.
+        watch: () => [
+          {
+            subscribe: (onChange) => {
+              staleNotify = onChange;
+              return () => {};
+            }
+          }
+        ],
+        onStart: () => {}
+      };
+      const current = watchedApp(() => 'current');
+      ctl.app.run(replaced);
+      const refreshed = waitForState(ctl, 'set-menu-items', {
+        name: 'the current app to refresh',
+        reached: () => current.refreshes.length > 0,
+        seen: () => `${current.refreshes.length} refreshes`
+      });
+
+      // act
+      ctl.app.replace(current.app);
+      staleNotify();
+      await refreshed;
+
+      // assert
+      expect(current.refreshes).toEqual(['current']);
+    });
 
     it('notify - onRefresh runs and the menu rebuilds', async () => {
       // arrange

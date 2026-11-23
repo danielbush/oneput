@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { Controller } from './controller.js';
-import type { InputKind, InputSelectionState } from '../types.js';
+import { Controller } from '../controller.js';
+import type { InputKind, InputSelectionState } from '../../types.js';
 
 /**
  * happy-dom only dispatches a single `selectionchange` per session, not one

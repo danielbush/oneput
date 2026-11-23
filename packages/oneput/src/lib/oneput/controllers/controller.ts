@@ -128,6 +128,7 @@ export class Controller {
     for (const callback of this.destroyCallbacks) callback();
     this.destroyCallbacks.clear();
     this.keys.destroy();
+    this.app.destroy();
   }
 
   /**

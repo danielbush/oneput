@@ -86,9 +86,9 @@ export const fixturePaths = {
   "packages/jsed/src/lib/ops/focusable/__tests__/retention.test.ts":
     "Node retention fixtures.",
   "packages/jsed/src/test/util.ts": "Shared test document constructor.",
-  "packages/oneput/src/lib/oneput/controllers/AppController.test.ts":
+  "packages/oneput/src/lib/oneput/controllers/__tests__/AppController.test.ts":
     "Reset test document.",
-  "packages/oneput/src/lib/oneput/controllers/InputController.test.ts":
+  "packages/oneput/src/lib/oneput/controllers/__tests__/InputController.test.ts":
     "Reset test document.",
   "packages/oneput/src/lib/oneput/controllers/helpers/InputClaims.test.ts":
     "Reset test document.",

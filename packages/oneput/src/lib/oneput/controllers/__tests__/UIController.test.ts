@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, test } from 'vitest';
-import { Controller } from './controller.js';
-import { walk } from '../lib/utils.js';
-import type { FChildParams, FlexParams } from '../types.js';
-import { StandardLayout } from '../shared/ui/layout/StandardLayout.js';
+import { Controller } from '../controller.js';
+import { walk } from '../../lib/utils.js';
+import type { FChildParams, FlexParams } from '../../types.js';
+import { StandardLayout } from '../../shared/ui/layout/StandardLayout.js';
 
 const icons = {
   Close: 'x',

@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { Controller } from './controller.js';
-import { stdMenuItem } from '../shared/ui/menuItems/stdMenuItem.js';
+import { Controller } from '../controller.js';
+import { stdMenuItem } from '../../shared/ui/menuItems/stdMenuItem.js';
 
 const controllers: Controller[] = [];
 

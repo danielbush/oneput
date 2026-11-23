@@ -52,7 +52,13 @@
     }
   },
   "peerDependencies": {
+    "signal-polyfill": "0.2.3",
     "svelte": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "signal-polyfill": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "happy-dom": "^18.0.1",
@@ -74,6 +80,7 @@
     "prettier": "^3.4.2",
     "prettier-plugin-svelte": "catalog:",
     "publint": "^0.3.2",
+    "signal-polyfill": "0.2.3",
     "svelte": "catalog:",
     "svelte-check": "catalog:",
     "typescript": "^5.0.0",

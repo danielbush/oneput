@@ -6,6 +6,6 @@ The async search demo written as a declarative AppObject: an XState machine whos
 - `actions.ts`: the implementations behind the machine's names: actions, guards, delays and the `fetchResults` actor, which calls the search service.
 - `content.ts`: the named content the views refer to: `text` for slots, `menu` for rows that come from data, and `menuItem` builders for rows drawn in a custom way.
 - `appObject.ts`: connects the machine to Oneput with `appObjectActor`, passing the content, the layouts and the default row builder.
-- `appObject.test.ts`: tests the AppObject through Oneput, with a null search service.
+- `__tests__/appObject.test.ts`: tests the AppObject through Oneput, with a null search service.
 
 The search itself is a plain service in `../../service/SearchService.ts`, which knows nothing about Oneput.

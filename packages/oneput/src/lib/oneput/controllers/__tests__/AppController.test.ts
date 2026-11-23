@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, it, test } from 'vitest';
-import { Controller } from './controller.js';
-import type { AppObject, UILayout } from '../types.js';
-import { stdMenuItem } from '../shared/ui/menuItems/stdMenuItem.js';
-import { WordFilter } from '../shared/filters/WordFilter.js';
-import { OneputAction } from '../shared/actions/OneputAction.js';
-import { cell, notifier } from '../lib/pull.js';
-import { routeApp } from '../shared/routing/routeApp.js';
-import { waitForState } from '../shared/test/index.js';
+import { Controller } from '../controller.js';
+import type { AppObject, UILayout } from '../../types.js';
+import { stdMenuItem } from '../../shared/ui/menuItems/stdMenuItem.js';
+import { WordFilter } from '../../shared/filters/WordFilter.js';
+import { OneputAction } from '../../shared/actions/OneputAction.js';
+import { cell, notifier } from '../../lib/pull.js';
+import { routeApp } from '../../shared/routing/routeApp.js';
+import { waitForState } from '../../shared/test/index.js';
 
 function layout(id: string): UILayout {
   return {

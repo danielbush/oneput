@@ -9,4 +9,4 @@ Write an AppObject as an XState machine whose states describe what Oneput shows.
 - `standardRow.ts`: a ready-made builder for rows that name no builder. An app can pass its own instead.
 - `signalSource.ts`: adapts a TC39 signal into a readable source, for data the machine doesn't own. Needs the optional `signal-polyfill` peer.
 
-Each file's tests sit next to it as `*.test.ts`; `interpreter.test.types.ts` holds the compile-time checks.
+Tests sit in `__tests__/` as `*.test.ts`; `__tests__/interpreter.test.types.ts` holds the compile-time checks.

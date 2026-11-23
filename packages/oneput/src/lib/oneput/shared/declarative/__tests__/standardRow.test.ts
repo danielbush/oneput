@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { standardRow } from './standardRow.js';
+import { standardRow } from '../standardRow.js';
 
 describe('standardRow', () => {
   test('text, detail, icon and action', () => {

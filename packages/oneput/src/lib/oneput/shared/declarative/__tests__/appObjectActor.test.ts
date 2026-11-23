@@ -1,22 +1,22 @@
 import { afterEach, expect, test } from 'vitest';
-import { Controller } from '../../controllers/controller.js';
-import { fchild, hflex } from '../../lib/builder.js';
-import { cell } from '../../lib/pull.js';
-import type { AppLayoutParams, UILayout } from '../../types.js';
-import { StandardLayout } from '../ui/layout/StandardLayout.js';
-import { StdMenuItemIds } from '../ui/menuItems/stdMenuItem.js';
-import { waitForState } from '../test/index.js';
-import { appObjectActor } from './appObjectActor.js';
+import { Controller } from '../../../controllers/controller.js';
+import { fchild, hflex } from '../../../lib/builder.js';
+import { cell } from '../../../lib/pull.js';
+import type { AppLayoutParams, UILayout } from '../../../types.js';
+import { StandardLayout } from '../../ui/layout/StandardLayout.js';
+import { StdMenuItemIds } from '../../ui/menuItems/stdMenuItem.js';
+import { waitForState } from '../../test/index.js';
+import { appObjectActor } from '../appObjectActor.js';
 import {
   readable,
   viewLayout,
   type LayoutSlots,
   type ViewDef,
   type ViewSnapshot
-} from './interpreter.js';
-import type { OneputEvent } from './oneputEvents.js';
-import { standardLayout } from './standardLayout.js';
-import { standardRow } from './standardRow.js';
+} from '../interpreter.js';
+import type { OneputEvent } from '../oneputEvents.js';
+import { standardLayout } from '../standardLayout.js';
+import { standardRow } from '../standardRow.js';
 
 type PageEvent = { type: 'NEXT_PAGE' };
 

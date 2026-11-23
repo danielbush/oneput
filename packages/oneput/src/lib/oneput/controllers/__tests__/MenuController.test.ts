@@ -1,9 +1,9 @@
 import { describe, expect, it, test } from 'vitest';
-import { Controller } from './controller.js';
-import { FocusedMenuLiveEdit } from '../shared/behaviors/liveEdit/FocusedMenuLiveEdit.js';
-import { stdMenuItem } from '../shared/ui/menuItems/stdMenuItem.js';
-import { WordFilter } from '../shared/filters/WordFilter.js';
-import type { MenuItem, MenuUpdateCause } from '../types.js';
+import { Controller } from '../controller.js';
+import { FocusedMenuLiveEdit } from '../../shared/behaviors/liveEdit/FocusedMenuLiveEdit.js';
+import { stdMenuItem } from '../../shared/ui/menuItems/stdMenuItem.js';
+import { WordFilter } from '../../shared/filters/WordFilter.js';
+import type { MenuItem, MenuUpdateCause } from '../../types.js';
 
 const item = (id: string, text: string, canFilter?: boolean) =>
   stdMenuItem({ id, textContent: text, canFilter, action: () => {} });

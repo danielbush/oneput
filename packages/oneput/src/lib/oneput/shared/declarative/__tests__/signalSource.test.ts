@@ -1,8 +1,8 @@
-import { notifier } from '../../lib/pull.js';
-import { waitFor } from '../test/index.js';
+import { notifier } from '../../../lib/pull.js';
+import { waitFor } from '../../test/index.js';
 import { Signal } from 'signal-polyfill';
 import { describe, expect, test } from 'vitest';
-import { signalSource } from './signalSource.js';
+import { signalSource } from '../signalSource.js';
 
 /** Count the changes that a subscription reports. */
 function countChanges(source: ReturnType<typeof signalSource>) {

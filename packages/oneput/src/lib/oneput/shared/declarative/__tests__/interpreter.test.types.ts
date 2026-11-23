@@ -1,13 +1,13 @@
-import type { Controller } from '../../controllers/controller.js';
-import type { AppLayoutParams, UILayout } from '../../types.js';
+import type { Controller } from '../../../controllers/controller.js';
+import type { AppLayoutParams, UILayout } from '../../../types.js';
 import {
   renderActiveView,
   viewLayout,
   type LayoutSlots,
   type Readable,
   type ViewDef
-} from './interpreter.js';
-import { standardRow } from './standardRow.js';
+} from '../interpreter.js';
+import { standardRow } from '../standardRow.js';
 
 declare function component<Params extends AppLayoutParams>(
   ctl: Controller,

@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, test } from 'vitest';
-import { Controller } from '../../controllers/controller.js';
-import { menuItem } from '../../lib/builder.js';
-import { cell } from '../../lib/pull.js';
-import type { AppLayoutParams, FChildParams, MenuItem, UILayout } from '../../types.js';
+import { Controller } from '../../../controllers/controller.js';
+import { menuItem } from '../../../lib/builder.js';
+import { cell } from '../../../lib/pull.js';
+import type { AppLayoutParams, FChildParams, MenuItem, UILayout } from '../../../types.js';
 import {
   renderActiveView,
   viewLayout,
@@ -12,8 +12,8 @@ import {
   sourceSubscriptions,
   type ViewLayouts,
   type ViewSources
-} from './interpreter.js';
-import { standardRow } from './standardRow.js';
+} from '../interpreter.js';
+import { standardRow } from '../standardRow.js';
 
 /** A layout component that keeps its params. These tests do not show it. */
 function component(_ctl: Controller, params: AppLayoutParams): UILayout {

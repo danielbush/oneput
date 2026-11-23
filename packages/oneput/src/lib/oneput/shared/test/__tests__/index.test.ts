@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { waitFor } from './index.js';
+import { waitFor } from '../index.js';
 
 describe('waitFor', () => {
   test('a source that calls back while it subscribes', async () => {

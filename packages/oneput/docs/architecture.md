@@ -74,12 +74,27 @@ share `liveEditClaim.ts`: `MenuLiveEdit` (claim on activate) and
 **Layout** is inherited through the AppObject stack. A root AppObject can provide
 `layout: { layout: (ctl, params) => UILayout, params }`; child AppObjects can
 omit `layout.layout` to reuse the active parent layout, and provide `{ params }`
-to configure the inherited layout before `onStart` / `onResume`. Use
-`ctl.ui.update({ params })` for later layout changes during the life of the
-AppObject (merged into current settings). When an AppObject becomes current,
-`runBefore` applies its declared params with `replace: true` so mid-flight
-child params (e.g. menu footer) do not stick on resume. Handle UI flags
-separately with `ctl.ui.update({ flags })`.
+for their own params. Handle UI flags separately with
+`ctl.ui.update({ flags })`.
+
+**Layout params** belong to one entry on the app stack, with its layout. When an
+AppObject starts (`run` / `replace`), its params are its declared
+`layout.params`, or a copy of the current params of the AppObject before it
+(the parent, or the replaced AppObject) if it declares none.
+`ctl.ui.update({ params })` merges a patch into the current AppObject's params;
+`ctl.ui.setParams(params)` replaces them. Neither changes another entry, thus a
+parent resumes (Back, exit, queued exit, `exitToRoot`) with its own params, and
+a child's patches do not stay. The layout keeps no params of its own:
+`ctl.ui.invalidate` gives it the full current params (`UILayout.configure`)
+before it reads the layout's UI.
+
+```ts
+// Suppose the parent declares { menuTitle: 'Files' } and the child declares none.
+ctl.app.run(child); // the child starts with { menuTitle: 'Files' }
+ctl.ui.update({ params: { inputAccept } }); // only the child's params change
+ctl.ui.setParams({ menuTitle: 'Pick' }); // the child's params are now only this
+ctl.app.exit(); // the parent shows { menuTitle: 'Files' }
+```
 
 When a child exits, `onResume` runs only if the parent defines it. There is no
 fallback to `onStart`. Declared settings, layout, menu, and actions are still

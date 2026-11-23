@@ -253,16 +253,16 @@ Both can ride the same `update()` call (`applyFlags` → `configure` → reassig
 **Start-time baselines** (in `runBefore`, before `onStart` / `onResume`):
 
 - `AppObject.settings` → `reset(settings)` — declared `UIFlags`; defaults fill anything unset
-- `AppObject.layout` params → `ui.update({ params, replace: true })` — declared layout params as the new baseline
+- `AppObject.layout` params → the AppObject's own params: declared on start, or a copy of the parent's current params; on resume, the params it had when it was suspended
 
-Mid-flight `ctl.ui.update({ flags })` / `{ params }` still wins after that.
+Mid-flight `ctl.ui.update({ flags })` / `{ params }` still wins after that. `{ params }` and `ctl.ui.setParams(params)` change only the current AppObject's params.
 
 **`flags`** (`UIFlags`) — Oneput UI behaviour on the controllers. Applied first via `applyFlags` / `reset`. Not stored as layout settings. Layout may _read_ them when building chrome (e.g. show X from `ctl.app.flags.enableGoBack`), so getters see the new flags on the same call.
 
 - enable: `enableGoBack`, `enableMenuOpenClose`, `enableKeys`, `enableMenuActions`, `enableGenerative`, `enableFilter`, `enableInputElement`, `enableModal`
 - focus / clear: `focusInputOnStart`, `focusInputOnMenuOpen`, `clearInputAfterAction`, `clearInputAfterBack`
 
-**`params`** — data for the active `UILayout`. Then passed to `layout.configure`, then `menuUI` / `inputUI` / etc. are re-read onto `currentProps`.
+**`params`** — data for the active `UILayout`, owned by the current AppObject. The full params are passed to `layout.configure`, then `menuUI` / `inputUI` / etc. are re-read onto `currentProps`.
 
 - shared (`AppLayoutParams`): `menuTitle`, `inputSend`, `inputAccept`, `inputReject` (`{ run, enabled? }`)
 - menu-owned chrome (via `setMenu` / `menu()` → `menuUI.header` / `menuUI.footer`): AppObject pins above/below the item list; not layout params

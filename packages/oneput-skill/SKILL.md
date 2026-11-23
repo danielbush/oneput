@@ -454,7 +454,8 @@ ctl.keys.getDefaultBindings()
 ctl.keys.getCurrentBindings()
 
 // UI
-ctl.ui.update({ params?, flags? })
+ctl.ui.update({ params?, flags? })  // params: patch the current AppObject's params
+ctl.ui.setParams(params)            // replace the current AppObject's params
 ctl.ui.setInputUI({ left?, right?, outerLeft?, outerRight? })
 
 // App
@@ -496,9 +497,13 @@ layout = {
 ```
 
 If the AppObject does not provide `layout.layout`, it inherits the active parent
-layout and only applies `params`.
+layout. Each AppObject owns its layout params: the declared `params`, or a copy
+of the parent's current params if it declares none. When a child exits, the
+parent shows its own params again.
 
-Use `ctl.ui.update` for layout changes during the life of the AppObject:
+Use `ctl.ui.update` for layout changes during the life of the AppObject. Its
+`params` are merged into the current AppObject's params. Use
+`ctl.ui.setParams(params)` to replace them all:
 
 ```typescript
 ctl.ui.update({

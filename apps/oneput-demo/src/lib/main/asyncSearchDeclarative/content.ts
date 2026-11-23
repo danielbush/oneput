@@ -14,9 +14,8 @@ export type SearchContext = {
 
 type SearchSnapshot = { context: SearchContext };
 
-/** Find the last result with the ID, as the menu keeps the last row with an ID. */
 export function resultById(context: SearchContext, id: string) {
-  return context.results.findLast((result) => result.id === id);
+  return context.results.find((result) => result.id === id);
 }
 
 /**

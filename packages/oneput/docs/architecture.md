@@ -144,13 +144,18 @@ rows use only the main text and icon and have no activation function.
 
 A row can also name a builder with `{ id, build: 'name', send? }`. The
 builder in `sources.items` gets the snapshot, the row, and an activation
-function. For both kinds of builder, the interpreter sets the item's ID to
-the row's ID. The activation function sends the row's event to the actor,
-or sends `ITEM_ACTIVATED` with the row's ID when `send` is absent.
+function. Both kinds of builder return a menu item with the row's ID. The
+interpreter uses the returned item unchanged. The activation function sends
+the row's event to the actor, or sends `ITEM_ACTIVATED` with the row's ID when
+`send` is absent.
 
-Rows merge by key. `build` and the standard fields exclude each other. The
-later row's choice wins, and a row with only `id` and `send` keeps the
-earlier one. A name with no source gives an error.
+Rows from the list named by `menu.from` appear first, in source order, with
+their IDs and duplicates. Fixed rows declared in the active views follow.
+Only fixed rows merge by ID. They keep the position of their first
+declaration, and a child can override its parent's fields. `build` and the
+standard fields exclude each other. The later fixed row's choice wins, and a
+fixed row with only `id` and `send` keeps the earlier choice. A name with no
+source gives an error.
 
 A source is a function of the actor snapshot, for data that the machine owns
 in its context; this is the main pattern. A source marked with

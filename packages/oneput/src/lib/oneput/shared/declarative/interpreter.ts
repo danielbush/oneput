@@ -25,8 +25,8 @@ type RowPatch<Label, Event extends RowEvent> = Pick<Row<Label, Event>, 'id'> &
 
 /**
  * Make a menu item from a plain row after the interpreter resolves its text.
- * Use `activate` as the item's action when it is present. The interpreter
- * sets the item's ID to the row's ID.
+ * Return the item with the row's ID. Use `activate` as the item's action when
+ * it is present.
  */
 export type PlainRowBuilder = (
   row: Pick<Row<string, never>, 'id' | 'kind' | 'text' | 'detail' | 'icon'>,
@@ -61,7 +61,7 @@ function hasStandardFields<Label, Event extends RowEvent>(row: RowPatch<Label, E
 }
 
 /**
- * Merge a later row into the earlier row with its ID, key by key.
+ * Merge a later fixed row into the earlier fixed row with its ID, key by key.
  * `build` and the standard fields exclude each other: the later row's choice
  * wins, and a row with only `id` and `send` keeps the earlier choice.
  */
@@ -201,7 +201,9 @@ export type ViewDef<
   menu?: {
     id?: string;
     focusBehaviour?: Menu['focusBehaviour'];
+    /** Fixed rows. A child can override a parent's fixed row with the same ID. */
     items?: readonly ViewRow<Text<Source>, Event, Item>[];
+    /** The list source. Its rows appear in source order before the fixed rows. */
     from?: List;
   };
   input?: ViewInput<Source>;
@@ -294,9 +296,9 @@ function attempt<T>(read: () => T): Result<T, ReadError> {
 /**
  * Named code that a view refers to by name, so the view stays data.
  * `text` gives changing text, `lists` gives changing rows, and `items` builds
- * a row that names it in `build`. The interpreter sets the built item's ID to
- * the row's ID. The builder's `activate` sends the row's event (`send`, else
- * `ITEM_ACTIVATED`) to the actor; use it as the item's action.
+ * a row that names it in `build`. Return the item with the row's ID. The
+ * builder's `activate` sends the row's event (`send`, else `ITEM_ACTIVATED`) to
+ * the actor; use it as the item's action.
  *
  * A plain function reads the actor snapshot: use it for data that the machine
  * owns in its context. A source marked with {@link readable} reads data that
@@ -349,9 +351,11 @@ type Activation<Event extends RowEvent> = Event | { type: 'ITEM_ACTIVATED'; id: 
  * Resolve the active states' metadata, with parents first.
  * A child's `layout` replaces its parent's; when it names a different layout,
  * the parent's slots do not apply. Slots, settings and menu fields merge by
- * key, and a child can clear `input` with `input: undefined`. Rows merge by ID
- * in the same order (see {@link mergeRow}). A name with no source or layout,
- * or a slot that the active layout does not declare, gives an error.
+ * key, and a child can clear `input` with `input: undefined`. List rows keep
+ * their order and IDs, including repeats. Fixed rows follow in order of
+ * first declaration, with same-ID overrides (see {@link mergeRow}).
+ * A name with no source or layout, or a slot that the active layout does
+ * not declare, gives an error.
  *
  * The registry `layouts` types the layout names and slots that the views can
  * use. `defaultRow` makes each item whose row has no `build` name.
@@ -419,37 +423,38 @@ export function renderActiveView<
   ): Result<string | undefined, NameError | ReadError> =>
     text === undefined ? ok(undefined) : read(text);
 
-  const rows = new Map<string, ViewRow<Text<Source>, Event, Item>>();
+  let listRows: readonly ListRow<Event, Item>[] = [];
   if (menu.from !== undefined) {
     const list = named(sources.lists, menu.from).andThen((source) =>
       attempt(() => (isReadable(source) ? source.source.get() : source(snapshot)))
     );
     if (list.isErr()) return err(list.error);
-    for (const row of list.value) rows.set(row.id, row);
+    listRows = list.value;
   }
+  const fixedRows = new Map<string, ViewRow<Text<Source>, Event, Item>>();
   for (const { menu } of views) {
-    for (const row of menu?.items ?? []) rows.set(row.id, mergeRow(rows.get(row.id), row));
+    for (const row of menu?.items ?? []) {
+      fixedRows.set(row.id, mergeRow(fixedRows.get(row.id), row));
+    }
   }
 
   const renderRow = (row: ViewRow<Text<Source>, Event, Item>): Result<MenuItem, ViewError> => {
     const { id, send } = row;
     const raise = () => activate(send ?? { type: 'ITEM_ACTIVATED', id });
     if (isBuilt(row)) {
-      const built = named(sources.items, row.build).andThen((build) =>
+      return named(sources.items, row.build).andThen((build) =>
         attempt(() =>
           isReadable(build) ? build.source.get()(row, raise) : build(snapshot, row, raise)
         )
       );
-      return built.map((item) => ({ ...item, id }));
     }
     const { kind, text, detail, icon } = row;
     if (text === undefined) return err('Expected text for each menu row');
     const canActivate = kind !== 'info' && (row.activate ?? send !== undefined);
-    return Result.combine([read(text), readOptional(kind === 'info' ? undefined : detail)])
-      .andThen(([text, detail]) =>
+    return Result.combine([read(text), readOptional(kind === 'info' ? undefined : detail)]).andThen(
+      ([text, detail]) =>
         attempt(() => defaultRow({ id, kind, text, detail, icon }, canActivate ? raise : undefined))
-      )
-      .map((item) => ({ ...item, id }));
+    );
   };
 
   const slotValues = Result.combine(
@@ -461,7 +466,7 @@ export function renderActiveView<
   });
 
   return Result.combine([
-    Result.combine([...rows.values()].map(renderRow)),
+    Result.combine([...listRows, ...fixedRows.values()].map(renderRow)),
     slotValues,
     readOptional(input?.placeholder)
   ]).map(([items, values, placeholder]) => ({

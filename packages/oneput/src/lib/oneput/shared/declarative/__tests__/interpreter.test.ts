@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from 'vitest';
 import { Controller } from '../../../controllers/controller.js';
-import { menuItem } from '../../../lib/builder.js';
+import { menuItem, type FlexChildBuilder } from '../../../lib/builder.js';
 import { cell } from '../../../lib/pull.js';
 import type { AppLayoutParams, FChildParams, MenuItem, UILayout } from '../../../types.js';
 import {
@@ -9,6 +9,7 @@ import {
   type LayoutSlots,
   type ViewDef,
   readable,
+  slot,
   sourceSubscriptions,
   type ViewLayouts,
   type ViewSources
@@ -20,26 +21,45 @@ function component(_ctl: Controller, _params: AppLayoutParams): UILayout {
   return { configure: () => {} };
 }
 
+/** Content that a layout builds in place. */
+type Footer = (b: FlexChildBuilder) => FChildParams;
+type TypedParams = AppLayoutParams & { busy?: boolean; footer?: Footer };
+
 /** Test-only layouts: the interpreter knows no layout of its own. */
 const layouts = {
   plain: viewLayout({
-    slots: ['heading', 'note'],
+    slots: { heading: slot<string>(), note: slot<string>() },
     create: component,
     params: ({ heading, note }) => ({ menuTitle: [heading, note].filter(Boolean).join(' / ') })
   }),
   bare: viewLayout({
-    slots: ['heading'],
+    slots: { heading: slot<string>() },
     create: component,
     params: ({ heading }) => ({ menuTitle: `[${heading ?? ''}]` })
+  }),
+  // Keeps its values as they are, to show what reaches the layout.
+  typed: viewLayout({
+    slots: { busy: slot<boolean>(), footer: slot<Footer>() },
+    create: (ctl, params: TypedParams) => component(ctl, params),
+    params: ({ busy, footer }): TypedParams => ({ busy, footer })
   })
 };
 
 type Layouts = LayoutSlots<typeof layouts>;
 
 type PageEvent = { type: 'NEXT_PAGE' } | { type: 'PREVIOUS_PAGE' };
-type PageView = ViewDef<'pageText', 'pages', PageEvent, 'badge' | 'pageNumber', Layouts>;
+type PageSources = { pageText: string };
+type PageView = ViewDef<PageSources, 'pages', PageEvent, 'badge' | 'pageNumber', Layouts>;
+type TypedSources = PageSources & { laterPage: boolean; footer: Footer };
+type TypedView = ViewDef<TypedSources, never, never, never, Layouts>;
 /** A view type that a machine declares apart from its sources: any name type-checks. */
-type WideView = ViewDef<string, string, PageEvent, string, Record<string, string>>;
+type WideView = ViewDef<
+  Record<string, string>,
+  string,
+  PageEvent,
+  string,
+  Record<string, Record<string, string>>
+>;
 
 /** The same layouts, typed with any names as a registry declared apart from its views. */
 const wideLayouts: ViewLayouts = layouts;
@@ -48,7 +68,7 @@ const wideLayouts: ViewLayouts = layouts;
  * An actor whose events change its page and its last activated row.
  * Its active states are nested: each view is the child of the one before.
  */
-function createPages<View extends PageView | WideView>(...views: View[]) {
+function createPages<View extends PageView | WideView | TypedView>(...views: View[]) {
   const state = { page: 1, activated: null as string | null };
   const pages = {
     send(event: PageEvent | { type: 'ITEM_ACTIVATED'; id: string }) {
@@ -94,10 +114,16 @@ const sources = {
         children: (b) => [b.fchild({ textContent: String(page) })]
       })
   }
-} satisfies ViewSources<Snapshot, 'pageText', 'pages', PageEvent, 'badge' | 'pageNumber'>;
+} satisfies ViewSources<Snapshot, PageSources, 'pages', PageEvent, 'badge' | 'pageNumber'>;
 
 /** The same sources, typed with any names as a registry declared apart from its views. */
-const wideSources: ViewSources<Snapshot, string, string, PageEvent, string> = sources;
+const wideSources: ViewSources<
+  Snapshot,
+  Record<string, string>,
+  string,
+  PageEvent,
+  string
+> = sources;
 
 function renderView(pages: ReturnType<typeof createPages<PageView>>) {
   return renderActiveView(pages.snapshot, sources, layouts, {
@@ -314,6 +340,31 @@ describe('fixed row overrides', () => {
 });
 
 describe('layouts', () => {
+  const footer: Footer = (b) => b.fchild({ textContent: 'Footer' });
+  const typedSources = {
+    ...sources,
+    slot: { ...sources.slot, laterPage: ({ page }: Snapshot) => page > 1, footer: () => footer }
+  };
+
+  test.each<[string, Extract<TypedView, { layout: 'typed' }>['slots']]>([
+    ['literals', { busy: true, footer }],
+    ['sources', { busy: { from: 'laterPage' }, footer: { from: 'footer' } }]
+  ])('values that are not text reach the layout from %s', (name, slots) => {
+    // arrange
+    const pages = createPages<TypedView>({ layout: 'typed', slots, menu: { id: 'pages' } });
+
+    // act
+    const view = renderActiveView(pages.snapshot, typedSources, layouts, {
+      defaultRow: standardRow,
+      activate: pages.send
+    });
+
+    // assert
+    const { params } = view._unsafeUnwrap().layout;
+    expect(params).toEqual({ busy: name === 'literals', footer });
+    expect((params as TypedParams).footer).toBe(footer);
+  });
+
   test('slots merge by key', () => {
     // arrange
     const pages = createPages<PageView>(
@@ -497,7 +548,7 @@ describe('readable sources', () => {
       slot: { pageText: readable(heading) },
       menu: { pages: readable(rows) },
       menuItem: { badge: readable(badge), pageNumber: sources.menuItem.pageNumber }
-    } satisfies ViewSources<Snapshot, 'pageText', 'pages', PageEvent, 'badge' | 'pageNumber'>;
+    } satisfies ViewSources<Snapshot, PageSources, 'pages', PageEvent, 'badge' | 'pageNumber'>;
     const pages = createPages<PageView>({
       layout: 'plain',
       slots: { heading: { from: 'pageText' } },

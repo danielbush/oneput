@@ -1,5 +1,9 @@
 import { assign, fromCallback, sendTo, setup } from 'xstate';
-import type { LayoutSlots, ViewDef } from '@oneput/oneput/shared/declarative/interpreter.js';
+import type {
+  LayoutSlots,
+  SourceTypes,
+  ViewDef
+} from '@oneput/oneput/shared/declarative/interpreter.js';
 import type { OneputEvent } from '@oneput/oneput/shared/declarative/oneputEvents.js';
 import { viewLayouts } from '../../common/_layout.js';
 import { SearchService, type SearchFailure, type SearchItem } from '../../service/SearchService.js';
@@ -10,7 +14,7 @@ type FetchEvent =
   | { type: 'SEARCH_SUCCEEDED'; results: readonly SearchItem[] }
   | { type: 'SEARCH_FAILED'; error: SearchFailure };
 type SearchView = ViewDef<
-  keyof SearchContent['slot'],
+  SourceTypes<SearchContent['slot']>,
   keyof SearchContent['menu'],
   RowEvent,
   keyof SearchContent['menuItem'],

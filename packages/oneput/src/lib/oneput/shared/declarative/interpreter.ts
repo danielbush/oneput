@@ -3,7 +3,26 @@ import type { Pull } from '../../lib/pull.js';
 import type { AppLayoutParams, InputKind, Menu, MenuItem, UIFlags, UILayout } from '../../types.js';
 import { err, ok, Result } from 'neverthrow';
 
-type Text<Source extends string> = string | { from: Source };
+/** The names of the sources whose value fits `T`. */
+type SourceFor<Source, T> = {
+  [Name in keyof Source]: Source[Name] extends T ? Name : never;
+}[keyof Source] &
+  string;
+
+/**
+ * A value of type `T`: a literal, or `{ from: name }` for a source whose value
+ * fits `T`. A literal object with `from` would read as a source name, so it is
+ * not a literal.
+ */
+type Fill<T, Source> = Exclude<T, { from: unknown }> | { from: SourceFor<Source, T> };
+
+/** Text: a string, or the name of a source whose value is a string. */
+type Text<Source> = Fill<string, Source>;
+
+/** True for `{ from: name }`: the other values of a {@link Fill} are literals. */
+function isFrom(value: unknown): value is { from: string } {
+  return typeof value === 'object' && value !== null && 'from' in value;
+}
 type RowEvent = { type: string };
 type ViewSettings = Pick<
   UIFlags,
@@ -95,7 +114,7 @@ function slotRecord<Value>(): Record<string, Value | undefined> {
  * the param through which Oneput sets the input. With no view input, the
  * layout's own `input` stays (no value is a text input).
  */
-function withInput<Source extends string>(
+function withInput<Source>(
   params: AppLayoutParams,
   input: ViewInput<Source> | undefined
 ): AppLayoutParams {
@@ -120,68 +139,114 @@ function named<Name extends string, Source>(
     : err('Expected a source for each name');
 }
 
+declare const slotType: unique symbol;
+
+/** The type of the value that one slot takes. Make it with {@link slot}. */
+export type Slot<T> = { readonly [slotType]?: T };
+
 /**
- * A layout that a view names: its slot names, the layout component that shows
- * it, and how the resolved slot values become that component's params. Make
- * one with {@link viewLayout}. Register layouts once and share them across
- * AppObjects.
+ * Declare a slot that takes a value of type `T`, for example `slot<string>()`
+ * for text, `slot<boolean>()` for a flag, or a builder function type for any
+ * content. Only the type has an effect; the value is empty.
  */
-export type ViewLayout<Slot extends string, Params extends AppLayoutParams = AppLayoutParams> = {
-  slots: readonly Slot[];
+export function slot<T>(): Slot<T> {
+  return {};
+}
+
+/** Slot declarations by slot name. */
+type SlotMap = Record<string, Slot<unknown>>;
+
+/** The value type of each slot in a slot map. */
+type SlotTypes<Slots> = { [Name in keyof Slots]: Slots[Name] extends Slot<infer T> ? T : never };
+
+/**
+ * A layout that a view names: its slots and their types, the layout component
+ * that shows it, and how the resolved slot values become that component's
+ * params. Make one with {@link viewLayout}. Register layouts once and share
+ * them across AppObjects.
+ */
+export type ViewLayout<
+  Slots extends SlotMap = SlotMap,
+  Params extends AppLayoutParams = AppLayoutParams
+> = {
+  slots: Slots;
   create(ctl: Controller, params: Params): UILayout<Params>;
-  params(values: Partial<Record<Slot, string>>): Params;
+  /** Make the params from the values of the filled slots. The layout decides how to show them. */
+  params(values: Partial<SlotTypes<Slots>>): Params;
 };
 
 /** A slot name that an object inherits, such as `toString`, would clash with it. */
-type OwnSlot<Slot extends string> = Slot extends keyof typeof Object.prototype | '__proto__'
-  ? never
-  : Slot;
+type InheritedName = keyof typeof Object.prototype | '__proto__';
 
 /**
- * Make a {@link ViewLayout}. The slot names type the values that `params` gets.
+ * Make a {@link ViewLayout}. The slot declarations type the values that
+ * `params` gets and the values that views can fill:
+ *
+ * ```ts
+ * viewLayout({
+ *   slots: { title: slot<string>(), busy: slot<boolean>() },
+ *   create: MyLayout.create,
+ *   params: ({ title, busy }) => ({ menuTitle: title, inputRight: busy ? spinner : undefined })
+ * });
+ * ```
+ *
  * Slot names from `Object.prototype` are type errors.
  */
-export function viewLayout<const Slot extends string, Params extends AppLayoutParams>(
-  layout: ViewLayout<Slot, Params> & { slots: readonly OwnSlot<Slot>[] }
-): ViewLayout<Slot, Params> {
+export function viewLayout<Slots extends SlotMap, Params extends AppLayoutParams>(
+  layout: ViewLayout<Slots, Params> & {
+    slots: { [Name in keyof Slots & InheritedName]: never };
+  }
+): ViewLayout<Slots, Params> {
   return layout;
 }
 
 /** Layouts by name. */
-export type ViewLayouts = Record<string, ViewLayout<string>>;
+export type ViewLayouts = Record<string, ViewLayout>;
 
-/** The slot names of each layout in a registry, by layout name. */
+/** The value type of each slot of each layout in a registry, by layout name. */
 export type LayoutSlots<Layouts extends ViewLayouts> = {
-  [Name in keyof Layouts]: Layouts[Name]['slots'][number];
+  [Name in keyof Layouts]: SlotTypes<Layouts[Name]['slots']>;
 };
 
+/** Slot value types by slot name, for each layout name. */
+type LayoutTypes = Record<string, object>;
+
 /** A layout with no slots takes none. */
-type SlotValues<Slot extends string, Source extends string> = [Slot] extends [never]
+type SlotValues<Types, Source> = [keyof Types] extends [never]
   ? Record<string, never>
-  : { [Name in Slot]?: Text<Source> };
+  : { [Name in keyof Types]?: Fill<Types[Name], Source> };
+
+/** The slots of any one layout that has slots. */
+type AnyLayoutSlots<Layouts extends LayoutTypes, Source> = {
+  [Name in keyof Layouts]: [keyof Layouts[Name]] extends [never]
+    ? never
+    : SlotValues<Layouts[Name], Source>;
+}[keyof Layouts];
 
 /**
- * A view that names a layout fills only that layout's slots. A view that does
- * not name one fills the slots of the layout a parent names; the type allows
- * any registered slot there, and rendering checks it.
+ * A view that names a layout fills only that layout's slots, each with a value
+ * of the slot's type. A view that does not name one fills the slots of the
+ * layout a parent names; the type allows the slots of any registered layout
+ * there, and rendering checks the names.
  */
-type LayoutChoice<Layouts extends Record<string, string>, Source extends string> =
+type LayoutChoice<Layouts extends LayoutTypes, Source> =
   | {
       [Name in keyof Layouts & string]: {
         layout: Name;
         slots?: SlotValues<Layouts[Name], Source>;
       };
     }[keyof Layouts & string]
-  | { layout?: never; slots?: SlotValues<Layouts[keyof Layouts & string], Source> };
+  | { layout?: never; slots?: AnyLayoutSlots<Layouts, Source> };
 
 type NoLayouts = Record<never, never>;
+type NoSources = Record<never, never>;
 
 /**
  * The input for a view: Oneput's {@link InputKind}, with no `kind` meaning a
  * text input, and an optional placeholder. A child's `input` replaces its
  * parent's whole input, so a `textarea`'s `rows` never stays on a text input.
  */
-export type ViewInput<Source extends string = never> = (
+export type ViewInput<Source = NoSources> = (
   | { kind?: 'text' }
   | { kind: 'password' }
   | { kind: 'textarea'; rows?: number }
@@ -189,14 +254,16 @@ export type ViewInput<Source extends string = never> = (
 
 /**
  * Metadata for one state's contribution to the view. Use named sources for
- * changing data. `layout` names a registered layout, and `slots` fill it.
+ * changing data. `Source` gives the value type of each slot source by name
+ * (see {@link SourceTypes}). `layout` names a registered layout, and `slots`
+ * fill it.
  */
 export type ViewDef<
-  Source extends string = never,
+  Source = NoSources,
   List extends string = never,
   Event extends RowEvent = never,
   Item extends string = never,
-  Layouts extends Record<string, string> = NoLayouts
+  Layouts extends LayoutTypes = NoLayouts
 > = LayoutChoice<Layouts, Source> & {
   menu?: {
     id?: string;
@@ -212,11 +279,11 @@ export type ViewDef<
 
 /** The metadata read from an actor snapshot. */
 export type ViewSnapshot<
-  Source extends string,
+  Source,
   List extends string,
   Event extends RowEvent,
   Item extends string = never,
-  Layouts extends Record<string, string> = NoLayouts
+  Layouts extends LayoutTypes = NoLayouts
 > = {
   machine: { getStateNodeById(id: string): { path: readonly string[] } };
   getMeta(): Record<string, { view?: ViewDef<Source, List, Event, Item, Layouts> } | undefined>;
@@ -295,8 +362,10 @@ function attempt<T>(read: () => T): Result<T, ReadError> {
 
 /**
  * Named code that a view refers to by name, so the view stays data.
- * `slot` gives changing text for slots and rows, `menu` gives changing rows,
- * and `menuItem` builds a row that names it in `build`. Return the item with the row's ID. The
+ * `slot` gives changing values for slots and text, `menu` gives changing rows,
+ * and `menuItem` builds a row that names it in `build`. A `slot` source gives a
+ * value of the type that the slot declares; row text, row detail and the input
+ * placeholder take only sources that give a string. Return the item with the row's ID. The
  * builder's `activate` sends the row's event (`send`, else `ITEM_ACTIVATED`) to
  * the actor; use it as the item's action.
  *
@@ -307,12 +376,12 @@ function attempt<T>(read: () => T): Result<T, ReadError> {
  */
 export type ViewSources<
   Snapshot,
-  Source extends string,
+  Source,
   List extends string,
   Event extends RowEvent = never,
   Item extends string = never
 > = {
-  slot: Record<Source, ((snapshot: Snapshot) => string) | Readable<string>>;
+  slot: { [Name in keyof Source]: ((snapshot: Snapshot) => Source[Name]) | Readable<Source[Name]> };
   menu: Record<
     List,
     | ((snapshot: Snapshot) => readonly ListRow<Event, Item>[])
@@ -323,6 +392,18 @@ export type ViewSources<
     | ((snapshot: Snapshot, row: BuiltRow<Item, Event>, activate: () => void) => MenuItem)
     | Readable<Builder<Event, Item>>
   >;
+};
+
+/**
+ * The value type of each source in a `slot` registry, by name: the `Source`
+ * of a {@link ViewDef}. For example `SourceTypes<typeof content.slot>`.
+ */
+export type SourceTypes<Sources> = {
+  [Name in keyof Sources]: Sources[Name] extends Readable<infer T>
+    ? T
+    : Sources[Name] extends (snapshot: never) => infer T
+      ? T
+      : never;
 };
 
 /** The readable sources in a registry, to subscribe to, so that their changes redraw the view. */
@@ -339,7 +420,7 @@ export function sourceSubscriptions(sources: {
 
 export type OneputView = {
   /** The named layout and its params. */
-  layout: { name: string; create: ViewLayout<string>['create']; params: AppLayoutParams };
+  layout: { name: string; create: ViewLayout['create']; params: AppLayoutParams };
   menu: Menu;
   settings: ViewSettings;
   placeholder?: string;
@@ -358,17 +439,20 @@ type Activation<Event extends RowEvent> = Event | { type: 'ITEM_ACTIVATED'; id: 
  * not declare, gives an error.
  *
  * The registry `layouts` types the layout names and slots that the views can
- * use. `defaultRow` makes each item whose row has no `build` name.
+ * use. The layout gets each filled slot's value as the source or literal
+ * gives it, and decides how to show it. `defaultRow` makes each item whose row
+ * has no `build` name.
  */
 export function renderActiveView<
-  Source extends string,
+  Source,
   List extends string,
   Event extends RowEvent,
   Item extends string,
   Layouts extends ViewLayouts,
   Snapshot
 >(
-  snapshot: Snapshot & ViewSnapshot<Source, List, Event, Item, NoInfer<LayoutSlots<Layouts>>>,
+  snapshot: Snapshot &
+    ViewSnapshot<NoInfer<Source>, List, Event, Item, NoInfer<LayoutSlots<Layouts>>>,
   sources: ViewSources<NoInfer<Snapshot>, Source, List, Event, Item>,
   layouts: Layouts,
   {
@@ -388,7 +472,7 @@ export function renderActiveView<
   let input: ViewDef<Source>['input'];
   let menu: NonNullable<ViewDef<Source, List, Event, Item>['menu']> = {};
   let settings: ViewSettings = {};
-  let slots = slotRecord<Text<Source>>();
+  let slots = slotRecord<unknown>();
   for (const view of views) {
     if (view.layout !== undefined && view.layout !== layoutName) {
       layoutName = view.layout;
@@ -406,22 +490,29 @@ export function renderActiveView<
   const found = named(layouts, layoutName);
   if (found.isErr()) return err(found.error);
   // The values come from the merged slots, so they are keyed by any slot name.
-  const layout: ViewLayout<string> = found.value;
-  if (Object.keys(slots).some((slot) => !layout.slots.includes(slot))) {
+  const layout: ViewLayout = found.value;
+  const declared = Object.keys(layout.slots);
+  if (Object.keys(slots).some((slot) => !declared.includes(slot))) {
     return err('Expected only slots that the layout declares');
   }
   const filled = Object.keys(slots).filter((slot) => slots[slot] !== undefined);
 
-  const read = (text: Text<Source>): Result<string, NameError | ReadError> =>
-    typeof text === 'string'
-      ? ok(text)
-      : named(sources.slot, text.from).andThen((source) =>
+  /**
+   * A literal as it is, or the value of the named source. The view type names
+   * only sources that fit, so the value is not checked; `named` checks the name.
+   */
+  const read = (value: unknown): Result<unknown, NameError | ReadError> =>
+    isFrom(value)
+      ? named(sources.slot, value.from as keyof Source & string).andThen((source) =>
           attempt(() => (isReadable(source) ? source.source.get() : source(snapshot)))
-        );
+        )
+      : ok(value);
+  // The type of `from` names only sources that give a string.
+  const readText = (text: Text<Source>) => read(text) as Result<string, NameError | ReadError>;
   const readOptional = (
     text: Text<Source> | undefined
   ): Result<string | undefined, NameError | ReadError> =>
-    text === undefined ? ok(undefined) : read(text);
+    text === undefined ? ok(undefined) : readText(text);
 
   let listRows: readonly ListRow<Event, Item>[] = [];
   if (menu.from !== undefined) {
@@ -451,16 +542,18 @@ export function renderActiveView<
     const { kind, text, detail, icon } = row;
     if (text === undefined) return err('Expected text for each menu row');
     const canActivate = kind !== 'info' && (row.activate ?? send !== undefined);
-    return Result.combine([read(text), readOptional(kind === 'info' ? undefined : detail)]).andThen(
-      ([text, detail]) =>
-        attempt(() => defaultRow({ id, kind, text, detail, icon }, canActivate ? raise : undefined))
+    return Result.combine([
+      readText(text),
+      readOptional(kind === 'info' ? undefined : detail)
+    ]).andThen(([text, detail]) =>
+      attempt(() => defaultRow({ id, kind, text, detail, icon }, canActivate ? raise : undefined))
     );
   };
 
   const slotValues = Result.combine(
-    filled.map((slot) => readOptional(slots[slot]).map((value) => [slot, value] as const))
+    filled.map((slot) => read(slots[slot]).map((value) => [slot, value] as const))
   ).map((entries) => {
-    const values = slotRecord<string>();
+    const values = slotRecord<unknown>();
     for (const [slot, value] of entries) values[slot] = value;
     return values;
   });

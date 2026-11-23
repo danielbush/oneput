@@ -55,7 +55,7 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
       pending: {
         description: 'Keep the input available and show the busy icon while the query is pending.',
         initial: 'debouncing',
-        meta: { view: { slots: { busyIcon: 'RefreshCw' } } },
+        meta: { view: { slots: { busyIcon: true } } },
         states: {
           debouncing: {
             description: 'Wait for a pause in typing before making the request.',

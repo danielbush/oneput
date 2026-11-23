@@ -9,6 +9,7 @@ import { waitForState } from '../../test/index.js';
 import { appObjectActor } from '../appObjectActor.js';
 import {
   readable,
+  slot,
   viewLayout,
   type LayoutSlots,
   type ViewDef,
@@ -26,14 +27,15 @@ const icons = {
   Reject: 'x',
   Send: 'send',
   Back: 'left',
-  MenuToggle: 'down'
+  MenuToggle: 'down',
+  Busy: 'spin'
 };
 
 type BannerParams = AppLayoutParams & { banner?: string };
 
 /** A test-only layout component: it shows only its banner, in the outer UI. */
 const bannerLayout = viewLayout({
-  slots: ['banner'],
+  slots: { banner: slot<string>() },
   create: (_ctl, initial: BannerParams) => {
     let settings = initial;
     const layout: UILayout<BannerParams> = {
@@ -54,8 +56,8 @@ const bannerLayout = viewLayout({
 
 const layouts = { standard: standardLayout(icons), banner: bannerLayout };
 type Layouts = LayoutSlots<typeof layouts>;
-type PageView = ViewDef<never, never, PageEvent, never, Layouts>;
-type Page = ViewSnapshot<never, never, PageEvent, never, Layouts> & {
+type PageView = ViewDef<Record<never, never>, never, PageEvent, never, Layouts>;
+type Page = ViewSnapshot<Record<never, never>, never, PageEvent, never, Layouts> & {
   can(event: OneputEvent | PageEvent): boolean;
 };
 
@@ -219,7 +221,7 @@ test('a view that names another layout shows that layout component', async () =>
   });
 });
 
-type LabelView = ViewDef<'label', 'rows', never, never, Layouts>;
+type LabelView = ViewDef<{ label: string }, 'rows', never, never, Layouts>;
 
 /** An actor with one state whose snapshot never changes. */
 function createStillActor(view: LabelView) {

@@ -64,7 +64,7 @@ function applyView(ctl: Controller, view: OneputView, rowsChanged: boolean) {
  * source changes (see {@link Readable}).
  */
 export function appObjectActor<
-  Source extends string,
+  Source,
   List extends string,
   Event extends { type: string },
   Item extends string,
@@ -73,7 +73,7 @@ export function appObjectActor<
 >(
   ctl: Controller,
   actor: ViewActor<
-    Snapshot & ViewSnapshot<Source, List, Event, Item, NoInfer<LayoutSlots<Layouts>>>,
+    Snapshot & ViewSnapshot<NoInfer<Source>, List, Event, Item, NoInfer<LayoutSlots<Layouts>>>,
     Event
   >,
   sources: ViewSources<NoInfer<Snapshot>, Source, List, Event, Item>,

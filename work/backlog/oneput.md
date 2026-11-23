@@ -232,8 +232,6 @@ The following are potential work (tickets for work) sorted by priority: earlier 
   - COMMENT: how does this affect all the `ctl.*` commands we rely on?
 - refactor: packages/oneput/src/lib/oneput/shared/ui/menuItems/toggleMenuItem.ts vs packages/oneput/src/lib/oneput/shared/ui/menuItems/pullToggleMenuItem.ts
 - refactor: move core components and mount stuff out of shared/ - wtf are they doing in there?
-- refactor: packages/oneput/AGENTS.md vs packages/oneput/docs/architecture.md vs packages/oneput/docs/CONCEPTS.md
-  - COMMENT: I'd move the architecture out of AGENTS and merge into architecture.md; the hard question is architecture.md vs CONCEPTS.md - CONCEPT's is more general and is how I keep my head wrapped around the "why" as well as the "what"; maybe we can ditch architecture.md in favour of a combination of good CONCEPTS.md and using DEEP_MODULE's (surfacing key constructs and interfaces that represent the skeleton of the system or subsystem).
 - refactor: DEEP_MODULES + interfaces
   - COMMENT: idea is to push detail in to subdirs, expose the main load-bearing skeleton delineated mostly in interfaces; that leaves a complex core, still, in the form of the core controllers (AppController, etc); these feel like they need more than just this approach; we can try to extract things out like INPUT_CLAIM's, that helps; but I'm wondering if this core becomes like a kernel in an operating system
 - refactor: UI_PATTERN
@@ -304,11 +302,10 @@ The following are potential work (tickets for work) sorted by priority: earlier 
   - example: KatexDemo seems to be testing this because it has a help message that specifies the binding
   - COMMENT: packages/oneput/src/lib/oneput/shared/ui/DynamicPlaceholder.ts is the previous attempt to handle this, any good?
 
-## chore
+## docs
 
-- chore: run knip - dead exports / code etc
-- chore: test importing the built package, make sure all expoected exports work and test files etc are not include
-  - COMMENT: publishConfig looks out date cmopared to exports in package.json -
+- refactor: packages/oneput/AGENTS.md vs packages/oneput/docs/architecture.md vs packages/oneput/docs/CONCEPTS.md
+  - COMMENT: I'd move the architecture out of AGENTS and merge into architecture.md; the hard question is architecture.md vs CONCEPTS.md - CONCEPT's is more general and is how I keep my head wrapped around the "why" as well as the "what"; maybe we can ditch architecture.md in favour of a combination of good CONCEPTS.md and using DEEP_MODULE's (surfacing key constructs and interfaces that represent the skeleton of the system or subsystem).
 - docs: need to make ai-docs similar to effect v4
 - docs: are all over the place
   - AGENTS.md looks like its doing architecture
@@ -317,6 +314,12 @@ The following are potential work (tickets for work) sorted by priority: earlier 
   - architecture.md
   - SECURITY.md - might be confused with the new convention for that file used in the industry
   - skills/oneput/SKILL.md 
+
+## chore
+
+- chore: run knip - dead exports / code etc
+- chore: test importing the built package, make sure all expoected exports work and test files etc are not include
+  - COMMENT: publishConfig looks out date cmopared to exports in package.json -
 - set up playwright smoke tests on oneput-demo
   - "open menu should show expected menu items"
   - "typing filters menu"

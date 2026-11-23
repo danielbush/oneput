@@ -37,8 +37,8 @@ const bannerLayout = viewLayout({
   create: (_ctl, initial: BannerParams) => {
     let settings = initial;
     const layout: UILayout<BannerParams> = {
-      configure: ({ params, replace }) => {
-        settings = replace ? { ...params } : { ...settings, ...params };
+      configure: (params) => {
+        settings = params;
       },
       get outerUI() {
         return hflex({

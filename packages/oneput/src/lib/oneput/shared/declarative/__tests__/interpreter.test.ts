@@ -15,10 +15,9 @@ import {
 } from '../interpreter.js';
 import { standardRow } from '../standardRow.js';
 
-/** A layout component that keeps its params. These tests do not show it. */
-function component(_ctl: Controller, params: AppLayoutParams): UILayout {
-  let settings = params;
-  return { configure: ({ params: next }) => (settings = { ...settings, ...next }) };
+/** A layout component. These tests do not show it. */
+function component(_ctl: Controller, _params: AppLayoutParams): UILayout {
+  return { configure: () => {} };
 }
 
 /** Test-only layouts: the interpreter knows no layout of its own. */

@@ -111,7 +111,7 @@ function createPageActor(second: PageView = secondView) {
 const controllers: Controller[] = [];
 
 afterEach(() => {
-  for (const ctl of controllers) ctl.destroy();
+  for (const ctl of controllers) ctl._destroy();
   controllers.length = 0;
 });
 

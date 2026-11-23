@@ -81,7 +81,7 @@ describe('declarative async search AppObject', () => {
     expect(onlineTitle).toBe('Async Search Example');
     expect(rowIds(ctl)).toEqual(['instructions']);
     ctl.app.exit();
-    ctl.destroy();
+    ctl._destroy();
   });
 
   it('starts a debounce with the default clock', async () => {
@@ -97,7 +97,7 @@ describe('declarative async search AppObject', () => {
     // assert
     expect(status(ctl)).toBe('Debouncing...');
     ctl.app.exit();
-    ctl.destroy();
+    ctl._destroy();
   });
 
   it('restarts the debounce, draws the results, and focuses the first row', async () => {
@@ -163,7 +163,7 @@ describe('declarative async search AppObject', () => {
     expect(ctl.input.getInputValue()).toBe('');
     expect(ctl.app.isCurrent(app)).toBe(true);
     ctl.app.exit();
-    ctl.destroy();
+    ctl._destroy();
   });
 
   it.each([
@@ -207,7 +207,7 @@ describe('declarative async search AppObject', () => {
     expect(views.data.filter((view) => /stale|Error/i.test(view))).toEqual([]);
     expect(ctl.input.getInputValue()).toBe('app');
     ctl.app.exit();
-    ctl.destroy();
+    ctl._destroy();
   });
 
   describe('focus after a new search', () => {
@@ -241,7 +241,7 @@ describe('declarative async search AppObject', () => {
       // assert
       expect(focusAfterSelect).toBe('a');
       ctl.app.exit();
-      ctl.destroy();
+      ctl._destroy();
     });
 
     it('focuses the last activated row when new results still include it', async () => {
@@ -257,7 +257,7 @@ describe('declarative async search AppObject', () => {
       // assert
       expect(ctl.menu.focusedMenuItem?.id).toBe('a');
       ctl.app.exit();
-      ctl.destroy();
+      ctl._destroy();
     });
 
     it('focuses the first row when new results lack the last activated row', async () => {
@@ -273,7 +273,7 @@ describe('declarative async search AppObject', () => {
       // assert
       expect(ctl.menu.focusedMenuItem?.id).toBe('x');
       ctl.app.exit();
-      ctl.destroy();
+      ctl._destroy();
     });
   });
 
@@ -325,7 +325,7 @@ describe('declarative async search AppObject', () => {
     expect(ctl.input.getInputValue()).toBe('app');
     expect(ctl.currentProps.menuItems?.map((item) => item.id)).toEqual(['result']);
     ctl.app.exit();
-    ctl.destroy();
+    ctl._destroy();
   });
 
   it('holds edits from the start of closing until the next open edit', async () => {
@@ -374,7 +374,7 @@ describe('declarative async search AppObject', () => {
     expect(ctl.currentProps.menuItems?.map((item) => item.id)).toEqual(['app']);
     expect(status(ctl)).toBe('Ready');
     ctl.app.exit();
-    ctl.destroy();
+    ctl._destroy();
   });
 
   it('shows instructions for blank input and an empty menu for no results', async () => {
@@ -401,6 +401,6 @@ describe('declarative async search AppObject', () => {
     expect(ctl.currentProps.menuItems).toEqual([]);
     expect(status(ctl)).toBe('Ready');
     ctl.app.exit();
-    ctl.destroy();
+    ctl._destroy();
   });
 });

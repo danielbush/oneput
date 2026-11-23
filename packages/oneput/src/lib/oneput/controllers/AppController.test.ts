@@ -850,7 +850,7 @@ describe('AppController', () => {
       const openBefore = subscriptions.open;
 
       // act
-      ctl.destroy();
+      ctl._destroy();
 
       // assert
       expect(openBefore).toBe(1);

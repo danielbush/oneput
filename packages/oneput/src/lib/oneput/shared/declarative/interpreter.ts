@@ -34,7 +34,7 @@ export type PlainRowBuilder = (
 ) => MenuItem;
 
 /**
- * A row that a named builder in `sources.items` makes. Use it when the standard
+ * A row that a named builder in `sources.menuItem` makes. Use it when the standard
  * fields cannot show the row. The row keeps only data: its ID, the builder name
  * and its event.
  */
@@ -295,7 +295,7 @@ function attempt<T>(read: () => T): Result<T, ReadError> {
 
 /**
  * Named code that a view refers to by name, so the view stays data.
- * `text` gives changing text, `lists` gives changing rows, and `items` builds
+ * `text` gives changing text, `menu` gives changing rows, and `menuItem` builds
  * a row that names it in `build`. Return the item with the row's ID. The
  * builder's `activate` sends the row's event (`send`, else `ITEM_ACTIVATED`) to
  * the actor; use it as the item's action.
@@ -313,12 +313,12 @@ export type ViewSources<
   Item extends string = never
 > = {
   text: Record<Source, ((snapshot: Snapshot) => string) | Readable<string>>;
-  lists: Record<
+  menu: Record<
     List,
     | ((snapshot: Snapshot) => readonly ListRow<Event, Item>[])
     | Readable<readonly ListRow<Event, Item>[]>
   >;
-  items: Record<
+  menuItem: Record<
     Item,
     | ((snapshot: Snapshot, row: BuiltRow<Item, Event>, activate: () => void) => MenuItem)
     | Readable<Builder<Event, Item>>
@@ -328,10 +328,10 @@ export type ViewSources<
 /** The readable sources in a registry, to subscribe to, so that their changes redraw the view. */
 export function sourceSubscriptions(sources: {
   text: object;
-  lists: object;
-  items: object;
+  menu: object;
+  menuItem: object;
 }): ReadableSource<unknown>[] {
-  return [sources.text, sources.lists, sources.items]
+  return [sources.text, sources.menu, sources.menuItem]
     .flatMap(sourcesOf)
     .filter(isReadable)
     .map(({ source }) => source);
@@ -425,7 +425,7 @@ export function renderActiveView<
 
   let listRows: readonly ListRow<Event, Item>[] = [];
   if (menu.from !== undefined) {
-    const list = named(sources.lists, menu.from).andThen((source) =>
+    const list = named(sources.menu, menu.from).andThen((source) =>
       attempt(() => (isReadable(source) ? source.source.get() : source(snapshot)))
     );
     if (list.isErr()) return err(list.error);
@@ -442,7 +442,7 @@ export function renderActiveView<
     const { id, send } = row;
     const raise = () => activate(send ?? { type: 'ITEM_ACTIVATED', id });
     if (isBuilt(row)) {
-      return named(sources.items, row.build).andThen((build) =>
+      return named(sources.menuItem, row.build).andThen((build) =>
         attempt(() =>
           isReadable(build) ? build.source.get()(row, raise) : build(snapshot, row, raise)
         )

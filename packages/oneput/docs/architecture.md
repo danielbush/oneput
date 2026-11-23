@@ -143,7 +143,7 @@ passes an activation function when the row enables activation. Information
 rows use only the main text and icon and have no activation function.
 
 A row can also name a builder with `{ id, build: 'name', send? }`. The
-builder in `sources.items` gets the snapshot, the row, and an activation
+builder in `sources.menuItem` gets the snapshot, the row, and an activation
 function. Both kinds of builder return a menu item with the row's ID. The
 interpreter uses the returned item unchanged. The activation function sends
 the row's event to the actor, or sends `ITEM_ACTIVATED` with the row's ID when

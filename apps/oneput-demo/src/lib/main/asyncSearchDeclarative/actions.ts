@@ -11,9 +11,9 @@ type FetchEvent =
   | { type: 'SEARCH_FAILED'; error: SearchFailure };
 type SearchView = ViewDef<
   keyof SearchContent['text'],
-  keyof SearchContent['lists'],
+  keyof SearchContent['menu'],
   RowEvent,
-  keyof SearchContent['items'],
+  keyof SearchContent['menuItem'],
   LayoutSlots<typeof viewLayouts>
 >;
 

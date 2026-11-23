@@ -21,7 +21,7 @@ export function resultById(context: SearchContext, id: string) {
 /**
  * The view sources for this declarative AppObject: the named data its views
  * refer to. A view in the machine's `meta.view` names a source (a `text` for a
- * slot, a `lists` entry for its menu rows, an `items` builder for a row), and
+ * slot, a `menu` entry for its menu rows, a `menuItem` builder for a row), and
  * the interpreter looks the name up here each time it draws the view. So the
  * machine says what to show by name, and this file says where that comes from.
  *
@@ -43,11 +43,11 @@ export function createContent(online: Online) {
         context.selected === null ? 'Ready' : `Selected: ${context.selected}`,
       searchError: ({ context }: SearchSnapshot) => context.error?.message ?? ''
     },
-    lists: {
+    menu: {
       results: ({ context }: SearchSnapshot) =>
         context.results.map(({ id }) => ({ id, build: 'result' as const }))
     },
-    items: {
+    menuItem: {
       // Built with menuItem, not stdMenuItem, to show a custom builder.
       result: ({ context }: SearchSnapshot, row: { id: string }, activate: () => void) =>
         menuItem({

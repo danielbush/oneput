@@ -80,8 +80,8 @@ function pageSegments(page: number) {
 
 const sources = {
   text: { pageText: ({ page }: Snapshot) => `Page ${page}` },
-  lists: { pages: () => [{ id: 'list-row', build: 'badge' as const }] },
-  items: {
+  menu: { pages: () => [{ id: 'list-row', build: 'badge' as const }] },
+  menuItem: {
     badge: ({ page }: Snapshot, row: { id: string }, activate: () => void) =>
       menuItem({
         id: row.id,
@@ -199,7 +199,7 @@ describe('list rows', () => {
     // arrange
     const registry = {
       ...sources,
-      lists: {
+      menu: {
         pages: () => [
           { id: 'same', text: 'First' },
           { id: 'same', text: 'Second' }
@@ -496,8 +496,8 @@ describe('readable sources', () => {
     );
     const mixed = {
       text: { pageText: readable(heading) },
-      lists: { pages: readable(rows) },
-      items: { badge: readable(badge), pageNumber: sources.items.pageNumber }
+      menu: { pages: readable(rows) },
+      menuItem: { badge: readable(badge), pageNumber: sources.menuItem.pageNumber }
     } satisfies ViewSources<Snapshot, 'pageText', 'pages', PageEvent, 'badge' | 'pageNumber'>;
     const pages = createPages<PageView>({
       layout: 'plain',
@@ -582,7 +582,7 @@ describe('readable sources', () => {
 
   test('an unmarked object with subscribe is not subscribed', () => {
     // arrange
-    const registry = { text: {}, lists: {}, items: { odd: { subscribe: true } } };
+    const registry = { text: {}, menu: {}, menuItem: { odd: { subscribe: true } } };
 
     // act
     const subscriptions = sourceSubscriptions(registry);
@@ -606,12 +606,12 @@ describe('readable sources', () => {
     ],
     [
       'list',
-      { ...sources, lists: { pages: readable(throwing) } },
+      { ...sources, menu: { pages: readable(throwing) } },
       { menu: { id: 'pages', from: 'pages' } }
     ],
     [
       'builder',
-      { ...sources, items: { ...sources.items, badge: readable(throwing) } },
+      { ...sources, menuItem: { ...sources.menuItem, badge: readable(throwing) } },
       { menu: { id: 'pages', items: [{ id: 'row', build: 'badge' }] } }
     ]
   ] as const)('readable %s that throws gives the read error', (_, registry, view) => {
@@ -654,8 +654,8 @@ describe('readable sources', () => {
     // arrange
     const registry = {
       text: {},
-      lists: {},
-      items: { unused: readable({} as never), fake: { kind: 'readable' } }
+      menu: {},
+      menuItem: { unused: readable({} as never), fake: { kind: 'readable' } }
     };
 
     // act

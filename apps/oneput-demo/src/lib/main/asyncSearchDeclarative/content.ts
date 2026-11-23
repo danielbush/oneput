@@ -28,7 +28,7 @@ export function resultById(context: SearchContext, id: string) {
  * Most sources read the machine's snapshot. A source for data the machine does
  * not own is marked `readable`; here the title reads the host's `online` signal.
  */
-export function createSources(online: Online) {
+export function createContent(online: Online) {
   return {
     text: {
       title: readable(
@@ -64,4 +64,4 @@ export function createSources(online: Online) {
   };
 }
 
-export type SearchSources = ReturnType<typeof createSources>;
+export type SearchContent = ReturnType<typeof createContent>;

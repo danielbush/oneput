@@ -17,19 +17,12 @@ function layout(id: string): UILayout {
   };
 }
 
+/** A layout that keeps the params it last received: what it shows. */
 function trackedLayout(id: string) {
-  const params: Array<Record<string, unknown> | undefined> = [];
-  const replaces: boolean[] = [];
-  let settings: Record<string, unknown> = {};
+  let shown: Record<string, unknown> | undefined;
   const appLayout: UILayout = {
-    configure: ({ params: nextParams, replace }) => {
-      params.push(nextParams);
-      replaces.push(!!replace);
-      if (replace) {
-        settings = { ...(nextParams ?? {}) };
-      } else {
-        settings = { ...settings, ...(nextParams ?? {}) };
-      }
+    configure: (params) => {
+      shown = params;
     },
     innerUI: {
       id,
@@ -37,7 +30,7 @@ function trackedLayout(id: string) {
     }
   };
 
-  return { appLayout, params, replaces, getSettings: () => settings };
+  return { appLayout, shown: () => shown };
 }
 
 function layoutFactory(id: string) {
@@ -103,66 +96,201 @@ describe('AppController', () => {
       expect(ctl.ui.getLayout()).toBe(appLayout.appLayout);
     });
 
-    it('configures an inherited layout before starting an app object', () => {
+    it('setLayout - a child inherits the layout its parent set', () => {
       // arrange
       const ctl = Controller.createNull();
-      const { appLayout, params, replaces } = trackedLayout('app-layout');
-      const appObject: AppObject = {
-        layout: {
-          layout: (_ctl, _params) => appLayout,
-          params: {}
-        },
-        onStart: () => {}
-      };
-      const child: AppObject<unknown, { menuTitle: string }> = {
-        layout: { params: { menuTitle: 'Child' } },
-        onStart: () => {}
-      };
+      const { appLayout, shown } = trackedLayout('parent-layout');
+      ctl.app.run({
+        layout: { params: { menuTitle: 'Home' } },
+        onStart: () => ctl.ui.setLayout(appLayout)
+      });
 
-      ctl.app.run(appObject);
+      // act
+      ctl.app.run({});
+
+      // assert
+      expect(ctl.ui.getLayout()).toBe(appLayout);
+      expect(shown()).toEqual({ menuTitle: 'Home' });
+    });
+
+    it('setLayout - the parent shows its layout again when a child with its own layout exits', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const parentLayout = trackedLayout('parent-layout');
+      const childLayout = trackedLayout('child-layout');
+      ctl.app.run({
+        layout: { params: { menuTitle: 'Home' } },
+        onStart: () => ctl.ui.setLayout(parentLayout.appLayout)
+      });
+      ctl.app.run({
+        layout: { layout: () => childLayout.appLayout, params: { menuTitle: 'Child' } }
+      });
+
+      // act
+      ctl.app.exit();
+
+      // assert
+      expect(ctl.ui.getLayout()).toBe(parentLayout.appLayout);
+      expect(parentLayout.shown()).toEqual({ menuTitle: 'Home' });
+    });
+
+    it('child with declared params - shows only its own params', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const { appLayout, shown } = trackedLayout('app-layout');
+      const parent: AppObject = {
+        layout: {
+          layout: () => appLayout,
+          params: { menuTitle: 'Home', input: { kind: 'password' } }
+        }
+      };
+      const child: AppObject = { layout: { params: { menuTitle: 'Child' } } };
+      ctl.app.run(parent);
 
       // act
       ctl.app.run(child);
 
       // assert
       expect(ctl.ui.getLayout()).toBe(appLayout);
-      expect(params).toContainEqual({ menuTitle: 'Child' });
-      expect(replaces.at(-1)).toBe(true);
+      expect(shown()).toEqual({ menuTitle: 'Child' });
     });
 
-    it('replaces layout params when resuming parent after child mid-flight update', () => {
+    it("child with no params - inherits the parent's current params", () => {
       // arrange
       const ctl = Controller.createNull();
-      const { appLayout, getSettings } = trackedLayout('app-layout');
-      const parent: AppObject<unknown, { menuTitle: string }> = {
-        layout: {
-          layout: (_ctl, _params) => appLayout,
-          params: { menuTitle: 'Home' }
-        },
-        onStart: () => {},
-        onResume: () => {}
+      const { appLayout, shown } = trackedLayout('app-layout');
+      const accept = { run: () => {} };
+      const parent: AppObject = {
+        layout: { layout: () => appLayout, params: { menuTitle: 'Home' } },
+        onStart: () => ctl.ui.update({ params: { inputAccept: accept } })
       };
-      const child: AppObject<unknown, { menuTitle: string; inputAccept?: { run: () => void } }> = {
-        layout: { params: { menuTitle: 'Child' } },
-        onStart: () => {
-          ctl.ui.update({
-            params: {
-              menuTitle: 'Child',
-              inputAccept: { run: () => {} }
-            }
-          });
-        }
-      };
+      ctl.app.run(parent);
 
+      // act
+      ctl.app.run({});
+
+      // assert
+      expect(shown()).toEqual({ menuTitle: 'Home', inputAccept: accept });
+    });
+
+    it("Back - the child's patch does not change the parent's params", () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const { appLayout, shown } = trackedLayout('app-layout');
+      const root: AppObject = {
+        layout: { layout: () => appLayout, params: { menuTitle: 'Home' } }
+      };
+      // The parent declares no params, thus it starts with a copy of the root's.
+      const parent: AppObject = {
+        onStart: () => ctl.ui.update({ params: { menuTitle: 'Parent' } })
+      };
+      const child: AppObject = {
+        onStart: () => ctl.ui.update({ params: { inputAccept: { run: () => {} } } })
+      };
+      ctl.app.run(root);
       ctl.app.run(parent);
       ctl.app.run(child);
-      expect(getSettings().inputAccept).toBeTruthy();
+
+      // act
+      ctl.app.goBack();
+
+      // assert
+      expect(ctl.app.isCurrent(parent)).toBe(true);
+      expect(shown()).toEqual({ menuTitle: 'Parent' });
+    });
+
+    it('setParams - replaces the params of the current AppObject only', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const { appLayout, shown } = trackedLayout('app-layout');
+      const accept = { run: () => {} };
+      const parent: AppObject = {
+        layout: { layout: () => appLayout, params: { menuTitle: 'Home', inputAccept: accept } }
+      };
+      ctl.app.run(parent);
+      ctl.app.run({});
+
+      // act
+      ctl.ui.setParams({ menuTitle: 'Pick' });
+      const childShown = shown();
+      ctl.app.exit();
+
+      // assert
+      expect(childShown).toEqual({ menuTitle: 'Pick' });
+      expect(shown()).toEqual({ menuTitle: 'Home', inputAccept: accept });
+    });
+
+    it('replace: child - the parent resumes with its own params', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const { appLayout, shown } = trackedLayout('app-layout');
+      const parent: AppObject = {
+        layout: { layout: () => appLayout, params: { menuTitle: 'Home' } }
+      };
+      const child: AppObject = {
+        onStart: () => ctl.ui.update({ params: { menuTitle: 'Child' } })
+      };
+      const replacement: AppObject = {
+        onStart: () => ctl.ui.update({ params: { inputAccept: { run: () => {} } } })
+      };
+      ctl.app.run(parent);
+      ctl.app.run(child);
+      ctl.app.replace(replacement);
 
       // act
       ctl.app.exit();
 
       // assert
-      expect(getSettings()).toEqual({ menuTitle: 'Home' });
+      expect(ctl.app.isCurrent(parent)).toBe(true);
+      expect(shown()).toEqual({ menuTitle: 'Home' });
+    });
+
+    it('queued exit - the parent resumes with its own params after the outro', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const { appLayout, shown } = trackedLayout('app-layout');
+      const parent: AppObject = {
+        layout: { layout: () => appLayout, params: { menuTitle: 'Home' } }
+      };
+      const child: AppObject = {
+        onStart: () => ctl.ui.update({ params: { menuTitle: 'Child' } })
+      };
+      ctl.app.run(parent);
+      ctl.app.run(child);
+      const parentResumed = new Promise<void>((resolve) => {
+        ctl.events.on('app-change', ({ current }) => {
+          if (current === parent) resolve();
+        });
+      });
+
+      // act
+      ctl.app.closeAndExit();
+      await parentResumed;
+
+      // assert
+      expect(shown()).toEqual({ menuTitle: 'Home' });
+    });
+
+    it('exitToRoot - the root resumes with its own params', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const { appLayout, shown } = trackedLayout('app-layout');
+      const root: AppObject = {
+        layout: { layout: () => appLayout, params: { menuTitle: 'Home' } }
+      };
+      const patchTitle = (menuTitle: string): AppObject => ({
+        onStart: () => ctl.ui.update({ params: { menuTitle } })
+      });
+      ctl.app.run(root);
+      ctl.app.run(patchTitle('Parent'));
+      ctl.app.run(patchTitle('Child'));
+
+      // act
+      ctl.app.exitToRoot();
+
+      // assert
+      expect(ctl.app.isCurrent(root)).toBe(true);
+      expect(shown()).toEqual({ menuTitle: 'Home' });
     });
 
     it('passes params to an installed layout factory', () => {

@@ -74,19 +74,9 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
     private icons: StandardLayoutIcons
   ) {}
 
-  configure(settings: { params?: Partial<StandardLayoutParams>; replace?: boolean }) {
-    if (settings.replace) {
-      this.settings = {
-        ...settings.params,
-        menuTitle: settings.params?.menuTitle ?? 'Menu'
-      };
-      return;
-    }
-    this.settings = {
-      ...this.settings,
-      ...settings.params,
-      menuTitle: settings.params?.menuTitle ?? this.settings.menuTitle ?? 'Menu'
-    };
+  /** Receive the full params of the current AppObject. See {@link UILayout.configure}. */
+  configure(params: StandardLayoutParams) {
+    this.settings = params;
   }
 
   /** The menu title now: `menuTitle` can be a function. */

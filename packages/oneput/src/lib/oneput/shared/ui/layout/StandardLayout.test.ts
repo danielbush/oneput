@@ -112,26 +112,15 @@ describe('input', () => {
     expect(input).toEqual({ kind: 'password' });
   });
 
-  test('replace without it - removed', () => {
+  test('configure without it - removed', () => {
     // arrange
     const layout = createLayout({ input: { kind: 'textarea', rows: 5 } });
 
     // act
-    layout.configure({ params: { menuTitle: 'Next' }, replace: true });
+    layout.configure({ menuTitle: 'Next' });
 
     // assert
     expect(layout.inputUI.input).toBeUndefined();
-  });
-
-  test('merge without it - kept', () => {
-    // arrange
-    const layout = createLayout({ input: { kind: 'textarea', rows: 5 } });
-
-    // act
-    layout.configure({ params: { menuTitle: 'Same app' } });
-
-    // assert
-    expect(layout.inputUI.input).toEqual({ kind: 'textarea', rows: 5 });
   });
 });
 

@@ -536,7 +536,7 @@ export type SharedCtl = {
     | 'subscribeFocusChange'
   >;
   /** Params / flags only — no direct `OneputProps` chrome writers. */
-  ui: Pick<UIController, 'update' | 'invalidate'>;
+  ui: Pick<UIController, 'update' | 'setParams' | 'invalidate'>;
   keys: Pick<KeysController, 'setDefaultBindings' | 'getCurrentBindings'>;
   notify: Controller['notify'];
   alert: Controller['alert'];
@@ -610,11 +610,13 @@ export type InstallLayout<LayoutParams extends AppLayoutParams = AppLayoutParams
 };
 
 /**
- * Configure the layout inherited from the parent AppObject.
+ * Keep the layout inherited from the parent AppObject, with this AppObject's
+ * own params.
  *
- * Use this when the AppObject should keep the current layout instance but adjust
- * its params before `onStart`/`onResume` runs, for example to set `menuTitle`.
- * Params are partial because the inherited layout has already been created.
+ * `params` are all the params of this AppObject: they are not merged with the
+ * parent's params. Omit `params` to start with a copy of the parent's current
+ * params. Params are partial because the inherited layout has already been
+ * created.
  */
 export type ConfigureInheritedLayout<LayoutParams extends AppLayoutParams = AppLayoutParams> = {
   layout?: undefined;
@@ -643,8 +645,13 @@ export interface AppObject<
    * The layout configuration for this AppObject.
    *
    * Provide a layout factory with its required params to replace the active
-   * layout, or params alone to configure the inherited layout before
-   * onStart/onResume. If no layout is specified, it is inherited from the parent.
+   * layout, or params alone to keep the inherited layout. If no layout is
+   * specified, it is inherited from the parent.
+   *
+   * This AppObject owns its layout params. When it starts, they are the
+   * declared `params`, or a copy of the parent's current params if it declares
+   * none. `ctl.ui.update({ params })` and `ctl.ui.setParams` change only them.
+   * When a child exits, this AppObject resumes with its own params unchanged.
    */
   layout?: AppLayoutConfig<LayoutParams>;
   /**
@@ -670,7 +677,8 @@ export interface AppObject<
    * passed to this method.
    *
    * If this hook is not defined, no lifecycle hook runs. The controller still
-   * restores declared settings, layout, menu, and actions.
+   * restores declared settings, menu, and actions, and this AppObject's own
+   * layout and layout params.
    */
   onResume?: (result?: { payload?: ResumePayload }) => void;
   /**
@@ -884,11 +892,13 @@ export type UIFlags = {
 
 export interface UILayout<LayoutParams extends AppLayoutParams = AppLayoutParams> {
   /**
-   * Apply layout params. Default merges into current settings (mid-flight
-   * patches). Pass `replace: true` to treat `params` as the new baseline
-   * (used when an AppObject becomes current).
+   * Receive the full layout params of the current AppObject.
+   *
+   * Oneput calls it each time before it reads the layout's UI
+   * (`ctl.ui.invalidate`). The AppObject owns the params; the layout does not
+   * merge them or keep params of its own.
    */
-  configure(settings: { params?: Partial<LayoutParams>; replace?: boolean }): void;
+  configure(params: LayoutParams): void;
   inputUI?: OneputProps['inputUI'];
   menuUI?: OneputProps['menuUI'];
   innerUI?: OneputProps['innerUI'];

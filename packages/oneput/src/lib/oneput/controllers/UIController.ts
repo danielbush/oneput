@@ -64,8 +64,16 @@ export class UIController {
 
   private layout?: UILayout;
 
+  /**
+   * Show `layout`. Then call {@link invalidate} to show its UI.
+   *
+   * The current AppObject owns the layout, as it owns its params: its children
+   * inherit it, and it shows again when the AppObject resumes. With no current
+   * AppObject, the next root inherits it.
+   */
   setLayout(layout: UILayout) {
     this.layout = layout;
+    this.ctl.app._setLayout(layout);
   }
 
   getLayout<D extends UILayout = UILayout>(): D | undefined {
@@ -73,6 +81,12 @@ export class UIController {
   }
 
   /**
+   * Change UI flags and patch the layout params of the current AppObject.
+   *
+   * Each AppObject on the app stack owns its layout params (see
+   * `AppController.layoutParams`). Thus a child's patch does not change its
+   * parent's params, and the parent resumes with its own params.
+   *
    * Should perform similar reset to beforeRun logic in AppController.
    */
   update<A extends AppLayoutParams = AppLayoutParams>(settings: {
@@ -90,21 +104,31 @@ export class UIController {
      */
     flags?: UIFlags;
     /**
-     * Your LayoutSettings parameters.
+     * Merged into the layout params of the current AppObject. A key with the
+     * value `undefined` clears that param. Requires a current AppObject.
      */
     params?: Partial<A>;
-    /**
-     * When true, layout settings are replaced by `params` (baseline for the
-     * current AppObject). Default false merges (mid-flight patches).
-     */
-    replace?: boolean;
   }) {
     if (settings.reset) {
       this.ctl.app.reset(settings.flags);
     } else {
       this.ctl.app.applyFlags(settings.flags);
     }
-    this.layout?.configure({ params: settings.params, replace: settings.replace });
+    if (settings.params) {
+      this.ctl.app._setLayoutParams({ ...this.ctl.app.layoutParams, ...settings.params });
+    }
+    this.invalidate();
+  }
+
+  /**
+   * Replace all the layout params of the current AppObject with `params`.
+   * Use it when you calculate the full set of params each time. Use
+   * {@link update} to change only some params.
+   *
+   * Requires a current AppObject. Its parent's params do not change.
+   */
+  setParams<A extends AppLayoutParams = AppLayoutParams>(params: A) {
+    this.ctl.app._setLayoutParams(params);
     this.invalidate();
   }
 
@@ -115,10 +139,18 @@ export class UIController {
    * affordance's `enabled` function. Like `ctl.menu.invalidate` for `menu()`
    * and `ctl.app.invalidate` for `actions`.
    *
+   * It gives the layout the full params of the current AppObject
+   * (`UILayout.configure`), then reads its UI. With no current AppObject there
+   * are no params, thus the layout keeps the params it last received.
+   *
    * It writes over what `setInputUI`, `setInnerUI` and `setOuterUI` set. Use
    * layout params (for example `input`) for things that must stay.
    */
   invalidate() {
+    const params = this.ctl.app.layoutParams;
+    if (params) {
+      this.layout?.configure(params);
+    }
     this.ctl.currentProps.inputUI = this.layout?.inputUI;
     this.setMenuLayoutUI(this.layout?.menuUI);
     this.ctl.currentProps.innerUI = this.layout?.innerUI;

@@ -132,30 +132,52 @@ When an AppObject starts, `AppController.runBefore()` extracts bindings from `ac
 an actor to Oneput. The actor receives AppObject lifecycle, Back, input, and
 row activation events. Its active states declare `meta.view`. The interpreter
 merges views from parent to child and reads named sources from the snapshot
-for changing slot values, text and rows. Oneput owns the stack and applies the view to the
+for changing slot values, row params and rows. Oneput owns the stack and applies the view to the
 current AppObject through `watch` and `onRefresh`.
 
-A plain row has standard fields such as `text`, `detail`, `icon`, and `send`.
-The required `defaultRow` option builds it from the row's ID, kind, resolved
-text and detail, and icon. An app can pass `standardRow` from
-`shared/declarative/standardRow.ts` or supply its own builder. The interpreter
-passes an activation function when the row enables activation. Information
-rows use only the main text and icon and have no activation function.
+The interpreter knows no row. A named row builder in `sources.menuItem` draws
+each row. `rowBuilder({ params, build })` makes one: its params and the type
+of each, declared with `slot<T>()` as a layout declares its slots, and how
+the resolved params become a menu item:
 
-A row can also name a builder with `{ id, build: 'name', send? }`. The
-builder in `sources.menuItem` gets the snapshot, the row, and an activation
-function. Both kinds of builder return a menu item with the row's ID. The
-interpreter uses the returned item unchanged. The activation function sends
-the row's event to the actor, or sends `ITEM_ACTIVATED` with the row's ID when
-`send` is absent.
+```ts
+menuItem: {
+  default: standardRow, // draws each row with no `build`
+  info: infoRow,
+  result: rowBuilder({
+    params: { text: slot<string>() },
+    build: ({ id, text }, activate) => menuItem({ id, action: activate, ... })
+  })
+}
+```
+
+A row has the fields `id`, `build`, `send` and `activate`; its other fields
+are the builder's params, each a literal or `{ from: 'source' }`, for example
+`{ id: 'retry', text: 'Retry', detail: { from: 'searchError' }, send: { type: 'RETRY' } }`
+or `{ id: 'note', build: 'info', text: 'Type to search' }`. A row with no
+`build` uses the `default` builder, so a registry with no `default` builder
+needs `build` on each row. A param value of another type, a param that the
+builder does not declare, or a builder that is not registered is a type error.
+`RowParams` gives the param types of a builder registry, for the machine's
+`ViewDef`. `standardRow` and `infoRow` in `shared/declarative/standardRow.ts`
+are ready-made builders for a Oneput standard menu item and an information
+message.
+
+The builder gets the row's ID and the resolved params, and returns a menu item
+with the row's ID. The interpreter uses the returned item unchanged. A row
+activates when it has `send` or `activate: true`; the builder then gets an
+activation function, which sends the row's event to the actor, or sends
+`ITEM_ACTIVATED` with the row's ID when `send` is absent. A builder does not
+read the snapshot: data for one row comes as its params. In the demo, each
+search result row carries its result's text as the `text` param.
 
 Rows from the list named by `menu.from` appear first, in source order, with
 their IDs and duplicates. Fixed rows declared in the active views follow.
 Only fixed rows merge by ID. They keep the position of their first
-declaration, and a child can override its parent's fields. `build` and the
-standard fields exclude each other. The later fixed row's choice wins, and a
-fixed row with only `id` and `send` keeps the earlier choice. A name with no
-source gives an error.
+declaration, and a child can override its parent's fields key by key. When the
+child row uses another builder (no `build` is the `default` builder), the
+parent's params do not apply; its `send` and `activate` do. A name with no
+source or builder gives an error.
 
 A source is a function of the actor snapshot, for data that the machine owns
 in its context; this is the main pattern. A source marked with
@@ -193,8 +215,8 @@ A view names a registered layout and fills its slots with a literal or
 The value must have the slot's type: a literal of another type, or a source
 in `sources.slot` that gives another type, is a type error. `SourceTypes`
 gives the source types of a `slot` registry, for the machine's `ViewDef`.
-Row `text` and `detail` and the input placeholder take only sources that give
-a string. The interpreter does not check the values at runtime: it gives each
+Row params take sources in the same way, and the input placeholder takes only
+sources that give a string. The interpreter does not check the values at runtime: it gives each
 filled slot's value to `params` as the literal or source gives it, and the
 layout decides how to show it. The registry is shared
 across AppObjects. When the active view names a layout other than the one the

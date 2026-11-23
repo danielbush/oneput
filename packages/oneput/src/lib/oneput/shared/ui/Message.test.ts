@@ -103,7 +103,7 @@ for (const Kind of [Alert, Confirm, Notification]) {
         expect(target.querySelector('b,script,[onclick]')).toBeNull();
 
         await unmount(component);
-        ctl.destroy();
+        ctl._destroy();
       });
     }
   });

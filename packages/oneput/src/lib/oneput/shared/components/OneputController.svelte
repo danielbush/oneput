@@ -30,7 +30,7 @@
   });
 
   onDestroy(() => {
-    controller.destroy();
+    controller._destroy();
   });
 </script>
 

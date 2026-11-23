@@ -6,7 +6,7 @@ const controllers: Controller[] = [];
 
 afterEach(() => {
   for (const ctl of controllers) {
-    ctl.destroy();
+    ctl._destroy();
   }
   controllers.length = 0;
 });
@@ -144,7 +144,7 @@ describe('Controller', () => {
       }));
 
       // act
-      ctl.destroy();
+      ctl._destroy();
       await ctl.simulateKey('Enter');
 
       // assert

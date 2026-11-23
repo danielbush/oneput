@@ -132,7 +132,7 @@ When an AppObject starts, `AppController.runBefore()` extracts bindings from `ac
 an actor to Oneput. The actor receives AppObject lifecycle, Back, input, and
 row activation events. Its active states declare `meta.view`. The interpreter
 merges views from parent to child and reads named sources from the snapshot
-for changing text and rows. Oneput owns the stack and applies the view to the
+for changing slot values, text and rows. Oneput owns the stack and applies the view to the
 current AppObject through `watch` and `onRefresh`.
 
 A plain row has standard fields such as `text`, `detail`, `icon`, and `send`.
@@ -173,21 +173,39 @@ through one readable source. Oneput ignores a watch notification
 from an AppObject that it no longer watches, so a late one cannot replace the
 current AppObject's refresh.
 
-The interpreter knows no layout. A view names a registered layout and fills
-its slots with text or `{ from: 'textSource' }`, for example
-`{ layout: 'standard', slots: { title: 'Search', status: { from: 'status' } } }`.
-`viewLayout({ slots, create, params })` makes a registry entry: its slot
-names, the layout component (`create`, as in `AppObject.layout`), and how the
-resolved slot values become that component's params. The registry is shared
+The interpreter knows no layout. `viewLayout({ slots, create, params })` makes
+a registry entry: its slots and the type of each slot, the layout component
+(`create`, as in `AppObject.layout`), and how the resolved slot values become
+that component's params. `slot<T>()` declares a slot of type `T`, for example
+text, a flag, or a builder function for any content:
+
+```ts
+const banner = viewLayout({
+  slots: { title: slot<string>(), busy: slot<boolean>() },
+  create: BannerLayout.create,
+  params: ({ title, busy }) => ({ menuTitle: title, inputRight: busy ? spinner : undefined })
+});
+```
+
+A view names a registered layout and fills its slots with a literal or
+`{ from: 'source' }`, for example
+`{ layout: 'banner', slots: { title: 'Search', busy: { from: 'loading' } } }`.
+The value must have the slot's type: a literal of another type, or a source
+in `sources.slot` that gives another type, is a type error. `SourceTypes`
+gives the source types of a `slot` registry, for the machine's `ViewDef`.
+Row `text` and `detail` and the input placeholder take only sources that give
+a string. The interpreter does not check the values at runtime: it gives each
+filled slot's value to `params` as the literal or source gives it, and the
+layout decides how to show it. The registry is shared
 across AppObjects. When the active view names a layout other than the one the
 AppObject shows, the adapter shows its component with `ctl.ui.setLayout`.
 Children inherit it, and it comes back when the AppObject resumes.
 
 A child view can name a different layout; then the parent's slots do not
 apply. Otherwise slots merge by key. The registry types the layout names and
-slots. A view without `layout` can name any registered slot, so rendering
-gives an error for a slot that the active layout does not declare, and for
-an unknown layout name. The menu, the input placeholder and the settings are
+slots. A view without `layout` can fill the slots of any one registered
+layout, so rendering gives an error for a slot that the active layout does not
+declare, and for an unknown layout name. The menu, the input placeholder and the settings are
 not slots.
 
 A view's `input` is Oneput's `InputKind` with an optional `placeholder`
@@ -201,8 +219,10 @@ it. With no view input, the layout's own `input` stays. The typed text stays
 when the kind changes.
 
 `standardLayout(icons)` in `shared/declarative/standardLayout.ts` shows
-`StandardLayout`: `title`, `status` (bottom-right text) and `busyIcon` (a
-turning icon at the right of the input). Async search uses it.
+`StandardLayout`: `title` and `status` (bottom-right text) take text, and
+`busyIcon: true` shows the host's `Busy` icon, turning at the right of the
+input. The host gives `Busy` with the `StandardLayoutIcons`, so the views
+contain no icon names. Async search uses it.
 The menu refresh uses the view's `focusBehaviour`.
 Editor and claim views, and menu focus, menu update, and claim release events
 are not supported.

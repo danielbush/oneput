@@ -37,16 +37,15 @@ function rowKey(menu: Menu) {
  * the user had it.
  */
 function applyView(ctl: Controller, view: OneputView, rowsChanged: boolean) {
-  // The view gives all the params of this AppObject each time.
-  ctl.ui.setParams(view.layout.params);
-  ctl.ui.update({
-    flags: {
-      enableFilter: view.settings.enableFilter,
-      enableInputElement: view.settings.enableInputElement,
-      enableMenuItemFocus: view.settings.enableMenuItemFocus,
-      clearInputAfterAction: view.settings.clearInputAfterAction
-    }
+  ctl.app.applyFlags({
+    enableFilter: view.settings.enableFilter,
+    enableInputElement: view.settings.enableInputElement,
+    enableMenuItemFocus: view.settings.enableMenuItemFocus,
+    clearInputAfterAction: view.settings.clearInputAfterAction
   });
+  // The view gives all the params of this AppObject each time. This is the
+  // one layout redraw per refresh.
+  ctl.ui.setParams(view.layout.params);
   ctl.input.setPlaceholder(view.placeholder);
   // New rows: set the menu now, which runs the view's focus rule. The watch
   // refresh after onRefresh asks for 'none', so it keeps that focus. The same

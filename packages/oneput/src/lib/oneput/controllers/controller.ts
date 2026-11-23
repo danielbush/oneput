@@ -80,6 +80,7 @@ export class Controller {
   }
 
   private notification = Notification.create(this);
+  private destroyCallbacks = new Set<() => void>();
 
   notify(message: Message, params: NotificationParams = {}): Notification {
     this.notification.run(message, params);
@@ -109,8 +110,23 @@ export class Controller {
     return { data, stop };
   }
 
-  /** Release controller resources that can outlive the mounted Oneput UI. */
-  destroy() {
+  /** Register a cleanup that runs when the host destroys Oneput, and return its unsubscribe function. */
+  onDestroy(fn: () => void): () => void {
+    const callback = () => fn();
+    this.destroyCallbacks.add(callback);
+    return () => {
+      this.destroyCallbacks.delete(callback);
+    };
+  }
+
+  /**
+   * Called by the host when it unmounts Oneput. Run the cleanups in
+   * registration order, while the controller still works, then release
+   * controller resources.
+   */
+  _destroy() {
+    for (const callback of this.destroyCallbacks) callback();
+    this.destroyCallbacks.clear();
     this.keys.destroy();
   }
 

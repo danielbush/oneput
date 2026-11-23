@@ -6,7 +6,7 @@ const controllers: Controller[] = [];
 
 afterEach(() => {
   for (const ctl of controllers) {
-    ctl.destroy();
+    ctl._destroy();
   }
   controllers.length = 0;
 });
@@ -124,7 +124,7 @@ describe('Controller', () => {
     });
   });
 
-  describe('destroy', () => {
+  describe('_destroy', () => {
     it('stops handling registered key bindings', async () => {
       // arrange
       const ctl = createNull();
@@ -144,11 +144,61 @@ describe('Controller', () => {
       }));
 
       // act
-      ctl.destroy();
+      ctl._destroy();
       await ctl.simulateKey('Enter');
 
       // assert
       expect(count).toBe(0);
+    });
+  });
+
+  describe('onDestroy', () => {
+    it('runs registered cleanups in order', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const cleanups: string[] = [];
+      ctl.onDestroy(() => cleanups.push('first'));
+      ctl.onDestroy(() => cleanups.push('second'));
+
+      // act
+      ctl._destroy();
+
+      // assert
+      expect(cleanups).toEqual(['first', 'second']);
+    });
+
+    it('skips an unsubscribed cleanup', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const cleanups: string[] = [];
+      const unsubscribe = ctl.onDestroy(() => cleanups.push('removed'));
+      ctl.onDestroy(() => cleanups.push('retained'));
+
+      // act
+      unsubscribe();
+      ctl._destroy();
+
+      // assert
+      expect(cleanups).toEqual(['retained']);
+    });
+
+    it('runs cleanups before it releases the keys', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      ctl.keys.replaceBindings({
+        ENTER: { bindings: ['Enter'], description: 'Run enter action', action: () => {} }
+      });
+      const bindingsDuringCleanup: string[] = [];
+      ctl.onDestroy(() =>
+        bindingsDuringCleanup.push(...Object.keys(ctl.keys.getCurrentBindings()))
+      );
+
+      // act
+      ctl._destroy();
+
+      // assert
+      expect(bindingsDuringCleanup).toEqual(['ENTER']);
+      expect(ctl.keys.getCurrentBindings()).toEqual({});
     });
   });
 

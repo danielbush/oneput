@@ -12,7 +12,7 @@ const mounted: (() => void)[] = [];
 afterEach(() => {
   for (const unmount of mounted) unmount();
   mounted.length = 0;
-  for (const ctl of controllers) ctl.destroy();
+  for (const ctl of controllers) ctl._destroy();
   controllers.length = 0;
 });
 

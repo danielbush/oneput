@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { Online } from './online.js';
+import { Online } from '../online.js';
 
 /** A browser stand-in that can fire its online and offline events. */
 function createBrowser(onLine: boolean) {

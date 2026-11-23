@@ -23,7 +23,7 @@ afterEach(() => {
 function createNull() {
   const ctl = Controller.createNull();
   controllers.push(ctl);
-  ctl.ui.setLayout(StandardLayout.create(ctl, {}, icons));
+  ctl.app.run({ layout: { layout: (ctl) => StandardLayout.create(ctl, {}, icons), params: {} } });
   return ctl;
 }
 
@@ -35,6 +35,18 @@ function sendDisabled(ctl: Controller) {
   if (!found) throw new Error('no Send button');
   return found.attr?.disabled;
 }
+
+describe('params', () => {
+  test('no current AppObject - throws', () => {
+    // arrange
+    const ctl = Controller.createNull();
+    controllers.push(ctl);
+    ctl.ui.setLayout(StandardLayout.create(ctl, {}, icons));
+
+    // act / assert
+    expect(() => ctl.ui.update({ params: { menuTitle: 'T' } })).toThrow(/no AppObject is current/);
+  });
+});
 
 describe('invalidate', () => {
   test('enabled changed - shown after invalidate', () => {

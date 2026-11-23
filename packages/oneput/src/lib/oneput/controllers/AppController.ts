@@ -31,10 +31,16 @@ export type AppChangeTracker = {
 
 type AnyAppObject = AppObject<any, any>;
 
+/**
+ * What one entry on the app stack owns. `layout` and `layoutParams` are set
+ * when the AppObject starts (run / replace) and stay while it is suspended,
+ * thus the AppObject resumes with its own layout and params.
+ */
 type AppObjectState = {
   lastMenuActionIds: Record<string, string>;
   layout?: UILayout;
-  layoutParams?: Partial<AppLayoutParams>;
+  /** The full layout params of this AppObject. See {@link layoutParams}. */
+  layoutParams?: AppLayoutParams;
 };
 
 /**
@@ -95,24 +101,47 @@ export class AppController {
   }
 
   /**
-   * Declaration = Object containing layout + params.
+   * The layout and params of an AppObject that starts. `inherited` is the
+   * AppObject it comes after: the parent on run, the replaced AppObject on
+   * replace.
    *
-   * - layout + params       => create/set active layout, then configure it
-   * - no layout + params    => inherit active parent layout, then configure it
-   * - no layout + no params => inherit active parent layout unchanged
-   *
+   * - layout + params       => create a layout; params are the declared params
+   * - no layout + params    => inherit the layout; params are the declared params
+   * - no layout + no params => inherit the layout and a copy of the params
    */
-  private resolveLayout(app: AnyAppObject, inheritedLayout?: UILayout) {
+  private resolveLayout(
+    app: AnyAppObject,
+    inherited: { layout?: UILayout; layoutParams: AppLayoutParams }
+  ) {
     const declaration = app.layout;
-    if (!declaration) {
-      return { layout: inheritedLayout, layoutParams: undefined };
+    const layout = declaration?.layout
+      ? declaration.layout(this.ctl, declaration.params)
+      : inherited.layout;
+    const layoutParams: AppLayoutParams = declaration?.params ?? { ...inherited.layoutParams };
+    return { layout, layoutParams };
+  }
+
+  /**
+   * The full layout params of the current AppObject. Undefined when no
+   * AppObject is current.
+   *
+   * Each AppObject on the stack owns its params. Thus a child's changes do not
+   * touch its parent's params, and the parent resumes with its own params.
+   */
+  get layoutParams(): AppLayoutParams | undefined {
+    return this.current ? this.getAppState(this.current).layoutParams : undefined;
+  }
+
+  /**
+   * Set the full layout params of the current AppObject. Use
+   * `ctl.ui.update({ params })` or `ctl.ui.setParams(params)` instead: they
+   * also rebuild the layout UI.
+   */
+  _setLayoutParams(params: AppLayoutParams) {
+    if (!this.current) {
+      throw new Error('Layout params belong to an AppObject: no AppObject is current.');
     }
-    return {
-      layout: declaration.layout
-        ? declaration.layout(this.ctl, declaration.params)
-        : inheritedLayout,
-      layoutParams: declaration.params
-    };
+    this.getAppState(this.current).layoutParams = params;
   }
 
   // #region ui settings
@@ -393,12 +422,18 @@ export class AppController {
     const previous = this.current;
     this.current = app;
     this.generation += 1;
-    // If layout not set use parent's (INHERIT_LAYOUT).
-    // Trivial edge-case: If we never set a layout, then the AppState layout
-    // will always be blank.
+    // If layout or params are not declared, use the previous AppObject's
+    // (INHERIT_LAYOUT). With no previous AppObject (the first root, or a root
+    // started after a root exit), inherit the active layout and no params.
     if (app && fromParent) {
-      const previousLayout = previous ? this.getAppState(previous).layout : this.ctl.ui.getLayout();
-      Object.assign(this.getAppState(app), this.resolveLayout(app, previousLayout));
+      const inherited = previous ? this.getAppState(previous) : undefined;
+      Object.assign(
+        this.getAppState(app),
+        this.resolveLayout(app, {
+          layout: inherited ? inherited.layout : this.ctl.ui.getLayout(),
+          layoutParams: inherited?.layoutParams ?? {}
+        })
+      );
     }
   }
 
@@ -501,14 +536,12 @@ export class AppController {
       );
     }
     if (this.current) {
-      const { layout, layoutParams } = this.getAppState(this.current);
+      // Show this AppObject's own layout and params. A child's params are
+      // its own, thus they do not stay when this AppObject resumes.
+      const { layout } = this.getAppState(this.current);
       if (layout) {
         this.ctl.ui.setLayout(layout);
-      }
-      if (layout || layoutParams) {
-        // Baseline for this AppObject: replace so child mid-flight params
-        // (e.g. inputAccept) don't stick on resume.
-        this.ctl.ui.update({ params: layoutParams, replace: true });
+        this.ctl.ui.invalidate();
       }
     }
     this.installInputScope();

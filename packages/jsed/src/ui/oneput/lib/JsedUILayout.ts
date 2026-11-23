@@ -40,11 +40,11 @@ export class JsedUILayout implements UILayout<JsedLayoutParams> {
       );
     }
     this.host = host;
-    this.host.configure({ params });
+    this.host.configure(params);
   }
 
-  configure(settings: { params?: Partial<JsedLayoutParams>; replace?: boolean }) {
-    this.host.configure(settings);
+  configure(params: JsedLayoutParams) {
+    this.host.configure(params);
   }
 
   get inputUI() {

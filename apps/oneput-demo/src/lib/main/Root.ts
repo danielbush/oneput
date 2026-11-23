@@ -19,8 +19,10 @@ import { Online } from '../common/online.js';
 import type { AppObject, UIFlags } from '@oneput/oneput';
 
 export class Root implements AppObject {
-  /** `online` belongs to the host that mounts Oneput, which disposes it. */
-  static create(ctl: Controller, online: Online) {
+  static create(ctl: Controller) {
+    // Root lives as long as the controller, so it owns the online signal.
+    const online = Online.create();
+    ctl.onDestroy(() => online.dispose());
     return new Root(ctl, {
       // Direct factory form. A nullable/test Root.createNull could inject
       // `Layout.createNull` here with the same `(ctl, params) => UILayout` shape.

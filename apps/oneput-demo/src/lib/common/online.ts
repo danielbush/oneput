@@ -7,9 +7,9 @@ type OnlineEvents = {
 };
 
 /**
- * Whether the browser is online, as a signal that the demo host owns. The
+ * Whether the browser is online, as a signal that Root owns. The
  * browser's `online` and `offline` events set it; AppObjects only read it.
- * The host that creates it calls {@link dispose} when it unmounts.
+ * Root calls {@link dispose} through `ctl.onDestroy`.
  */
 export class Online {
   /** Follow the browser until {@link dispose}. */

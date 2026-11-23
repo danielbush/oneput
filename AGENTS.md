@@ -1,7 +1,7 @@
 ## Project docs
 
 - [NFR.md](./NFR.md), [CODE.md](./CODE.md), [REVIEW.md](./REVIEW.md) and [MANAGER.md](./MANAGER.md) hold what we have agreed; each answers one question. Concepts live per package, eg `packages/oneput/docs/CONCEPTS.md`.
-- The main session follows MANAGER.md: how to answer, explain, help the user decide and run the work.
+- Main session: read `~/.agents/codebase-docs/MANAGER.md` and [MANAGER.md](./MANAGER.md) (repo rules override global). Worker and reviewer agents do not need them.
 - When adding, moving or questioning a rule or decision, use the codebase-docs skill to decide which file it belongs in.
 - Before starting work, read CODE.md and REVIEW.md. Check the work against REVIEW.md and CODE.md before reporting it. Name both files in briefs to other agents.
 

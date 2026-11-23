@@ -295,8 +295,8 @@ function attempt<T>(read: () => T): Result<T, ReadError> {
 
 /**
  * Named code that a view refers to by name, so the view stays data.
- * `text` gives changing text, `menu` gives changing rows, and `menuItem` builds
- * a row that names it in `build`. Return the item with the row's ID. The
+ * `slot` gives changing text for slots and rows, `menu` gives changing rows,
+ * and `menuItem` builds a row that names it in `build`. Return the item with the row's ID. The
  * builder's `activate` sends the row's event (`send`, else `ITEM_ACTIVATED`) to
  * the actor; use it as the item's action.
  *
@@ -312,7 +312,7 @@ export type ViewSources<
   Event extends RowEvent = never,
   Item extends string = never
 > = {
-  text: Record<Source, ((snapshot: Snapshot) => string) | Readable<string>>;
+  slot: Record<Source, ((snapshot: Snapshot) => string) | Readable<string>>;
   menu: Record<
     List,
     | ((snapshot: Snapshot) => readonly ListRow<Event, Item>[])
@@ -327,11 +327,11 @@ export type ViewSources<
 
 /** The readable sources in a registry, to subscribe to, so that their changes redraw the view. */
 export function sourceSubscriptions(sources: {
-  text: object;
+  slot: object;
   menu: object;
   menuItem: object;
 }): ReadableSource<unknown>[] {
-  return [sources.text, sources.menu, sources.menuItem]
+  return [sources.slot, sources.menu, sources.menuItem]
     .flatMap(sourcesOf)
     .filter(isReadable)
     .map(({ source }) => source);
@@ -415,7 +415,7 @@ export function renderActiveView<
   const read = (text: Text<Source>): Result<string, NameError | ReadError> =>
     typeof text === 'string'
       ? ok(text)
-      : named(sources.text, text.from).andThen((source) =>
+      : named(sources.slot, text.from).andThen((source) =>
           attempt(() => (isReadable(source) ? source.source.get() : source(snapshot)))
         );
   const readOptional = (

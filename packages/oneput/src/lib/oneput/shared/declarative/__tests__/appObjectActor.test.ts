@@ -137,7 +137,7 @@ function runPages(second?: PageView) {
   const app = appObjectActor(
     ctl,
     createPageActor(second),
-    { text: {}, menu: {}, menuItem: {} },
+    { slot: {}, menu: {}, menuItem: {} },
     layouts,
     { defaultRow: standardRow }
   );
@@ -250,7 +250,7 @@ test('a readable source change redraws the view with no new snapshot', async () 
       slots: { title: { from: 'label' } },
       menu: { id: 'labels', from: 'rows' }
     }),
-    { text: { label: readable(label) }, menu: { rows: readable(rows) }, menuItem: {} },
+    { slot: { label: readable(label) }, menu: { rows: readable(rows) }, menuItem: {} },
     layouts,
     { defaultRow: standardRow }
   );

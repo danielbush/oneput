@@ -73,7 +73,7 @@ function inferredSnapshot() {
     machine: { getStateNodeById: () => ({ path: [] }) },
     getMeta: () => ({ root: { view: { layout: 'gone' as const, menu: { id: 'menu' } } } })
   };
-  const sources = { text: {}, menu: {}, menuItem: {} };
+  const sources = { slot: {}, menu: {}, menuItem: {} };
   // @ts-expect-error The registry has no 'gone' layout.
   return renderActiveView(snapshot, sources, layouts, {
     defaultRow: standardRow,

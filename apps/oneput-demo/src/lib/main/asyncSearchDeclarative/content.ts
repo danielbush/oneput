@@ -20,8 +20,8 @@ export function resultById(context: SearchContext, id: string) {
 
 /**
  * The view sources for this declarative AppObject: the named data its views
- * refer to. A view in the machine's `meta.view` names a source (a `text` for a
- * slot, a `menu` entry for its menu rows, a `menuItem` builder for a row), and
+ * refer to. A view in the machine's `meta.view` names a source (a `slot` source
+ * for a slot or a row's text, a `menu` entry for its menu rows, a `menuItem` builder for a row), and
  * the interpreter looks the name up here each time it draws the view. So the
  * machine says what to show by name, and this file says where that comes from.
  *
@@ -30,7 +30,7 @@ export function resultById(context: SearchContext, id: string) {
  */
 export function createContent(online: Online) {
   return {
-    text: {
+    slot: {
       title: readable(
         signalSource(
           new Signal.Computed(() =>

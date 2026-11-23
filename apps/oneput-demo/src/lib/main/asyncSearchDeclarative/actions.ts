@@ -10,7 +10,7 @@ type FetchEvent =
   | { type: 'SEARCH_SUCCEEDED'; results: readonly SearchItem[] }
   | { type: 'SEARCH_FAILED'; error: SearchFailure };
 type SearchView = ViewDef<
-  keyof SearchContent['text'],
+  keyof SearchContent['slot'],
   keyof SearchContent['menu'],
   RowEvent,
   keyof SearchContent['menuItem'],

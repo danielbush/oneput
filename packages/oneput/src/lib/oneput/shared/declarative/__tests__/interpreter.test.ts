@@ -78,7 +78,7 @@ function pageSegments(page: number) {
 }
 
 const sources = {
-  text: { pageText: ({ page }: Snapshot) => `Page ${page}` },
+  slot: { pageText: ({ page }: Snapshot) => `Page ${page}` },
   menu: { pages: () => [{ id: 'list-row', build: 'badge' as const }] },
   menuItem: {
     badge: ({ page }: Snapshot, row: { id: string }, activate: () => void) =>
@@ -494,7 +494,7 @@ describe('readable sources', () => {
       })
     );
     const mixed = {
-      text: { pageText: readable(heading) },
+      slot: { pageText: readable(heading) },
       menu: { pages: readable(rows) },
       menuItem: { badge: readable(badge), pageNumber: sources.menuItem.pageNumber }
     } satisfies ViewSources<Snapshot, 'pageText', 'pages', PageEvent, 'badge' | 'pageNumber'>;
@@ -561,7 +561,7 @@ describe('readable sources', () => {
     ['marked callable is read with get and subscribed', readable(both), 'Got', [both]]
   ])('%s', (_, pageText, title, subscribed) => {
     // arrange
-    const registry = { ...sources, text: { pageText } };
+    const registry = { ...sources, slot: { pageText } };
     const pages = createPages<PageView>({
       layout: 'plain',
       slots: { heading: { from: 'pageText' } },
@@ -581,7 +581,7 @@ describe('readable sources', () => {
 
   test('an unmarked object with subscribe is not subscribed', () => {
     // arrange
-    const registry = { text: {}, menu: {}, menuItem: { odd: { subscribe: true } } };
+    const registry = { slot: {}, menu: {}, menuItem: { odd: { subscribe: true } } };
 
     // act
     const subscriptions = sourceSubscriptions(registry);
@@ -599,8 +599,8 @@ describe('readable sources', () => {
 
   test.each([
     [
-      'text',
-      { ...sources, text: { pageText: readable(throwing) } },
+      'slot',
+      { ...sources, slot: { pageText: readable(throwing) } },
       { menu: { id: 'pages' }, slots: { heading: { from: 'pageText' } } }
     ],
     [
@@ -629,9 +629,9 @@ describe('readable sources', () => {
 
   test('a name that is not enumerable is neither read nor subscribed', () => {
     // arrange
-    const text = {};
-    Object.defineProperty(text, 'pageText', { value: readable(cell('Hidden')), enumerable: false });
-    const registry = { ...sources, text } as typeof sources;
+    const slot = {};
+    Object.defineProperty(slot, 'pageText', { value: readable(cell('Hidden')), enumerable: false });
+    const registry = { ...sources, slot } as typeof sources;
     const pages = createPages<PageView>({
       layout: 'plain',
       slots: { heading: { from: 'pageText' } },
@@ -652,7 +652,7 @@ describe('readable sources', () => {
   test('a mark around a source with no get or subscribe is not subscribed', () => {
     // arrange
     const registry = {
-      text: {},
+      slot: {},
       menu: {},
       menuItem: { unused: readable({} as never), fake: { kind: 'readable' } }
     };

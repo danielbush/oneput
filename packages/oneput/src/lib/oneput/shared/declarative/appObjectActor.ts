@@ -6,7 +6,8 @@ import {
   type OneputView,
   type Readable,
   type LayoutSlots,
-  type PlainRowBuilder,
+  type RowBuilders,
+  type RowParams,
   type ViewLayouts,
   type ViewSnapshot,
   type ViewSources
@@ -19,11 +20,6 @@ type ViewActor<Snapshot, Event extends { type: string }> = {
   send(event: OneputEvent | Event): void;
   getSnapshot(): Snapshot & { can(event: OneputEvent | Event): boolean };
   subscribe(onChange: () => void): { unsubscribe(): void };
-};
-
-export type AppObjectActorOptions = {
-  /** Build rows whose view has no `build` name. */
-  defaultRow: PlainRowBuilder;
 };
 
 /** The menu ID and row IDs: what the user sees as "the same rows". */
@@ -56,7 +52,8 @@ function applyView(ctl: Controller, view: OneputView, rowsChanged: boolean) {
 /**
  * Connect an actor to its AppObject. Oneput owns the AppObject stack and the input.
  * `layouts` are the layouts that the actor's views can name, shared across AppObjects.
- * `defaultRow` builds the rows that do not name a builder.
+ * The row builders are in `sources.menuItem`; its `default` builder draws the
+ * rows that do not name a builder.
  * When the active view names a layout other than the one this AppObject shows,
  * the adapter shows that layout's component.
  *
@@ -67,18 +64,24 @@ export function appObjectActor<
   Source,
   List extends string,
   Event extends { type: string },
-  Item extends string,
+  Builders extends RowBuilders,
   Layouts extends ViewLayouts,
   Snapshot
 >(
   ctl: Controller,
   actor: ViewActor<
-    Snapshot & ViewSnapshot<NoInfer<Source>, List, Event, Item, NoInfer<LayoutSlots<Layouts>>>,
+    Snapshot &
+      ViewSnapshot<
+        NoInfer<Source>,
+        List,
+        Event,
+        NoInfer<RowParams<Builders>>,
+        NoInfer<LayoutSlots<Layouts>>
+      >,
     Event
   >,
-  sources: ViewSources<NoInfer<Snapshot>, Source, List, Event, Item>,
-  layouts: Layouts,
-  { defaultRow }: AppObjectActorOptions
+  sources: ViewSources<NoInfer<Snapshot>, Source, List, Event, Builders>,
+  layouts: Layouts
 ): AppObject {
   const sendIfCurrent = (event: OneputEvent | Event) => {
     if (ctl.app.isCurrent(app)) actor.send(event);
@@ -133,7 +136,6 @@ export function appObjectActor<
     ],
     onRefresh() {
       const rendered = renderActiveView(actor.getSnapshot(), sources, layouts, {
-        defaultRow,
         activate: sendIfCurrent
       });
       if (rendered.isErr()) {

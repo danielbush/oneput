@@ -1,17 +1,20 @@
 import type { Controller } from '../../../controllers/controller.js';
 import type { FlexChildBuilder } from '../../../lib/builder.js';
 import type { AppLayoutParams, FChildParams, UILayout } from '../../../types.js';
+import { menuItem } from '../../../lib/builder.js';
 import {
   renderActiveView,
+  rowBuilder,
   slot,
   viewLayout,
   type LayoutSlots,
   type Readable,
+  type RowParams,
   type SourceTypes,
   type ViewDef,
   type ViewSources
 } from '../interpreter.js';
-import { standardRow } from '../standardRow.js';
+import { infoRow, standardRow } from '../standardRow.js';
 
 declare function component<Params extends AppLayoutParams>(
   ctl: Controller,
@@ -49,20 +52,82 @@ const layouts = {
   empty: viewLayout({ slots: {}, create: component, params: () => ({}) })
 };
 type Layouts = LayoutSlots<typeof layouts>;
-type BadgeView = ViewDef<Record<never, never>, never, never, 'badge'>;
-type Sources = { known: string; flag: boolean; footer: Footer };
-type PlainView = ViewDef<Sources, never, never, never, Layouts>;
+
+/** A row builder whose params are not text. */
+const counter = rowBuilder({
+  params: { count: slot<number>(), done: slot<boolean>() },
+  build: ({ id, count, done }, activate) =>
+    menuItem({
+      id,
+      action: activate,
+      children: (b) => [b.fchild({ textContent: `${count} ${done}` })]
+    })
+});
+const builders = { default: standardRow, info: infoRow, counter };
+type Rows = RowParams<typeof builders>;
+type Sources = { known: string; flag: boolean; footer: Footer; total: number };
+type PlainView = ViewDef<Sources, never, never, Rows, Layouts>;
+/** A view whose registry has no `default` builder. */
+type NoDefaultView = ViewDef<Sources, never, never, Omit<Rows, 'default'>, Layouts>;
 
 declare const footer: Footer;
 
-const missing: BadgeView = {
+const missing: PlainView = {
   // @ts-expect-error 'missing' is not a builder name.
   menu: { items: [{ id: 'row', build: 'missing' }] }
 };
-const mixed: BadgeView = {
-  // @ts-expect-error A built row has no standard fields.
-  menu: { items: [{ id: 'row', build: 'badge', text: 'Standard' }] }
+const otherParam: PlainView = {
+  // @ts-expect-error 'counter' does not declare 'text'.
+  menu: { items: [{ id: 'row', build: 'counter', text: 'Standard' }] }
 };
+const unknownParam: PlainView = {
+  // @ts-expect-error The default builder does not declare 'colour'.
+  menu: { items: [{ id: 'row', text: 'Row', colour: 'red' }] }
+};
+const otherBuilderParam: PlainView = {
+  // @ts-expect-error The default builder does not declare 'count'; 'counter' does.
+  menu: { items: [{ id: 'row', text: 'Row', count: 1 }] }
+};
+const noDefault: NoDefaultView = {
+  // @ts-expect-error With no 'default' builder, each row names a builder.
+  menu: { items: [{ id: 'row', text: 'Row' }] }
+};
+
+// Row params: a literal or a source must fit the type that the param declares.
+const typedRows: PlainView = {
+  menu: {
+    items: [
+      { id: 'a', text: 'A', detail: { from: 'known' }, send: undefined, activate: true },
+      { id: 'b', build: 'counter', count: 2, done: { from: 'flag' } },
+      { id: 'c', build: 'counter', count: { from: 'total' } },
+      { id: 'd', build: 'default', text: 'D' },
+      { id: 'e', build: 'info', text: 'Info' }
+    ]
+  }
+};
+const wrongParamLiteral: PlainView = {
+  // @ts-expect-error 'count' takes a number, not text.
+  menu: { items: [{ id: 'row', build: 'counter', count: 'two' }] }
+};
+const wrongParamSource: PlainView = {
+  // @ts-expect-error 'known' gives text; 'done' takes a boolean.
+  menu: { items: [{ id: 'row', build: 'counter', done: { from: 'known' } }] }
+};
+const unknownParamSource: PlainView = {
+  // @ts-expect-error 'gone' is not a source.
+  menu: { items: [{ id: 'row', text: { from: 'gone' } }] }
+};
+
+rowBuilder({
+  // @ts-expect-error A param cannot take the name of a row field.
+  params: { send: slot<string>() },
+  build: ({ id }) => menuItem({ id })
+});
+rowBuilder({
+  // @ts-expect-error A param name from Object.prototype would clash with the inherited member.
+  params: { toString: slot<string>() },
+  build: ({ id }) => menuItem({ id })
+});
 // @ts-expect-error 'gone' is not a registered layout.
 const unknownLayout: PlainView = { layout: 'gone' };
 const wrongSlot: PlainView = {
@@ -118,7 +183,7 @@ const inheritedWrongLiteral: PlainView = {
   slots: { busy: 'yes' }
 };
 
-// Row text, row detail and the placeholder take only sources that give text.
+// Text params and the placeholder take only sources that give text.
 const flagRowText: PlainView = {
   // @ts-expect-error 'flag' gives a boolean, not row text.
   menu: { items: [{ id: 'row', text: { from: 'flag' } }] }
@@ -135,17 +200,37 @@ const textRow: PlainView = {
 
 type Snapshot = { busy: boolean };
 const registry = {
-  slot: { known: () => 'Known', flag: ({ busy }: Snapshot) => busy, footer: () => footer },
+  slot: {
+    known: () => 'Known',
+    flag: ({ busy }: Snapshot) => busy,
+    footer: () => footer,
+    total: () => 3
+  },
   menu: {},
-  menuItem: {}
+  menuItem: builders
 };
 // A registry gives the source types of its views.
 const registryTypes: Sources = {} as SourceTypes<typeof registry.slot>;
 const wrongSource: ViewSources<Snapshot, Sources, never> = {
   // @ts-expect-error The 'flag' source must give a boolean.
-  slot: { known: () => 'Known', flag: () => 'yes', footer: () => footer },
+  slot: { known: () => 'Known', flag: () => 'yes', footer: () => footer, total: () => 3 },
   menu: {},
   menuItem: {}
+};
+// List rows are rows of the same builders.
+const listSources: ViewSources<Snapshot, Sources, 'rows', never, typeof builders> = {
+  ...registry,
+  menu: {
+    rows: () => [
+      { id: 'a', text: 'A' },
+      { id: 'b', build: 'counter', count: 1 }
+    ]
+  }
+};
+const wrongListRow: ViewSources<Snapshot, Sources, 'rows', never, typeof builders> = {
+  ...registry,
+  // @ts-expect-error 'count' takes a number, not text.
+  menu: { rows: () => [{ id: 'b', build: 'counter', count: 'one' }] }
 };
 
 const inherited: PlainView = { slots: { note: { from: 'known' } } };
@@ -160,10 +245,7 @@ function inferredSnapshot() {
   };
   const sources = { slot: {}, menu: {}, menuItem: {} };
   // @ts-expect-error The registry has no 'gone' layout.
-  return renderActiveView(snapshot, sources, layouts, {
-    defaultRow: standardRow,
-    activate: () => {}
-  });
+  return renderActiveView(snapshot, sources, layouts, { activate: () => {} });
 }
 
 viewLayout({
@@ -181,7 +263,9 @@ viewLayout({
 // A view that does not name a layout fills a slot of the layout its parent names.
 const inheritedLiteral: PlainView = { slots: { heading: 'A' } };
 
-void [missing, mixed, unknownLayout, wrongSlot, unknownSlot, unknownSource, inherited];
+void [missing, otherParam, unknownParam, otherBuilderParam, noDefault, typedRows];
+void [wrongParamLiteral, wrongParamSource, unknownParamSource, listSources, wrongListRow];
+void [unknownLayout, wrongSlot, unknownSlot, unknownSource, inherited];
 // @ts-expect-error Only readable() makes a Readable.
 const forged: Readable<string> = { source: { get: () => '', subscribe: () => () => {} } };
 

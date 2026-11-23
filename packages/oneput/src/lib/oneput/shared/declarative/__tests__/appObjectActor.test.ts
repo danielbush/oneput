@@ -12,6 +12,7 @@ import {
   slot,
   viewLayout,
   type LayoutSlots,
+  type RowParams,
   type ViewDef,
   type ViewSnapshot
 } from '../interpreter.js';
@@ -56,8 +57,10 @@ const bannerLayout = viewLayout({
 
 const layouts = { standard: standardLayout(icons), banner: bannerLayout };
 type Layouts = LayoutSlots<typeof layouts>;
-type PageView = ViewDef<Record<never, never>, never, PageEvent, never, Layouts>;
-type Page = ViewSnapshot<Record<never, never>, never, PageEvent, never, Layouts> & {
+const builders = { default: standardRow };
+type Rows = RowParams<typeof builders>;
+type PageView = ViewDef<Record<never, never>, never, PageEvent, Rows, Layouts>;
+type Page = ViewSnapshot<Record<never, never>, never, PageEvent, Rows, Layouts> & {
   can(event: OneputEvent | PageEvent): boolean;
 };
 
@@ -139,9 +142,8 @@ function runPages(second?: PageView) {
   const app = appObjectActor(
     ctl,
     createPageActor(second),
-    { slot: {}, menu: {}, menuItem: {} },
-    layouts,
-    { defaultRow: standardRow }
+    { slot: {}, menu: {}, menuItem: builders },
+    layouts
   );
   const shown = menuShows(ctl, 'Next page');
   ctl.app.run(app);
@@ -221,7 +223,7 @@ test('a view that names another layout shows that layout component', async () =>
   });
 });
 
-type LabelView = ViewDef<{ label: string }, 'rows', never, never, Layouts>;
+type LabelView = ViewDef<{ label: string }, 'rows', never, Rows, Layouts>;
 
 /** An actor with one state whose snapshot never changes. */
 function createStillActor(view: LabelView) {
@@ -252,9 +254,8 @@ test('a readable source change redraws the view with no new snapshot', async () 
       slots: { title: { from: 'label' } },
       menu: { id: 'labels', from: 'rows' }
     }),
-    { slot: { label: readable(label) }, menu: { rows: readable(rows) }, menuItem: {} },
-    layouts,
-    { defaultRow: standardRow }
+    { slot: { label: readable(label) }, menu: { rows: readable(rows) }, menuItem: builders },
+    layouts
   );
   const shown = menuShows(ctl, 'Row A');
   ctl.app.run(app);

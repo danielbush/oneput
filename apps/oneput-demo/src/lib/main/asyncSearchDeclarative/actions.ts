@@ -1,13 +1,14 @@
 import { assign, fromCallback, sendTo, setup } from 'xstate';
 import type {
   LayoutSlots,
+  RowParams,
   SourceTypes,
   ViewDef
 } from '@oneput/oneput/shared/declarative/interpreter.js';
 import type { OneputEvent } from '@oneput/oneput/shared/declarative/oneputEvents.js';
 import { viewLayouts } from '../../common/_layout.js';
 import { SearchService, type SearchFailure, type SearchItem } from '../../service/SearchService.js';
-import { resultById, type SearchContext, type SearchContent } from './content.js';
+import type { SearchContext, SearchContent } from './content.js';
 
 type RowEvent = { type: 'RETRY_SEARCH' };
 type FetchEvent =
@@ -17,9 +18,13 @@ type SearchView = ViewDef<
   SourceTypes<SearchContent['slot']>,
   keyof SearchContent['menu'],
   RowEvent,
-  keyof SearchContent['menuItem'],
+  RowParams<SearchContent['menuItem']>,
   LayoutSlots<typeof viewLayouts>
 >;
+
+function resultById(context: SearchContext, id: string) {
+  return context.results.find((result) => result.id === id);
+}
 
 function fetchResults(service: SearchService) {
   return fromCallback<{ type: 'SEARCH'; query: string }>(({ receive, sendBack }) => {

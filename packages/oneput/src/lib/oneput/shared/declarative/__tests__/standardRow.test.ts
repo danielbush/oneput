@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { standardRow } from '../standardRow.js';
+import { infoRow, standardRow } from '../standardRow.js';
 
 describe('standardRow', () => {
   test('text, detail, icon and action', () => {
@@ -7,7 +7,7 @@ describe('standardRow', () => {
     const row = { id: 'result', text: 'Result', detail: 'A match', icon: 'Search' };
 
     // act
-    const item = standardRow(row, () => {});
+    const item = standardRow.build(row, () => {});
 
     // assert
     expect(item).toMatchObject({
@@ -40,15 +40,28 @@ describe('standardRow', () => {
     });
   });
 
+  test('no action', () => {
+    // arrange
+    const row = { id: 'result', text: 'Result' };
+
+    // act
+    const item = standardRow.build(row);
+
+    // assert
+    expect(item.action).toBeUndefined();
+  });
+});
+
+describe('infoRow', () => {
   test.each([
     { icon: undefined, expectedIcon: 'Info' },
     { icon: 'Search', expectedIcon: 'Search' }
-  ])('info row with $expectedIcon icon', ({ icon, expectedIcon }) => {
+  ])('$expectedIcon icon', ({ icon, expectedIcon }) => {
     // arrange
-    const row = { id: 'status', kind: 'info' as const, text: 'Searching', detail: 'Ignored', icon };
+    const row = { id: 'status', text: 'Searching', icon };
 
     // act
-    const item = standardRow(row);
+    const item = infoRow.build(row, () => {});
 
     // assert
     expect(item).toMatchObject({

@@ -43,7 +43,7 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
               items: [
                 {
                   id: 'instructions',
-                  kind: 'info',
+                  build: 'info',
                   icon: 'Info',
                   text: 'Start typing something and inspect the browser console. The latest input controls the results. The service fails 30% of the time.'
                 }

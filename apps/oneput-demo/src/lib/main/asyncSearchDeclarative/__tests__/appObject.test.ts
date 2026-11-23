@@ -328,55 +328,6 @@ describe('declarative async search AppObject', () => {
     ctl._destroy();
   });
 
-  it('holds edits from the start of closing until the next open edit', async () => {
-    // arrange
-    const ctl = createController();
-    const clock = new SimulatedClock();
-    const service = SearchService.createNull({
-      clock,
-      response: (query) => ({ result: ok([{ id: query, text: query }]) })
-    });
-    const empty = viewShows(ctl, { status: '', rows: ['instructions'] });
-    ctl.app.run(createAsyncSearchAppObject(ctl, Online.createNull(), service, clock));
-    await empty;
-
-    // act
-    const closed = waitForState(ctl, 'menu-open-change', {
-      name: 'menu to close',
-      reached: () => !ctl.menu.isMenuOpen,
-      seen: () => 'menu open'
-    });
-    ctl.menu.closeMenu();
-    await ctl.input.typeText('a');
-    const stillRenderingOpen = ctl.menu.isMenuOpen;
-    const closingStatus = status(ctl);
-
-    await closed;
-    await ctl.input.typeText('p');
-    clock.increment(500);
-    const reopened = viewShows(ctl, { status: '', rows: ['instructions'] });
-    ctl.menu.openMenu();
-    await reopened;
-    const reopenedRows = ctl.currentProps.menuItems?.map((item) => item.id);
-    const reopenedStatus = status(ctl);
-
-    const results = viewShows(ctl, { status: 'Ready', rows: ['app'] });
-    await ctl.input.typeText('p');
-    clock.increment(500);
-    await results;
-
-    // assert
-    expect(stillRenderingOpen).toBe(true);
-    expect(closingStatus).toBe('');
-    expect(reopenedRows).toEqual(['instructions']);
-    expect(reopenedStatus).toBe('');
-    expect(ctl.input.getInputValue()).toBe('app');
-    expect(ctl.currentProps.menuItems?.map((item) => item.id)).toEqual(['app']);
-    expect(status(ctl)).toBe('Ready');
-    ctl.app.exit();
-    ctl._destroy();
-  });
-
   it('shows instructions for blank input and an empty menu for no results', async () => {
     // arrange
     const ctl = createController();

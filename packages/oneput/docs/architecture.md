@@ -203,9 +203,7 @@ when the kind changes.
 `standardLayout(icons)` in `shared/declarative/standardLayout.ts` shows
 `StandardLayout`: `title`, `status` (bottom-right text) and `busyIcon` (a
 turning icon at the right of the input). Async search uses it.
-The menu refresh uses the view's `focusBehaviour`. With
-`inputRequiresOpenMenu`, the adapter checks `ctl.menu.immediateMenuOpen`
-when it receives input. After reopening, a fresh edit starts the next search.
+The menu refresh uses the view's `focusBehaviour`.
 Editor and claim views, and menu focus, menu update, and claim release events
 are not supported.
 

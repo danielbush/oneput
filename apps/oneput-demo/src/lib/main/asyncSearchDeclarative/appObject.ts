@@ -17,7 +17,6 @@ export function createAsyncSearchAppObject(
 ): AppObject {
   const actor = createActor(createAsyncSearchMachine(service), clock && { clock });
   return appObjectActor(ctl, actor, createContent(online), viewLayouts, {
-    defaultRow: standardRow,
-    inputRequiresOpenMenu: true
+    defaultRow: standardRow
   });
 }

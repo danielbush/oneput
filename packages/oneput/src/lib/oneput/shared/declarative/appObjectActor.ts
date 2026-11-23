@@ -24,8 +24,6 @@ type ViewActor<Snapshot, Event extends { type: string }> = {
 export type AppObjectActorOptions = {
   /** Build rows whose view has no `build` name. */
   defaultRow: PlainRowBuilder;
-  /** Drop input events while the menu is closed, including during its close animation. */
-  inputRequiresOpenMenu?: boolean;
 };
 
 /** The menu ID and row IDs: what the user sees as "the same rows". */
@@ -81,7 +79,7 @@ export function appObjectActor<
   >,
   sources: ViewSources<NoInfer<Snapshot>, Source, List, Event, Item>,
   layouts: Layouts,
-  { defaultRow, inputRequiresOpenMenu }: AppObjectActorOptions
+  { defaultRow }: AppObjectActorOptions
 ): AppObject {
   const sendIfCurrent = (event: OneputEvent | Event) => {
     if (ctl.app.isCurrent(app)) actor.send(event);
@@ -115,7 +113,6 @@ export function appObjectActor<
       if (!handled && ctl.app.isCurrent(app) && ctl.app.canGoBack()) ctl.app.exit();
     },
     onInputChange({ value }) {
-      if (inputRequiresOpenMenu && !ctl.menu.immediateMenuOpen) return;
       sendIfCurrent({ type: 'INPUT_CHANGED', value });
     },
     watch: () => [

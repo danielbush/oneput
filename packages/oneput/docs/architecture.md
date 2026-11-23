@@ -20,6 +20,8 @@ The `Controller` (`controllers/controller.ts`) is the central API that consumers
 
 The `Controller` is created by `<OneputController>` (a Svelte component) which manages reactive state via `OneputProps` and passes the controller to consumers via a `run` callback.
 
+AppObjects can use `ctl.onDestroy(fn)` to register a cleanup for the lifetime of the controller. The method returns a function that removes that registration. `<OneputController>` or another host calls `ctl._destroy()` when it unmounts Oneput. Cleanups run in registration order, before teardown releases the controller's resources, so they can still use the controller.
+
 ## AppObject
 
 COMMENT: we initially just had ctl.app.run which pushes the current AppObject onto the stack, making it a parent, and the newly running AppObject the child. ctl.app.replace allows us to launch different AppObject's without using a stack or forcing parent/child relationship. This allows us to route or use a state machine to control what happens. If an AppObject calls ctl.app.run however, we go into "stack mode" and we have to exhaust the stack before we go back to "routed" mode.

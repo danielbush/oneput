@@ -4,6 +4,7 @@ import type { Controller } from '../../../controllers/controller.js';
 import type {
   AppLayoutParams,
   FChildParams,
+  FlexChildren,
   FlexParams,
   LayoutAffordance,
   UILayout
@@ -133,22 +134,32 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
     });
   }
 
+  /** The `Busy` icon while `busy`. It has its own ID, so turning it on or off keeps its siblings. */
+  private busyIcon(b: FlexChildBuilder) {
+    if (!this.settings.busy) {
+      return;
+    }
+    return b.icon(this.icons.Busy, { id: 'layout-input-busy', classes: ['oneput__rotate'] });
+  }
+
   /**
    * Input-right buttons from layout params: `inputAccept`, `inputReject`,
-   * then `inputSend`. Chrome roles — exit/stay stays in each affordance’s `run`.
+   * then `inputSend`, after the busy icon. Chrome roles — exit/stay stays in
+   * each affordance’s `run`.
    */
   private inputRight() {
-    const { inputAccept, inputReject, inputSend } = this.settings;
-    if (!inputAccept && !inputReject && !inputSend) {
+    const { inputAccept, inputReject, inputSend, busy } = this.settings;
+    if (!inputAccept && !inputReject && !inputSend && !busy) {
       return;
     }
     return hflex({
       id: 'layout-input-right',
-      children: () => {
-        const children: FChildParams[] = [];
+      children: (b) => {
+        const children: FlexChildren = [this.busyIcon(b)];
         if (inputAccept) {
           children.push(
             acceptButton({
+              id: 'layout-input-accept',
               icon: this.icons.Accept,
               onClick: () => inputAccept.run(),
               enabled: isEnabled(inputAccept),
@@ -159,6 +170,7 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
         if (inputReject) {
           children.push(
             rejectButton({
+              id: 'layout-input-reject',
               icon: this.icons.Reject,
               onClick: () => inputReject.run(),
               enabled: isEnabled(inputReject),
@@ -169,6 +181,7 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
         if (inputSend) {
           children.push(
             sendButton({
+              id: 'layout-input-send',
               icon: this.icons.Send,
               onClick: () => inputSend.run(),
               enabled: isEnabled(inputSend),
@@ -183,16 +196,17 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
 
   /**
    * The input-right content: `inputRight`, or the default buttons. While
-   * `busy`, the `Busy` icon turns beside it.
+   * `busy`, the `Busy` icon turns beside it. Each keeps its parent when `busy`
+   * changes, so a redraw keeps its nodes and their focus.
    */
   private inputRightUI() {
-    const right = this.settings.inputRight ?? this.inputRight();
-    if (!this.settings.busy) {
-      return right;
+    const { inputRight } = this.settings;
+    if (inputRight === undefined) {
+      return this.inputRight();
     }
     return hflex({
-      id: 'layout-input-right-busy',
-      children: (b) => [b.icon(this.icons.Busy, { classes: ['oneput__rotate'] }), right]
+      id: 'layout-input-right-custom',
+      children: (b) => [this.busyIcon(b), inputRight]
     });
   }
 

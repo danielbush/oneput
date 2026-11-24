@@ -241,6 +241,44 @@ describe('busy', () => {
     expect(shown).toEqual(['spin', 'custom']);
   });
 
+  /**
+   * The IDs from the input-right root down to the node with this ID or title:
+   * a keyed redraw keeps that node while they stay the same.
+   */
+  function pathTo(layout: StandardLayout, name: string) {
+    const search = (node: FlexParams | FChildParams, path: string[]): string[] | undefined => {
+      const here = [...path, node.id ?? ''];
+      if (node.id === name || node.attr?.title === name) return here;
+      if (node.type !== 'hflex' && node.type !== 'vflex') return undefined;
+      for (const child of node.children ?? []) {
+        const found = child ? search(child, here) : undefined;
+        if (found) return found;
+      }
+      return undefined;
+    };
+    const right = layout.inputUI.right;
+    return right ? search(right, []) : undefined;
+  }
+
+  test.each<[string, StandardLayoutParams, string]>([
+    ['buttons', { inputSend: { run: () => {} } }, 'Send'],
+    ['inputRight', { inputRight: hflex({ id: 'custom', children: [] }) }, 'custom']
+  ])('toggle - %s keep their place', (_, params, name) => {
+    // arrange
+    const layout = createLayout(params);
+    const idle = pathTo(layout, name);
+
+    // act
+    layout.configure({ ...params, busy: true });
+    const busy = pathTo(layout, name);
+    layout.configure(params);
+
+    // assert
+    expect(idle).toBeDefined();
+    expect(busy).toEqual(idle);
+    expect(pathTo(layout, name)).toEqual(idle);
+  });
+
   test('omitted - no Busy icon', () => {
     // arrange
     const layout = createLayout({ inputSend: { run: () => {} } });

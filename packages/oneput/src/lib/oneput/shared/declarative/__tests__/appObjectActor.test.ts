@@ -66,7 +66,7 @@ type Page = ViewSnapshot<Record<never, never>, never, PageEvent, Rows, Layouts> 
 
 const rootView: PageView = {
   layout: 'standard',
-  slots: { title: 'Pages' },
+  params: { menuTitle: 'Pages' },
   // Keep typed text after a row click, to see what an input switch does to it.
   settings: { clearInputAfterAction: false },
   menu: {
@@ -253,7 +253,7 @@ test('a readable source change redraws the view with no new snapshot', async () 
     ctl,
     createStillActor({
       layout: 'standard',
-      slots: { title: { from: 'label' } },
+      params: { menuTitle: { from: 'label' } },
       menu: { id: 'labels', from: 'rows' }
     }),
     { slot: { label: readable(label) }, menu: { rows: readable(rows) }, menuItem: builders },

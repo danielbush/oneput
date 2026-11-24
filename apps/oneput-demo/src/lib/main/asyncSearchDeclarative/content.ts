@@ -18,10 +18,11 @@ type SearchSnapshot = { context: SearchContext };
 /**
  * The view sources for this declarative AppObject: the named data its views
  * refer to. A view in the machine's `meta.view` names a source (a `slot` source
- * for a slot or a row param, a `menu` entry for its menu rows, a `menuItem`
+ * for a layout param, a slot or a row param, a `menu` entry for its menu rows, a `menuItem`
  * builder for a row), and the interpreter looks the name up here each time it
  * draws the view. A `slot` source gives the type that its slot or param
- * declares; here all of them give text. The `default` builder draws the rows
+ * declares; here all of them give text, and `title` fills the `menuTitle`
+ * layout param. The `default` builder draws the rows
  * that name no builder. So the machine says what to show by name, and this
  * file says where that comes from.
  *

@@ -485,6 +485,56 @@ describe('layouts', () => {
     });
   });
 
+  test('params merge by key and reach the layout over its own', () => {
+    // arrange
+    const pages = createPages<PageView>(
+      {
+        layout: 'plain',
+        slots: { heading: 'Heading' },
+        params: { menuTitle: 'Parent', busy: true },
+        menu: { id: 'pages' }
+      },
+      { params: { menuTitle: { from: 'pageText' } } }
+    );
+
+    // act
+    const view = renderView(pages);
+
+    // assert
+    expect(view._unsafeUnwrap().layout.params).toEqual({ menuTitle: 'Page 1', busy: true });
+  });
+
+  test('another layout keeps the params', () => {
+    // arrange
+    const pages = createPages<PageView>(
+      { layout: 'plain', params: { busy: true }, menu: { id: 'pages' } },
+      { layout: 'bare', slots: { heading: 'Child' } }
+    );
+
+    // act
+    const view = renderView(pages);
+
+    // assert
+    expect(view._unsafeUnwrap().layout).toMatchObject({
+      name: 'bare',
+      params: { menuTitle: '[Child]', busy: true }
+    });
+  });
+
+  test('child clears a param', () => {
+    // arrange
+    const pages = createPages<PageView>(
+      { layout: 'bare', params: { busy: true }, menu: { id: 'pages' } },
+      { params: { busy: undefined } }
+    );
+
+    // act
+    const view = renderView(pages);
+
+    // assert
+    expect(view._unsafeUnwrap().layout.params).toEqual({ menuTitle: '[]' });
+  });
+
   test('slot the layout does not declare', () => {
     // arrange
     const pages = createPages<PageView>(

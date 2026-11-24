@@ -127,6 +127,15 @@ function slotRecord<Value>(): Record<string, Value | undefined> {
   return Object.create(null) as Record<string, Value | undefined>;
 }
 
+/** The values that are not `undefined`: a child gives `undefined` to clear a value. */
+function filledOf(record: Record<string, unknown>) {
+  const filled = slotRecord<unknown>();
+  for (const name of Object.keys(record)) {
+    if (record[name] !== undefined) filled[name] = record[name];
+  }
+  return filled;
+}
+
 /**
  * Put the view's input kind in the layout params, as `AppLayoutParams.input`,
  * the param through which Oneput sets the input. With no view input, the
@@ -199,13 +208,15 @@ type InheritedName = keyof typeof Object.prototype | '__proto__';
 
 /**
  * Make a {@link ViewLayout}. The slot declarations type the values that
- * `params` gets and the values that views can fill:
+ * `params` gets and the values that views can fill. Slots are for what this
+ * layout adds; the params that every layout takes come from the view's
+ * `params`:
  *
  * ```ts
  * viewLayout({
- *   slots: { title: slot<string>(), busy: slot<boolean>() },
+ *   slots: { status: slot<string>(), compact: slot<boolean>() },
  *   create: MyLayout.create,
- *   params: ({ title, busy }) => ({ menuTitle: title, inputRight: busy ? spinner : undefined })
+ *   params: ({ status, compact }) => ({ statusText: status, compact })
  * });
  * ```
  *
@@ -324,11 +335,20 @@ export type ViewInput<Source = NoSources> = (
 ) & { placeholder?: Text<Source> };
 
 /**
+ * The layout params that every layout takes ({@link AppLayoutParams}), as a
+ * view gives them. The affordances are left out, because their functions
+ * cannot be in a machine config, and so is `input`, which comes from the
+ * view's own `input` with its placeholder.
+ */
+type SharedParams = Omit<AppLayoutParams, 'inputSend' | 'inputAccept' | 'inputReject' | 'input'>;
+
+/**
  * Metadata for one state's contribution to the view. Use named sources for
  * changing data. `Source` gives the value type of each slot source by name
- * (see {@link SourceTypes}). `layout` names a registered layout, and `slots`
- * fill it. `Rows` gives the param types of each row builder by name (see
- * {@link RowParams}).
+ * (see {@link SourceTypes}). `params` gives the layout params that every
+ * layout takes, such as `menuTitle` and `busy`. `layout` names a registered
+ * layout, and `slots` fill what that layout adds. `Rows` gives the param
+ * types of each row builder by name (see {@link RowParams}).
  */
 export type ViewDef<
   Source = NoSources,
@@ -337,6 +357,8 @@ export type ViewDef<
   Rows extends TypesByName = NoRows,
   Layouts extends TypesByName = NoLayouts
 > = LayoutChoice<Layouts, Source> & {
+  /** Each shared layout param: a literal or `{ from: name }` of the param's type. */
+  params?: { [Name in keyof SharedParams]?: Fill<SharedParams[Name], Source> };
   menu?: {
     id?: string;
     focusBehaviour?: Menu['focusBehaviour'];
@@ -486,8 +508,9 @@ export type OneputView = {
 /**
  * Resolve the active states' metadata, with parents first.
  * A child's `layout` replaces its parent's; when it names a different layout,
- * the parent's slots do not apply. Slots, settings and menu fields merge by
- * key, and a child can clear `input` with `input: undefined`. List rows keep
+ * the parent's slots do not apply, and its `params` still do. Params, slots,
+ * settings and menu fields merge by key, and a child can clear `input` with
+ * `input: undefined`. The layout gets the view's params over its own. List rows keep
  * their order and IDs, including repeats. Fixed rows follow in order of
  * first declaration, with same-ID overrides (see {@link mergeRow}).
  * A name with no source, builder or layout, or a slot that the active layout
@@ -532,6 +555,7 @@ export function renderActiveView<
   let menu: Omit<NonNullable<ViewDef<Source, List>['menu']>, 'items'> = {};
   let settings: ViewSettings = {};
   let slots = slotRecord<unknown>();
+  const params = slotRecord<unknown>();
   for (const view of views) {
     if (view.layout !== undefined && view.layout !== layoutName) {
       layoutName = view.layout;
@@ -541,6 +565,7 @@ export function renderActiveView<
     menu = { ...menu, ...view.menu };
     settings = { ...settings, ...view.settings };
     Object.assign(slots, view.slots);
+    Object.assign(params, view.params);
   }
   const menuId = menu.id;
   if (layoutName === undefined || menuId === undefined) {
@@ -554,7 +579,6 @@ export function renderActiveView<
   if (Object.keys(slots).some((slot) => !declared.includes(slot))) {
     return err('Expected only slots that the layout declares');
   }
-  const filled = Object.keys(slots).filter((slot) => slots[slot] !== undefined);
 
   /**
    * A literal as it is, or the value of the named source. The view type names
@@ -601,18 +625,17 @@ export function renderActiveView<
     );
   };
 
-  const filledSlots = slotRecord<unknown>();
-  for (const slot of filled) filledSlots[slot] = slots[slot];
-
   return Result.combine([
     Result.combine([...listRows, ...fixedRows.values()].map(renderRow)),
-    readAll(filledSlots),
+    readAll(filledOf(slots)),
+    // The view types give each param a value of its type.
+    readAll(filledOf(params)) as Result<SharedParams, NameError | ReadError>,
     read(input?.placeholder) as Result<string | undefined, NameError | ReadError>
-  ]).map(([items, values, placeholder]) => ({
+  ]).map(([items, values, shared, placeholder]) => ({
     layout: {
       name: layoutName,
       create: layout.create,
-      params: withInput(layout.params(values), input)
+      params: withInput({ ...layout.params(values), ...shared }, input)
     },
     menu: { id: menuId, focusBehaviour: menu.focusBehaviour, items },
     settings,

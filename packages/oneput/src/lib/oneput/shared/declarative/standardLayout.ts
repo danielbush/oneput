@@ -1,4 +1,3 @@
-import { hflex } from '../../lib/builder.js';
 import {
   StandardLayout,
   type StandardLayoutIcons,
@@ -9,29 +8,17 @@ import { slot, viewLayout } from './interpreter.js';
 /**
  * The view layout that shows {@link StandardLayout} with the host's icons.
  * Register it under a name, for example `{ standard: standardLayout(icons) }`.
+ * The shared layout params, such as `menuTitle` and `busy`, come from the
+ * view's `params`; `StandardLayout` turns the `Busy` icon while `busy`.
  *
- * - `title`: the menu title.
  * - `status`: text in the bottom-right outer chrome.
- * - `busyIcon`: when true, the host's `Busy` icon turns at the right of the input.
  */
-export function standardLayout(
-  icons: StandardLayoutIcons & {
-    /** The icon that turns while the view is busy. Often a circular arrow. */
-    Busy: string;
-  }
-) {
+export function standardLayout(icons: StandardLayoutIcons) {
   return viewLayout({
-    slots: { title: slot<string>(), status: slot<string>(), busyIcon: slot<boolean>() },
+    slots: { status: slot<string>() },
     create: (ctl, params: StandardLayoutParams) => StandardLayout.create(ctl, params, icons),
-    params: ({ title, status, busyIcon }): StandardLayoutParams => ({
-      menuTitle: title,
-      outerRight: status === undefined ? undefined : (b) => b.fchild({ textContent: status }),
-      inputRight: busyIcon
-        ? hflex({
-            id: 'input-right-busy',
-            children: (b) => [b.icon(icons.Busy, { classes: ['oneput__rotate'] })]
-          })
-        : undefined
+    params: ({ status }): StandardLayoutParams => ({
+      outerRight: status === undefined ? undefined : (b) => b.fchild({ textContent: status })
     })
   });
 }

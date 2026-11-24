@@ -11,7 +11,8 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
     meta: {
       view: {
         layout: 'standard',
-        slots: { title: { from: 'title' }, status: 'Ready' },
+        params: { menuTitle: { from: 'title' } },
+        slots: { status: 'Ready' },
         menu: { id: 'async-search', focusBehaviour: 'last-action,first' },
         input: { placeholder: 'Start typing something...' },
         settings: { enableFilter: false, enableInputElement: true, clearInputAfterAction: false }
@@ -57,7 +58,7 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
       pending: {
         description: 'Keep the input available and show the busy icon while the query is pending.',
         initial: 'debouncing',
-        meta: { view: { slots: { busyIcon: true } } },
+        meta: { view: { params: { busy: true } } },
         states: {
           debouncing: {
             description: 'Wait for a pause in typing before making the request.',

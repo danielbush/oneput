@@ -214,6 +214,17 @@ const inheritedWrongLiteral: PlainView = {
   slots: { busy: 'yes' }
 };
 
+// The shared layout params: a literal or a source of the param's type.
+const sharedParams: PlainView = {
+  params: { menuTitle: { from: 'known' }, busy: { from: 'flag' } }
+};
+// @ts-expect-error 'busy' takes a boolean, not text.
+const textBusy: PlainView = { params: { busy: 'yes' } };
+// @ts-expect-error 'flag' gives a boolean; 'menuTitle' takes text.
+const flagTitle: PlainView = { params: { menuTitle: { from: 'flag' } } };
+// @ts-expect-error An affordance is a function, so it is not a view param.
+const affordance: PlainView = { params: { inputSend: { run: () => {} } } };
+
 // Text params and the placeholder take only sources that give text.
 const flagRowText: PlainView = {
   // @ts-expect-error 'flag' gives a boolean, not row text.
@@ -316,3 +327,4 @@ void [typedValues, wrongLiteral, textForBuilder, flagForText, textSourceForFlag]
 void [flagSourceForText, inheritedWrongLiteral, flagRowText, builderRowDetail, flagPlaceholder];
 void [textRow, registryTypes, wrongSource, rowFieldParams];
 void [missingParam, noParams, missingDefaultParam, activateField];
+void [sharedParams, textBusy, flagTitle, affordance];

@@ -32,4 +32,4 @@ export const Layout = {
 };
 
 /** The layouts that declarative views can name: StandardLayout with this app's icons. */
-export const viewLayouts = { standard: standardLayout({ ...layoutIcons, Busy: icons.RefreshCw }) };
+export const viewLayouts = { standard: standardLayout(layoutIcons) };

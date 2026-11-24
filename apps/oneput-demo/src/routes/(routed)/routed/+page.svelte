@@ -4,12 +4,9 @@
   import OneputController from '@oneput/oneput/shared/components/OneputController.svelte';
   import OneputCornerButton from '@oneput/oneput/shared/components/OneputCornerButton.svelte';
   import { icons } from '$lib/common/icons.js';
-  import { createRoutedDemo } from '$lib/routed/_init.js';
+  import { init } from '$lib/routed/_init.js';
 
-  const { initialState, init } = createRoutedDemo((next) => {
-    state = next;
-  });
-  let state = $state(initialState);
+  let state = $state('');
 </script>
 
 <svelte:head>
@@ -43,6 +40,6 @@
 
 <!-- The routed page mounts its own controller. -->
 <Anchor>
-  <OneputController run={init} />
+  <OneputController run={(ctl) => init(ctl, (next) => (state = next))} />
 </Anchor>
 <OneputCornerButton icon={icons.Command} />

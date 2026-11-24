@@ -1,64 +1,15 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
-  import { onDestroy } from 'svelte';
-  import { createActor, type StateValue } from 'xstate';
-  import type { AppObject, Controller } from '@oneput/oneput';
   import Anchor from '@oneput/oneput/shared/components/Anchor.svelte';
   import OneputController from '@oneput/oneput/shared/components/OneputController.svelte';
   import OneputCornerButton from '@oneput/oneput/shared/components/OneputCornerButton.svelte';
-  import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
   import { icons } from '$lib/common/icons.js';
-  import { flowMachine, routeFlow } from '$lib/routed/flowMachine.js';
-  import { Layout } from '$lib/common/layout.js';
-  import { Online } from '$lib/common/online.js';
+  import { createRoutedDemo } from '$lib/routed/_init.js';
 
-  // Each page visit owns its actor and router subscriptions.
-  const actor = createActor(flowMachine);
-  // Show a nested state as a path, for example 'form.confirm'.
-  const pathOf = (value: StateValue): string =>
-    typeof value === 'string'
-      ? value
-      : Object.entries(value)
-          .map(([name, child]) => (child ? `${name}.${pathOf(child)}` : name))
-          .join(', ');
-  let state = $state(pathOf(actor.getSnapshot().value));
-  const subscription = actor.subscribe((snapshot) => (state = pathOf(snapshot.value)));
-  let routing: ReturnType<typeof routeFlow> | undefined;
-
-  // OneputController needs an AppObject to run. routeFlow replaces it at once
-  // with Welcome, so the stack is [Welcome] and Welcome is the root.
-  function init(ctl: Controller): AppObject {
-    const online = Online.create();
-    ctl.onDestroy(() => online.dispose());
-    const dynamicPlaceholder = DynamicPlaceholder.create(ctl, (params) =>
-      params.menuOpenBinding
-        ? params.isMenuOpen
-          ? `Close menu with ${params.menuOpenBinding}...`
-          : `Open menu with ${params.menuOpenBinding}...`
-        : 'Type here...'
-    );
-    ctl.input.setDefaultPlaceholder(dynamicPlaceholder);
-    return {
-      layout: { layout: Layout.create, params: {} },
-      settings: { enableGoBack: false },
-      onStart() {
-        actor.start();
-        routing = routeFlow(ctl, actor, online);
-        // A routed AppObject exited: the stack is empty and routeApp has
-        // stopped. Tell the machine, then route again from its new state.
-        ctl.app.setOnRootExit(() => {
-          actor.send({ type: 'EXITED' });
-          routing = routeFlow(ctl, actor, online);
-        });
-      }
-    };
-  }
-
-  onDestroy(() => {
-    routing?.stop();
-    subscription.unsubscribe();
-    actor.stop();
+  const { initialState, init } = createRoutedDemo((next) => {
+    state = next;
   });
+  let state = $state(initialState);
 </script>
 
 <svelte:head>
@@ -84,7 +35,7 @@
     </li>
     <li>
       In done, "Exit anyway" calls <code>ctl.app.exit</code>, which routed AppObjects should not do.
-      The page's <code>setOnRootExit</code> handler then sends EXITED, and the machine goes back to welcome.
+      The <code>setOnRootExit</code> handler then sends EXITED, and the machine goes back to welcome.
     </li>
   </ul>
   <p aria-live="polite"><small>Current state: <strong>{state}</strong></small></p>

@@ -262,7 +262,7 @@ each with a value that fits every layout that declares that slot: a value of
 the types they have in common. For example, if one layout declares `heading`
 as `string | number` and another as `string`, the view can give text there;
 if the types have nothing in common, as `string` and `number`, only
-`undefined`. So
+`undefined`. The type cannot know which layout a parent names, so
 rendering gives an error for a slot that the active layout does not declare,
 and for an unknown layout name. A snapshot whose views fill a slot that their
 layout does not declare is a type error at `appObjectActor`, also when the

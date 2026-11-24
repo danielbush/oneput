@@ -304,7 +304,7 @@ describe('row builders', () => {
 describe('list rows', () => {
   test('list row sends its event', () => {
     // arrange
-    const pages = createPages<PageView>({ layout: 'plain', menu: { id: 'pages', from: 'pages' } });
+    const pages = createPages<PageView>({ layout: 'plain', menu: { id: 'pages', $from: 'pages' } });
     const [item] = render(pages);
 
     // act
@@ -327,7 +327,7 @@ describe('list rows', () => {
         ]
       }
     };
-    const pages = createPages<PageView>({ layout: 'plain', menu: { id: 'pages', from: 'pages' } });
+    const pages = createPages<PageView>({ layout: 'plain', menu: { id: 'pages', $from: 'pages' } });
 
     // act
     const { menu } = renderActiveView(pages.snapshot, registry, layouts, {
@@ -345,7 +345,7 @@ describe('list rows', () => {
     // arrange
     const pages = createPages<PageView>({
       layout: 'plain',
-      menu: { id: 'pages', from: 'pages', items: [{ id: 'list-row', params: { text: 'Fixed' } }] }
+      menu: { id: 'pages', $from: 'pages', items: [{ id: 'list-row', params: { text: 'Fixed' } }] }
     });
 
     // act
@@ -712,7 +712,7 @@ describe('missing names', () => {
   test.each<[string, WideView]>([
     ['layout', { layout: 'gone', menu: { id: 'pages' } }],
     ['builder', { layout: 'plain', menu: { id: 'pages', items: [{ id: 'row', build: 'gone' }] } }],
-    ['list', { layout: 'plain', menu: { id: 'pages', from: 'gone' } }],
+    ['list', { layout: 'plain', menu: { id: 'pages', $from: 'gone' } }],
     [
       'slot text',
       { layout: 'plain', slots: { heading: { $from: 'gone' } }, menu: { id: 'pages' } }
@@ -760,7 +760,7 @@ describe('readable sources', () => {
     const pages = createPages<PageView>({
       layout: 'plain',
       slots: { heading: { $from: 'pageText' } },
-      menu: { id: 'pages', from: 'pages' }
+      menu: { id: 'pages', $from: 'pages' }
     });
     const render = () =>
       renderActiveView(pages.snapshot, mixed, layouts, { activate: pages.send })._unsafeUnwrap();
@@ -860,7 +860,7 @@ describe('readable sources', () => {
     [
       'readable list',
       { ...sources, menu: { pages: readable(throwing) } },
-      { menu: { id: 'pages', from: 'pages' } }
+      { menu: { id: 'pages', $from: 'pages' } }
     ],
     [
       'builder',

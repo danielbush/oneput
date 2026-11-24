@@ -107,7 +107,7 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
         description: 'Show the current results and report a selection next to the input.',
         meta: {
           view: {
-            menu: { from: 'results' },
+            menu: { $from: 'results' },
             slots: { status: { $from: 'resultStatus' } },
             settings: { clearInputAfterAction: true }
           }

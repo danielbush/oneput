@@ -360,8 +360,11 @@ export type ViewDef<
     focusBehaviour?: Menu['focusBehaviour'];
     /** Fixed rows. A child can override a parent's fixed row with the same ID. */
     items?: readonly ViewRow<Rows, Source, Event>[];
-    /** The list source. Its rows appear in source order before the fixed rows. */
-    from?: List;
+    /**
+     * The `menu` source whose rows to show, named with `$from` as every source is.
+     * Its rows appear in source order before the fixed rows.
+     */
+    $from?: List;
   };
   /** The input placeholder: text, or a source that gives text. */
   placeholder?: Text<Source>;
@@ -662,8 +665,8 @@ export function renderActiveView<
 
   // The rows that the view types allow, as the interpreter merges and draws them.
   let listRows: readonly AnyRow<Event>[] = [];
-  if (menu.from !== undefined) {
-    const list = named(sources.menu, menu.from).andThen((source) =>
+  if (menu.$from !== undefined) {
+    const list = named(sources.menu, menu.$from).andThen((source) =>
       attempt(() => (isReadable(source) ? source.source.get() : source(snapshot)))
     );
     if (list.isErr()) return err(list.error);

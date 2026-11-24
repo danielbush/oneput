@@ -182,7 +182,8 @@ ID in the event puts it there, for example the demo's result rows send
 data for one row comes as its params. In the demo, each search result row
 carries its result's text as the `text` param.
 
-Rows from the list named by `menu.from` appear first, in source order, with
+Rows from the `menu` source named by `menu.$from` (named as every source
+is) appear first, in source order, with
 their IDs and duplicates. Fixed rows declared in the active views follow.
 Only fixed rows merge by ID. They keep the position of their first
 declaration. A child's row fields (`build`, `send`) merge key by key with its

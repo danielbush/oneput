@@ -39,7 +39,10 @@ type ViewSettings = Pick<
 /** The row fields that the interpreter reads. The builder's params are apart, in `params`. */
 type RowFields<Event extends RowEvent> = {
   id: string;
-  /** Send this event when the user activates the row. Only a row with `send` activates. */
+  /**
+   * The row's event. The builder gets a function that sends it, and decides
+   * which element raises it.
+   */
   send?: Event;
 };
 
@@ -240,8 +243,9 @@ export type RowBuilder<Params extends SlotMap = SlotMap> = {
   params: Params;
   /**
    * Make the item from the row's ID and the values of its params. Return the
-   * item with the row's ID. `activate` is present when the row has `send`;
-   * use it as the item's action.
+   * item with the row's ID. `activate`, present when the row has `send`,
+   * sends the row's event; the builder decides which element raises it, for
+   * example as the item's action, or none.
    */
   build(
     row: { id: string; params: OptionalUndefined<SlotTypes<Params>> },

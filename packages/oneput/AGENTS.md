@@ -59,7 +59,7 @@ named row builders and named layouts whose params and slots have declared types
 (`menuTitle`, `busy`, `input`) in `params`, a layout's own in `slots`, and
 the input `placeholder` apart; a row gives
 its builder's params in `params` (required unless the type allows
-`undefined`), and only a row with `send` is clickable. `ViewFor` types a
+`undefined`) and its event in `send`, which the builder decides how to raise. `ViewFor` types a
 machine's views from its content and layouts. See `docs/architecture.md`.
 
 ### Routing

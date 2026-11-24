@@ -10,6 +10,8 @@ import { rowBuilder, slot } from './interpreter.js';
  * - `text`: the main text.
  * - `detail` (optional): text below the main text.
  * - `icon` (optional): the icon at the left.
+ *
+ * The whole item raises the row's `send`.
  */
 export const standardRow = rowBuilder({
   params: {
@@ -28,8 +30,8 @@ export const standardRow = rowBuilder({
 });
 
 /**
- * The row builder that shows an information message. The row does not
- * activate, even when it has `send`.
+ * The row builder that shows an information message. It raises no event,
+ * even when the row has `send`.
  *
  * - `text`: the message.
  * - `icon` (optional): the icon at the left. With no icon, it is `Info`.

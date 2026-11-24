@@ -130,7 +130,7 @@ When an AppObject starts, `AppController.runBefore()` extracts bindings from `ac
 
 `appObjectActor(ctl, actor, sources, layouts)` in `shared/declarative/` connects
 an actor to Oneput. The actor receives AppObject lifecycle, Back and input
-events, and the events that clickable rows send. Its active states declare `meta.view`. The interpreter
+events, and the events that rows send. Its active states declare `meta.view`. The interpreter
 merges views from parent to child and reads named sources from the snapshot
 for changing layout params, slot values, row params and rows. Oneput owns the stack and applies the view to the
 current AppObject through `watch` and `onRefresh`.
@@ -174,9 +174,11 @@ registry, for the machine's `ViewDef`. `standardRow` and `infoRow` in
 standard menu item and an information message.
 
 The builder gets the row's ID and its params, and returns a menu item with
-the row's ID. The interpreter uses the returned item unchanged. A row is
-clickable if and only if it has `send`: the builder then gets an activation
-function, which sends the row's event to the actor. A row that needs its own
+the row's ID. The interpreter uses the returned item unchanged. A row's
+`send` is its event. For a row with `send`, the builder gets a function that
+sends that event to the actor, and decides which element raises it:
+`standardRow` makes the whole item its action, and `infoRow` raises none. A
+row that needs its own
 ID in the event puts it there, for example the demo's result rows send
 `{ type: 'RESULT_ACTIVATED', id }`. A builder does not read the snapshot:
 data for one row comes as its params. In the demo, each search result row

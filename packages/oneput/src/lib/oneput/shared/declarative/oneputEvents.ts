@@ -2,7 +2,7 @@ import type { InputClaimReleaseReason, MenuItemFocusCause, MenuUpdateCause } fro
 
 /**
  * Event vocabulary for AppObject machines. The adapter sends lifecycle, Back
- * and input events. A row sends its own event, its `send`.
+ * and input events. A row's event is its `send`, which its builder raises.
  */
 export type OneputEvent =
   /** Replaces AppObject.onStart. */

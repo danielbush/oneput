@@ -63,7 +63,10 @@ function applyView(ctl: Controller, view: OneputView, rowsChanged: boolean) {
  * Which argument decides each type parameter: `actor` decides `Snapshot` and
  * `Event`; `sources` decides `Source` (the slot source types), `List` (the
  * list names) and `Builders` (the row builders); `layouts` decides `Layouts`.
- * `NoInfer` keeps `Event` from being inferred from the list rows' `send`.
+ * `NoInfer` keeps `sources` from deciding them too: `Snapshot` from the
+ * parameter types of its source functions (with an xstate actor, that
+ * candidate wins and fails the constraint), and `Event` from the list rows'
+ * `send`.
  * The constraint on `Snapshot` checks the actor's views against the others.
  * It is a constraint, not an intersection with the snapshot type, so that a
  * view filling a slot the layout does not declare (a misspelt one) is an error.
@@ -78,7 +81,7 @@ export function appObjectActor<
 >(
   ctl: Controller,
   actor: ViewActor<Snapshot, Event>,
-  sources: ViewSources<Snapshot, Source, List, NoInfer<Event>, Builders>,
+  sources: ViewSources<NoInfer<Snapshot>, Source, List, NoInfer<Event>, Builders>,
   layouts: Layouts
 ): AppObject {
   const sendIfCurrent = (event: OneputEvent | Event) => {

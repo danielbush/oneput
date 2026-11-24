@@ -13,7 +13,7 @@ import { rowBuilder, slot } from './interpreter.js';
  */
 export const standardRow = rowBuilder({
   params: { text: slot<string>(), detail: slot<string>(), icon: slot<string>() },
-  build: ({ id, text, detail, icon }, activate) =>
+  build: ({ id, params: { text, detail, icon } }, activate) =>
     stdMenuItem({
       id,
       textContent: text,
@@ -32,5 +32,6 @@ export const standardRow = rowBuilder({
  */
 export const infoRow = rowBuilder({
   params: { text: slot<string>(), icon: slot<string>() },
-  build: ({ id, text, icon }) => infoMenuItem({ id, msg: text ?? '', icon: icon ?? 'Info' })
+  build: ({ id, params: { text, icon } }) =>
+    infoMenuItem({ id, msg: text ?? '', icon: icon ?? 'Info' })
 });

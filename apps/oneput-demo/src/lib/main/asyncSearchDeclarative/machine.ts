@@ -44,8 +44,10 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
                 {
                   id: 'instructions',
                   build: 'info',
-                  icon: 'Info',
-                  text: 'Start typing something and inspect the browser console. The latest input controls the results. The service fails 30% of the time.'
+                  params: {
+                    icon: 'Info',
+                    text: 'Start typing something and inspect the browser console. The latest input controls the results. The service fails 30% of the time.'
+                  }
                 }
               ]
             }
@@ -129,9 +131,11 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
               items: [
                 {
                   id: 'retry-search',
-                  text: 'Retry search',
-                  detail: { from: 'searchError' },
-                  icon: 'RefreshCw',
+                  params: {
+                    text: 'Retry search',
+                    detail: { from: 'searchError' },
+                    icon: 'RefreshCw'
+                  },
                   send: { type: 'RETRY_SEARCH' }
                 }
               ]

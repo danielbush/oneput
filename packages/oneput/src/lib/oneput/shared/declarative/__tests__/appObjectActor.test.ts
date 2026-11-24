@@ -72,13 +72,13 @@ const rootView: PageView = {
   menu: {
     id: 'pages',
     items: [
-      { id: 'next', text: 'Next page', send: { type: 'NEXT_PAGE' } },
-      { id: 'help', text: 'Help' }
+      { id: 'next', params: { text: 'Next page' }, send: { type: 'NEXT_PAGE' } },
+      { id: 'help', params: { text: 'Help' } }
     ]
   }
 };
 const secondView: PageView = {
-  menu: { items: [{ id: 'next', text: 'Second page' }] }
+  menu: { items: [{ id: 'next', params: { text: 'Second page' } }] }
 };
 
 /** A two-state actor: root > first | second. NEXT_PAGE moves first to second. */
@@ -181,7 +181,7 @@ test('a child view switches the input kind on the redraw and keeps the typed tex
   // arrange
   const { ctl, shown } = runPages({
     input: { kind: 'textarea', rows: 3, placeholder: 'Note...' },
-    menu: { items: [{ id: 'next', text: 'Second page' }] }
+    menu: { items: [{ id: 'next', params: { text: 'Second page' } }] }
   });
   await shown;
   const firstInput = ctl.currentProps.inputUI?.input;
@@ -204,7 +204,7 @@ test('a view that names another layout shows that layout component', async () =>
   const { ctl, shown } = runPages({
     layout: 'banner',
     slots: { banner: 'Offline' },
-    menu: { items: [{ id: 'next', text: 'Second page' }] }
+    menu: { items: [{ id: 'next', params: { text: 'Second page' } }] }
   });
   await shown;
   const firstLayout = ctl.ui.getLayout();
@@ -246,7 +246,9 @@ test('a readable source change redraws the view with no new snapshot', async () 
   const ctl = Controller.createNull({ menuOpen: true });
   controllers.push(ctl);
   const label = cell('First label');
-  const rows = cell<readonly { id: string; text: string }[]>([{ id: 'a', text: 'Row A' }]);
+  const rows = cell<readonly { id: string; params: { text: string } }[]>([
+    { id: 'a', params: { text: 'Row A' } }
+  ]);
   const app = appObjectActor(
     ctl,
     createStillActor({
@@ -272,7 +274,7 @@ test('a readable source change redraws the view with no new snapshot', async () 
   await retitled;
   const rowsAfterTitle = ctl.currentProps.menuItems?.map((item) => item.id);
   const redrawn = menuShows(ctl, 'Row B');
-  rows.set([{ id: 'b', text: 'Row B' }]);
+  rows.set([{ id: 'b', params: { text: 'Row B' } }]);
   await redrawn;
 
   // assert

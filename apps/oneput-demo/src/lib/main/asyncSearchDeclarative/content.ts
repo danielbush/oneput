@@ -44,12 +44,12 @@ export function createContent(online: Online) {
       searchError: ({ context }: SearchSnapshot) => context.error?.message ?? ''
     },
     menu: {
-      // Each row carries its result's text as the `result` builder's param.
+      // Each row carries its result's text as the `result` builder's `text` param.
       results: ({ context }: SearchSnapshot) =>
         context.results.map(({ id, text }) => ({
           id,
           build: 'result' as const,
-          text,
+          params: { text },
           activate: true
         }))
     },
@@ -59,7 +59,7 @@ export function createContent(online: Online) {
       // Built with menuItem, not stdMenuItem, to show a custom builder.
       result: rowBuilder({
         params: { text: slot<string>() },
-        build: ({ id, text }, activate) =>
+        build: ({ id, params: { text } }, activate) =>
           menuItem({
             id,
             tag: 'button',

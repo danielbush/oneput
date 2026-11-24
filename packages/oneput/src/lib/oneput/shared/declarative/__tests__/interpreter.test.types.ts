@@ -56,7 +56,7 @@ type Layouts = LayoutSlots<typeof layouts>;
 /** A row builder whose params are not text. */
 const counter = rowBuilder({
   params: { count: slot<number>(), done: slot<boolean>() },
-  build: ({ id, count, done }, activate) =>
+  build: ({ id, params: { count, done } }, activate) =>
     menuItem({
       id,
       action: activate,
@@ -78,7 +78,7 @@ const missing: PlainView = {
 };
 const otherParam: PlainView = {
   // @ts-expect-error 'counter' does not declare 'text'.
-  menu: { items: [{ id: 'row', build: 'counter', text: 'Standard' }] }
+  menu: { items: [{ id: 'row', build: 'counter', params: { text: 'Standard' } }] }
 };
 const unknownParam: PlainView = {
   // @ts-expect-error The default builder does not declare 'colour'.
@@ -86,42 +86,47 @@ const unknownParam: PlainView = {
 };
 const otherBuilderParam: PlainView = {
   // @ts-expect-error The default builder does not declare 'count'; 'counter' does.
-  menu: { items: [{ id: 'row', text: 'Row', count: 1 }] }
+  menu: { items: [{ id: 'row', params: { text: 'Row', count: 1 } }] }
 };
 const noDefault: NoDefaultView = {
   // @ts-expect-error With no 'default' builder, each row names a builder.
-  menu: { items: [{ id: 'row', text: 'Row' }] }
+  menu: { items: [{ id: 'row', params: { text: 'Row' } }] }
 };
 
 // Row params: a literal or a source must fit the type that the param declares.
 const typedRows: PlainView = {
   menu: {
     items: [
-      { id: 'a', text: 'A', detail: { from: 'known' }, send: undefined, activate: true },
-      { id: 'b', build: 'counter', count: 2, done: { from: 'flag' } },
-      { id: 'c', build: 'counter', count: { from: 'total' } },
-      { id: 'd', build: 'default', text: 'D' },
-      { id: 'e', build: 'info', text: 'Info' }
+      {
+        id: 'a',
+        params: { text: 'A', detail: { from: 'known' } },
+        send: undefined,
+        activate: true
+      },
+      { id: 'b', build: 'counter', params: { count: 2, done: { from: 'flag' } } },
+      { id: 'c', build: 'counter', params: { count: { from: 'total' } } },
+      { id: 'd', build: 'default', params: { text: 'D' } },
+      { id: 'e', build: 'info', params: { text: 'Info' } }
     ]
   }
 };
 const wrongParamLiteral: PlainView = {
   // @ts-expect-error 'count' takes a number, not text.
-  menu: { items: [{ id: 'row', build: 'counter', count: 'two' }] }
+  menu: { items: [{ id: 'row', build: 'counter', params: { count: 'two' } }] }
 };
 const wrongParamSource: PlainView = {
   // @ts-expect-error 'known' gives text; 'done' takes a boolean.
-  menu: { items: [{ id: 'row', build: 'counter', done: { from: 'known' } }] }
+  menu: { items: [{ id: 'row', build: 'counter', params: { done: { from: 'known' } } }] }
 };
 const unknownParamSource: PlainView = {
   // @ts-expect-error 'gone' is not a source.
-  menu: { items: [{ id: 'row', text: { from: 'gone' } }] }
+  menu: { items: [{ id: 'row', params: { text: { from: 'gone' } } }] }
 };
 
-rowBuilder({
-  // @ts-expect-error A param cannot take the name of a row field.
-  params: { send: slot<string>() },
-  build: ({ id }) => menuItem({ id })
+// The params are apart from the row's own fields, so a param can take any of their names.
+const rowFieldParams = rowBuilder({
+  params: { id: slot<string>(), send: slot<string>() },
+  build: ({ id, params }) => menuItem({ id, attr: { title: `${params.id} ${params.send}` } })
 });
 rowBuilder({
   // @ts-expect-error A param name from Object.prototype would clash with the inherited member.
@@ -186,16 +191,16 @@ const inheritedWrongLiteral: PlainView = {
 // Text params and the placeholder take only sources that give text.
 const flagRowText: PlainView = {
   // @ts-expect-error 'flag' gives a boolean, not row text.
-  menu: { items: [{ id: 'row', text: { from: 'flag' } }] }
+  menu: { items: [{ id: 'row', params: { text: { from: 'flag' } } }] }
 };
 const builderRowDetail: PlainView = {
   // @ts-expect-error 'footer' gives a builder, not row detail.
-  menu: { items: [{ id: 'row', text: 'Row', detail: { from: 'footer' } }] }
+  menu: { items: [{ id: 'row', params: { text: 'Row', detail: { from: 'footer' } } }] }
 };
 // @ts-expect-error 'flag' gives a boolean, not a placeholder.
 const flagPlaceholder: PlainView = { input: { placeholder: { from: 'flag' } } };
 const textRow: PlainView = {
-  menu: { items: [{ id: 'row', text: { from: 'known' }, detail: 'Detail' }] }
+  menu: { items: [{ id: 'row', params: { text: { from: 'known' }, detail: 'Detail' } }] }
 };
 
 type Snapshot = { busy: boolean };
@@ -222,15 +227,15 @@ const listSources: ViewSources<Snapshot, Sources, 'rows', never, typeof builders
   ...registry,
   menu: {
     rows: () => [
-      { id: 'a', text: 'A' },
-      { id: 'b', build: 'counter', count: 1 }
+      { id: 'a', params: { text: 'A' } },
+      { id: 'b', build: 'counter', params: { count: 1 } }
     ]
   }
 };
 const wrongListRow: ViewSources<Snapshot, Sources, 'rows', never, typeof builders> = {
   ...registry,
   // @ts-expect-error 'count' takes a number, not text.
-  menu: { rows: () => [{ id: 'b', build: 'counter', count: 'one' }] }
+  menu: { rows: () => [{ id: 'b', build: 'counter', params: { count: 'one' } }] }
 };
 
 const inherited: PlainView = { slots: { note: { from: 'known' } } };
@@ -283,4 +288,4 @@ void forged;
 void [emptySlot, inferredSnapshot];
 void [typedValues, wrongLiteral, textForBuilder, flagForText, textSourceForFlag];
 void [flagSourceForText, inheritedWrongLiteral, flagRowText, builderRowDetail, flagPlaceholder];
-void [textRow, registryTypes, wrongSource];
+void [textRow, registryTypes, wrongSource, rowFieldParams];

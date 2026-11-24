@@ -59,7 +59,7 @@ const builders = {
   // Shows its text and detail as one text, to show which params reach it.
   default: rowBuilder({
     params: { text: slot<string>(), detail: slot<string>() },
-    build: ({ id, text, detail }, activate) =>
+    build: ({ id, params: { text, detail } }, activate) =>
       menuItem({
         id,
         action: activate,
@@ -68,7 +68,7 @@ const builders = {
   }),
   badge: rowBuilder({
     params: { page: slot<number>() },
-    build: ({ id, page }, activate) =>
+    build: ({ id, params: { page } }, activate) =>
       menuItem({
         id,
         action: activate,
@@ -130,7 +130,9 @@ const sources = {
     labelText: () => 'Label',
     page: ({ page }: Snapshot) => page
   },
-  menu: { pages: () => [{ id: 'list-row', build: 'badge' as const, page: 7, activate: true }] },
+  menu: {
+    pages: () => [{ id: 'list-row', build: 'badge' as const, params: { page: 7 }, activate: true }]
+  },
   menuItem: builders
 } satisfies ViewSources<Snapshot, PageSources, 'pages', PageEvent, typeof builders>;
 
@@ -183,7 +185,7 @@ describe('row builders', () => {
   test('row with no build uses the default builder', () => {
     // arrange
     const pages = pagesWith([
-      { id: 'details', text: { from: 'pageText' }, detail: 'Details', activate: true }
+      { id: 'details', params: { text: { from: 'pageText' }, detail: 'Details' }, activate: true }
     ]);
     const [item] = render(pages);
 
@@ -199,7 +201,12 @@ describe('row builders', () => {
   test('named builder gets its params and sends the row event', () => {
     // arrange
     const pages = pagesWith([
-      { id: 'next', build: 'badge', page: { from: 'page' }, send: { type: 'NEXT_PAGE' } }
+      {
+        id: 'next',
+        build: 'badge',
+        params: { page: { from: 'page' } },
+        send: { type: 'NEXT_PAGE' }
+      }
     ]);
     const [item] = render(pages);
 
@@ -214,7 +221,7 @@ describe('row builders', () => {
 
   test('row with no send or activate has no action', () => {
     // arrange
-    const pages = pagesWith([{ id: 'help', text: 'Help' }]);
+    const pages = pagesWith([{ id: 'help', params: { text: 'Help' } }]);
 
     // act
     const [item] = render(pages);
@@ -229,7 +236,7 @@ describe('row builders', () => {
     const registry = { ...wideSources, menuItem: { badge: builders.badge } };
     const pages = createPages<WideView>({
       layout: 'plain',
-      menu: { id: 'pages', items: [{ id: 'row', text: 'Row' }] }
+      menu: { id: 'pages', items: [{ id: 'row', params: { text: 'Row' } }] }
     });
 
     // act
@@ -263,8 +270,8 @@ describe('list rows', () => {
       ...sources,
       menu: {
         pages: () => [
-          { id: 'same', text: 'First' },
-          { id: 'same', text: 'Second' }
+          { id: 'same', params: { text: 'First' } },
+          { id: 'same', params: { text: 'Second' } }
         ]
       }
     };
@@ -286,7 +293,7 @@ describe('list rows', () => {
     // arrange
     const pages = createPages<PageView>({
       layout: 'plain',
-      menu: { id: 'pages', from: 'pages', items: [{ id: 'list-row', text: 'Fixed' }] }
+      menu: { id: 'pages', from: 'pages', items: [{ id: 'list-row', params: { text: 'Fixed' } }] }
     });
 
     // act
@@ -307,10 +314,12 @@ describe('fixed row overrides', () => {
         layout: 'plain',
         menu: {
           id: 'pages',
-          items: [{ id: 'row', text: 'Parent', detail: 'Detail', send: { type: 'NEXT_PAGE' } }]
+          items: [
+            { id: 'row', params: { text: 'Parent', detail: 'Detail' }, send: { type: 'NEXT_PAGE' } }
+          ]
         }
       },
-      { menu: { items: [{ id: 'row', text: 'Child' }] } }
+      { menu: { items: [{ id: 'row', params: { text: 'Child' } }] } }
     );
     const [item] = render(pages);
 
@@ -330,16 +339,16 @@ describe('fixed row overrides', () => {
         menu: {
           id: 'pages',
           items: [
-            { id: 'row', text: 'Parent' },
-            { id: 'parent-only', text: 'Parent only' }
+            { id: 'row', params: { text: 'Parent' } },
+            { id: 'parent-only', params: { text: 'Parent only' } }
           ]
         }
       },
       {
         menu: {
           items: [
-            { id: 'child-only', text: 'Child only' },
-            { id: 'row', build: 'badge', page: { from: 'page' } }
+            { id: 'child-only', params: { text: 'Child only' } },
+            { id: 'row', build: 'badge', params: { page: { from: 'page' } } }
           ]
         }
       }
@@ -360,12 +369,14 @@ describe('fixed row overrides', () => {
         layout: 'plain',
         menu: {
           id: 'pages',
-          items: [{ id: 'row', text: 'Parent', detail: 'Detail', send: { type: 'NEXT_PAGE' } }]
+          items: [
+            { id: 'row', params: { text: 'Parent', detail: 'Detail' }, send: { type: 'NEXT_PAGE' } }
+          ]
         }
       },
-      { menu: { items: [{ id: 'row', build: 'badge', page: 3 }] } },
+      { menu: { items: [{ id: 'row', build: 'badge', params: { page: 3 } }] } },
       // No build: back to the default builder, with none of the parent's params.
-      { menu: { items: [{ id: 'row', text: 'Grandchild' }] } }
+      { menu: { items: [{ id: 'row', params: { text: 'Grandchild' } }] } }
     );
     const [item] = render(pages);
 
@@ -384,7 +395,9 @@ describe('fixed row overrides', () => {
         layout: 'plain',
         menu: {
           id: 'pages',
-          items: [{ id: 'row', build: 'badge', page: 4, send: { type: 'PREVIOUS_PAGE' } }]
+          items: [
+            { id: 'row', build: 'badge', params: { page: 4 }, send: { type: 'PREVIOUS_PAGE' } }
+          ]
         }
       },
       { menu: { items: [{ id: 'row', build: 'badge', send: { type: 'NEXT_PAGE' } }] } }
@@ -568,7 +581,10 @@ describe('missing names', () => {
     ['slot text', { layout: 'plain', slots: { heading: { from: 'gone' } }, menu: { id: 'pages' } }],
     [
       'row param',
-      { layout: 'plain', menu: { id: 'pages', items: [{ id: 'row', text: { from: 'gone' } }] } }
+      {
+        layout: 'plain',
+        menu: { id: 'pages', items: [{ id: 'row', params: { text: { from: 'gone' } } }] }
+      }
     ]
   ])('%s', (_, view) => {
     // arrange
@@ -590,8 +606,8 @@ describe('readable sources', () => {
     const heading = cell('First');
     const label = cell('Label A');
     const rows = cell<readonly ViewRow<Rows, PageSources, PageEvent>[]>([
-      { id: 'list-row', build: 'badge', page: { from: 'page' }, activate: true },
-      { id: 'label-row', text: { from: 'labelText' } }
+      { id: 'list-row', build: 'badge', params: { page: { from: 'page' } }, activate: true },
+      { id: 'label-row', params: { text: { from: 'labelText' } } }
     ]);
     const mixed = {
       ...sources,

@@ -29,7 +29,7 @@ type ViewSettings = Pick<
   'enableFilter' | 'enableInputElement' | 'enableMenuItemFocus' | 'clearInputAfterAction'
 >;
 
-/** The row fields that the interpreter reads. All other fields are the builder's params. */
+/** The row fields that the interpreter reads. The builder's params are apart, in `params`. */
 type RowFields<Event extends RowEvent> = {
   id: string;
   /** Send this event when the user activates the row. */
@@ -46,27 +46,31 @@ const defaultRow: DefaultRow = 'default';
 type ParamValues<Types, Source> = { [Name in keyof Types]?: Fill<Types[Name], Source> };
 
 /**
- * A menu row: the builder that draws it, its activation and the builder's
- * params, flat on the row. A row with no `build` uses the `default` builder.
- * `Rows` gives the param types of each builder by name (see {@link RowParams}).
+ * A menu row: the builder that draws it (`build`), its activation, and the
+ * builder's params in `params`. A row with no `build` uses the `default`
+ * builder. `Rows` gives the param types of each builder by name (see
+ * {@link RowParams}).
  */
 export type ViewRow<Rows extends TypesByName, Source, Event extends RowEvent> =
   | {
-      [Name in keyof Rows & string]: RowFields<Event> & { build: Name } & ParamValues<
-          Rows[Name],
-          Source
-        >;
+      [Name in keyof Rows & string]: RowFields<Event> & {
+        build: Name;
+        params?: ParamValues<Rows[Name], Source>;
+      };
     }[keyof Rows & string]
   | (DefaultRow extends keyof Rows
-      ? RowFields<Event> & { build?: never } & ParamValues<Rows[DefaultRow], Source> & {
+      ? RowFields<Event> & {
+          build?: never;
+          params?: ParamValues<Rows[DefaultRow], Source> & {
             [Name in Exclude<ParamNames<Rows>, keyof Rows[DefaultRow]>]?: never;
-          }
+          };
+        }
       : never);
 
 /**
  * The param names of all builders. A row with no `build` cannot take the
- * others: with no builder name, TypeScript checks extra fields against all
- * the builders.
+ * others: with no builder name, TypeScript checks its params against all the
+ * builders.
  */
 type ParamNames<Rows> = Rows[keyof Rows] extends infer Params
   ? Params extends unknown
@@ -75,15 +79,16 @@ type ParamNames<Rows> = Rows[keyof Rows] extends infer Params
   : never;
 
 /** A row as the interpreter merges and draws it: any builder name and params. */
-type AnyRow<Event extends RowEvent> = RowFields<Event> & { build?: string } & Record<
-    string,
-    unknown
-  >;
+type AnyRow<Event extends RowEvent> = RowFields<Event> & {
+  build?: string;
+  params?: Record<string, unknown>;
+};
 
 /**
- * Merge a later fixed row into the earlier fixed row with its ID, key by key.
- * When the later row names another builder (no `build` names the default),
- * the earlier row's params do not apply; its `send` and `activate` do.
+ * Merge a later fixed row into the earlier fixed row with its ID. The row's
+ * own fields merge key by key. Its params merge key by key while the later
+ * row keeps the builder; when it names another builder (no `build` names the
+ * default), the later row's params replace them.
  */
 function mergeRow<Event extends RowEvent>(
   earlier: AnyRow<Event> | undefined,
@@ -91,8 +96,9 @@ function mergeRow<Event extends RowEvent>(
 ): AnyRow<Event> {
   if (earlier === undefined) return later;
   const builder = (row: AnyRow<Event>) => row.build ?? defaultRow;
-  if (builder(later) === builder(earlier)) return { ...earlier, ...later };
-  return { send: earlier.send, activate: earlier.activate, ...later };
+  const params =
+    builder(later) === builder(earlier) ? { ...earlier.params, ...later.params } : later.params;
+  return { ...earlier, ...later, build: later.build, params };
 }
 
 type NameError = 'Expected a source for each name';
@@ -207,9 +213,6 @@ export type LayoutSlots<Layouts extends ViewLayouts> = {
   [Name in keyof Layouts]: SlotTypes<Layouts[Name]['slots']>;
 };
 
-/** A row field that the interpreter reads, so a builder cannot take it as a param. */
-type RowFieldName = keyof RowFields<RowEvent> | 'build';
-
 /**
  * Code that draws one kind of menu row: its params and their types, and how
  * the resolved params become a menu item. Make one with {@link rowBuilder}
@@ -218,11 +221,11 @@ type RowFieldName = keyof RowFields<RowEvent> | 'build';
 export type RowBuilder<Params extends SlotMap = SlotMap> = {
   params: Params;
   /**
-   * Make the item from the row's ID and the values of its filled params.
-   * Return the item with the row's ID. `activate` is present when the row
-   * activates (it has `send` or `activate: true`); use it as the item's action.
+   * Make the item from the row's ID and the values of its params. Return the
+   * item with the row's ID. `activate` is present when the row activates (it
+   * has `send` or `activate: true`); use it as the item's action.
    */
-  build(row: { id: string } & Partial<SlotTypes<Params>>, activate?: () => void): MenuItem;
+  build(row: { id: string; params: Partial<SlotTypes<Params>> }, activate?: () => void): MenuItem;
 };
 
 /**
@@ -232,17 +235,17 @@ export type RowBuilder<Params extends SlotMap = SlotMap> = {
  * ```ts
  * rowBuilder({
  *   params: { label: slot<string>(), count: slot<number>() },
- *   build: ({ id, label, count }, activate) =>
+ *   build: ({ id, params: { label, count } }, activate) =>
  *     menuItem({ id, action: activate, children: (b) => [b.fchild({ textContent: `${label}: ${count}` })] })
  * });
  * ```
  *
- * Param names from `Object.prototype`, and the row's own fields (`id`,
- * `build`, `send`, `activate`), are type errors.
+ * Param names from `Object.prototype` are type errors. Any other name is
+ * free: the params are apart from the row's own fields.
  */
 export function rowBuilder<Params extends SlotMap>(
   builder: RowBuilder<Params> & {
-    params: { [Name in keyof Params & (InheritedName | RowFieldName)]: never };
+    params: { [Name in keyof Params & InheritedName]: never };
   }
 ): RowBuilder<Params> {
   return builder;
@@ -574,13 +577,13 @@ export function renderActiveView<
   }
 
   const renderRow = (row: AnyRow<Event>): Result<MenuItem, ViewError> => {
-    const { id, build = defaultRow, send, activate: activates, ...params } = row;
+    const { id, build = defaultRow, send, activate: activates, params = {} } = row;
     const raise =
       (activates ?? send !== undefined)
         ? () => activate(send ?? { type: 'ITEM_ACTIVATED', id })
         : undefined;
     return Result.combine([named(sources.menuItem, build), readAll(params)]).andThen(
-      ([builder, values]) => attempt(() => builder.build({ ...values, id }, raise))
+      ([builder, values]) => attempt(() => builder.build({ id, params: values }, raise))
     );
   };
 

@@ -4,7 +4,7 @@ import { infoRow, standardRow } from '../standardRow.js';
 describe('standardRow', () => {
   test('text, detail, icon and action', () => {
     // arrange
-    const row = { id: 'result', text: 'Result', detail: 'A match', icon: 'Search' };
+    const row = { id: 'result', params: { text: 'Result', detail: 'A match', icon: 'Search' } };
 
     // act
     const item = standardRow.build(row, () => {});
@@ -42,7 +42,7 @@ describe('standardRow', () => {
 
   test('no action', () => {
     // arrange
-    const row = { id: 'result', text: 'Result' };
+    const row = { id: 'result', params: { text: 'Result' } };
 
     // act
     const item = standardRow.build(row);
@@ -58,7 +58,7 @@ describe('infoRow', () => {
     { icon: 'Search', expectedIcon: 'Search' }
   ])('$expectedIcon icon', ({ icon, expectedIcon }) => {
     // arrange
-    const row = { id: 'status', text: 'Searching', icon };
+    const row = { id: 'status', params: { text: 'Searching', icon } };
 
     // act
     const item = infoRow.build(row, () => {});

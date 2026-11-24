@@ -139,7 +139,7 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
     if (!this.settings.busy) {
       return;
     }
-    return b.icon(this.icons.Busy, { id: 'layout-input-busy', classes: ['oneput__rotate'] });
+    return b.icon(this.icons.Busy, { id: 'oneput-layout-input-busy', classes: ['oneput__rotate'] });
   }
 
   /**
@@ -153,13 +153,13 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
       return;
     }
     return hflex({
-      id: 'layout-input-right',
+      id: 'oneput-layout-input-right',
       children: (b) => {
         const children: FlexChildren = [this.busyIcon(b)];
         if (inputAccept) {
           children.push(
             acceptButton({
-              id: 'layout-input-accept',
+              id: 'oneput-layout-input-accept',
               icon: this.icons.Accept,
               onClick: () => inputAccept.run(),
               enabled: isEnabled(inputAccept),
@@ -170,7 +170,7 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
         if (inputReject) {
           children.push(
             rejectButton({
-              id: 'layout-input-reject',
+              id: 'oneput-layout-input-reject',
               icon: this.icons.Reject,
               onClick: () => inputReject.run(),
               enabled: isEnabled(inputReject),
@@ -181,7 +181,7 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
         if (inputSend) {
           children.push(
             sendButton({
-              id: 'layout-input-send',
+              id: 'oneput-layout-input-send',
               icon: this.icons.Send,
               onClick: () => inputSend.run(),
               enabled: isEnabled(inputSend),
@@ -205,7 +205,7 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
       return this.inputRight();
     }
     return hflex({
-      id: 'layout-input-right-custom',
+      id: 'oneput-layout-input-right-custom',
       children: (b) => [this.busyIcon(b), inputRight]
     });
   }

@@ -4,6 +4,10 @@
 
 This codebase is new. Avoid preserving old apis or features, do not keep legacy code. Always prefer replacing with better implementations and apis. It's paramount that we get the foundations right so that future changes can be added easily and in a modular fashion.
 
+## Element IDs
+
+Any ID that Oneput core gives an element must contain `oneput`, for example `oneput-layout-input-busy`. Then an ID that a host or AppObject gives cannot collide with one of Oneput's in the same keyed list.
+
 ## Demo app
 
 `apps/oneput-demo` shows Oneput. It is not meant to be consumed. Track its issues here, in this package: security findings in `THREAT_MODEL.md`, and other issues in this package's docs and backlog. Do not create separate docs for the demo.

@@ -31,6 +31,10 @@ export type InternalEvent =
   | MenuSetItemsEvent
   | SelectionChangeEvent;
 
+/**
+ * The input value changed. Carries before/after value and range snapshots so
+ * consumers can reason about the edit transition.
+ */
 export type InputChangeEvent = {
   type: 'input-change';
   payload: InputChangePayload;
@@ -48,18 +52,22 @@ export type AppChangeEvent = {
   type: 'app-change';
   payload: AppChange;
 };
+/** Key bindings were updated. */
 export type BindingsChangeEvent = {
   type: 'bindings-change';
   payload: { bindings: KeyBindingMap };
 };
+/** The menu opened or closed. */
 export type MenuOpenChangeEvent = {
   type: 'menu-open-change';
   payload: boolean;
 };
+/** The menu close outro finished. */
 export type MenuOutroEndEvent = {
   type: 'menu-outro-end';
   payload: undefined;
 };
+/** The focused menu item changed. */
 export type MenuItemFocusEvent = {
   type: 'menu-item-focus';
   /**
@@ -74,10 +82,12 @@ export type MenuItemFocusEvent = {
     cause: MenuItemFocusCause;
   };
 };
+/** A menu action fired. */
 export type MenuActionEvent = {
   type: 'menu-action';
   payload: { menuId: string; menuActionId: string };
 };
+/** Displayed menu rows and synthetic focus were resolved, with the outer update cause. */
 export type MenuSetItemsEvent = {
   type: 'set-menu-items';
   payload: {
@@ -87,6 +97,7 @@ export type MenuSetItemsEvent = {
     menuItem: MenuItem | undefined;
   };
 };
+/** Input selection state changed. */
 export type SelectionChangeEvent = {
   type: 'selection-change';
   payload: { selection: InputSelectionState };

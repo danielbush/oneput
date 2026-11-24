@@ -60,6 +60,9 @@ function applyView(ctl: Controller, view: OneputView, rowsChanged: boolean) {
  *
  * The view redraws when the actor has a new snapshot, and when any readable
  * source changes (see {@link Readable}).
+ * Changing the view's input kind keeps the typed text.
+ * Editor and claim views, and menu focus, menu update, and claim release
+ * events are not supported.
  *
  * Which argument decides each type parameter: `actor` decides `Snapshot` and
  * `Event`; `sources` decides `Source` (the slot source types), `List` (the

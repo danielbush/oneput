@@ -2,7 +2,13 @@ import { afterEach, describe, expect, test } from 'vitest';
 import { Controller } from '../../../controllers/controller.js';
 import { menuItem, type FlexChildBuilder } from '../../../lib/builder.js';
 import { cell } from '../../../lib/pull.js';
-import type { AppLayoutParams, FChildParams, MenuItem, UILayout } from '../../../types.js';
+import type {
+  AppLayoutParams,
+  FChildParams,
+  InputKind,
+  MenuItem,
+  UILayout
+} from '../../../types.js';
 import {
   renderActiveView,
   rowBuilder,
@@ -45,6 +51,12 @@ const layouts = {
     slots: { busy: slot<boolean>(), footer: slot<Footer>() },
     create: (ctl, params: TypedParams) => component(ctl, params),
     params: ({ busy, footer }): TypedParams => ({ busy, footer })
+  }),
+  // Gives its own input kind, to show when a view's input param applies.
+  note: viewLayout({
+    slots: {},
+    create: component,
+    params: () => ({ input: { kind: 'textarea', rows: 3 } })
   })
 };
 
@@ -92,6 +104,13 @@ type Rows = RowParams<typeof builders>;
 type PageView = ViewDef<PageSources, 'pages', PageEvent, Rows, Layouts>;
 type TypedSources = PageSources & { laterPage: boolean; footer: Footer };
 type TypedView = ViewDef<TypedSources, never, never, Rows, Layouts>;
+type InputView = ViewDef<
+  PageSources & { noInput: InputKind | undefined },
+  'pages',
+  PageEvent,
+  Rows,
+  Layouts
+>;
 /** A view type that a machine declares apart from its sources: any name type-checks. */
 type WideView = ViewDef<
   Record<string, string>,
@@ -108,7 +127,7 @@ const wideLayouts: ViewLayouts = layouts;
  * An actor whose events change its page and its last activated row.
  * Its active states are nested: each view is the child of the one before.
  */
-function createPages<View extends PageView | WideView | TypedView>(...views: View[]) {
+function createPages<View extends PageView | WideView | TypedView | InputView>(...views: View[]) {
   const state = { page: 1, activated: null as string | null };
   const pages = {
     send(event: PageEvent) {
@@ -555,6 +574,24 @@ describe('layouts', () => {
 
     // assert
     expect(view._unsafeUnwrap().layout.params).toEqual({ menuTitle: '[]' });
+  });
+
+  test.each<[string, InputView]>([
+    ['literal', { layout: 'note', params: { input: undefined }, menu: { id: 'pages' } }],
+    ['source', { layout: 'note', params: { input: { $from: 'noInput' } }, menu: { id: 'pages' } }]
+  ])('undefined input param from a %s keeps the layout input', (_, view) => {
+    // arrange
+    const registry = {
+      ...sources,
+      slot: { ...sources.slot, noInput: (): InputKind | undefined => undefined }
+    };
+    const pages = createPages<InputView>(view);
+
+    // act
+    const result = renderActiveView(pages.snapshot, registry, layouts, { activate: pages.send });
+
+    // assert
+    expect(result._unsafeUnwrap().layout.params).toEqual({ input: { kind: 'textarea', rows: 3 } });
   });
 
   test('slot the layout does not declare', () => {

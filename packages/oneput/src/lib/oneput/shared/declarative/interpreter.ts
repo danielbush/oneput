@@ -135,7 +135,11 @@ function slotRecord<Value>(): Record<string, Value | undefined> {
   return Object.create(null) as Record<string, Value | undefined>;
 }
 
-/** The values that are not `undefined`: a child gives `undefined` to clear a value. */
+/**
+ * The values that are not `undefined`: a child gives `undefined` to clear a
+ * value. Applied to read values, so a source that gives `undefined` clears it
+ * as a literal `undefined` does.
+ */
 function filledOf(record: Record<string, unknown>) {
   const filled = slotRecord<unknown>();
   for (const name of Object.keys(record)) {
@@ -642,9 +646,9 @@ export function renderActiveView<
 
   return Result.combine([
     Result.combine([...listRows, ...fixedRows.values()].map(renderRow)),
-    readAll(filledOf(slots)),
+    readAll(slots).map(filledOf),
     // The view types give each param a value of its type.
-    readAll(filledOf(params)) as Result<SharedParams, NameError | ReadError>,
+    readAll(params).map(filledOf) as Result<SharedParams, NameError | ReadError>,
     read(placeholder) as Result<string | undefined, NameError | ReadError>
   ]).map(([items, values, shared, text]) => ({
     layout: {

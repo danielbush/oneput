@@ -213,7 +213,8 @@ A view gives the layout params that every layout takes in `params`: the
 `menuTitle`, `busy` and `input`. Each is a literal or
 `{ $from: 'source' }` of the param's type, for example
 `{ params: { menuTitle: { $from: 'title' }, busy: true } }`. Params merge by
-key from parent to child, and `undefined` clears one. They apply to
+key from parent to child, and `undefined`, as a literal or from a source,
+clears one, so the layout's own value stays. They apply to
 whichever layout the active view shows, also when a child names another
 layout, and the layout gets them over its own params.
 

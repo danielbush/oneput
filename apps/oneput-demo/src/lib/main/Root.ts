@@ -2,7 +2,7 @@ import { sanitiseHtml } from '@oneput/safe-html';
 import { fchild, type Controller, type UILayout } from '@oneput/oneput';
 import { Settings } from './Settings.js';
 import { AsyncSearchExample } from './AsyncSearchExample.js';
-import { createAsyncSearchAppObject } from './asyncSearchDeclarative/appObject.js';
+import { createAsyncSearchAppObject } from '../shared/asyncSearchDeclarative/appObject.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
 import { KatexDemo } from './KatexDemo.js';
 import { DirectoryBrowser } from './DirectoryBrowser.js';

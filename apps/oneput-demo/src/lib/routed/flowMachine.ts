@@ -6,7 +6,7 @@ import { Form } from './form/Form.js';
 import { Confirm } from './form/Confirm.js';
 import { Done } from './form/Done.js';
 import type { Online } from '../common/online.js';
-import { createAsyncSearchAppObject } from '../main/asyncSearchDeclarative/appObject.js';
+import { createAsyncSearchAppObject } from '../shared/asyncSearchDeclarative/appObject.js';
 
 /** Events that the routed AppObjects send. */
 export type AppEvent =

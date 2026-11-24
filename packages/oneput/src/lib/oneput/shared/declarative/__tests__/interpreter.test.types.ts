@@ -55,7 +55,7 @@ type Layouts = LayoutSlots<typeof layouts>;
 
 /** A row builder whose params are not text. */
 const counter = rowBuilder({
-  params: { count: slot<number>(), done: slot<boolean>() },
+  params: { count: slot<number>(), done: slot<boolean | undefined>() },
   build: ({ id, params: { count, done } }, activate) =>
     menuItem({
       id,
@@ -110,13 +110,36 @@ const typedRows: PlainView = {
     ]
   }
 };
+// A param is required unless its type allows undefined.
+const missingParam: PlainView = {
+  // @ts-expect-error 'counter' requires 'count'.
+  menu: { items: [{ id: 'row', build: 'counter', params: { done: true } }] }
+};
+const noParams: PlainView = {
+  // @ts-expect-error 'counter' requires 'count', so the row has params.
+  menu: { items: [{ id: 'row', build: 'counter' }] }
+};
+const missingDefaultParam: PlainView = {
+  // @ts-expect-error The default builder requires 'text'.
+  menu: { items: [{ id: 'row', params: { detail: 'Detail' } }] }
+};
+// A builder gets each required param with its own type, and an optional one maybe undefined.
+rowBuilder({
+  params: { text: slot<string>(), note: slot<string | undefined>() },
+  build: ({ id, params }) => {
+    const text: string = params.text;
+    // @ts-expect-error 'note' allows undefined.
+    const note: string = params.note;
+    return menuItem({ id, attr: { title: `${text} ${note}` } });
+  }
+});
 const wrongParamLiteral: PlainView = {
   // @ts-expect-error 'count' takes a number, not text.
   menu: { items: [{ id: 'row', build: 'counter', params: { count: 'two' } }] }
 };
 const wrongParamSource: PlainView = {
   // @ts-expect-error 'known' gives text; 'done' takes a boolean.
-  menu: { items: [{ id: 'row', build: 'counter', params: { done: { from: 'known' } } }] }
+  menu: { items: [{ id: 'row', build: 'counter', params: { count: 1, done: { from: 'known' } } }] }
 };
 const unknownParamSource: PlainView = {
   // @ts-expect-error 'gone' is not a source.
@@ -289,3 +312,4 @@ void [emptySlot, inferredSnapshot];
 void [typedValues, wrongLiteral, textForBuilder, flagForText, textSourceForFlag];
 void [flagSourceForText, inheritedWrongLiteral, flagRowText, builderRowDetail, flagPlaceholder];
 void [textRow, registryTypes, wrongSource, rowFieldParams];
+void [missingParam, noParams, missingDefaultParam];

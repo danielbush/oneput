@@ -58,7 +58,7 @@ function pageSegments(page: number) {
 const builders = {
   // Shows its text and detail as one text, to show which params reach it.
   default: rowBuilder({
-    params: { text: slot<string>(), detail: slot<string>() },
+    params: { text: slot<string>(), detail: slot<string | undefined>() },
     build: ({ id, params: { text, detail } }, activate) =>
       menuItem({
         id,
@@ -72,7 +72,7 @@ const builders = {
       menuItem({
         id,
         action: activate,
-        children: (b) => [b.fchild({ textSegments: pageSegments(page ?? 0) })]
+        children: (b) => [b.fchild({ textSegments: pageSegments(page) })]
       })
   })
 };
@@ -388,7 +388,7 @@ describe('fixed row overrides', () => {
     expect(pages.snapshot.page).toBe(2);
   });
 
-  test('send over the same builder keeps its params', () => {
+  test('child send replaces the parent send', () => {
     // arrange
     const pages = createPages<PageView>(
       {
@@ -396,11 +396,15 @@ describe('fixed row overrides', () => {
         menu: {
           id: 'pages',
           items: [
-            { id: 'row', build: 'badge', params: { page: 4 }, send: { type: 'PREVIOUS_PAGE' } }
+            {
+              id: 'row',
+              params: { text: 'Parent', detail: 'Detail' },
+              send: { type: 'PREVIOUS_PAGE' }
+            }
           ]
         }
       },
-      { menu: { items: [{ id: 'row', build: 'badge', send: { type: 'NEXT_PAGE' } }] } }
+      { menu: { items: [{ id: 'row', params: { text: 'Child' }, send: { type: 'NEXT_PAGE' } }] } }
     );
     const [item] = render(pages);
 
@@ -408,7 +412,7 @@ describe('fixed row overrides', () => {
     click(item);
 
     // assert
-    expect(segments(item)).toEqual(pageSegments(4));
+    expect(text(item)).toBe('Child: Detail');
     expect(pages.snapshot.page).toBe(2);
   });
 });
@@ -728,7 +732,7 @@ describe('readable sources', () => {
           badge: rowBuilder({ params: { page: slot<number>() }, build: throwing.get })
         }
       },
-      { menu: { id: 'pages', items: [{ id: 'row', build: 'badge' }] } }
+      { menu: { id: 'pages', items: [{ id: 'row', build: 'badge', params: { page: 1 } }] } }
     ]
   ] as const)('%s that throws gives the read error', (_, registry, view) => {
     // arrange

@@ -42,8 +42,26 @@ type RowFields<Event extends RowEvent> = {
 type DefaultRow = 'default';
 const defaultRow: DefaultRow = 'default';
 
-/** Each param value of a row: a literal or `{ from: name }` of the param's type. */
-type ParamValues<Types, Source> = { [Name in keyof Types]?: Fill<Types[Name], Source> };
+/** The names whose type allows `undefined`. */
+type OptionalName<Types> = {
+  [Name in keyof Types]: undefined extends Types[Name] ? Name : never;
+}[keyof Types];
+
+/** `Types` with a key optional where its type allows `undefined`, and required elsewhere. */
+type OptionalUndefined<Types> = {
+  [Name in Exclude<keyof Types, OptionalName<Types>>]: Types[Name];
+} & { [Name in OptionalName<Types>]?: Types[Name] };
+
+/**
+ * Each param value of a row: a literal or `{ from: name }` of the param's
+ * type. A param is required unless its type allows `undefined`.
+ */
+type ParamValues<Types, Source> = OptionalUndefined<{
+  [Name in keyof Types]: Fill<Types[Name], Source>;
+}>;
+
+/** A row's `params`: required when the builder has a required param. */
+type ParamsField<Values> = {} extends Values ? { params?: Values } : { params: Values };
 
 /**
  * A menu row: the builder that draws it (`build`), its activation, and the
@@ -53,18 +71,16 @@ type ParamValues<Types, Source> = { [Name in keyof Types]?: Fill<Types[Name], So
  */
 export type ViewRow<Rows extends TypesByName, Source, Event extends RowEvent> =
   | {
-      [Name in keyof Rows & string]: RowFields<Event> & {
-        build: Name;
-        params?: ParamValues<Rows[Name], Source>;
-      };
+      [Name in keyof Rows & string]: RowFields<Event> & { build: Name } & ParamsField<
+          ParamValues<Rows[Name], Source>
+        >;
     }[keyof Rows & string]
   | (DefaultRow extends keyof Rows
-      ? RowFields<Event> & {
-          build?: never;
-          params?: ParamValues<Rows[DefaultRow], Source> & {
-            [Name in Exclude<ParamNames<Rows>, keyof Rows[DefaultRow]>]?: never;
-          };
-        }
+      ? RowFields<Event> & { build?: never } & ParamsField<
+            ParamValues<Rows[DefaultRow], Source> & {
+              [Name in Exclude<ParamNames<Rows>, keyof Rows[DefaultRow]>]?: never;
+            }
+          >
       : never);
 
 /**
@@ -225,12 +241,17 @@ export type RowBuilder<Params extends SlotMap = SlotMap> = {
    * item with the row's ID. `activate` is present when the row activates (it
    * has `send` or `activate: true`); use it as the item's action.
    */
-  build(row: { id: string; params: Partial<SlotTypes<Params>> }, activate?: () => void): MenuItem;
+  build(
+    row: { id: string; params: OptionalUndefined<SlotTypes<Params>> },
+    activate?: () => void
+  ): MenuItem;
 };
 
 /**
  * Make a {@link RowBuilder}. The param declarations type the values that
- * `build` gets and the values that rows can give, as slots do for a layout:
+ * `build` gets and the values that rows give, as slots do for a layout. A row
+ * must give each param unless its type allows `undefined`
+ * (`slot<string | undefined>()`):
  *
  * ```ts
  * rowBuilder({

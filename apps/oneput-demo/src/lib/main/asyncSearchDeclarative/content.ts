@@ -65,7 +65,7 @@ export function createContent(online: Online) {
             tag: 'button',
             attr: { type: 'button' },
             action: activate,
-            children: (b) => [b.icon('Dot'), b.fchild({ textContent: `Result: '${text ?? ''}'` })]
+            children: (b) => [b.icon('Dot'), b.fchild({ textContent: `Result: '${text}'` })]
           })
       })
     }

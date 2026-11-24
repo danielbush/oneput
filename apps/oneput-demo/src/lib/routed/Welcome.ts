@@ -24,6 +24,11 @@ export class Welcome implements AppObject {
           id: 'next',
           textContent: 'Next: open the form',
           action: () => this.send({ type: 'NEXT' })
+        }),
+        stdMenuItem({
+          id: 'search',
+          textContent: 'Async search (declarative)...',
+          action: () => this.send({ type: 'SEARCH' })
         })
       ]
     });

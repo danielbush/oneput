@@ -9,6 +9,7 @@
   import { icons } from '$lib/common/icons.js';
   import { flowMachine, routeFlow } from '$lib/routed/flowMachine.js';
   import { Layout } from '$lib/common/layout.js';
+  import { Online } from '$lib/common/online.js';
 
   // Each page visit owns its actor and router subscriptions.
   const actor = createActor(flowMachine);
@@ -26,17 +27,19 @@
   // OneputController needs an AppObject to run. routeFlow replaces it at once
   // with Welcome, so the stack is [Welcome] and Welcome is the root.
   function init(ctl: Controller): AppObject {
+    const online = Online.create();
+    ctl.onDestroy(() => online.dispose());
     return {
       layout: { layout: Layout.create, params: {} },
       settings: { enableGoBack: false },
       onStart() {
         actor.start();
-        routing = routeFlow(ctl, actor);
+        routing = routeFlow(ctl, actor, online);
         // A routed AppObject exited: the stack is empty and routeApp has
         // stopped. Tell the machine, then route again from its new state.
         ctl.app.setOnRootExit(() => {
           actor.send({ type: 'EXITED' });
-          routing = routeFlow(ctl, actor);
+          routing = routeFlow(ctl, actor, online);
         });
       }
     };
@@ -61,9 +64,9 @@
     <li>
       A small XState machine (<code>flowMachine.ts</code>) decides which AppObject Oneput shows.
     </li>
-    <li>States: welcome, form (with child states editing and confirm), done.</li>
+    <li>States: welcome, form (with child states editing and confirm), done, search.</li>
     <li>Each state has one AppObject, in a map with the shape of the machine.</li>
-    <li>The AppObjects only send events (Next, Back, Restart).</li>
+    <li>The AppObjects only send events (Next, Back, Restart, Search).</li>
     <li>
       When the state changes, <code>routeMachine</code> swaps in the AppObject for the new state.
     </li>

@@ -406,6 +406,25 @@ const clashNumber: ClashView = { slots: { heading: 42 } };
 // @ts-expect-error 'heading' is a number in 'count'.
 const clashText: ClashView = { slots: { heading: 'Text' } };
 void [clashNamed, clashNumber, clashText];
+// Overlapping types: 'heading' is text or a number in one layout and text in the other.
+const overlapLayouts = {
+  either: viewLayout({
+    slots: { heading: slot<string | number>() },
+    create: component,
+    params: ({ heading }) => ({ menuTitle: String(heading) })
+  }),
+  text: viewLayout({
+    slots: { heading: slot<string>() },
+    create: component,
+    params: ({ heading }) => ({ menuTitle: heading })
+  })
+};
+type OverlapView = ViewDef<Sources, never, never, Rows, LayoutSlots<typeof overlapLayouts>>;
+// Text fits both, so a view with no layout can give it.
+const overlapText: OverlapView = { slots: { heading: 'Text' } };
+// @ts-expect-error A number fits 'either' but not 'text'.
+const overlapNumber: OverlapView = { slots: { heading: 42 } };
+void [overlapText, overlapNumber];
 // A view that does not name a layout fills a slot of the layout its parent names.
 const inheritedLiteral: PlainView = { slots: { heading: 'A' } };
 

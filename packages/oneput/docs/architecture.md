@@ -258,8 +258,11 @@ A child view can name a different layout; then the parent's slots do not
 apply. Otherwise slots merge by key. A slot value of `undefined`, as a literal
 or from a source that can give `undefined`, leaves the slot to the layout. The registry types the layout names and
 slots. A view without `layout` can fill the slots of any registered layout,
-each with a value that fits every layout that declares that slot (a slot that
-two layouts declare with different types cannot be filled there), so
+each with a value that fits every layout that declares that slot: a value of
+the types they have in common. For example, if one layout declares `heading`
+as `string | number` and another as `string`, the view can give text there;
+if the types have nothing in common, as `string` and `number`, only
+`undefined`. So
 rendering gives an error for a slot that the active layout does not declare,
 and for an unknown layout name. A snapshot whose views fill a slot that their
 layout does not declare is a type error at `appObjectActor`, also when the

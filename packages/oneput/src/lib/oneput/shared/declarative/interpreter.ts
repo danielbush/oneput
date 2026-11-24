@@ -371,6 +371,27 @@ export type ViewDef<
   settings?: ViewSettings;
 };
 
+/**
+ * The {@link ViewDef} for an AppObject's content (its `slot`, `menu` and
+ * `menuItem` registries, see {@link ViewSources}), its layouts and its row
+ * events, for the machine's `meta` type:
+ *
+ * ```ts
+ * type SearchView = ViewFor<SearchContent, typeof viewLayouts, RowEvent>;
+ * ```
+ */
+export type ViewFor<
+  Content extends { slot: object; menu: object; menuItem: RowBuilders },
+  Layouts extends ViewLayouts,
+  Event extends RowEvent = never
+> = ViewDef<
+  SourceTypes<Content['slot']>,
+  keyof Content['menu'] & string,
+  Event,
+  RowParams<Content['menuItem']>,
+  LayoutSlots<Layouts>
+>;
+
 /** The metadata read from an actor snapshot. */
 export type ViewSnapshot<
   Source,

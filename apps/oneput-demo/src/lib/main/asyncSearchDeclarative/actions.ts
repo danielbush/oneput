@@ -1,10 +1,5 @@
 import { assign, fromCallback, sendTo, setup } from 'xstate';
-import type {
-  LayoutSlots,
-  RowParams,
-  SourceTypes,
-  ViewDef
-} from '@oneput/oneput/shared/declarative/interpreter.js';
+import type { ViewFor } from '@oneput/oneput/shared/declarative/interpreter.js';
 import type { OneputEvent } from '@oneput/oneput/shared/declarative/oneputEvents.js';
 import { viewLayouts } from '../../common/layout.js';
 import { SearchService, type SearchFailure, type SearchItem } from '../../service/SearchService.js';
@@ -14,13 +9,7 @@ type RowEvent = { type: 'RETRY_SEARCH' } | { type: 'RESULT_ACTIVATED'; id: strin
 type FetchEvent =
   | { type: 'SEARCH_SUCCEEDED'; results: readonly SearchItem[] }
   | { type: 'SEARCH_FAILED'; error: SearchFailure };
-type SearchView = ViewDef<
-  SourceTypes<SearchContent['slot']>,
-  keyof SearchContent['menu'],
-  RowEvent,
-  RowParams<SearchContent['menuItem']>,
-  LayoutSlots<typeof viewLayouts>
->;
+type SearchView = ViewFor<SearchContent, typeof viewLayouts, RowEvent>;
 
 function resultById(context: SearchContext, id: string) {
   return context.results.find((result) => result.id === id);

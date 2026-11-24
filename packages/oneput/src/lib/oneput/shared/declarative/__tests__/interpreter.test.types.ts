@@ -12,6 +12,7 @@ import {
   type RowParams,
   type SourceTypes,
   type ViewDef,
+  type ViewFor,
   type ViewSources
 } from '../interpreter.js';
 import { infoRow, standardRow } from '../standardRow.js';
@@ -251,6 +252,9 @@ const registry = {
   menu: {},
   menuItem: builders
 };
+// ViewFor gives the same view type from the content and the layouts.
+const viewFor: ViewFor<typeof registry, typeof layouts>[] = [textRow, typedRows];
+const fromViewFor: PlainView = {} as ViewFor<typeof registry, typeof layouts>;
 // A registry gives the source types of its views.
 const registryTypes: Sources = {} as SourceTypes<typeof registry.slot>;
 const wrongSource: ViewSources<Snapshot, Sources, never> = {
@@ -327,4 +331,4 @@ void [typedValues, wrongLiteral, textForBuilder, flagForText, textSourceForFlag]
 void [flagSourceForText, inheritedWrongLiteral, flagRowText, builderRowDetail, flagPlaceholder];
 void [textRow, registryTypes, wrongSource, rowFieldParams];
 void [missingParam, noParams, missingDefaultParam, activateField];
-void [sharedParams, textBusy, flagTitle, affordance];
+void [sharedParams, textBusy, flagTitle, affordance, viewFor, fromViewFor];

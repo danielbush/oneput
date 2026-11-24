@@ -1,9 +1,5 @@
 # Oneput
 
-## Changes
-
-This codebase is new. Avoid preserving old apis or features, do not keep legacy code. Always prefer replacing with better implementations and apis. It's paramount that we get the foundations right so that future changes can be added easily and in a modular fashion.
-
 ## Element IDs
 
 Any ID that Oneput core gives an element must contain `oneput`, for example `oneput-layout-input-busy`. Then an ID that a host or AppObject gives cannot collide with one of Oneput's in the same keyed list.
@@ -12,136 +8,24 @@ Any ID that Oneput core gives an element must contain `oneput`, for example `one
 
 `apps/oneput-demo` shows Oneput. It is not meant to be consumed. Track its issues here, in this package: security findings in `THREAT_MODEL.md`, and other issues in this package's docs and backlog. Do not create separate docs for the demo.
 
-## Testing
+## Docs
 
-See `TESTING.md` for a high-level testing policy.
-Offer to flesh this out with the user. Look for obvious things to tackle.
+- `docs/CONCEPTS.md` — shared concepts, vocabulary, and design rationale (owned by the human; propose new terms before adding them).
+- `THREAT_MODEL.md` and `docs/safe-content.md` — security boundaries, sanitisation policy, and safe UI content rules.
+- `TESTING.md` — high-level testing policy.
+- `packages/oneput-skill/SKILL.md` — portable consumer guide for building with Oneput. Update it when the public API or recommended consumer patterns change; keep repo-specific paths and internal implementation details out of it.
 
-## Architecture and concepts / design choices and philosophy
+## System map
 
-- `packages/oneput/docs/architecture.md`.
-- `packages/oneput/docs/CONCEPTS.md`
-  - shared concepts and vocabulary
-  - design choices and justifications
+Read the entry file's JSDoc for contracts and edge cases, and `docs/CONCEPTS.md` for design rationale. Paths in the **Entry point** column are under `packages/oneput/src/lib/oneput/`; paths in **Concepts / Docs** are relative to `packages/oneput/`.
 
-## Key systems (packages/oneput)
-
-Below are pointers for agents — read the source files for full detail via JSDoc.
-
-### Safe UI content
-
-Strings stay text. Rich fields require `SafeHtml` from `@oneput/safe-html`.
-`lib/domSafety.ts` checks tags, attributes, URLs, and styles before rendering.
-`lib/icons.ts` checks bounded SVG geometry and renders it with DOM calls.
-See `docs/safe-content.md` for policies, failure states, and deferred sinks.
-
-### Bindings
-
-Key bindings map keyboard shortcuts to actions. Each binding declares `when` conditions (`menuOpen`, `multiline`) controlling when it fires. Dispatch also leaves unmodified Enter/Space alone when the browser already activates the focused control (`lib/nativeActivation.ts`) - see ENTER_SEMANTICS.
-
-- Types: `packages/oneput/src/lib/oneput/lib/bindings.ts` — `KeyBinding`, `ActionBinding`, `KeyBindingMap`
-- Controller: `packages/oneput/src/lib/oneput/controllers/KeysController.ts`
-- Defaults: `packages/oneput/src/lib/oneput/shared/actions/OneputActionProvider.ts`
-- Persistence: `packages/oneput/src/lib/oneput/shared/bindings/BindingsIDB.ts`
-
-### AppObject
-
-AppObjects represent screens/states in the app stack with actions, menu, and lifecycle hooks. `run()` pushes; `replace()` exits the current app without pushing. `exitToRoot(payload?)` exits all children, top first, and resumes only the stack root before one settled `app-change`. `setOnRootExit()` lets a host choose the next screen after an exit with no parent.
-
-Each AppObject on the stack owns its layout params: declared `layout.params`, or a copy of the parent's. `ctl.ui.update({ params })` patches them and `ctl.ui.setParams()` replaces them; a parent resumes with its own params.
-
-- Type: `packages/oneput/src/lib/oneput/types.ts` — `AppObject`
-- Controller: `packages/oneput/src/lib/oneput/controllers/AppController.ts`
-
-### Declarative AppObject
-
-`shared/declarative/appObjectActor.ts` connects an actor to the AppObject stack.
-`shared/declarative/interpreter.ts` builds the async search view from active
-state metadata, named sources (snapshot functions or readable sources),
-named row builders and named layouts whose params and slots have declared types
-(`standardLayout.ts` is one). A view gives the shared layout params
-(`menuTitle`, `busy`, `input`) in `params`, a layout's own in `slots`, and
-the input `placeholder` apart; a row gives
-its builder's params in `params` (required unless the type allows
-`undefined`) and its event in `send`, which the builder decides how to raise. `ViewFor` types a
-machine's views from its content and layouts. See `docs/architecture.md`.
-
-### Routing
-
-`routeApp(ctl, source, appFor, key?)` replaces the caller (the current
-AppObject) with the first routed AppObject, and replaces that when the source
-key changes. So the routed AppObject is the root when the caller was the root.
-Children keep control until the routed AppObject resumes. When the routed
-AppObject leaves the stack (a root exit or an external replacement), routeApp
-stops its subscriptions; `stop()` detaches it explicitly. A root exit goes to
-`ctl.app.setOnRootExit`, which the app owns; routeApp does not register it.
-The source has `get()` and `subscribe()`.
-
-- Helper: `packages/oneput/src/lib/oneput/shared/routing/routeApp.ts`
-- XState adapter: `packages/oneput/src/lib/oneput/shared/routing/xstate/routeMachine.ts`.
-  `routeMachine(ctl, actor, apps)` takes a map in the shape of the machine and
-  calls `routeApp`; it declares the XState shapes it reads, so Oneput does not
-  depend on XState. `fromChild(id, childApps)` routes a state that invokes a
-  child machine on the child's state.
-- Stack membership: `ctl.app.contains(app)` includes suspended parents.
-
-### Input claims
-
-Exclusive semantic ownership of typed input for live-edit and similar flows.
-`InputScope` is AppObject-scoped; closing it on suspend/exit releases claims.
-Claims declare their own termination via `release` (Back, focus leave, owner
-removed). `AppController` routes those events to `InputController`, then runs
-`MenuItem.onFocus` (for claim-on-focus rows), then `AppObject.onMenuItemFocus`.
-
-- Helper: `packages/oneput/src/lib/oneput/controllers/helpers/InputClaims.ts`
-- API: `InputController.openScope()` / `claim()` / `handleBack()` /
-  `handleMenuItemFocus()` / `notifyBaseMenuChanged()`
-- Coordinators (`shared/behaviors/liveEdit/`):
-  - `MenuLiveEdit.ts` — claim on activate (mixed/filtered)
-  - `FocusedMenuLiveEdit.ts` — claim on focus (whole editable menu)
-- Shared claim builder: `shared/behaviors/liveEdit/liveEditClaim.ts`
-- Per-row focus hook: `MenuItem.onFocus` + `MenuItemFocusCause` in `types.ts`
-
-### Controller
-
-The central API consumers use to control Oneput. Composes sub-controllers for keys, menu, input, ui, app.
-
-- Entry: `packages/oneput/src/lib/oneput/controllers/controller.ts`
-
-### Events
-
-Decoupled pub-sub communication between controllers.
-
-- Types and emitter: `packages/oneput/src/lib/oneput/controllers/InternalEventEmitter.ts`
-
-### Pull rows (menu rows that paint themselves)
-
-Rows that must change without a menu rebuild mount a widget that reads a live
-`Pull<T>` source. See PULL_OBJECT in `docs/CONCEPTS.md`.
-
-- Type + helpers: `packages/oneput/src/lib/oneput/lib/pull.ts` — `Pull`, `cell`, `notifier`
-- Repaint channel: `Controller.pull`, given to `onMount(node, ctx)` as `MountContext` (`shared/components/mountContext.ts`)
-- Rows: `shared/ui/menuItems/checkboxMenuItem.ts`, `shared/ui/menuItems/pullToggleMenuItem.ts`
-- Widgets: `shared/ui/menuItems/pull/`
-- Snapshot alternative: `shared/ui/menuItems/toggleMenuItem.ts` (caller rebuilds)
-
-### Standard host layout
-
-Reusable menu/input chrome that maps `AppLayoutParams` (`inputAccept` /
-`inputReject` / `inputSend`) onto `inputUI.right`. Hosts close over registered
-icon names in the install factory.
-
-- `packages/oneput/src/lib/oneput/shared/ui/layout/StandardLayout.ts`
-- Buttons: `packages/oneput/src/lib/oneput/shared/ui/buttons.ts`
-
-## Oneput skill (`packages/oneput-skill/SKILL.md`)
-
-There is also an agent skill at `.agents/skills/oneput` (symlinked from `packages/oneput-skill/`). This is a fourth layer that sits alongside the others but serves a different purpose:
-
-- **This file** tells agents where things are in this repo (navigational, project-specific)
-- **Architecture docs** explain how systems work and why (descriptive, for humans)
-- **The skill** teaches how to build with Oneput — patterns, recipes, API usage (prescriptive, portable)
-
-The skill is portable — it works in any project that uses Oneput as a dependency, not just this monorepo. It should not duplicate project-specific file paths (that's this file's job) or internal implementation details (that's JSDoc's job). Instead it covers the patterns: how to create AppObjects, declare bindings with `when` conditions, build menus with `stdMenuItem`, use the Controller, etc.
-
-When to update the skill: when the public API or recommended patterns change (e.g. new builder methods, new AppObject lifecycle hooks, changes to the bindings system). When changing internal implementation details, update JSDoc and architecture docs instead.
+| System                   | Entry point                                                                                                                    | Concepts / Docs                              |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------- |
+| Controller & events      | `controllers/controller.ts`, `controllers/InternalEventEmitter.ts`                                                             | —                                            |
+| App stack & routing      | `controllers/AppController.ts`, `types.ts`, `shared/routing/routeApp.ts`, `shared/routing/xstate/routeMachine.ts`              | `STACK_MODE`, `ROUTED_MODE`, `BACK_HANDLING` |
+| Declarative AppObject    | `shared/declarative/appObjectActor.ts`, `shared/declarative/interpreter.ts`, `shared/declarative/standardLayout.ts`            | —                                            |
+| Bindings                 | `controllers/KeysController.ts`, `lib/bindings.ts`, `shared/actions/OneputActionProvider.ts`, `shared/bindings/BindingsIDB.ts` | `ENTER_SEMANTICS`, `PROVIDER_PATTERN`        |
+| Input claims & live edit | `controllers/helpers/InputClaims.ts`, `shared/behaviors/liveEdit/`                                                             | `INPUT_CLAIM`, `LIVE_EDIT`                   |
+| Pull rows                | `lib/pull.ts`, `shared/components/mountContext.ts`, `shared/ui/menuItems/pull/`                                                | `PULL_OBJECT`, `CONTROLLED_PATTERN`          |
+| Standard layout          | `shared/ui/layout/StandardLayout.ts`, `shared/ui/buttons.ts`                                                                   | Layout params vs direct UI                   |
+| Safe UI content & icons  | `lib/domSafety.ts`, `lib/icons.ts`                                                                                             | `docs/safe-content.md`, `THREAT_MODEL.md`    |

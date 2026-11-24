@@ -304,16 +304,8 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## docs
 
-- refactor: packages/oneput/AGENTS.md vs packages/oneput/docs/architecture.md vs packages/oneput/docs/CONCEPTS.md
-  - COMMENT: I'd move the architecture out of AGENTS and merge into architecture.md; the hard question is architecture.md vs CONCEPTS.md - CONCEPT's is more general and is how I keep my head wrapped around the "why" as well as the "what"; maybe we can ditch architecture.md in favour of a combination of good CONCEPTS.md and using DEEP_MODULE's (surfacing key constructs and interfaces that represent the skeleton of the system or subsystem).
 - docs: need to make ai-docs similar to effect v4
-- docs: are all over the place
-  - AGENTS.md looks like its doing architecture
-    - COMMENT: I think it's the `Key systems (packages/oneput)` section that bothers me; at the same time it looks like a tidy summary of the system
-  - CONCEPTS.md - the thing I cling to
-  - architecture.md
-  - SECURITY.md - might be confused with the new convention for that file used in the industry
-  - skills/oneput/SKILL.md 
+- docs: update `packages/oneput/docs/CONCEPTS.md` when ready — add Declarative AppObject concept and remove dead `architecture.md` reference on line 900
 
 ## chore
 

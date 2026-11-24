@@ -46,10 +46,10 @@ Use ASD-STE100 (Simplified Technical English) when writing docstrings, comments 
 
 When making code changes, look for opportunities to update docs. We're progressively moving towards a "deep modules" format (from John Ousterhout's *A Philosophy of Software Design*) — modules should have simple interfaces that hide complexity. Applied to documentation, this means progressive disclosure across three layers:
 
-1. **AGENTS.md (CLAUDE.md)** — the shallowest layer. Terse summaries and file pointers, such as the "Key systems" section in `packages/oneput/AGENTS.md`. Agents always see these, so they orient them on where to look. Update them when you add a new system or significantly change an existing one.
+1. **`AGENTS.md` (`CLAUDE.md`)** — the shallowest layer. Package rules, doc pointers, and a compact pointer map to key entry files (no behavioral prose). Agents always see these, so they orient them on where to look. Update them when you add or move a subsystem.
 
-2. **Architecture docs (`packages/*/docs/architecture.md`)** — the narrative layer for humans. Explains how systems connect, design rationale, and data flow. Update these when architectural decisions change or new systems are added.
+2. **`CONCEPTS.md` (and optional `docs/architecture.md`)** — the conceptual layer for humans and agents. Packages use `docs/CONCEPTS.md` where present (for example `packages/oneput/docs/CONCEPTS.md`) for shared vocabulary and design rationale ("what and why"). A package may also keep `docs/architecture.md` if it needs a dependency narrative (for example `packages/jsed/docs/architecture.md`), but do not duplicate `CONCEPTS.md` or JSDoc.
 
-3. **Source-level JSDoc** — the deepest layer. Module-level doc comments on key files explain the "what and why" for that specific module. This is where agents drill down after being pointed by AGENTS.md. When changing a module's behaviour, update its JSDoc to reflect the new design.
+3. **Source-level JSDoc** — the deepest layer. Module-level doc comments on deep-module entry files and top-level types explain contracts, invariants, and edge cases. This is where agents drill down after being pointed by `AGENTS.md`. When changing a module's behaviour, update its JSDoc to reflect the new design.
 
-The goal over time: a reader (human or agent) can start at any layer and progressively go deeper only as needed. Source files should have enough JSDoc that reading them after being pointed by AGENTS.md gives you everything you need — the architecture docs provide the broader narrative if you want it.
+The goal over time: a reader (human or agent) can start at any layer and progressively go deeper only as needed. Source files should have enough JSDoc that reading them after being pointed by `AGENTS.md` gives you everything you need, while `CONCEPTS.md` holds the shared mental model and rationale.

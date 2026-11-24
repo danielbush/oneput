@@ -60,10 +60,13 @@ function applyView(ctl: Controller, view: OneputView, rowsChanged: boolean) {
  * The view redraws when the actor has a new snapshot, and when any readable
  * source changes (see {@link Readable}).
  *
- * Which argument decides each type parameter: `actor` decides `Snapshot`;
- * `sources` decides `Source` (the slot source types) and `Builders` (the row
- * builders); `layouts` decides `Layouts`. Each `NoInfer` marks a mention that
- * is checked against them, not inferred from.
+ * Which argument decides each type parameter: `actor` decides `Snapshot` and
+ * `Event`; `sources` decides `Source` (the slot source types), `List` (the
+ * list names) and `Builders` (the row builders); `layouts` decides `Layouts`.
+ * `NoInfer` keeps `Event` from being inferred from the list rows' `send`.
+ * The constraint on `Snapshot` checks the actor's views against the others.
+ * It is a constraint, not an intersection with the snapshot type, so that a
+ * view filling a slot the layout does not declare (a misspelt one) is an error.
  */
 export function appObjectActor<
   Source,
@@ -71,21 +74,11 @@ export function appObjectActor<
   Event extends { type: string },
   Builders extends RowBuilders,
   Layouts extends ViewLayouts,
-  Snapshot
+  Snapshot extends ViewSnapshot<Source, List, Event, RowParams<Builders>, LayoutSlots<Layouts>>
 >(
   ctl: Controller,
-  actor: ViewActor<
-    Snapshot &
-      ViewSnapshot<
-        NoInfer<Source>,
-        List,
-        Event,
-        NoInfer<RowParams<Builders>>,
-        NoInfer<LayoutSlots<Layouts>>
-      >,
-    Event
-  >,
-  sources: ViewSources<NoInfer<Snapshot>, Source, List, Event, Builders>,
+  actor: ViewActor<Snapshot, Event>,
+  sources: ViewSources<Snapshot, Source, List, NoInfer<Event>, Builders>,
   layouts: Layouts
 ): AppObject {
   const sendIfCurrent = (event: OneputEvent | Event) => {

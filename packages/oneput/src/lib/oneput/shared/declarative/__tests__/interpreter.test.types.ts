@@ -15,6 +15,7 @@ import {
   type ViewFor,
   type ViewSources
 } from '../interpreter.js';
+import { appObjectActor } from '../appObjectActor.js';
 import { infoRow, standardRow } from '../standardRow.js';
 
 declare function component<Params extends AppLayoutParams>(
@@ -294,6 +295,33 @@ function inferredSnapshot() {
   return renderActiveView(snapshot, sources, layouts, { activate: () => {} });
 }
 
+/** A snapshot whose view, inferred from its literal, misspells the 'heading' slot of 'plain'. */
+function misspeltSnapshot() {
+  return {
+    machine: { getStateNodeById: () => ({ path: [] }) },
+    getMeta: () => ({
+      root: { view: { layout: 'plain' as const, slots: { headng: 'Typo' }, menu: { id: 'menu' } } }
+    }),
+    can: () => false
+  };
+}
+declare const ctl: Controller;
+/** The adapter checks the actor's views against the layouts, so a misspelt slot is an error. */
+function misspeltSlot() {
+  const actor = {
+    start() {},
+    stop() {},
+    send(_event: { type: string }) {},
+    getSnapshot: misspeltSnapshot,
+    subscribe: () => ({ unsubscribe() {} })
+  };
+  const sources = { slot: {}, menu: {}, menuItem: builders };
+  // @ts-expect-error 'plain' declares 'heading', not 'headng'.
+  appObjectActor(ctl, actor, sources, layouts);
+  // @ts-expect-error 'plain' declares 'heading', not 'headng'.
+  renderActiveView(misspeltSnapshot(), sources, layouts, { activate: () => {} });
+}
+
 viewLayout({
   // @ts-expect-error A slot name from Object.prototype would clash with the inherited member.
   slots: { toString: slot<string>() },
@@ -329,7 +357,7 @@ const textarea: PlainView = {
 void inheritedLiteral;
 void [filterInput, textRows, inputPlaceholder, textarea];
 void forged;
-void [emptySlot, inferredSnapshot];
+void [emptySlot, inferredSnapshot, misspeltSlot];
 void [typedValues, wrongLiteral, textForBuilder, flagForText, textSourceForFlag];
 void [flagSourceForText, inheritedWrongLiteral, flagRowText, builderRowDetail, flagPlaceholder];
 void [textRow, registryTypes, wrongSource, rowFieldParams];

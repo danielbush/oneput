@@ -510,7 +510,12 @@ export type OneputView = {
  * does not declare, gives an error.
  *
  * The registry `layouts` types the layout names and slots that the views can
- * use, and `sources.menuItem` types the row builder names and params. A layout
+ * use, and `sources.menuItem` types the row builder names and params. The
+ * snapshot's views are checked against them by the constraint on `Snapshot`,
+ * not intersected with them: an intersection would let a view fill a slot
+ * that the layout does not declare, such as a misspelt one. `activate`
+ * decides `Event`; `NoInfer` keeps it from being inferred from the list rows'
+ * `send`. A layout
  * or row builder gets each filled value as the source or literal gives it,
  * and decides how to show it.
  */
@@ -520,17 +525,10 @@ export function renderActiveView<
   Event extends RowEvent,
   Builders extends RowBuilders,
   Layouts extends ViewLayouts,
-  Snapshot
+  Snapshot extends ViewSnapshot<Source, List, Event, RowParams<Builders>, LayoutSlots<Layouts>>
 >(
-  snapshot: Snapshot &
-    ViewSnapshot<
-      NoInfer<Source>,
-      List,
-      Event,
-      NoInfer<RowParams<Builders>>,
-      NoInfer<LayoutSlots<Layouts>>
-    >,
-  sources: ViewSources<NoInfer<Snapshot>, Source, List, Event, Builders>,
+  snapshot: Snapshot,
+  sources: ViewSources<Snapshot, Source, List, NoInfer<Event>, Builders>,
   layouts: Layouts,
   { activate }: { activate: (event: Event) => void }
 ): Result<OneputView, ViewError> {

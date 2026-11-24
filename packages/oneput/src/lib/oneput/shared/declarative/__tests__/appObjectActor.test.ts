@@ -180,7 +180,8 @@ test('a row sends its named event and the child view patches the row in place', 
 test('a child view switches the input kind on the redraw and keeps the typed text', async () => {
   // arrange
   const { ctl, shown } = runPages({
-    input: { kind: 'textarea', rows: 3, placeholder: 'Note...' },
+    params: { input: { kind: 'textarea', rows: 3 } },
+    placeholder: 'Note...',
     menu: { items: [{ id: 'next', params: { text: 'Second page' } }] }
   });
   await shown;

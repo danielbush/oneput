@@ -1,6 +1,6 @@
 import type { Controller } from '../../controllers/controller.js';
 import type { Pull } from '../../lib/pull.js';
-import type { AppLayoutParams, InputKind, Menu, MenuItem, UIFlags, UILayout } from '../../types.js';
+import type { AppLayoutParams, Menu, MenuItem, UIFlags, UILayout } from '../../types.js';
 import { err, ok, Result } from 'neverthrow';
 
 /** The names of the sources whose value fits `T`. */
@@ -134,25 +134,6 @@ function filledOf(record: Record<string, unknown>) {
     if (record[name] !== undefined) filled[name] = record[name];
   }
   return filled;
-}
-
-/**
- * Put the view's input kind in the layout params, as `AppLayoutParams.input`,
- * the param through which Oneput sets the input. With no view input, the
- * layout's own `input` stays (no value is a text input).
- */
-function withInput<Source>(
-  params: AppLayoutParams,
-  input: ViewInput<Source> | undefined
-): AppLayoutParams {
-  if (input === undefined) return params;
-  const kind: InputKind =
-    input.kind === 'textarea'
-      ? { kind: 'textarea', rows: input.rows }
-      : input.kind === 'password'
-        ? { kind: 'password' }
-        : { kind: 'text' };
-  return { ...params, input: kind };
 }
 
 /** Find a named source. A widened view type can name a source that is not there. */
@@ -324,23 +305,11 @@ type NoRows = Record<never, never>;
 type NoSources = Record<never, never>;
 
 /**
- * The input for a view: Oneput's {@link InputKind}, with no `kind` meaning a
- * text input, and an optional placeholder. A child's `input` replaces its
- * parent's whole input, so a `textarea`'s `rows` never stays on a text input.
- */
-export type ViewInput<Source = NoSources> = (
-  | { kind?: 'text' }
-  | { kind: 'password' }
-  | { kind: 'textarea'; rows?: number }
-) & { placeholder?: Text<Source> };
-
-/**
  * The layout params that every layout takes ({@link AppLayoutParams}), as a
  * view gives them. The affordances are left out, because their functions
- * cannot be in a machine config, and so is `input`, which comes from the
- * view's own `input` with its placeholder.
+ * cannot be in a machine config.
  */
-type SharedParams = Omit<AppLayoutParams, 'inputSend' | 'inputAccept' | 'inputReject' | 'input'>;
+type SharedParams = Omit<AppLayoutParams, 'inputSend' | 'inputAccept' | 'inputReject'>;
 
 /**
  * Metadata for one state's contribution to the view. Use named sources for
@@ -367,7 +336,8 @@ export type ViewDef<
     /** The list source. Its rows appear in source order before the fixed rows. */
     from?: List;
   };
-  input?: ViewInput<Source>;
+  /** The input placeholder: text, or a source that gives text. */
+  placeholder?: Text<Source>;
   settings?: ViewSettings;
 };
 
@@ -530,8 +500,10 @@ export type OneputView = {
  * Resolve the active states' metadata, with parents first.
  * A child's `layout` replaces its parent's; when it names a different layout,
  * the parent's slots do not apply, and its `params` still do. Params, slots,
- * settings and menu fields merge by key, and a child can clear `input` with
- * `input: undefined`. The layout gets the view's params over its own. List rows keep
+ * settings and menu fields merge by key, and a child clears a param with
+ * `undefined`; a child's `input` param replaces its parent's whole input kind.
+ * A child's `placeholder` replaces its parent's, and `placeholder: undefined`
+ * clears it. The layout gets the view's params over its own. List rows keep
  * their order and IDs, including repeats. Fixed rows follow in order of
  * first declaration, with same-ID overrides (see {@link mergeRow}).
  * A name with no source, builder or layout, or a slot that the active layout
@@ -571,7 +543,7 @@ export function renderActiveView<
     .sort((a, b) => a.depth - b.depth)
     .map(({ view }) => view);
   let layoutName: string | undefined;
-  let input: ViewDef<Source>['input'];
+  let placeholder: ViewDef<Source>['placeholder'];
   // The rows are merged by ID below, not with the other menu fields.
   let menu: Omit<NonNullable<ViewDef<Source, List>['menu']>, 'items'> = {};
   let settings: ViewSettings = {};
@@ -582,7 +554,7 @@ export function renderActiveView<
       layoutName = view.layout;
       slots = slotRecord();
     }
-    if ('input' in view) input = view.input;
+    if ('placeholder' in view) placeholder = view.placeholder;
     menu = { ...menu, ...view.menu };
     settings = { ...settings, ...view.settings };
     Object.assign(slots, view.slots);
@@ -651,15 +623,15 @@ export function renderActiveView<
     readAll(filledOf(slots)),
     // The view types give each param a value of its type.
     readAll(filledOf(params)) as Result<SharedParams, NameError | ReadError>,
-    read(input?.placeholder) as Result<string | undefined, NameError | ReadError>
-  ]).map(([items, values, shared, placeholder]) => ({
+    read(placeholder) as Result<string | undefined, NameError | ReadError>
+  ]).map(([items, values, shared, text]) => ({
     layout: {
       name: layoutName,
       create: layout.create,
-      params: withInput({ ...layout.params(values), ...shared }, input)
+      params: { ...layout.params(values), ...shared }
     },
     menu: { id: menuId, focusBehaviour: menu.focusBehaviour, items },
     settings,
-    placeholder
+    placeholder: text
   }));
 }

@@ -207,8 +207,8 @@ current AppObject's refresh.
 
 A view gives the layout params that every layout takes in `params`: the
 `AppLayoutParams` without the affordances (`inputSend`, `inputAccept`,
-`inputReject`), whose functions cannot be in a machine config, and without
-`input` (below). Those are `menuTitle` and `busy`. Each is a literal or
+`inputReject`), whose functions cannot be in a machine config. Those are
+`menuTitle`, `busy` and `input`. Each is a literal or
 `{ from: 'source' }` of the param's type, for example
 `{ params: { menuTitle: { from: 'title' }, busy: true } }`. Params merge by
 key from parent to child, and `undefined` clears one. They apply to
@@ -255,15 +255,19 @@ layout, so rendering gives an error for a slot that the active layout does not
 declare, and for an unknown layout name. The menu, the input placeholder and the settings are
 not slots.
 
-A view's `input` is Oneput's `InputKind` with an optional `placeholder`
-(text or `{ from: ... }`), for example
-`{ kind: 'textarea', rows: 3, placeholder: 'Note...' }`; no `kind` is a text
-input. A child's `input` replaces its parent's whole input, and
-`input: undefined` clears it. The adapter sends the kind as the `input` layout
-param with the other params on each redraw, as an AppObject's `layout.params`
-does, so a layout that renders `inputUI.input` (as `StandardLayout` does) shows
-it. With no view input, the layout's own `input` stays. The typed text stays
-when the kind changes.
+The `input` param is Oneput's `InputKind`, for example
+`{ params: { input: { kind: 'textarea', rows: 3 } } }`. A child's `input`
+replaces its parent's whole input kind, so a `textarea`'s `rows` never stays
+on a text input, and `input: undefined` clears it. The adapter sends it with
+the other layout params on each redraw, as an AppObject's `layout.params`
+does, so a layout that renders `inputUI.input` (as `StandardLayout` does)
+shows it. With no `input` param, the layout's own `input` stays. The typed
+text stays when the kind changes.
+
+A view's `placeholder` is the input placeholder: text or `{ from: ... }` for
+a source that gives text, for example `{ placeholder: 'Note...' }`. It is not
+a layout param: the adapter sets it on the input. A child's `placeholder`
+replaces its parent's, and `placeholder: undefined` clears it.
 
 `standardLayout(icons)` in `shared/declarative/standardLayout.ts` shows
 `StandardLayout`, which draws the view's `menuTitle` and turns the host's

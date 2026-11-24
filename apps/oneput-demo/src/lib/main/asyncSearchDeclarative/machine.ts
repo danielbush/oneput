@@ -14,7 +14,7 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
         params: { menuTitle: { from: 'title' } },
         slots: { status: 'Ready' },
         menu: { id: 'async-search', focusBehaviour: 'last-action,first' },
-        input: { placeholder: 'Start typing something...' },
+        placeholder: 'Start typing something...',
         settings: { enableFilter: false, enableInputElement: true, clearInputAfterAction: false }
       }
     },

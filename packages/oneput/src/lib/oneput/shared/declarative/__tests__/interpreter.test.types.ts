@@ -236,7 +236,7 @@ const builderRowDetail: PlainView = {
   menu: { items: [{ id: 'row', params: { text: 'Row', detail: { from: 'footer' } } }] }
 };
 // @ts-expect-error 'flag' gives a boolean, not a placeholder.
-const flagPlaceholder: PlainView = { input: { placeholder: { from: 'flag' } } };
+const flagPlaceholder: PlainView = { placeholder: { from: 'flag' } };
 const textRow: PlainView = {
   menu: { items: [{ id: 'row', params: { text: { from: 'known' }, detail: 'Detail' } }] }
 };
@@ -316,15 +316,18 @@ void [unknownLayout, wrongSlot, unknownSlot, unknownSource, inherited];
 const forged: Readable<string> = { source: { get: () => '', subscribe: () => () => {} } };
 
 // @ts-expect-error A view's input is Oneput's InputKind; there is no 'filter' kind.
-const filterInput: PlainView = { input: { kind: 'filter' } };
+const filterInput: PlainView = { params: { input: { kind: 'filter' } } };
 // @ts-expect-error Only a textarea has rows.
-const textRows: PlainView = { input: { kind: 'text', rows: 3 } };
+const textRows: PlainView = { params: { input: { kind: 'text', rows: 3 } } };
+// @ts-expect-error The input param is Oneput's InputKind, which has no placeholder.
+const inputPlaceholder: PlainView = { params: { input: { kind: 'text', placeholder: 'Type' } } };
 const textarea: PlainView = {
-  input: { kind: 'textarea', rows: 3, placeholder: { from: 'known' } }
+  params: { input: { kind: 'textarea', rows: 3 } },
+  placeholder: { from: 'known' }
 };
 
 void inheritedLiteral;
-void [filterInput, textRows, textarea];
+void [filterInput, textRows, inputPlaceholder, textarea];
 void forged;
 void [emptySlot, inferredSnapshot];
 void [typedValues, wrongLiteral, textForBuilder, flagForText, textSourceForFlag];

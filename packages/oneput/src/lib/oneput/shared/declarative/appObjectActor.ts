@@ -6,8 +6,10 @@ import {
   type OneputView,
   type Readable,
   type LayoutSlots,
-  type PlainRowBuilder,
+  type RowBuilders,
+  type RowParams,
   type ViewLayouts,
+  type DeclaredSlots,
   type ViewSnapshot,
   type ViewSources
 } from './interpreter.js';
@@ -19,11 +21,6 @@ type ViewActor<Snapshot, Event extends { type: string }> = {
   send(event: OneputEvent | Event): void;
   getSnapshot(): Snapshot & { can(event: OneputEvent | Event): boolean };
   subscribe(onChange: () => void): { unsubscribe(): void };
-};
-
-export type AppObjectActorOptions = {
-  /** Build rows whose view has no `build` name. */
-  defaultRow: PlainRowBuilder;
 };
 
 /** The menu ID and row IDs: what the user sees as "the same rows". */
@@ -56,29 +53,39 @@ function applyView(ctl: Controller, view: OneputView, rowsChanged: boolean) {
 /**
  * Connect an actor to its AppObject. Oneput owns the AppObject stack and the input.
  * `layouts` are the layouts that the actor's views can name, shared across AppObjects.
- * `defaultRow` builds the rows that do not name a builder.
+ * The row builders are in `sources.menuItem`; its `default` builder draws the
+ * rows that do not name a builder.
  * When the active view names a layout other than the one this AppObject shows,
  * the adapter shows that layout's component.
  *
  * The view redraws when the actor has a new snapshot, and when any readable
  * source changes (see {@link Readable}).
+ *
+ * Which argument decides each type parameter: `actor` decides `Snapshot` and
+ * `Event`; `sources` decides `Source` (the slot source types), `List` (the
+ * list names) and `Builders` (the row builders); `layouts` decides `Layouts`.
+ * `NoInfer` keeps `sources` from deciding them too: `Snapshot` from the
+ * parameter types of its source functions (with an xstate actor, that
+ * candidate wins and fails the constraint), and `Event` from the list rows'
+ * `send`.
+ * The constraint on `Snapshot` checks the actor's views against the others.
+ * It is a constraint, not an intersection with the snapshot type, so that a
+ * view filling only a slot the layout does not declare (a misspelt one) is an
+ * error. {@link DeclaredSlots} on `layouts` catches such a slot beside
+ * declared ones, which the constraint allows: TypeScript has no exact types.
  */
 export function appObjectActor<
-  Source extends string,
+  Source,
   List extends string,
   Event extends { type: string },
-  Item extends string,
+  Builders extends RowBuilders,
   Layouts extends ViewLayouts,
-  Snapshot
+  Snapshot extends ViewSnapshot<Source, List, Event, RowParams<Builders>, LayoutSlots<Layouts>>
 >(
   ctl: Controller,
-  actor: ViewActor<
-    Snapshot & ViewSnapshot<Source, List, Event, Item, NoInfer<LayoutSlots<Layouts>>>,
-    Event
-  >,
-  sources: ViewSources<NoInfer<Snapshot>, Source, List, Event, Item>,
-  layouts: Layouts,
-  { defaultRow }: AppObjectActorOptions
+  actor: ViewActor<Snapshot, Event>,
+  sources: ViewSources<NoInfer<Snapshot>, Source, List, NoInfer<Event>, Builders>,
+  layouts: Layouts & DeclaredSlots<NoInfer<Snapshot>, NoInfer<Layouts>>
 ): AppObject {
   const sendIfCurrent = (event: OneputEvent | Event) => {
     if (ctl.app.isCurrent(app)) actor.send(event);
@@ -133,7 +140,6 @@ export function appObjectActor<
     ],
     onRefresh() {
       const rendered = renderActiveView(actor.getSnapshot(), sources, layouts, {
-        defaultRow,
         activate: sendIfCurrent
       });
       if (rendered.isErr()) {

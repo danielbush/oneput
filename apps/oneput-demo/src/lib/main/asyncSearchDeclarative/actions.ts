@@ -1,21 +1,19 @@
 import { assign, fromCallback, sendTo, setup } from 'xstate';
-import type { LayoutSlots, ViewDef } from '@oneput/oneput/shared/declarative/interpreter.js';
+import type { ViewFor } from '@oneput/oneput/shared/declarative/interpreter.js';
 import type { OneputEvent } from '@oneput/oneput/shared/declarative/oneputEvents.js';
-import { viewLayouts } from '../../common/_layout.js';
+import { viewLayouts } from '../../common/layout.js';
 import { SearchService, type SearchFailure, type SearchItem } from '../../service/SearchService.js';
-import { resultById, type SearchContext, type SearchContent } from './content.js';
+import type { SearchContext, SearchContent } from './content.js';
 
-type RowEvent = { type: 'RETRY_SEARCH' };
+type RowEvent = { type: 'RETRY_SEARCH' } | { type: 'RESULT_ACTIVATED'; id: string };
 type FetchEvent =
   | { type: 'SEARCH_SUCCEEDED'; results: readonly SearchItem[] }
   | { type: 'SEARCH_FAILED'; error: SearchFailure };
-type SearchView = ViewDef<
-  keyof SearchContent['text'],
-  keyof SearchContent['menu'],
-  RowEvent,
-  keyof SearchContent['menuItem'],
-  LayoutSlots<typeof viewLayouts>
->;
+type SearchView = ViewFor<SearchContent, typeof viewLayouts, RowEvent>;
+
+function resultById(context: SearchContext, id: string) {
+  return context.results.find((result) => result.id === id);
+}
 
 function fetchResults(service: SearchService) {
   return fromCallback<{ type: 'SEARCH'; query: string }>(({ receive, sendBack }) => {
@@ -44,7 +42,7 @@ export function searchActions(service: SearchService) {
       isBlankInput: ({ event }) => event.type === 'INPUT_CHANGED' && !/\S/.test(event.value),
       hasResults: ({ event }) => event.type === 'SEARCH_SUCCEEDED' && event.results.length > 0,
       resultExists: ({ context, event }) =>
-        event.type === 'ITEM_ACTIVATED' && resultById(context, event.id) !== undefined
+        event.type === 'RESULT_ACTIVATED' && resultById(context, event.id) !== undefined
     },
     actions: {
       writeQuery: assign((_, params: { value: string }) => ({

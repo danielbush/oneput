@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test } from 'vitest';
 import { Controller } from '../../../controllers/controller.js';
+import { hflex } from '../../../lib/builder.js';
 import { walk } from '../../../lib/utils.js';
 import type { FChildParams, FlexParams } from '../../../types.js';
 import { StandardLayout, type StandardLayoutParams } from './StandardLayout.js';
@@ -10,7 +11,8 @@ const icons = {
   Reject: 'x',
   Send: 'send',
   Back: 'left',
-  MenuToggle: 'down'
+  MenuToggle: 'down',
+  Busy: 'spin'
 };
 
 const controllers: Controller[] = [];
@@ -200,5 +202,91 @@ describe('menuTitle', () => {
 
     // assert
     expect([before, title(layout)]).toEqual(['New chat', 'Plans']);
+  });
+});
+
+describe('busy', () => {
+  /** The icon names in the input-right content. */
+  function rightIcons(layout: StandardLayout) {
+    const found: string[] = [];
+    const right = layout.inputUI.right;
+    if (right) {
+      walk(right, (child) => {
+        if (child.type === 'fchild' && child.icon) found.push(child.icon);
+      });
+    }
+    return found;
+  }
+
+  test('true - Busy icon beside the buttons', () => {
+    // arrange
+    const layout = createLayout({ busy: true, inputSend: { run: () => {} } });
+
+    // act
+    const shown = rightIcons(layout);
+
+    // assert
+    expect(shown).toEqual(['spin', 'send']);
+  });
+
+  test('true - Busy icon beside inputRight', () => {
+    // arrange
+    const inputRight = hflex({ id: 'custom', children: (b) => [b.icon('custom')] });
+    const layout = createLayout({ busy: true, inputRight });
+
+    // act
+    const shown = rightIcons(layout);
+
+    // assert
+    expect(shown).toEqual(['spin', 'custom']);
+  });
+
+  /**
+   * The IDs from the input-right root down to the node with this ID or title:
+   * a keyed redraw keeps that node while they stay the same.
+   */
+  function pathTo(layout: StandardLayout, name: string) {
+    const search = (node: FlexParams | FChildParams, path: string[]): string[] | undefined => {
+      const here = [...path, node.id ?? ''];
+      if (node.id === name || node.attr?.title === name) return here;
+      if (node.type !== 'hflex' && node.type !== 'vflex') return undefined;
+      for (const child of node.children ?? []) {
+        const found = child ? search(child, here) : undefined;
+        if (found) return found;
+      }
+      return undefined;
+    };
+    const right = layout.inputUI.right;
+    return right ? search(right, []) : undefined;
+  }
+
+  test.each<[string, StandardLayoutParams, string]>([
+    ['buttons', { inputSend: { run: () => {} } }, 'Send'],
+    ['inputRight', { inputRight: hflex({ id: 'custom', children: [] }) }, 'custom']
+  ])('toggle - %s keep their place', (_, params, name) => {
+    // arrange
+    const layout = createLayout(params);
+    const idle = pathTo(layout, name);
+
+    // act
+    layout.configure({ ...params, busy: true });
+    const busy = pathTo(layout, name);
+    layout.configure(params);
+
+    // assert
+    expect(idle).toBeDefined();
+    expect(busy).toEqual(idle);
+    expect(pathTo(layout, name)).toEqual(idle);
+  });
+
+  test('omitted - no Busy icon', () => {
+    // arrange
+    const layout = createLayout({ inputSend: { run: () => {} } });
+
+    // act
+    const shown = rightIcons(layout);
+
+    // assert
+    expect(shown).toEqual(['send']);
   });
 });

@@ -11,9 +11,10 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
     meta: {
       view: {
         layout: 'standard',
-        slots: { title: { from: 'title' }, status: 'Ready' },
+        params: { menuTitle: { $from: 'title' } },
+        slots: { status: 'Ready' },
         menu: { id: 'async-search', focusBehaviour: 'last-action,first' },
-        input: { placeholder: 'Start typing something...' },
+        placeholder: 'Start typing something...',
         settings: { enableFilter: false, enableInputElement: true, clearInputAfterAction: false }
       }
     },
@@ -38,14 +39,16 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
         description: 'Show the instructions. Blank input needs no request.',
         meta: {
           view: {
-            slots: { status: { from: 'emptyStatus' } },
+            slots: { status: { $from: 'emptyStatus' } },
             menu: {
               items: [
                 {
                   id: 'instructions',
-                  kind: 'info',
-                  icon: 'Info',
-                  text: 'Start typing something and inspect the browser console. The latest input controls the results. The service fails 30% of the time.'
+                  build: 'info',
+                  params: {
+                    icon: 'Info',
+                    text: 'Start typing something and inspect the browser console. The latest input controls the results. The service fails 30% of the time.'
+                  }
                 }
               ]
             }
@@ -55,7 +58,7 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
       pending: {
         description: 'Keep the input available and show the busy icon while the query is pending.',
         initial: 'debouncing',
-        meta: { view: { slots: { busyIcon: 'RefreshCw' } } },
+        meta: { view: { params: { busy: true } } },
         states: {
           debouncing: {
             description: 'Wait for a pause in typing before making the request.',
@@ -104,13 +107,13 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
         description: 'Show the current results and report a selection next to the input.',
         meta: {
           view: {
-            menu: { from: 'results' },
-            slots: { status: { from: 'resultStatus' } },
+            menu: { $from: 'results' },
+            slots: { status: { $from: 'resultStatus' } },
             settings: { clearInputAfterAction: true }
           }
         },
         on: {
-          ITEM_ACTIVATED: {
+          RESULT_ACTIVATED: {
             guard: 'resultExists',
             actions: { type: 'selectResult', params: ({ event }) => ({ id: event.id }) },
             description: 'Show the selected result text if its row still exists.'
@@ -129,9 +132,11 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
               items: [
                 {
                   id: 'retry-search',
-                  text: 'Retry search',
-                  detail: { from: 'searchError' },
-                  icon: 'RefreshCw',
+                  params: {
+                    text: 'Retry search',
+                    detail: { $from: 'searchError' },
+                    icon: 'RefreshCw'
+                  },
                   send: { type: 'RETRY_SEARCH' }
                 }
               ]

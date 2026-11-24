@@ -9,8 +9,10 @@ import { waitForState } from '../../test/index.js';
 import { appObjectActor } from '../appObjectActor.js';
 import {
   readable,
+  slot,
   viewLayout,
   type LayoutSlots,
+  type RowParams,
   type ViewDef,
   type ViewSnapshot
 } from '../interpreter.js';
@@ -26,14 +28,15 @@ const icons = {
   Reject: 'x',
   Send: 'send',
   Back: 'left',
-  MenuToggle: 'down'
+  MenuToggle: 'down',
+  Busy: 'spin'
 };
 
 type BannerParams = AppLayoutParams & { banner?: string };
 
 /** A test-only layout component: it shows only its banner, in the outer UI. */
 const bannerLayout = viewLayout({
-  slots: ['banner'],
+  slots: { banner: slot<string>() },
   create: (_ctl, initial: BannerParams) => {
     let settings = initial;
     const layout: UILayout<BannerParams> = {
@@ -54,26 +57,28 @@ const bannerLayout = viewLayout({
 
 const layouts = { standard: standardLayout(icons), banner: bannerLayout };
 type Layouts = LayoutSlots<typeof layouts>;
-type PageView = ViewDef<never, never, PageEvent, never, Layouts>;
-type Page = ViewSnapshot<never, never, PageEvent, never, Layouts> & {
+const builders = { default: standardRow };
+type Rows = RowParams<typeof builders>;
+type PageView = ViewDef<Record<never, never>, never, PageEvent, Rows, Layouts>;
+type Page = ViewSnapshot<Record<never, never>, never, PageEvent, Rows, Layouts> & {
   can(event: OneputEvent | PageEvent): boolean;
 };
 
 const rootView: PageView = {
   layout: 'standard',
-  slots: { title: 'Pages' },
+  params: { menuTitle: 'Pages' },
   // Keep typed text after a row click, to see what an input switch does to it.
   settings: { clearInputAfterAction: false },
   menu: {
     id: 'pages',
     items: [
-      { id: 'next', text: 'Next page', send: { type: 'NEXT_PAGE' } },
-      { id: 'help', text: 'Help' }
+      { id: 'next', params: { text: 'Next page' }, send: { type: 'NEXT_PAGE' } },
+      { id: 'help', params: { text: 'Help' } }
     ]
   }
 };
 const secondView: PageView = {
-  menu: { items: [{ id: 'next', text: 'Second page' }] }
+  menu: { items: [{ id: 'next', params: { text: 'Second page' } }] }
 };
 
 /** A two-state actor: root > first | second. NEXT_PAGE moves first to second. */
@@ -137,9 +142,8 @@ function runPages(second?: PageView) {
   const app = appObjectActor(
     ctl,
     createPageActor(second),
-    { text: {}, menu: {}, menuItem: {} },
-    layouts,
-    { defaultRow: standardRow }
+    { slot: {}, menu: {}, menuItem: builders },
+    layouts
   );
   const shown = menuShows(ctl, 'Next page');
   ctl.app.run(app);
@@ -176,8 +180,9 @@ test('a row sends its named event and the child view patches the row in place', 
 test('a child view switches the input kind on the redraw and keeps the typed text', async () => {
   // arrange
   const { ctl, shown } = runPages({
-    input: { kind: 'textarea', rows: 3, placeholder: 'Note...' },
-    menu: { items: [{ id: 'next', text: 'Second page' }] }
+    params: { input: { kind: 'textarea', rows: 3 } },
+    placeholder: 'Note...',
+    menu: { items: [{ id: 'next', params: { text: 'Second page' } }] }
   });
   await shown;
   const firstInput = ctl.currentProps.inputUI?.input;
@@ -200,7 +205,7 @@ test('a view that names another layout shows that layout component', async () =>
   const { ctl, shown } = runPages({
     layout: 'banner',
     slots: { banner: 'Offline' },
-    menu: { items: [{ id: 'next', text: 'Second page' }] }
+    menu: { items: [{ id: 'next', params: { text: 'Second page' } }] }
   });
   await shown;
   const firstLayout = ctl.ui.getLayout();
@@ -219,7 +224,7 @@ test('a view that names another layout shows that layout component', async () =>
   });
 });
 
-type LabelView = ViewDef<'label', 'rows', never, never, Layouts>;
+type LabelView = ViewDef<{ label: string }, 'rows', never, Rows, Layouts>;
 
 /** An actor with one state whose snapshot never changes. */
 function createStillActor(view: LabelView) {
@@ -242,17 +247,18 @@ test('a readable source change redraws the view with no new snapshot', async () 
   const ctl = Controller.createNull({ menuOpen: true });
   controllers.push(ctl);
   const label = cell('First label');
-  const rows = cell<readonly { id: string; text: string }[]>([{ id: 'a', text: 'Row A' }]);
+  const rows = cell<readonly { id: string; params: { text: string } }[]>([
+    { id: 'a', params: { text: 'Row A' } }
+  ]);
   const app = appObjectActor(
     ctl,
     createStillActor({
       layout: 'standard',
-      slots: { title: { from: 'label' } },
-      menu: { id: 'labels', from: 'rows' }
+      params: { menuTitle: { $from: 'label' } },
+      menu: { id: 'labels', $from: 'rows' }
     }),
-    { text: { label: readable(label) }, menu: { rows: readable(rows) }, menuItem: {} },
-    layouts,
-    { defaultRow: standardRow }
+    { slot: { label: readable(label) }, menu: { rows: readable(rows) }, menuItem: builders },
+    layouts
   );
   const shown = menuShows(ctl, 'Row A');
   ctl.app.run(app);
@@ -269,7 +275,7 @@ test('a readable source change redraws the view with no new snapshot', async () 
   await retitled;
   const rowsAfterTitle = ctl.currentProps.menuItems?.map((item) => item.id);
   const redrawn = menuShows(ctl, 'Row B');
-  rows.set([{ id: 'b', text: 'Row B' }]);
+  rows.set([{ id: 'b', params: { text: 'Row B' } }]);
   await redrawn;
 
   // assert

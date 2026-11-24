@@ -4,6 +4,10 @@
 
 This codebase is new. Avoid preserving old apis or features, do not keep legacy code. Always prefer replacing with better implementations and apis. It's paramount that we get the foundations right so that future changes can be added easily and in a modular fashion.
 
+## Element IDs
+
+Any ID that Oneput core gives an element must contain `oneput`, for example `oneput-layout-input-busy`. Then an ID that a host or AppObject gives cannot collide with one of Oneput's in the same keyed list.
+
 ## Demo app
 
 `apps/oneput-demo` shows Oneput. It is not meant to be consumed. Track its issues here, in this package: security findings in `THREAT_MODEL.md`, and other issues in this package's docs and backlog. Do not create separate docs for the demo.
@@ -54,8 +58,13 @@ Each AppObject on the stack owns its layout params: declared `layout.params`, or
 `shared/declarative/appObjectActor.ts` connects an actor to the AppObject stack.
 `shared/declarative/interpreter.ts` builds the async search view from active
 state metadata, named sources (snapshot functions or readable sources),
-named row builders, and named layouts
-(`standardLayout.ts` is one). See `docs/architecture.md`.
+named row builders and named layouts whose params and slots have declared types
+(`standardLayout.ts` is one). A view gives the shared layout params
+(`menuTitle`, `busy`, `input`) in `params`, a layout's own in `slots`, and
+the input `placeholder` apart; a row gives
+its builder's params in `params` (required unless the type allows
+`undefined`) and its event in `send`, which the builder decides how to raise. `ViewFor` types a
+machine's views from its content and layouts. See `docs/architecture.md`.
 
 ### Routing
 

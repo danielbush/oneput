@@ -1,45 +1,131 @@
 import { afterEach, describe, expect, test } from 'vitest';
 import { Controller } from '../../../controllers/controller.js';
-import { menuItem } from '../../../lib/builder.js';
+import { menuItem, type FlexChildBuilder } from '../../../lib/builder.js';
 import { cell } from '../../../lib/pull.js';
-import type { AppLayoutParams, FChildParams, MenuItem, UILayout } from '../../../types.js';
+import type {
+  AppLayoutParams,
+  FChildParams,
+  InputKind,
+  MenuItem,
+  UILayout
+} from '../../../types.js';
 import {
   renderActiveView,
+  rowBuilder,
   viewLayout,
   type LayoutSlots,
+  type RowBuilders,
+  type RowParams,
   type ViewDef,
   readable,
+  slot,
   sourceSubscriptions,
   type ViewLayouts,
+  type ViewRow,
   type ViewSources
 } from '../interpreter.js';
-import { standardRow } from '../standardRow.js';
 
 /** A layout component. These tests do not show it. */
 function component(_ctl: Controller, _params: AppLayoutParams): UILayout {
   return { configure: () => {} };
 }
 
+/** Content that a layout builds in place. */
+type Footer = (b: FlexChildBuilder) => FChildParams;
+type TypedParams = AppLayoutParams & { busy?: boolean; footer?: Footer };
+
 /** Test-only layouts: the interpreter knows no layout of its own. */
 const layouts = {
   plain: viewLayout({
-    slots: ['heading', 'note'],
+    slots: { heading: slot<string>(), note: slot<string>() },
     create: component,
     params: ({ heading, note }) => ({ menuTitle: [heading, note].filter(Boolean).join(' / ') })
   }),
   bare: viewLayout({
-    slots: ['heading'],
+    slots: { heading: slot<string>() },
     create: component,
     params: ({ heading }) => ({ menuTitle: `[${heading ?? ''}]` })
+  }),
+  // Keeps its values as they are, to show what reaches the layout.
+  typed: viewLayout({
+    slots: { busy: slot<boolean>(), footer: slot<Footer>() },
+    create: (ctl, params: TypedParams) => component(ctl, params),
+    params: ({ busy, footer }): TypedParams => ({ busy, footer })
+  }),
+  // Gives its own input kind, to show when a view's input param applies.
+  note: viewLayout({
+    slots: {},
+    create: component,
+    params: () => ({ input: { kind: 'textarea', rows: 3 } })
   })
 };
 
 type Layouts = LayoutSlots<typeof layouts>;
 
-type PageEvent = { type: 'NEXT_PAGE' } | { type: 'PREVIOUS_PAGE' };
-type PageView = ViewDef<'pageText', 'pages', PageEvent, 'badge' | 'pageNumber', Layouts>;
+function pageSegments(page: number) {
+  return [{ text: 'Page ' }, { text: String(page), emphasis: true }];
+}
+
+/** Test-only row builders: the interpreter knows no row of its own. */
+const builders = {
+  // Shows its text and detail as one text, to show which params reach it.
+  default: rowBuilder({
+    params: { text: slot<string>(), detail: slot<string | undefined>() },
+    build: ({ id, params: { text, detail } }, activate) =>
+      menuItem({
+        id,
+        action: activate,
+        children: (b) => [b.fchild({ textContent: [text, detail].filter(Boolean).join(': ') })]
+      })
+  }),
+  badge: rowBuilder({
+    params: { page: slot<number>() },
+    build: ({ id, params: { page } }, activate) =>
+      menuItem({
+        id,
+        action: activate,
+        children: (b) => [b.fchild({ textSegments: pageSegments(page) })]
+      })
+  }),
+  // Takes data with a `from` field, as a chat message has.
+  message: rowBuilder({
+    params: { message: slot<{ text: string; from?: string }>() },
+    build: ({ id, params: { message } }) =>
+      menuItem({
+        id,
+        children: (b) => [b.fchild({ textContent: `${message.from}: ${message.text}` })]
+      })
+  })
+};
+
+type PageEvent = { type: 'NEXT_PAGE' } | { type: 'PREVIOUS_PAGE' } | { type: 'OPENED'; id: string };
+type PageSources = { pageText: string; labelText: string; page: number };
+type Rows = RowParams<typeof builders>;
+type PageView = ViewDef<PageSources, 'pages', PageEvent, Rows, Layouts>;
+type TypedSources = PageSources & { laterPage: boolean; footer: Footer };
+type TypedView = ViewDef<TypedSources, never, never, Rows, Layouts>;
+type MaybeView = ViewDef<
+  PageSources & { maybeNote: string | undefined },
+  'pages',
+  PageEvent,
+  Rows,
+  Layouts
+>;
+type InputView = ViewDef<
+  PageSources & { noInput: InputKind | undefined },
+  'pages',
+  PageEvent,
+  Rows,
+  Layouts
+>;
 /** A view type that a machine declares apart from its sources: any name type-checks. */
-type WideView = ViewDef<string, string, PageEvent, string, Record<string, string>>;
+type WideView = ViewDef<
+  Record<string, string>,
+  string,
+  PageEvent,
+  Record<string, Record<string, string>>,
+  Record<string, Record<string, string>>
+>;
 
 /** The same layouts, typed with any names as a registry declared apart from its views. */
 const wideLayouts: ViewLayouts = layouts;
@@ -48,10 +134,12 @@ const wideLayouts: ViewLayouts = layouts;
  * An actor whose events change its page and its last activated row.
  * Its active states are nested: each view is the child of the one before.
  */
-function createPages<View extends PageView | WideView>(...views: View[]) {
+function createPages<View extends PageView | WideView | TypedView | InputView | MaybeView>(
+  ...views: View[]
+) {
   const state = { page: 1, activated: null as string | null };
   const pages = {
-    send(event: PageEvent | { type: 'ITEM_ACTIVATED'; id: string }) {
+    send(event: PageEvent) {
       if (event.type === 'NEXT_PAGE') state.page += 1;
       else if (event.type === 'PREVIOUS_PAGE') state.page -= 1;
       else state.activated = event.id;
@@ -73,37 +161,33 @@ function createPages<View extends PageView | WideView>(...views: View[]) {
 
 type Snapshot = { page: number };
 
-function pageSegments(page: number) {
-  return [{ text: 'Page ' }, { text: String(page), emphasis: true }];
-}
-
 const sources = {
-  text: { pageText: ({ page }: Snapshot) => `Page ${page}` },
-  menu: { pages: () => [{ id: 'list-row', build: 'badge' as const }] },
-  menuItem: {
-    badge: ({ page }: Snapshot, row: { id: string }, activate: () => void) =>
-      menuItem({
-        id: row.id,
-        action: activate,
-        children: (b) => [b.fchild({ textSegments: pageSegments(page) })]
-      }),
-    pageNumber: ({ page }: Snapshot, row: { id: string }, activate: () => void) =>
-      menuItem({
-        id: row.id,
-        action: activate,
-        children: (b) => [b.fchild({ textContent: String(page) })]
-      })
-  }
-} satisfies ViewSources<Snapshot, 'pageText', 'pages', PageEvent, 'badge' | 'pageNumber'>;
+  slot: {
+    pageText: ({ page }: Snapshot) => `Page ${page}`,
+    labelText: () => 'Label',
+    page: ({ page }: Snapshot) => page
+  },
+  menu: {
+    pages: () => [
+      {
+        id: 'list-row',
+        build: 'badge' as const,
+        params: { page: 7 },
+        send: { type: 'OPENED' as const, id: 'list-row' }
+      }
+    ]
+  },
+  menuItem: builders
+} satisfies ViewSources<Snapshot, PageSources, 'pages', PageEvent, typeof builders>;
 
-/** The same sources, typed with any names as a registry declared apart from its views. */
-const wideSources: ViewSources<Snapshot, string, string, PageEvent, string> = sources;
+/** The text sources, typed with any names as a registry declared apart from its views. */
+const wideSources: ViewSources<Snapshot, Record<string, string>, string, PageEvent, RowBuilders> = {
+  ...sources,
+  slot: { pageText: sources.slot.pageText }
+};
 
 function renderView(pages: ReturnType<typeof createPages<PageView>>) {
-  return renderActiveView(pages.snapshot, sources, layouts, {
-    defaultRow: standardRow,
-    activate: pages.send
-  });
+  return renderActiveView(pages.snapshot, sources, layouts, { activate: pages.send });
 }
 
 /** The interpreter puts only menu items in the menu. */
@@ -125,49 +209,53 @@ function click(item: MenuItem | undefined) {
   item?.action?.(ctl);
 }
 
+function firstChild(item: MenuItem | undefined) {
+  return item?.children?.[0] as FChildParams | undefined;
+}
+
 function segments(item: MenuItem | undefined) {
-  return (item?.children?.[0] as FChildParams | undefined)?.textSegments;
+  return firstChild(item)?.textSegments;
+}
+
+function text(item: MenuItem | undefined) {
+  return firstChild(item)?.textContent;
 }
 
 function pagesWith(items: NonNullable<PageView['menu']>['items']) {
   return createPages<PageView>({ layout: 'plain', menu: { id: 'pages', items } });
 }
 
-test('plain row uses the passed builder', () => {
-  // arrange
-  const pages = pagesWith([
-    { id: 'details', text: { from: 'pageText' }, detail: 'Details', activate: true }
-  ]);
-  let builtItem: MenuItem | undefined;
-
-  // act
-  const view = renderActiveView(pages.snapshot, sources, layouts, {
-    defaultRow: ({ id, text, detail }, action) => {
-      builtItem = menuItem({
-        id,
-        action,
-        children: (b) => [b.fchild({ textContent: `${text}: ${detail}` })]
-      });
-      return builtItem;
-    },
-    activate: pages.send
-  })._unsafeUnwrap();
-  const [item] = view.menu.items as MenuItem[];
-  click(item);
-
-  // assert
-  expect(item).toBe(builtItem);
-  expect(item).toMatchObject({
-    id: 'details',
-    children: [{ textContent: 'Page 1: Details' }]
-  });
-  expect(pages.snapshot.activated).toBe('details');
-});
-
-describe('built rows', () => {
-  test('view row sends its event', () => {
+describe('row builders', () => {
+  test('row with no build uses the default builder', () => {
     // arrange
-    const pages = pagesWith([{ id: 'next', build: 'badge', send: { type: 'NEXT_PAGE' } }]);
+    const pages = pagesWith([
+      {
+        id: 'details',
+        params: { text: { $from: 'pageText' }, detail: 'Details' },
+        send: { type: 'OPENED', id: 'details' }
+      }
+    ]);
+    const [item] = render(pages);
+
+    // act
+    click(item);
+
+    // assert
+    expect(item?.id).toBe('details');
+    expect(text(item)).toBe('Page 1: Details');
+    expect(pages.snapshot.activated).toBe('details');
+  });
+
+  test('named builder gets its params and sends the row event', () => {
+    // arrange
+    const pages = pagesWith([
+      {
+        id: 'next',
+        build: 'badge',
+        params: { page: { $from: 'page' } },
+        send: { type: 'NEXT_PAGE' }
+      }
+    ]);
     const [item] = render(pages);
 
     // act
@@ -179,9 +267,53 @@ describe('built rows', () => {
     expect(segments(render(pages)[0])).toEqual(pageSegments(2));
   });
 
-  test('list row without send activates its id', () => {
+  test('row with no send has no action', () => {
     // arrange
-    const pages = createPages<PageView>({ layout: 'plain', menu: { id: 'pages', from: 'pages' } });
+    const pages = pagesWith([{ id: 'help', params: { text: 'Help' } }]);
+
+    // act
+    const [item] = render(pages);
+
+    // assert
+    expect(text(item)).toBe('Help');
+    expect(item?.action).toBeUndefined();
+  });
+
+  test('a literal with a from field is data, not a source', () => {
+    // arrange
+    const pages = pagesWith([
+      { id: 'message', build: 'message', params: { message: { text: 'Hi', from: 'Alice' } } }
+    ]);
+
+    // act
+    const [item] = render(pages);
+
+    // assert
+    expect(text(item)).toBe('Alice: Hi');
+  });
+
+  test('no default builder', () => {
+    // arrange
+    const registry = { ...wideSources, menuItem: { badge: builders.badge } };
+    const pages = createPages<WideView>({
+      layout: 'plain',
+      menu: { id: 'pages', items: [{ id: 'row', params: { text: 'Row' } }] }
+    });
+
+    // act
+    const result = renderActiveView(pages.snapshot, registry, wideLayouts, {
+      activate: pages.send
+    });
+
+    // assert
+    expect(result._unsafeUnwrapErr()).toBe('Expected a source for each name');
+  });
+});
+
+describe('list rows', () => {
+  test('list row sends its event', () => {
+    // arrange
+    const pages = createPages<PageView>({ layout: 'plain', menu: { id: 'pages', $from: 'pages' } });
     const [item] = render(pages);
 
     // act
@@ -189,28 +321,25 @@ describe('built rows', () => {
 
     // assert
     expect(item?.id).toBe('list-row');
+    expect(segments(item)).toEqual(pageSegments(7));
     expect(pages.snapshot.activated).toBe('list-row');
   });
-});
 
-describe('list rows', () => {
   test('duplicate ids keep both rows in list order', () => {
     // arrange
     const registry = {
       ...sources,
       menu: {
         pages: () => [
-          { id: 'same', text: 'First' },
-          { id: 'same', text: 'Second' }
+          { id: 'same', params: { text: 'First' } },
+          { id: 'same', params: { text: 'Second' } }
         ]
       }
     };
-    const pages = createPages<PageView>({ layout: 'plain', menu: { id: 'pages', from: 'pages' } });
+    const pages = createPages<PageView>({ layout: 'plain', menu: { id: 'pages', $from: 'pages' } });
 
     // act
     const { menu } = renderActiveView(pages.snapshot, registry, layouts, {
-      defaultRow: ({ id, text }) =>
-        menuItem({ id, children: (b) => [b.fchild({ textContent: text })] }),
       activate: pages.send
     })._unsafeUnwrap();
 
@@ -225,7 +354,7 @@ describe('list rows', () => {
     // arrange
     const pages = createPages<PageView>({
       layout: 'plain',
-      menu: { id: 'pages', from: 'pages', items: [{ id: 'list-row', text: 'Fixed' }] }
+      menu: { id: 'pages', $from: 'pages', items: [{ id: 'list-row', params: { text: 'Fixed' } }] }
     });
 
     // act
@@ -233,12 +362,36 @@ describe('list rows', () => {
 
     // assert
     expect(items.map((item) => item.id)).toEqual(['list-row', 'list-row']);
-    expect(segments(items[0])).toEqual(pageSegments(1));
-    expect(JSON.stringify(items[1])).toContain('"textContent":"Fixed"');
+    expect(segments(items[0])).toEqual(pageSegments(7));
+    expect(text(items[1])).toBe('Fixed');
   });
 });
 
 describe('fixed row overrides', () => {
+  test('params merge by key', () => {
+    // arrange
+    const pages = createPages<PageView>(
+      {
+        layout: 'plain',
+        menu: {
+          id: 'pages',
+          items: [
+            { id: 'row', params: { text: 'Parent', detail: 'Detail' }, send: { type: 'NEXT_PAGE' } }
+          ]
+        }
+      },
+      { menu: { items: [{ id: 'row', params: { text: 'Child' } }] } }
+    );
+    const [item] = render(pages);
+
+    // act
+    click(item);
+
+    // assert
+    expect(text(item)).toBe('Child: Detail');
+    expect(pages.snapshot.page).toBe(2);
+  });
+
   test('child builder replaces the parent content in place', () => {
     // arrange
     const pages = createPages<PageView>(
@@ -247,16 +400,16 @@ describe('fixed row overrides', () => {
         menu: {
           id: 'pages',
           items: [
-            { id: 'row', text: 'Parent' },
-            { id: 'parent-only', text: 'Parent only' }
+            { id: 'row', params: { text: 'Parent' } },
+            { id: 'parent-only', params: { text: 'Parent only' } }
           ]
         }
       },
       {
         menu: {
           items: [
-            { id: 'child-only', text: 'Child only' },
-            { id: 'row', build: 'badge' }
+            { id: 'child-only', params: { text: 'Child only' } },
+            { id: 'row', build: 'badge', params: { page: { $from: 'page' } } }
           ]
         }
       }
@@ -270,17 +423,21 @@ describe('fixed row overrides', () => {
     expect(segments(items[0])).toEqual(pageSegments(1));
   });
 
-  test('send over build keeps the builder', () => {
+  test('another builder drops the earlier params and keeps the send', () => {
     // arrange
     const pages = createPages<PageView>(
       {
         layout: 'plain',
         menu: {
           id: 'pages',
-          items: [{ id: 'row', build: 'badge', send: { type: 'PREVIOUS_PAGE' } }]
+          items: [
+            { id: 'row', params: { text: 'Parent', detail: 'Detail' }, send: { type: 'NEXT_PAGE' } }
+          ]
         }
       },
-      { menu: { items: [{ id: 'row', send: { type: 'NEXT_PAGE' } }] } }
+      { menu: { items: [{ id: 'row', build: 'badge', params: { page: 3 } }] } },
+      // No build: back to the default builder, with none of the parent's params.
+      { menu: { items: [{ id: 'row', params: { text: 'Grandchild' } }] } }
     );
     const [item] = render(pages);
 
@@ -288,18 +445,27 @@ describe('fixed row overrides', () => {
     click(item);
 
     // assert
-    expect(segments(item)).toEqual(pageSegments(1));
+    expect(text(item)).toBe('Grandchild');
     expect(pages.snapshot.page).toBe(2);
   });
 
-  test('standard over build keeps the send', () => {
+  test('child send replaces the parent send', () => {
     // arrange
     const pages = createPages<PageView>(
       {
         layout: 'plain',
-        menu: { id: 'pages', items: [{ id: 'row', build: 'badge', send: { type: 'NEXT_PAGE' } }] }
+        menu: {
+          id: 'pages',
+          items: [
+            {
+              id: 'row',
+              params: { text: 'Parent', detail: 'Detail' },
+              send: { type: 'PREVIOUS_PAGE' }
+            }
+          ]
+        }
       },
-      { menu: { items: [{ id: 'row', text: 'Standard' }] } }
+      { menu: { items: [{ id: 'row', params: { text: 'Child' }, send: { type: 'NEXT_PAGE' } }] } }
     );
     const [item] = render(pages);
 
@@ -307,18 +473,60 @@ describe('fixed row overrides', () => {
     click(item);
 
     // assert
-    expect(JSON.stringify(item)).toContain('"textContent":"Standard"');
-    expect(segments(item)).toBeUndefined();
+    expect(text(item)).toBe('Child: Detail');
     expect(pages.snapshot.page).toBe(2);
   });
 });
 
 describe('layouts', () => {
+  const footer: Footer = (b) => b.fchild({ textContent: 'Footer' });
+  const typedSources = {
+    ...sources,
+    slot: { ...sources.slot, laterPage: ({ page }: Snapshot) => page > 1, footer: () => footer }
+  };
+
+  test.each<[string, Extract<TypedView, { layout: 'typed' }>['slots']]>([
+    ['literals', { busy: true, footer }],
+    ['sources', { busy: { $from: 'laterPage' }, footer: { $from: 'footer' } }]
+  ])('values that are not text reach the layout from %s', (name, slots) => {
+    // arrange
+    const pages = createPages<TypedView>({ layout: 'typed', slots, menu: { id: 'pages' } });
+
+    // act
+    const view = renderActiveView(pages.snapshot, typedSources, layouts, { activate: pages.send });
+
+    // assert
+    const { params } = view._unsafeUnwrap().layout;
+    expect(params).toEqual({ busy: name === 'literals', footer });
+    expect((params as TypedParams).footer).toBe(footer);
+  });
+
+  test.each<[string, MaybeView]>([
+    ['literal', { slots: { note: undefined } }],
+    ['source', { slots: { note: { $from: 'maybeNote' } } }]
+  ])('undefined slot from a %s leaves the slot to the layout', (_, child) => {
+    // arrange
+    const registry = {
+      ...sources,
+      slot: { ...sources.slot, maybeNote: (): string | undefined => undefined }
+    };
+    const pages = createPages<MaybeView>(
+      { layout: 'plain', slots: { heading: 'Parent', note: 'Parent note' }, menu: { id: 'pages' } },
+      child
+    );
+
+    // act
+    const view = renderActiveView(pages.snapshot, registry, layouts, { activate: pages.send });
+
+    // assert
+    expect(view._unsafeUnwrap().layout.params).toEqual({ menuTitle: 'Parent' });
+  });
+
   test('slots merge by key', () => {
     // arrange
     const pages = createPages<PageView>(
       { layout: 'plain', slots: { heading: 'Parent', note: 'Parent note' }, menu: { id: 'pages' } },
-      { slots: { note: { from: 'pageText' } } }
+      { slots: { note: { $from: 'pageText' } } }
     );
 
     // act
@@ -346,6 +554,74 @@ describe('layouts', () => {
       name: 'bare',
       params: { menuTitle: '[Child]' }
     });
+  });
+
+  test('params merge by key and reach the layout over its own', () => {
+    // arrange
+    const pages = createPages<PageView>(
+      {
+        layout: 'plain',
+        slots: { heading: 'Heading' },
+        params: { menuTitle: 'Parent', busy: true },
+        menu: { id: 'pages' }
+      },
+      { params: { menuTitle: { $from: 'pageText' } } }
+    );
+
+    // act
+    const view = renderView(pages);
+
+    // assert
+    expect(view._unsafeUnwrap().layout.params).toEqual({ menuTitle: 'Page 1', busy: true });
+  });
+
+  test('another layout keeps the params', () => {
+    // arrange
+    const pages = createPages<PageView>(
+      { layout: 'plain', params: { busy: true }, menu: { id: 'pages' } },
+      { layout: 'bare', slots: { heading: 'Child' } }
+    );
+
+    // act
+    const view = renderView(pages);
+
+    // assert
+    expect(view._unsafeUnwrap().layout).toMatchObject({
+      name: 'bare',
+      params: { menuTitle: '[Child]', busy: true }
+    });
+  });
+
+  test('child clears a param', () => {
+    // arrange
+    const pages = createPages<PageView>(
+      { layout: 'bare', params: { busy: true }, menu: { id: 'pages' } },
+      { params: { busy: undefined } }
+    );
+
+    // act
+    const view = renderView(pages);
+
+    // assert
+    expect(view._unsafeUnwrap().layout.params).toEqual({ menuTitle: '[]' });
+  });
+
+  test.each<[string, InputView]>([
+    ['literal', { layout: 'note', params: { input: undefined }, menu: { id: 'pages' } }],
+    ['source', { layout: 'note', params: { input: { $from: 'noInput' } }, menu: { id: 'pages' } }]
+  ])('undefined input param from a %s keeps the layout input', (_, view) => {
+    // arrange
+    const registry = {
+      ...sources,
+      slot: { ...sources.slot, noInput: (): InputKind | undefined => undefined }
+    };
+    const pages = createPages<InputView>(view);
+
+    // act
+    const result = renderActiveView(pages.snapshot, registry, layouts, { activate: pages.send });
+
+    // assert
+    expect(result._unsafeUnwrap().layout.params).toEqual({ input: { kind: 'textarea', rows: 3 } });
   });
 
   test('slot the layout does not declare', () => {
@@ -386,7 +662,6 @@ describe('layouts', () => {
 
     // act
     const view = renderActiveView(pages.snapshot, wideSources, wideLayouts, {
-      defaultRow: standardRow,
       activate: pages.send
     });
 
@@ -394,11 +669,12 @@ describe('layouts', () => {
     expect(view._unsafeUnwrapErr()).toBe('Expected only slots that the layout declares');
   });
 
-  test('input with no kind is a text input', () => {
+  test('input param and placeholder', () => {
     // arrange
     const pages = createPages<PageView>({
       layout: 'plain',
-      input: { placeholder: 'Type' },
+      params: { input: { kind: 'text' } },
+      placeholder: 'Type',
       menu: { id: 'pages' }
     });
 
@@ -413,23 +689,33 @@ describe('layouts', () => {
   test('child replaces the input', () => {
     // arrange
     const pages = createPages<PageView>(
-      { layout: 'plain', input: { placeholder: 'Type' }, menu: { id: 'pages' } },
-      { input: { kind: 'textarea', rows: 3, placeholder: { from: 'pageText' } } }
+      {
+        layout: 'plain',
+        params: { input: { kind: 'textarea', rows: 3 } },
+        placeholder: 'Type',
+        menu: { id: 'pages' }
+      },
+      { params: { input: { kind: 'password' } }, placeholder: { $from: 'pageText' } }
     );
 
     // act
     const view = renderView(pages)._unsafeUnwrap();
 
     // assert
-    expect(view.layout.params.input).toEqual({ kind: 'textarea', rows: 3 });
+    expect(view.layout.params.input).toEqual({ kind: 'password' });
     expect(view.placeholder).toBe('Page 1');
   });
 
   test('child clears the input', () => {
     // arrange
     const pages = createPages<PageView>(
-      { layout: 'plain', input: { kind: 'password', placeholder: 'Key' }, menu: { id: 'pages' } },
-      { input: undefined }
+      {
+        layout: 'plain',
+        params: { input: { kind: 'password' } },
+        placeholder: 'Key',
+        menu: { id: 'pages' }
+      },
+      { params: { input: undefined }, placeholder: undefined }
     );
 
     // act
@@ -456,11 +742,17 @@ describe('missing names', () => {
   test.each<[string, WideView]>([
     ['layout', { layout: 'gone', menu: { id: 'pages' } }],
     ['builder', { layout: 'plain', menu: { id: 'pages', items: [{ id: 'row', build: 'gone' }] } }],
-    ['list', { layout: 'plain', menu: { id: 'pages', from: 'gone' } }],
-    ['slot text', { layout: 'plain', slots: { heading: { from: 'gone' } }, menu: { id: 'pages' } }],
+    ['list', { layout: 'plain', menu: { id: 'pages', $from: 'gone' } }],
     [
-      'row text',
-      { layout: 'plain', menu: { id: 'pages', items: [{ id: 'row', text: { from: 'gone' } }] } }
+      'slot text',
+      { layout: 'plain', slots: { heading: { $from: 'gone' } }, menu: { id: 'pages' } }
+    ],
+    [
+      'row param',
+      {
+        layout: 'plain',
+        menu: { id: 'pages', items: [{ id: 'row', params: { text: { $from: 'gone' } } }] }
+      }
     ]
   ])('%s', (_, view) => {
     // arrange
@@ -468,7 +760,6 @@ describe('missing names', () => {
 
     // act
     const result = renderActiveView(pages.snapshot, wideSources, wideLayouts, {
-      defaultRow: standardRow,
       activate: pages.send
     });
 
@@ -481,34 +772,29 @@ describe('readable sources', () => {
   /** A registry that mixes readable sources with snapshot functions. */
   function mixedPages() {
     const heading = cell('First');
-    const rows = cell<readonly { id: string; build: 'badge' | 'pageNumber' }[]>([
-      { id: 'list-row', build: 'badge' },
-      { id: 'snapshot-row', build: 'pageNumber' }
-    ]);
     const label = cell('Label A');
-    const badge = cell((row: { id: string }, activate: () => void) =>
-      menuItem({
-        id: row.id,
-        action: activate,
-        children: (b) => [b.fchild({ textContent: label.get() })]
-      })
-    );
+    const rows = cell<readonly ViewRow<Rows, PageSources, PageEvent>[]>([
+      {
+        id: 'list-row',
+        build: 'badge',
+        params: { page: { $from: 'page' } },
+        send: { type: 'OPENED', id: 'list-row' }
+      },
+      { id: 'label-row', params: { text: { $from: 'labelText' } } }
+    ]);
     const mixed = {
-      text: { pageText: readable(heading) },
-      menu: { pages: readable(rows) },
-      menuItem: { badge: readable(badge), pageNumber: sources.menuItem.pageNumber }
-    } satisfies ViewSources<Snapshot, 'pageText', 'pages', PageEvent, 'badge' | 'pageNumber'>;
+      ...sources,
+      slot: { pageText: readable(heading), labelText: readable(label), page: sources.slot.page },
+      menu: { pages: readable(rows) }
+    } satisfies ViewSources<Snapshot, PageSources, 'pages', PageEvent, typeof builders>;
     const pages = createPages<PageView>({
       layout: 'plain',
-      slots: { heading: { from: 'pageText' } },
-      menu: { id: 'pages', from: 'pages' }
+      slots: { heading: { $from: 'pageText' } },
+      menu: { id: 'pages', $from: 'pages' }
     });
     const render = () =>
-      renderActiveView(pages.snapshot, mixed, layouts, {
-        defaultRow: standardRow,
-        activate: pages.send
-      })._unsafeUnwrap();
-    return { heading, rows, label, badge, mixed, pages, render };
+      renderActiveView(pages.snapshot, mixed, layouts, { activate: pages.send })._unsafeUnwrap();
+    return { heading, rows, label, mixed, pages, render };
   }
 
   test('each source is read by its own mark', () => {
@@ -522,14 +808,15 @@ describe('readable sources', () => {
     const after = render();
 
     // assert
+    const items = after.menu.items as MenuItem[];
     expect(before.layout.params).toEqual({ menuTitle: 'First' });
     expect(after.layout.params).toEqual({ menuTitle: 'Second' });
-    expect(after.menu.items.map((item) => item && item.id)).toEqual(['list-row', 'snapshot-row']);
-    expect(JSON.stringify(after.menu.items)).toContain('Label B');
-    expect(JSON.stringify(after.menu.items)).toContain('"textContent":"1"');
+    expect(items.map((item) => item.id)).toEqual(['list-row', 'label-row']);
+    expect(segments(items[0])).toEqual(pageSegments(1));
+    expect(text(items[1])).toBe('Label B');
   });
 
-  test('built row from a readable builder activates its id', () => {
+  test('row from a readable list sends its event', () => {
     // arrange
     const { pages, render } = mixedPages();
     const [item] = render().menu.items as MenuItem[];
@@ -544,13 +831,13 @@ describe('readable sources', () => {
 
   test('subscriptions are the marked sources only', () => {
     // arrange
-    const { heading, rows, badge, mixed } = mixedPages();
+    const { heading, rows, label, mixed } = mixedPages();
 
     // act
     const subscriptions = sourceSubscriptions(mixed);
 
     // assert
-    expect(subscriptions).toEqual([heading, rows, badge]);
+    expect(subscriptions).toEqual([heading, label, rows]);
   });
 
   // A callable object with get and subscribe looks like both kinds; only the mark counts.
@@ -561,18 +848,15 @@ describe('readable sources', () => {
     ['marked callable is read with get and subscribed', readable(both), 'Got', [both]]
   ])('%s', (_, pageText, title, subscribed) => {
     // arrange
-    const registry = { ...sources, text: { pageText } };
+    const registry = { ...sources, slot: { ...sources.slot, pageText } };
     const pages = createPages<PageView>({
       layout: 'plain',
-      slots: { heading: { from: 'pageText' } },
+      slots: { heading: { $from: 'pageText' } },
       menu: { id: 'pages' }
     });
 
     // act
-    const view = renderActiveView(pages.snapshot, registry, layouts, {
-      defaultRow: standardRow,
-      activate: pages.send
-    });
+    const view = renderActiveView(pages.snapshot, registry, layouts, { activate: pages.send });
 
     // assert
     expect(view._unsafeUnwrap().layout.params).toEqual({ menuTitle: title });
@@ -581,7 +865,7 @@ describe('readable sources', () => {
 
   test('an unmarked object with subscribe is not subscribed', () => {
     // arrange
-    const registry = { text: {}, menu: {}, menuItem: { odd: { subscribe: true } } };
+    const registry = { slot: {}, menu: { odd: { subscribe: true } } };
 
     // act
     const subscriptions = sourceSubscriptions(registry);
@@ -599,29 +883,32 @@ describe('readable sources', () => {
 
   test.each([
     [
-      'text',
-      { ...sources, text: { pageText: readable(throwing) } },
-      { menu: { id: 'pages' }, slots: { heading: { from: 'pageText' } } }
+      'readable slot',
+      { ...sources, slot: { ...sources.slot, pageText: readable(throwing) } },
+      { menu: { id: 'pages' }, slots: { heading: { $from: 'pageText' } } }
     ],
     [
-      'list',
+      'readable list',
       { ...sources, menu: { pages: readable(throwing) } },
-      { menu: { id: 'pages', from: 'pages' } }
+      { menu: { id: 'pages', $from: 'pages' } }
     ],
     [
       'builder',
-      { ...sources, menuItem: { ...sources.menuItem, badge: readable(throwing) } },
-      { menu: { id: 'pages', items: [{ id: 'row', build: 'badge' }] } }
+      {
+        ...sources,
+        menuItem: {
+          ...sources.menuItem,
+          badge: rowBuilder({ params: { page: slot<number>() }, build: throwing.get })
+        }
+      },
+      { menu: { id: 'pages', items: [{ id: 'row', build: 'badge', params: { page: 1 } }] } }
     ]
-  ] as const)('readable %s that throws gives the read error', (_, registry, view) => {
+  ] as const)('%s that throws gives the read error', (_, registry, view) => {
     // arrange
     const pages = createPages<PageView>({ layout: 'plain', ...view });
 
     // act
-    const result = renderActiveView(pages.snapshot, registry, layouts, {
-      defaultRow: standardRow,
-      activate: pages.send
-    });
+    const result = renderActiveView(pages.snapshot, registry, layouts, { activate: pages.send });
 
     // assert
     expect(result._unsafeUnwrapErr()).toBe('Expected each source to read without an error');
@@ -629,20 +916,17 @@ describe('readable sources', () => {
 
   test('a name that is not enumerable is neither read nor subscribed', () => {
     // arrange
-    const text = {};
-    Object.defineProperty(text, 'pageText', { value: readable(cell('Hidden')), enumerable: false });
-    const registry = { ...sources, text } as typeof sources;
+    const slot = {};
+    Object.defineProperty(slot, 'pageText', { value: readable(cell('Hidden')), enumerable: false });
+    const registry = { ...sources, slot } as typeof sources;
     const pages = createPages<PageView>({
       layout: 'plain',
-      slots: { heading: { from: 'pageText' } },
+      slots: { heading: { $from: 'pageText' } },
       menu: { id: 'pages' }
     });
 
     // act
-    const result = renderActiveView(pages.snapshot, registry, layouts, {
-      defaultRow: standardRow,
-      activate: pages.send
-    });
+    const result = renderActiveView(pages.snapshot, registry, layouts, { activate: pages.send });
 
     // assert
     expect(result._unsafeUnwrapErr()).toBe('Expected a source for each name');
@@ -652,9 +936,8 @@ describe('readable sources', () => {
   test('a mark around a source with no get or subscribe is not subscribed', () => {
     // arrange
     const registry = {
-      text: {},
-      menu: {},
-      menuItem: { unused: readable({} as never), fake: { kind: 'readable' } }
+      slot: { unused: readable({} as never) },
+      menu: { fake: { kind: 'readable' } }
     };
 
     // act

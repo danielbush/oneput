@@ -6,6 +6,7 @@
   import Anchor from '@oneput/oneput/shared/components/Anchor.svelte';
   import OneputController from '@oneput/oneput/shared/components/OneputController.svelte';
   import OneputCornerButton from '@oneput/oneput/shared/components/OneputCornerButton.svelte';
+  import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
   import { icons } from '$lib/common/icons.js';
   import { flowMachine, routeFlow } from '$lib/routed/flowMachine.js';
   import { Layout } from '$lib/common/layout.js';
@@ -29,6 +30,14 @@
   function init(ctl: Controller): AppObject {
     const online = Online.create();
     ctl.onDestroy(() => online.dispose());
+    const dynamicPlaceholder = DynamicPlaceholder.create(ctl, (params) =>
+      params.menuOpenBinding
+        ? params.isMenuOpen
+          ? `Close menu with ${params.menuOpenBinding}...`
+          : `Open menu with ${params.menuOpenBinding}...`
+        : 'Type here...'
+    );
+    ctl.input.setDefaultPlaceholder(dynamicPlaceholder);
     return {
       layout: { layout: Layout.create, params: {} },
       settings: { enableGoBack: false },

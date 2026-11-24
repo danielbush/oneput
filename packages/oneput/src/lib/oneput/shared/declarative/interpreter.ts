@@ -83,17 +83,18 @@ export type ViewRow<Rows extends TypesByName, Source, Event extends RowEvent> =
   | (DefaultRow extends keyof Rows
       ? RowFields<Event> & { build?: never } & ParamsField<
             ParamValues<Rows[DefaultRow], Source> & {
-              [Name in Exclude<ParamNames<Rows>, keyof Rows[DefaultRow]>]?: never;
+              [Name in Exclude<AllNames<Rows>, keyof Rows[DefaultRow]>]?: never;
             }
           >
       : never);
 
 /**
- * The param names of all builders. A row with no `build` cannot take the
- * others: with no builder name, TypeScript checks its params against all the
- * builders.
+ * The names in any entry of a registry: the param names of all builders, or
+ * the slot names of all layouts. A row with no `build` cannot take the other
+ * builders' params: with no builder name, TypeScript checks its params against
+ * all the builders.
  */
-type ParamNames<Rows> = Rows[keyof Rows] extends infer Params
+type AllNames<Rows> = Rows[keyof Rows] extends infer Params
   ? Params extends unknown
     ? keyof Params
     : never
@@ -285,18 +286,33 @@ type SlotValues<Types, Source> = [keyof Types] extends [never]
   ? Record<string, never>
   : { [Name in keyof Types]?: Fill<Types[Name], Source> };
 
-/** The slots of any one layout that has slots. */
-type AnyLayoutSlots<Layouts extends TypesByName, Source> = {
-  [Name in keyof Layouts]: [keyof Layouts[Name]] extends [never]
-    ? never
-    : SlotValues<Layouts[Name], Source>;
-}[keyof Layouts];
+/**
+ * The type that fits slot `Name` in every layout that declares it: the
+ * intersection of their types, `never` when they conflict.
+ */
+type InheritedType<Layouts extends TypesByName, Name> = {
+  [Layout in keyof Layouts]: Name extends keyof Layouts[Layout]
+    ? (value: Layouts[Layout][Name]) => void
+    : never;
+}[keyof Layouts] extends (value: infer T) => void
+  ? T
+  : never;
+
+/**
+ * The slots that a view with no layout can fill: any registered layout's,
+ * each with a value that fits every layout declaring that slot, since a parent
+ * may name any of them.
+ */
+type InheritedSlots<Layouts extends TypesByName, Source> = [AllNames<Layouts>] extends [never]
+  ? Record<string, never>
+  : { [Name in AllNames<Layouts>]?: Fill<InheritedType<Layouts, Name>, Source> };
 
 /**
  * A view that names a layout fills only that layout's slots, each with a value
  * of the slot's type. A view that does not name one fills the slots of the
  * layout a parent names; the type allows the slots of any registered layout
- * there, and rendering checks the names.
+ * there, each with a value that fits every layout that declares it, and
+ * rendering checks the names.
  */
 type LayoutChoice<Layouts extends TypesByName, Source> =
   | {
@@ -305,7 +321,7 @@ type LayoutChoice<Layouts extends TypesByName, Source> =
         slots?: SlotValues<Layouts[Name], Source>;
       };
     }[keyof Layouts & string]
-  | { layout?: never; slots?: AnyLayoutSlots<Layouts, Source> };
+  | { layout?: never; slots?: InheritedSlots<Layouts, Source> };
 
 type NoLayouts = Record<never, never>;
 type NoRows = Record<never, never>;

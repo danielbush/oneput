@@ -252,9 +252,11 @@ resumes.
 
 A child view can name a different layout; then the parent's slots do not
 apply. Otherwise slots merge by key. The registry types the layout names and
-slots. A view without `layout` can fill the slots of any one registered
-layout, so rendering gives an error for a slot that the active layout does not
-declare, and for an unknown layout name. The menu, the input placeholder and the settings are
+slots. A view without `layout` can fill the slots of any registered layout,
+each with a value that fits every layout that declares that slot (a slot that
+two layouts declare with different types cannot be filled there), so
+rendering gives an error for a slot that the active layout does not declare,
+and for an unknown layout name. The menu, the input placeholder and the settings are
 not slots.
 
 The `input` param is Oneput's `InputKind`, for example

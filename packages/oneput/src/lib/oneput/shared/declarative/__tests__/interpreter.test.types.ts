@@ -359,6 +359,31 @@ viewLayout({
   create: component,
   params: () => ({})
 });
+// Two layouts declare 'heading' with different types.
+const clashLayouts = {
+  text: viewLayout({
+    slots: { heading: slot<string>() },
+    create: component,
+    params: ({ heading }) => ({ menuTitle: heading })
+  }),
+  count: viewLayout({
+    slots: { heading: slot<number>(), note: slot<string>() },
+    create: component,
+    params: ({ heading }) => ({ menuTitle: String(heading) })
+  })
+};
+type ClashView = ViewDef<Sources, never, never, Rows, LayoutSlots<typeof clashLayouts>>;
+const clashNamed: ClashView[] = [
+  { layout: 'count', slots: { heading: 42 } },
+  { layout: 'text', slots: { heading: 'Text' } },
+  // A slot that one layout declares takes that layout's type.
+  { slots: { note: 'Note' } }
+];
+// @ts-expect-error 'heading' is text in 'text': a view with no layout must fit every layout that declares it.
+const clashNumber: ClashView = { slots: { heading: 42 } };
+// @ts-expect-error 'heading' is a number in 'count'.
+const clashText: ClashView = { slots: { heading: 'Text' } };
+void [clashNamed, clashNumber, clashText];
 // A view that does not name a layout fills a slot of the layout its parent names.
 const inheritedLiteral: PlainView = { slots: { heading: 'A' } };
 

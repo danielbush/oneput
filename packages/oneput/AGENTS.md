@@ -55,7 +55,11 @@ Each AppObject on the stack owns its layout params: declared `layout.params`, or
 `shared/declarative/interpreter.ts` builds the async search view from active
 state metadata, named sources (snapshot functions or readable sources),
 named row builders and named layouts whose params and slots have declared types
-(`standardLayout.ts` is one). See `docs/architecture.md`.
+(`standardLayout.ts` is one). A view gives the shared layout params
+(`menuTitle`, `busy`) in `params` and a layout's own in `slots`; a row gives
+its builder's params in `params` (required unless the type allows
+`undefined`), and only a row with `send` is clickable. `ViewFor` types a
+machine's views from its content and layouts. See `docs/architecture.md`.
 
 ### Routing
 

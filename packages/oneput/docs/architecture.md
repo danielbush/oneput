@@ -128,11 +128,11 @@ When an AppObject starts, `AppController.runBefore()` extracts bindings from `ac
 
 ### Declarative AppObject
 
-`appObjectActor(ctl, actor, sources, layouts, options)` in `shared/declarative/` connects
-an actor to Oneput. The actor receives AppObject lifecycle, Back, input, and
-row activation events. Its active states declare `meta.view`. The interpreter
+`appObjectActor(ctl, actor, sources, layouts)` in `shared/declarative/` connects
+an actor to Oneput. The actor receives AppObject lifecycle, Back and input
+events, and the events that clickable rows send. Its active states declare `meta.view`. The interpreter
 merges views from parent to child and reads named sources from the snapshot
-for changing slot values, row params and rows. Oneput owns the stack and applies the view to the
+for changing layout params, slot values, row params and rows. Oneput owns the stack and applies the view to the
 current AppObject through `watch` and `onRefresh`.
 
 The interpreter knows no row. A named row builder in `sources.menuItem` draws
@@ -146,38 +146,48 @@ menuItem: {
   info: infoRow,
   result: rowBuilder({
     params: { text: slot<string>() },
-    build: ({ id, text }, activate) => menuItem({ id, action: activate, ... })
+    build: ({ id, params: { text } }, activate) => menuItem({ id, action: activate, ... })
   })
 }
 ```
 
-A row has the fields `id`, `build`, `send` and `activate`; its other fields
-are the builder's params, each a literal or `{ from: 'source' }`, for example
-`{ id: 'retry', text: 'Retry', detail: { from: 'searchError' }, send: { type: 'RETRY' } }`
-or `{ id: 'note', build: 'info', text: 'Type to search' }`. A row with no
-`build` uses the `default` builder, so a registry with no `default` builder
-needs `build` on each row. A param value of another type, a param that the
-builder does not declare, or a builder that is not registered is a type error.
-`RowParams` gives the param types of a builder registry, for the machine's
-`ViewDef`. `standardRow` and `infoRow` in `shared/declarative/standardRow.ts`
-are ready-made builders for a Oneput standard menu item and an information
-message.
+A row has the fields `id`, `build` and `send`, and the builder's params in
+`params`, each a literal or `{ from: 'source' }`, for example
+`{ id: 'retry', send: { type: 'RETRY' }, params: { text: 'Retry', detail: { from: 'searchError' } } }`
+or `{ id: 'note', build: 'info', params: { text: 'Type to search' } }`. The
+params are apart from the row's own fields, so a builder can name a param
+anything but a name from `Object.prototype`. A row with no `build` uses the
+`default` builder, so a registry with no `default` builder needs `build` on
+each row. A param value of another type, a param that the builder does not
+declare, or a builder that is not registered is a type error.
 
-The builder gets the row's ID and the resolved params, and returns a menu item
-with the row's ID. The interpreter uses the returned item unchanged. A row
-activates when it has `send` or `activate: true`; the builder then gets an
-activation function, which sends the row's event to the actor, or sends
-`ITEM_ACTIVATED` with the row's ID when `send` is absent. A builder does not
-read the snapshot: data for one row comes as its params. In the demo, each
-search result row carries its result's text as the `text` param.
+A declared param is required unless its type allows `undefined`. With
+`slot<string>()`, each row that uses the builder gives the param, and `build`
+gets a `string`; with `slot<string | undefined>()`, a row may leave it out,
+and `build` gets `string | undefined`. For example the demo's `result`
+builder requires `text`, and `standardRow` requires `text` and takes an
+optional `detail` and `icon`. `RowParams` gives the param types of a builder
+registry, for the machine's `ViewDef`. `standardRow` and `infoRow` in
+`shared/declarative/standardRow.ts` are ready-made builders for a Oneput
+standard menu item and an information message.
+
+The builder gets the row's ID and its params, and returns a menu item with
+the row's ID. The interpreter uses the returned item unchanged. A row is
+clickable if and only if it has `send`: the builder then gets an activation
+function, which sends the row's event to the actor. A row that needs its own
+ID in the event puts it there, for example the demo's result rows send
+`{ type: 'RESULT_ACTIVATED', id }`. A builder does not read the snapshot:
+data for one row comes as its params. In the demo, each search result row
+carries its result's text as the `text` param.
 
 Rows from the list named by `menu.from` appear first, in source order, with
 their IDs and duplicates. Fixed rows declared in the active views follow.
 Only fixed rows merge by ID. They keep the position of their first
-declaration, and a child can override its parent's fields key by key. When the
-child row uses another builder (no `build` is the `default` builder), the
-parent's params do not apply; its `send` and `activate` do. A name with no
-source or builder gives an error.
+declaration. A child's row fields (`build`, `send`) merge key by key with its
+parent's, so a child keeps its parent's `send` unless it gives its own. Its
+params merge key by key while it keeps the builder; when the child row uses
+another builder (no `build` is the `default` builder), its params replace the
+parent's. A name with no source or builder gives an error.
 
 A source is a function of the actor snapshot, for data that the machine owns
 in its context; this is the main pattern. A source marked with
@@ -195,33 +205,48 @@ through one readable source. Oneput ignores a watch notification
 from an AppObject that it no longer watches, so a late one cannot replace the
 current AppObject's refresh.
 
+A view gives the layout params that every layout takes in `params`: the
+`AppLayoutParams` without the affordances (`inputSend`, `inputAccept`,
+`inputReject`), whose functions cannot be in a machine config, and without
+`input` (below). Those are `menuTitle` and `busy`. Each is a literal or
+`{ from: 'source' }` of the param's type, for example
+`{ params: { menuTitle: { from: 'title' }, busy: true } }`. Params merge by
+key from parent to child, and `undefined` clears one. They apply to
+whichever layout the active view shows, also when a child names another
+layout, and the layout gets them over its own params.
+
 The interpreter knows no layout. `viewLayout({ slots, create, params })` makes
 a registry entry: its slots and the type of each slot, the layout component
 (`create`, as in `AppObject.layout`), and how the resolved slot values become
-that component's params. `slot<T>()` declares a slot of type `T`, for example
-text, a flag, or a builder function for any content:
+that component's params. Slots are for what one layout adds to the shared
+params. `slot<T>()` declares a slot of type `T`, for example text, a flag, or
+a builder function for any content:
 
 ```ts
 const banner = viewLayout({
-  slots: { title: slot<string>(), busy: slot<boolean>() },
+  slots: { banner: slot<string>(), compact: slot<boolean>() },
   create: BannerLayout.create,
-  params: ({ title, busy }) => ({ menuTitle: title, inputRight: busy ? spinner : undefined })
+  params: ({ banner, compact }) => ({ bannerText: banner, compact })
 });
 ```
 
 A view names a registered layout and fills its slots with a literal or
 `{ from: 'source' }`, for example
-`{ layout: 'banner', slots: { title: 'Search', busy: { from: 'loading' } } }`.
+`{ layout: 'banner', slots: { banner: 'Offline', compact: { from: 'narrow' } } }`.
 The value must have the slot's type: a literal of another type, or a source
 in `sources.slot` that gives another type, is a type error. `SourceTypes`
 gives the source types of a `slot` registry, for the machine's `ViewDef`.
-Row params take sources in the same way, and the input placeholder takes only
-sources that give a string. The interpreter does not check the values at runtime: it gives each
-filled slot's value to `params` as the literal or source gives it, and the
-layout decides how to show it. The registry is shared
-across AppObjects. When the active view names a layout other than the one the
-AppObject shows, the adapter shows its component with `ctl.ui.setLayout`.
-Children inherit it, and it comes back when the AppObject resumes.
+`ViewFor<Content, Layouts, RowEvent>` builds that `ViewDef` from the content
+(the `slot`, `menu` and `menuItem` registries) and the layouts, for example
+`type SearchView = ViewFor<SearchContent, typeof viewLayouts, RowEvent>`.
+Row params and view params take sources in the same way, and the input
+placeholder takes only sources that give a string. The interpreter does not
+check the values at runtime: it gives each filled slot's value to `params` as
+the literal or source gives it, and the layout decides how to show it. The
+registry is shared across AppObjects. When the active view names a layout
+other than the one the AppObject shows, the adapter shows its component with
+`ctl.ui.setLayout`. Children inherit it, and it comes back when the AppObject
+resumes.
 
 A child view can name a different layout; then the parent's slots do not
 apply. Otherwise slots merge by key. The registry types the layout names and
@@ -241,10 +266,11 @@ it. With no view input, the layout's own `input` stays. The typed text stays
 when the kind changes.
 
 `standardLayout(icons)` in `shared/declarative/standardLayout.ts` shows
-`StandardLayout`: `title` and `status` (bottom-right text) take text, and
-`busyIcon: true` shows the host's `Busy` icon, turning at the right of the
-input. The host gives `Busy` with the `StandardLayoutIcons`, so the views
-contain no icon names. Async search uses it.
+`StandardLayout`, which draws the view's `menuTitle` and turns the host's
+`Busy` icon at the right of the input while `busy`, beside any input-right
+content. Its one slot, `status`, takes the bottom-right text. The host gives
+`Busy` with the other `StandardLayoutIcons`, so the views contain no icon
+names. Async search uses it.
 The menu refresh uses the view's `focusBehaviour`.
 Editor and claim views, and menu focus, menu update, and claim release events
 are not supported.

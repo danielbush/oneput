@@ -289,10 +289,14 @@ export type RowParams<Builders extends RowBuilders> = {
 /** Value types by slot or param name, for each layout or row builder name. */
 type TypesByName = Record<string, object>;
 
-/** A layout with no slots takes none. */
+/**
+ * Each slot's value: a literal or `{ $from: name }` of the slot's type, or
+ * `undefined` (also from a source) to leave the slot to the layout. A layout
+ * with no slots takes none.
+ */
 type SlotValues<Types, Source> = [keyof Types] extends [never]
   ? Record<string, never>
-  : { [Name in keyof Types]?: Fill<Types[Name], Source> };
+  : { [Name in keyof Types]?: Fill<Types[Name] | undefined, Source> };
 
 /**
  * The type that fits slot `Name` in every layout that declares it: the
@@ -313,7 +317,7 @@ type InheritedType<Layouts extends TypesByName, Name> = {
  */
 type InheritedSlots<Layouts extends TypesByName, Source> = [AllNames<Layouts>] extends [never]
   ? Record<string, never>
-  : { [Name in AllNames<Layouts>]?: Fill<InheritedType<Layouts, Name>, Source> };
+  : { [Name in AllNames<Layouts>]?: Fill<InheritedType<Layouts, Name> | undefined, Source> };
 
 /**
  * A view that names a layout fills only that layout's slots, each with a value

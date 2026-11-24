@@ -255,7 +255,8 @@ other than the one the AppObject shows, the adapter shows its component with
 resumes.
 
 A child view can name a different layout; then the parent's slots do not
-apply. Otherwise slots merge by key. The registry types the layout names and
+apply. Otherwise slots merge by key. A slot value of `undefined`, as a literal
+or from a source that can give `undefined`, leaves the slot to the layout. The registry types the layout names and
 slots. A view without `layout` can fill the slots of any registered layout,
 each with a value that fits every layout that declares that slot (a slot that
 two layouts declare with different types cannot be filled there), so

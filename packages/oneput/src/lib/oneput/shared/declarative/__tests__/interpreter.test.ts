@@ -104,6 +104,13 @@ type Rows = RowParams<typeof builders>;
 type PageView = ViewDef<PageSources, 'pages', PageEvent, Rows, Layouts>;
 type TypedSources = PageSources & { laterPage: boolean; footer: Footer };
 type TypedView = ViewDef<TypedSources, never, never, Rows, Layouts>;
+type MaybeView = ViewDef<
+  PageSources & { maybeNote: string | undefined },
+  'pages',
+  PageEvent,
+  Rows,
+  Layouts
+>;
 type InputView = ViewDef<
   PageSources & { noInput: InputKind | undefined },
   'pages',
@@ -127,7 +134,9 @@ const wideLayouts: ViewLayouts = layouts;
  * An actor whose events change its page and its last activated row.
  * Its active states are nested: each view is the child of the one before.
  */
-function createPages<View extends PageView | WideView | TypedView | InputView>(...views: View[]) {
+function createPages<View extends PageView | WideView | TypedView | InputView | MaybeView>(
+  ...views: View[]
+) {
   const state = { page: 1, activated: null as string | null };
   const pages = {
     send(event: PageEvent) {
@@ -490,6 +499,27 @@ describe('layouts', () => {
     const { params } = view._unsafeUnwrap().layout;
     expect(params).toEqual({ busy: name === 'literals', footer });
     expect((params as TypedParams).footer).toBe(footer);
+  });
+
+  test.each<[string, MaybeView]>([
+    ['literal', { slots: { note: undefined } }],
+    ['source', { slots: { note: { $from: 'maybeNote' } } }]
+  ])('undefined slot from a %s leaves the slot to the layout', (_, child) => {
+    // arrange
+    const registry = {
+      ...sources,
+      slot: { ...sources.slot, maybeNote: (): string | undefined => undefined }
+    };
+    const pages = createPages<MaybeView>(
+      { layout: 'plain', slots: { heading: 'Parent', note: 'Parent note' }, menu: { id: 'pages' } },
+      child
+    );
+
+    // act
+    const view = renderActiveView(pages.snapshot, registry, layouts, { activate: pages.send });
+
+    // assert
+    expect(view._unsafeUnwrap().layout.params).toEqual({ menuTitle: 'Parent' });
   });
 
   test('slots merge by key', () => {

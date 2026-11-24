@@ -178,6 +178,19 @@ const unknownSource: PlainView = {
   slots: { heading: { $from: 'gone' } }
 };
 
+// A slot source may give undefined, to leave the slot to the layout as a literal undefined does.
+const maybeSlot: ViewDef<Sources & { maybe: string | undefined }, never, never, Rows, Layouts> = {
+  layout: 'plain',
+  slots: { heading: { $from: 'maybe' } }
+};
+const maybeInherited: ViewDef<
+  Sources & { maybe: string | undefined },
+  never,
+  never,
+  Rows,
+  Layouts
+> = { slots: { heading: { $from: 'maybe' } } };
+void [maybeSlot, maybeInherited];
 // Slot types: a literal or a source must fit the type that the slot declares.
 const typedValues: PlainView[] = [
   { layout: 'typed', slots: { busy: true, footer } },

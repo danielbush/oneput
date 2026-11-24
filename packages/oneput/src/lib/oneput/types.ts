@@ -587,6 +587,12 @@ export type AppLayoutParams = {
    * rebuilds its UI (each `ctl.ui.update`).
    */
   input?: InputKind;
+  /**
+   * The AppObject is busy, for example while a request is pending. Layouts
+   * that show it draw a busy indicator; `StandardLayout` turns its `Busy` icon
+   * at the right of the input.
+   */
+  busy?: boolean;
 };
 
 export type InstallLayout<LayoutParams extends AppLayoutParams = AppLayoutParams> = {

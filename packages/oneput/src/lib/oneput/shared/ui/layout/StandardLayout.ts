@@ -34,6 +34,8 @@ export type StandardLayoutIcons = {
    * menu opens.
    */
   MenuToggle: string;
+  /** Turns at the right of the input while the layout param `busy` is true. Often a circular arrow. */
+  Busy: string;
 };
 
 /**
@@ -57,7 +59,7 @@ function isEnabled(affordance: LayoutAffordance) {
 
 /**
  * Standard host layout: menu header (back / title / close), input-right
- * Accept / Reject / Send from {@link AppLayoutParams}, menu toggle, and
+ * Accept / Reject / Send and the busy icon from {@link AppLayoutParams}, menu toggle, and
  * outer status chrome (date/time toggle bottom-right by default).
  *
  * Chrome only — hosts set defaults (filter, bindings, placeholder) in their
@@ -179,10 +181,25 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
     });
   }
 
+  /**
+   * The input-right content: `inputRight`, or the default buttons. While
+   * `busy`, the `Busy` icon turns beside it.
+   */
+  private inputRightUI() {
+    const right = this.settings.inputRight ?? this.inputRight();
+    if (!this.settings.busy) {
+      return right;
+    }
+    return hflex({
+      id: 'layout-input-right-busy',
+      children: (b) => [b.icon(this.icons.Busy, { classes: ['oneput__rotate'] }), right]
+    });
+  }
+
   get inputUI() {
     return {
       input: this.settings.input,
-      right: this.settings.inputRight ?? this.inputRight(),
+      right: this.inputRightUI(),
       outerRight: hflex({
         id: 'root-input-right',
         children: (b) => [

@@ -13,7 +13,8 @@ const layoutIcons: StandardLayoutIcons = {
   Reject: icons.X,
   Send: icons.SendHorizontal,
   Back: icons.ArrowLeft,
-  MenuToggle: icons.ChevronDown
+  MenuToggle: icons.ChevronDown,
+  Busy: icons.RotateCcw
 };
 
 /**

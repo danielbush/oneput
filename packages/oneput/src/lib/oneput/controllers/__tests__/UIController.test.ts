@@ -10,7 +10,8 @@ const icons = {
   Reject: 'x',
   Send: 'send',
   Back: 'left',
-  MenuToggle: 'down'
+  MenuToggle: 'down',
+  Busy: 'spin'
 };
 
 const controllers: Controller[] = [];

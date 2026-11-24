@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test } from 'vitest';
 import { Controller } from '../../../controllers/controller.js';
+import { hflex } from '../../../lib/builder.js';
 import { walk } from '../../../lib/utils.js';
 import type { FChildParams, FlexParams } from '../../../types.js';
 import { StandardLayout, type StandardLayoutParams } from './StandardLayout.js';
@@ -10,7 +11,8 @@ const icons = {
   Reject: 'x',
   Send: 'send',
   Back: 'left',
-  MenuToggle: 'down'
+  MenuToggle: 'down',
+  Busy: 'spin'
 };
 
 const controllers: Controller[] = [];
@@ -200,5 +202,53 @@ describe('menuTitle', () => {
 
     // assert
     expect([before, title(layout)]).toEqual(['New chat', 'Plans']);
+  });
+});
+
+describe('busy', () => {
+  /** The icon names in the input-right content. */
+  function rightIcons(layout: StandardLayout) {
+    const found: string[] = [];
+    const right = layout.inputUI.right;
+    if (right) {
+      walk(right, (child) => {
+        if (child.type === 'fchild' && child.icon) found.push(child.icon);
+      });
+    }
+    return found;
+  }
+
+  test('true - Busy icon beside the buttons', () => {
+    // arrange
+    const layout = createLayout({ busy: true, inputSend: { run: () => {} } });
+
+    // act
+    const shown = rightIcons(layout);
+
+    // assert
+    expect(shown).toEqual(['spin', 'send']);
+  });
+
+  test('true - Busy icon beside inputRight', () => {
+    // arrange
+    const inputRight = hflex({ id: 'custom', children: (b) => [b.icon('custom')] });
+    const layout = createLayout({ busy: true, inputRight });
+
+    // act
+    const shown = rightIcons(layout);
+
+    // assert
+    expect(shown).toEqual(['spin', 'custom']);
+  });
+
+  test('omitted - no Busy icon', () => {
+    // arrange
+    const layout = createLayout({ inputSend: { run: () => {} } });
+
+    // act
+    const shown = rightIcons(layout);
+
+    // assert
+    expect(shown).toEqual(['send']);
   });
 });

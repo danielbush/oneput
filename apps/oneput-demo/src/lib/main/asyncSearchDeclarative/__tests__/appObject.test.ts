@@ -328,6 +328,49 @@ describe('declarative async search AppObject', () => {
     ctl._destroy();
   });
 
+  it('shows the new error when the retry fails too', async () => {
+    // arrange
+    const ctl = createController();
+    const clock = new SimulatedClock();
+    const responses = [err({ message: 'First failure' }), err({ message: 'Second failure' })];
+    const service = SearchService.createNull({
+      clock,
+      response: (query) => ({ result: query === 'app' ? (responses.shift() ?? ok([])) : ok([]) })
+    });
+    ctl.app.run(createAsyncSearchAppObject(ctl, Online.createNull(), service, clock));
+    const retryIds = new StdMenuItemIds('retry-search');
+    /** The retry row's detail: the error message under its text. */
+    const detail = () =>
+      ctl.currentProps.menuItems?.[0]?.children?.find(
+        (child) => child && child.id === retryIds.bottom
+      );
+    const showing = (message: string) => ({
+      children: expect.arrayContaining([
+        expect.objectContaining({ id: retryIds.bottomCenter, textContent: message })
+      ])
+    });
+
+    // act
+    const failed = viewShows(ctl, { status: '⚠️ Error', rows: ['retry-search'] });
+    await ctl.input.typeText('app');
+    clock.increment(500);
+    await failed;
+    const firstDetail = detail();
+    const retrying = viewShows(ctl, { status: 'Debouncing...' });
+    ctl.simulateMenuItemClick('retry-search');
+    await retrying;
+    const failedAgain = viewShows(ctl, { status: '⚠️ Error', rows: ['retry-search'] });
+    clock.increment(500);
+    await failedAgain;
+
+    // assert
+    expect(firstDetail).toMatchObject(showing('First failure'));
+    expect(detail()).toMatchObject(showing('Second failure'));
+    expect(ctl.input.getInputValue()).toBe('app');
+    ctl.app.exit();
+    ctl._destroy();
+  });
+
   it('shows instructions for blank input and an empty menu for no results', async () => {
     // arrange
     const ctl = createController();

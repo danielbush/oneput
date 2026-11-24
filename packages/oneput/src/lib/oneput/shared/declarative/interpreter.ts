@@ -389,6 +389,45 @@ export type ViewFor<
   LayoutSlots<Layouts>
 >;
 
+/** The views in a snapshot's metadata. Views typed `any` give none, so they are not checked. */
+type ViewsOf<Snapshot> = Snapshot extends { getMeta(): infer Meta }
+  ? Meta[keyof Meta] extends infer Entry
+    ? Entry extends { view?: infer View }
+      ? 0 extends 1 & View
+        ? never
+        : NonNullable<View>
+      : never
+    : never
+  : never;
+
+/**
+ * The slot names that a view fills and its layout does not declare, or that
+ * no layout declares for a view with no layout. Slots typed with an index
+ * signature name no slot, so they are not checked.
+ */
+type UndeclaredSlots<View, Layouts extends ViewLayouts> = View extends { slots?: infer Slots }
+  ? string extends keyof NonNullable<Slots>
+    ? never
+    : Exclude<
+        keyof NonNullable<Slots>,
+        View extends { layout: infer Name extends keyof Layouts }
+          ? keyof Layouts[Name]['slots']
+          : AllNames<LayoutSlots<Layouts>>
+      >
+  : never;
+
+/**
+ * Nothing when the snapshot's views fill only declared slots. Otherwise a
+ * field that names the others, which the layouts lack: TypeScript has no
+ * exact object types, so a view inferred from a literal can carry a slot
+ * beside the declared ones.
+ */
+export type DeclaredSlots<Snapshot, Layouts extends ViewLayouts> = [
+  UndeclaredSlots<ViewsOf<Snapshot>, Layouts>
+] extends [never]
+  ? unknown
+  : { 'Expected only slots that the layout declares': UndeclaredSlots<ViewsOf<Snapshot>, Layouts> };
+
 /** The metadata read from an actor snapshot. */
 export type ViewSnapshot<
   Source,
@@ -540,7 +579,8 @@ export type OneputView = {
  * use, and `sources.menuItem` types the row builder names and params. The
  * snapshot's views are checked against them by the constraint on `Snapshot`,
  * not intersected with them: an intersection would let a view fill a slot
- * that the layout does not declare, such as a misspelt one. `snapshot`
+ * that the layout does not declare, such as a misspelt one, and
+ * {@link DeclaredSlots} on `layouts` catches one beside declared slots. `snapshot`
  * decides `Snapshot` and `activate` decides `Event`; `NoInfer` keeps the
  * source functions' parameter types and the list rows' `send` from deciding
  * them. A layout
@@ -557,7 +597,7 @@ export function renderActiveView<
 >(
   snapshot: Snapshot,
   sources: ViewSources<NoInfer<Snapshot>, Source, List, NoInfer<Event>, Builders>,
-  layouts: Layouts,
+  layouts: Layouts & DeclaredSlots<NoInfer<Snapshot>, NoInfer<Layouts>>,
   { activate }: { activate: (event: Event) => void }
 ): Result<OneputView, ViewError> {
   const views = Object.entries(snapshot.getMeta())

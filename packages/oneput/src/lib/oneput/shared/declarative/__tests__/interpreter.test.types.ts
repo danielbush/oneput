@@ -320,16 +320,18 @@ function inferredSnapshot() {
   return renderActiveView(snapshot, sources, layouts, { activate: () => {} });
 }
 
-/** A snapshot whose view, inferred from its literal, misspells the 'heading' slot of 'plain'. */
-function misspeltSnapshot() {
+/** A snapshot whose view, inferred from its literal, fills these slots of 'plain'. */
+function plainSnapshot<const Slots>(slots: Slots) {
   return {
     machine: { getStateNodeById: () => ({ path: [] }) },
-    getMeta: () => ({
-      root: { view: { layout: 'plain' as const, slots: { headng: 'Typo' }, menu: { id: 'menu' } } }
-    }),
+    getMeta: () => ({ root: { view: { layout: 'plain' as const, slots, menu: { id: 'menu' } } } }),
     can: () => false
   };
 }
+/** 'plain' declares 'heading', not 'headng'. */
+const misspeltSnapshot = () => plainSnapshot({ headng: 'Typo' });
+/** 'headng' beside a slot that 'plain' declares. */
+const misspeltBesideSnapshot = () => plainSnapshot({ heading: 'Title', headng: 'Typo' });
 declare const ctl: Controller;
 /** The adapter checks the actor's views against the layouts, so a misspelt slot is an error. */
 function misspeltSlot() {
@@ -345,6 +347,13 @@ function misspeltSlot() {
   appObjectActor(ctl, actor, sources, layouts);
   // @ts-expect-error 'plain' declares 'heading', not 'headng'.
   renderActiveView(misspeltSnapshot(), sources, layouts, { activate: () => {} });
+  const besideActor = { ...actor, getSnapshot: misspeltBesideSnapshot };
+  // @ts-expect-error 'plain' does not declare 'headng', even beside 'heading'.
+  appObjectActor(ctl, besideActor, sources, layouts);
+  // @ts-expect-error 'plain' does not declare 'headng', even beside 'heading'.
+  renderActiveView(misspeltBesideSnapshot(), sources, layouts, { activate: () => {} });
+  // Declared slots only: no error.
+  renderActiveView(plainSnapshot({ heading: 'Title' }), sources, layouts, { activate: () => {} });
 }
 
 viewLayout({

@@ -9,6 +9,7 @@ import {
   type RowBuilders,
   type RowParams,
   type ViewLayouts,
+  type DeclaredSlots,
   type ViewSnapshot,
   type ViewSources
 } from './interpreter.js';
@@ -69,7 +70,9 @@ function applyView(ctl: Controller, view: OneputView, rowsChanged: boolean) {
  * `send`.
  * The constraint on `Snapshot` checks the actor's views against the others.
  * It is a constraint, not an intersection with the snapshot type, so that a
- * view filling a slot the layout does not declare (a misspelt one) is an error.
+ * view filling only a slot the layout does not declare (a misspelt one) is an
+ * error. {@link DeclaredSlots} on `layouts` catches such a slot beside
+ * declared ones, which the constraint allows: TypeScript has no exact types.
  */
 export function appObjectActor<
   Source,
@@ -82,7 +85,7 @@ export function appObjectActor<
   ctl: Controller,
   actor: ViewActor<Snapshot, Event>,
   sources: ViewSources<NoInfer<Snapshot>, Source, List, NoInfer<Event>, Builders>,
-  layouts: Layouts
+  layouts: Layouts & DeclaredSlots<NoInfer<Snapshot>, NoInfer<Layouts>>
 ): AppObject {
   const sendIfCurrent = (event: OneputEvent | Event) => {
     if (ctl.app.isCurrent(app)) actor.send(event);

@@ -257,7 +257,9 @@ slots. A view without `layout` can fill the slots of any registered layout,
 each with a value that fits every layout that declares that slot (a slot that
 two layouts declare with different types cannot be filled there), so
 rendering gives an error for a slot that the active layout does not declare,
-and for an unknown layout name. The menu, the input placeholder and the settings are
+and for an unknown layout name. A snapshot whose views fill a slot that their
+layout does not declare is a type error at `appObjectActor`, also when the
+views' type is inferred from a literal. The menu, the input placeholder and the settings are
 not slots.
 
 The `input` param is Oneput's `InputKind`, for example

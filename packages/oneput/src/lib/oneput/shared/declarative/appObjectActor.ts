@@ -59,6 +59,11 @@ function applyView(ctl: Controller, view: OneputView, rowsChanged: boolean) {
  *
  * The view redraws when the actor has a new snapshot, and when any readable
  * source changes (see {@link Readable}).
+ *
+ * Which argument decides each type parameter: `actor` decides `Snapshot`;
+ * `sources` decides `Source` (the slot source types) and `Builders` (the row
+ * builders); `layouts` decides `Layouts`. Each `NoInfer` marks a mention that
+ * is checked against them, not inferred from.
  */
 export function appObjectActor<
   Source,

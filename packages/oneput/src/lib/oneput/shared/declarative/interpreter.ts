@@ -10,18 +10,25 @@ type SourceFor<Source, T> = {
   string;
 
 /**
- * A value of type `T`: a literal, or `{ from: name }` for a source whose value
- * fits `T`. A literal object with `from` would read as a source name, so it is
- * not a literal.
+ * The members of `T` that can be literals: those with no `$from` key, not even
+ * an optional one, which would read as a source name. A type with an index
+ * signature can have any key, so it is not a literal; give it from a source.
  */
-type Fill<T, Source> = Exclude<T, { from: unknown }> | { from: SourceFor<Source, T> };
+type Literal<T> = T extends unknown ? ('$from' extends keyof T ? never : T) : never;
+
+/**
+ * A value of type `T`: a literal, or `{ $from: name }` for a source whose value
+ * fits `T`. The `$` keeps data with a `from` field, such as a chat message,
+ * a literal.
+ */
+type Fill<T, Source> = Literal<T> | { $from: SourceFor<Source, T> };
 
 /** Text: a string, or the name of a source whose value is a string. */
 type Text<Source> = Fill<string, Source>;
 
-/** True for `{ from: name }`: the other values of a {@link Fill} are literals. */
-function isFrom(value: unknown): value is { from: string } {
-  return typeof value === 'object' && value !== null && 'from' in value;
+/** True for `{ $from: name }`: the other values of a {@link Fill} are literals. */
+function isFrom(value: unknown): value is { $from: string } {
+  return typeof value === 'object' && value !== null && '$from' in value;
 }
 type RowEvent = { type: string };
 type ViewSettings = Pick<
@@ -51,7 +58,7 @@ type OptionalUndefined<Types> = {
 } & { [Name in OptionalName<Types>]?: Types[Name] };
 
 /**
- * Each param value of a row: a literal or `{ from: name }` of the param's
+ * Each param value of a row: a literal or `{ $from: name }` of the param's
  * type. A param is required unless its type allows `undefined`.
  */
 type ParamValues<Types, Source> = OptionalUndefined<{
@@ -326,7 +333,7 @@ export type ViewDef<
   Rows extends TypesByName = NoRows,
   Layouts extends TypesByName = NoLayouts
 > = LayoutChoice<Layouts, Source> & {
-  /** Each shared layout param: a literal or `{ from: name }` of the param's type. */
+  /** Each shared layout param: a literal or `{ $from: name }` of the param's type. */
   params?: { [Name in keyof SharedParams]?: Fill<SharedParams[Name], Source> };
   menu?: {
     id?: string;
@@ -578,7 +585,7 @@ export function renderActiveView<
    */
   const read = (value: unknown): Result<unknown, NameError | ReadError> =>
     isFrom(value)
-      ? named(sources.slot, value.from as keyof Source & string).andThen((source) =>
+      ? named(sources.slot, value.$from as keyof Source & string).andThen((source) =>
           attempt(() => (isReadable(source) ? source.source.get() : source(snapshot)))
         )
       : ok(value);

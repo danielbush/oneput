@@ -101,11 +101,11 @@ const typedRows: PlainView = {
     items: [
       {
         id: 'a',
-        params: { text: 'A', detail: { from: 'known' } },
+        params: { text: 'A', detail: { $from: 'known' } },
         send: undefined
       },
-      { id: 'b', build: 'counter', params: { count: 2, done: { from: 'flag' } } },
-      { id: 'c', build: 'counter', params: { count: { from: 'total' } } },
+      { id: 'b', build: 'counter', params: { count: 2, done: { $from: 'flag' } } },
+      { id: 'c', build: 'counter', params: { count: { $from: 'total' } } },
       { id: 'd', build: 'default', params: { text: 'D' } },
       { id: 'e', build: 'info', params: { text: 'Info' } }
     ]
@@ -144,11 +144,11 @@ const wrongParamLiteral: PlainView = {
 };
 const wrongParamSource: PlainView = {
   // @ts-expect-error 'known' gives text; 'done' takes a boolean.
-  menu: { items: [{ id: 'row', build: 'counter', params: { count: 1, done: { from: 'known' } } }] }
+  menu: { items: [{ id: 'row', build: 'counter', params: { count: 1, done: { $from: 'known' } } }] }
 };
 const unknownParamSource: PlainView = {
   // @ts-expect-error 'gone' is not a source.
-  menu: { items: [{ id: 'row', params: { text: { from: 'gone' } } }] }
+  menu: { items: [{ id: 'row', params: { text: { $from: 'gone' } } }] }
 };
 
 // The params are apart from the row's own fields, so a param can take any of their names.
@@ -175,14 +175,14 @@ const unknownSlot: PlainView = {
 const unknownSource: PlainView = {
   layout: 'plain',
   // @ts-expect-error 'gone' is not a source.
-  slots: { heading: { from: 'gone' } }
+  slots: { heading: { $from: 'gone' } }
 };
 
 // Slot types: a literal or a source must fit the type that the slot declares.
 const typedValues: PlainView[] = [
   { layout: 'typed', slots: { busy: true, footer } },
-  { layout: 'typed', slots: { busy: { from: 'flag' }, footer: { from: 'footer' } } },
-  { layout: 'plain', slots: { heading: { from: 'known' } } },
+  { layout: 'typed', slots: { busy: { $from: 'flag' }, footer: { $from: 'footer' } } },
+  { layout: 'plain', slots: { heading: { $from: 'known' } } },
   // A view that does not name a layout fills a typed slot of a registered layout.
   { slots: { busy: false } }
 ];
@@ -204,12 +204,12 @@ const flagForText: PlainView = {
 const textSourceForFlag: PlainView = {
   layout: 'typed',
   // @ts-expect-error 'known' gives text; 'busy' takes a boolean.
-  slots: { busy: { from: 'known' } }
+  slots: { busy: { $from: 'known' } }
 };
 const flagSourceForText: PlainView = {
   layout: 'plain',
   // @ts-expect-error 'flag' gives a boolean; 'heading' takes text.
-  slots: { heading: { from: 'flag' } }
+  slots: { heading: { $from: 'flag' } }
 };
 const inheritedWrongLiteral: PlainView = {
   // @ts-expect-error No registered layout has a text 'busy' slot.
@@ -218,28 +218,53 @@ const inheritedWrongLiteral: PlainView = {
 
 // The shared layout params: a literal or a source of the param's type.
 const sharedParams: PlainView = {
-  params: { menuTitle: { from: 'known' }, busy: { from: 'flag' } }
+  params: { menuTitle: { $from: 'known' }, busy: { $from: 'flag' } }
 };
 // @ts-expect-error 'busy' takes a boolean, not text.
 const textBusy: PlainView = { params: { busy: 'yes' } };
 // @ts-expect-error 'flag' gives a boolean; 'menuTitle' takes text.
-const flagTitle: PlainView = { params: { menuTitle: { from: 'flag' } } };
+const flagTitle: PlainView = { params: { menuTitle: { $from: 'flag' } } };
 // @ts-expect-error An affordance is a function, so it is not a view param.
 const affordance: PlainView = { params: { inputSend: { run: () => {} } } };
+
+// A literal cannot carry a '$from' key, not even an optional one: it would read as a source.
+type Tagged = { label: string; $from?: string };
+const taggedLayouts = {
+  tagged: viewLayout({
+    slots: { tag: slot<Tagged>() },
+    create: component,
+    params: () => ({})
+  })
+};
+const taggedLiteral: ViewDef<Sources, never, never, Rows, LayoutSlots<typeof taggedLayouts>> = {
+  layout: 'tagged',
+  // @ts-expect-error A literal with '$from' would read as a source name.
+  slots: { tag: { label: 'Tag', $from: 'known' } }
+};
+// A literal with a 'from' field is data.
+const messageRow = rowBuilder({
+  params: { message: slot<{ text: string; from?: string }>() },
+  build: ({ id, params }) => menuItem({ id, attr: { title: params.message.text } })
+});
+const fromData: ViewDef<Sources, never, never, RowParams<{ message: typeof messageRow }>> = {
+  menu: {
+    items: [{ id: 'm', build: 'message', params: { message: { text: 'Hi', from: 'Alice' } } }]
+  }
+};
 
 // Text params and the placeholder take only sources that give text.
 const flagRowText: PlainView = {
   // @ts-expect-error 'flag' gives a boolean, not row text.
-  menu: { items: [{ id: 'row', params: { text: { from: 'flag' } } }] }
+  menu: { items: [{ id: 'row', params: { text: { $from: 'flag' } } }] }
 };
 const builderRowDetail: PlainView = {
   // @ts-expect-error 'footer' gives a builder, not row detail.
-  menu: { items: [{ id: 'row', params: { text: 'Row', detail: { from: 'footer' } } }] }
+  menu: { items: [{ id: 'row', params: { text: 'Row', detail: { $from: 'footer' } } }] }
 };
 // @ts-expect-error 'flag' gives a boolean, not a placeholder.
-const flagPlaceholder: PlainView = { placeholder: { from: 'flag' } };
+const flagPlaceholder: PlainView = { placeholder: { $from: 'flag' } };
 const textRow: PlainView = {
-  menu: { items: [{ id: 'row', params: { text: { from: 'known' }, detail: 'Detail' } }] }
+  menu: { items: [{ id: 'row', params: { text: { $from: 'known' }, detail: 'Detail' } }] }
 };
 
 type Snapshot = { busy: boolean };
@@ -280,7 +305,7 @@ const wrongListRow: ViewSources<Snapshot, Sources, 'rows', never, typeof builder
   menu: { rows: () => [{ id: 'b', build: 'counter', params: { count: 'one' } }] }
 };
 
-const inherited: PlainView = { slots: { note: { from: 'known' } } };
+const inherited: PlainView = { slots: { note: { $from: 'known' } } };
 // @ts-expect-error A layout with no slots takes none.
 const emptySlot: PlainView = { layout: 'empty', slots: { heading: 'Text' } };
 
@@ -351,7 +376,7 @@ const textRows: PlainView = { params: { input: { kind: 'text', rows: 3 } } };
 const inputPlaceholder: PlainView = { params: { input: { kind: 'text', placeholder: 'Type' } } };
 const textarea: PlainView = {
   params: { input: { kind: 'textarea', rows: 3 } },
-  placeholder: { from: 'known' }
+  placeholder: { $from: 'known' }
 };
 
 void inheritedLiteral;
@@ -361,5 +386,5 @@ void [emptySlot, inferredSnapshot, misspeltSlot];
 void [typedValues, wrongLiteral, textForBuilder, flagForText, textSourceForFlag];
 void [flagSourceForText, inheritedWrongLiteral, flagRowText, builderRowDetail, flagPlaceholder];
 void [textRow, registryTypes, wrongSource, rowFieldParams];
-void [missingParam, noParams, missingDefaultParam, activateField];
+void [missingParam, noParams, missingDefaultParam, activateField, taggedLiteral, fromData];
 void [sharedParams, textBusy, flagTitle, affordance, viewFor, fromViewFor];

@@ -45,7 +45,7 @@ appObjectActor(
   ctl,
   actorOf({
     layout: 'plain',
-    slots: { heading: { from: 'query' } },
+    slots: { heading: { $from: 'query' } },
     menu: { id: 'menu', items: [{ id: 'row', params: { text: 'Row' } }] }
   }),
   sources,

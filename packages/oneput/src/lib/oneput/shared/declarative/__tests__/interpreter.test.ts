@@ -74,6 +74,15 @@ const builders = {
         action: activate,
         children: (b) => [b.fchild({ textSegments: pageSegments(page) })]
       })
+  }),
+  // Takes data with a `from` field, as a chat message has.
+  message: rowBuilder({
+    params: { message: slot<{ text: string; from?: string }>() },
+    build: ({ id, params: { message } }) =>
+      menuItem({
+        id,
+        children: (b) => [b.fchild({ textContent: `${message.from}: ${message.text}` })]
+      })
   })
 };
 
@@ -194,7 +203,7 @@ describe('row builders', () => {
     const pages = pagesWith([
       {
         id: 'details',
-        params: { text: { from: 'pageText' }, detail: 'Details' },
+        params: { text: { $from: 'pageText' }, detail: 'Details' },
         send: { type: 'OPENED', id: 'details' }
       }
     ]);
@@ -215,7 +224,7 @@ describe('row builders', () => {
       {
         id: 'next',
         build: 'badge',
-        params: { page: { from: 'page' } },
+        params: { page: { $from: 'page' } },
         send: { type: 'NEXT_PAGE' }
       }
     ]);
@@ -240,6 +249,19 @@ describe('row builders', () => {
     // assert
     expect(text(item)).toBe('Help');
     expect(item?.action).toBeUndefined();
+  });
+
+  test('a literal with a from field is data, not a source', () => {
+    // arrange
+    const pages = pagesWith([
+      { id: 'message', build: 'message', params: { message: { text: 'Hi', from: 'Alice' } } }
+    ]);
+
+    // act
+    const [item] = render(pages);
+
+    // assert
+    expect(text(item)).toBe('Alice: Hi');
   });
 
   test('no default builder', () => {
@@ -359,7 +381,7 @@ describe('fixed row overrides', () => {
         menu: {
           items: [
             { id: 'child-only', params: { text: 'Child only' } },
-            { id: 'row', build: 'badge', params: { page: { from: 'page' } } }
+            { id: 'row', build: 'badge', params: { page: { $from: 'page' } } }
           ]
         }
       }
@@ -437,7 +459,7 @@ describe('layouts', () => {
 
   test.each<[string, Extract<TypedView, { layout: 'typed' }>['slots']]>([
     ['literals', { busy: true, footer }],
-    ['sources', { busy: { from: 'laterPage' }, footer: { from: 'footer' } }]
+    ['sources', { busy: { $from: 'laterPage' }, footer: { $from: 'footer' } }]
   ])('values that are not text reach the layout from %s', (name, slots) => {
     // arrange
     const pages = createPages<TypedView>({ layout: 'typed', slots, menu: { id: 'pages' } });
@@ -455,7 +477,7 @@ describe('layouts', () => {
     // arrange
     const pages = createPages<PageView>(
       { layout: 'plain', slots: { heading: 'Parent', note: 'Parent note' }, menu: { id: 'pages' } },
-      { slots: { note: { from: 'pageText' } } }
+      { slots: { note: { $from: 'pageText' } } }
     );
 
     // act
@@ -494,7 +516,7 @@ describe('layouts', () => {
         params: { menuTitle: 'Parent', busy: true },
         menu: { id: 'pages' }
       },
-      { params: { menuTitle: { from: 'pageText' } } }
+      { params: { menuTitle: { $from: 'pageText' } } }
     );
 
     // act
@@ -606,7 +628,7 @@ describe('layouts', () => {
         placeholder: 'Type',
         menu: { id: 'pages' }
       },
-      { params: { input: { kind: 'password' } }, placeholder: { from: 'pageText' } }
+      { params: { input: { kind: 'password' } }, placeholder: { $from: 'pageText' } }
     );
 
     // act
@@ -654,12 +676,15 @@ describe('missing names', () => {
     ['layout', { layout: 'gone', menu: { id: 'pages' } }],
     ['builder', { layout: 'plain', menu: { id: 'pages', items: [{ id: 'row', build: 'gone' }] } }],
     ['list', { layout: 'plain', menu: { id: 'pages', from: 'gone' } }],
-    ['slot text', { layout: 'plain', slots: { heading: { from: 'gone' } }, menu: { id: 'pages' } }],
+    [
+      'slot text',
+      { layout: 'plain', slots: { heading: { $from: 'gone' } }, menu: { id: 'pages' } }
+    ],
     [
       'row param',
       {
         layout: 'plain',
-        menu: { id: 'pages', items: [{ id: 'row', params: { text: { from: 'gone' } } }] }
+        menu: { id: 'pages', items: [{ id: 'row', params: { text: { $from: 'gone' } } }] }
       }
     ]
   ])('%s', (_, view) => {
@@ -685,10 +710,10 @@ describe('readable sources', () => {
       {
         id: 'list-row',
         build: 'badge',
-        params: { page: { from: 'page' } },
+        params: { page: { $from: 'page' } },
         send: { type: 'OPENED', id: 'list-row' }
       },
-      { id: 'label-row', params: { text: { from: 'labelText' } } }
+      { id: 'label-row', params: { text: { $from: 'labelText' } } }
     ]);
     const mixed = {
       ...sources,
@@ -697,7 +722,7 @@ describe('readable sources', () => {
     } satisfies ViewSources<Snapshot, PageSources, 'pages', PageEvent, typeof builders>;
     const pages = createPages<PageView>({
       layout: 'plain',
-      slots: { heading: { from: 'pageText' } },
+      slots: { heading: { $from: 'pageText' } },
       menu: { id: 'pages', from: 'pages' }
     });
     const render = () =>
@@ -759,7 +784,7 @@ describe('readable sources', () => {
     const registry = { ...sources, slot: { ...sources.slot, pageText } };
     const pages = createPages<PageView>({
       layout: 'plain',
-      slots: { heading: { from: 'pageText' } },
+      slots: { heading: { $from: 'pageText' } },
       menu: { id: 'pages' }
     });
 
@@ -793,7 +818,7 @@ describe('readable sources', () => {
     [
       'readable slot',
       { ...sources, slot: { ...sources.slot, pageText: readable(throwing) } },
-      { menu: { id: 'pages' }, slots: { heading: { from: 'pageText' } } }
+      { menu: { id: 'pages' }, slots: { heading: { $from: 'pageText' } } }
     ],
     [
       'readable list',
@@ -829,7 +854,7 @@ describe('readable sources', () => {
     const registry = { ...sources, slot } as typeof sources;
     const pages = createPages<PageView>({
       layout: 'plain',
-      slots: { heading: { from: 'pageText' } },
+      slots: { heading: { $from: 'pageText' } },
       menu: { id: 'pages' }
     });
 

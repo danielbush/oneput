@@ -254,7 +254,7 @@ test('a readable source change redraws the view with no new snapshot', async () 
     ctl,
     createStillActor({
       layout: 'standard',
-      params: { menuTitle: { from: 'label' } },
+      params: { menuTitle: { $from: 'label' } },
       menu: { id: 'labels', from: 'rows' }
     }),
     { slot: { label: readable(label) }, menu: { rows: readable(rows) }, menuItem: builders },

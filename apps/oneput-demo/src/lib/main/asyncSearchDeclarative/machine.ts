@@ -11,7 +11,7 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
     meta: {
       view: {
         layout: 'standard',
-        params: { menuTitle: { from: 'title' } },
+        params: { menuTitle: { $from: 'title' } },
         slots: { status: 'Ready' },
         menu: { id: 'async-search', focusBehaviour: 'last-action,first' },
         placeholder: 'Start typing something...',
@@ -39,7 +39,7 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
         description: 'Show the instructions. Blank input needs no request.',
         meta: {
           view: {
-            slots: { status: { from: 'emptyStatus' } },
+            slots: { status: { $from: 'emptyStatus' } },
             menu: {
               items: [
                 {
@@ -108,7 +108,7 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
         meta: {
           view: {
             menu: { from: 'results' },
-            slots: { status: { from: 'resultStatus' } },
+            slots: { status: { $from: 'resultStatus' } },
             settings: { clearInputAfterAction: true }
           }
         },
@@ -134,7 +134,7 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
                   id: 'retry-search',
                   params: {
                     text: 'Retry search',
-                    detail: { from: 'searchError' },
+                    detail: { $from: 'searchError' },
                     icon: 'RefreshCw'
                   },
                   send: { type: 'RETRY_SEARCH' }

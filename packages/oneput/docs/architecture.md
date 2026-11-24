@@ -152,8 +152,10 @@ menuItem: {
 ```
 
 A row has the fields `id`, `build` and `send`, and the builder's params in
-`params`, each a literal or `{ from: 'source' }`, for example
-`{ id: 'retry', send: { type: 'RETRY' }, params: { text: 'Retry', detail: { from: 'searchError' } } }`
+`params`, each a literal or `{ $from: 'source' }` (the `$` keeps data with a `from`
+field, such as a chat message, a literal; a literal cannot have a `$from`
+key), for example
+`{ id: 'retry', send: { type: 'RETRY' }, params: { text: 'Retry', detail: { $from: 'searchError' } } }`
 or `{ id: 'note', build: 'info', params: { text: 'Type to search' } }`. The
 params are apart from the row's own fields, so a builder can name a param
 anything but a name from `Object.prototype`. A row with no `build` uses the
@@ -209,8 +211,8 @@ A view gives the layout params that every layout takes in `params`: the
 `AppLayoutParams` without the affordances (`inputSend`, `inputAccept`,
 `inputReject`), whose functions cannot be in a machine config. Those are
 `menuTitle`, `busy` and `input`. Each is a literal or
-`{ from: 'source' }` of the param's type, for example
-`{ params: { menuTitle: { from: 'title' }, busy: true } }`. Params merge by
+`{ $from: 'source' }` of the param's type, for example
+`{ params: { menuTitle: { $from: 'title' }, busy: true } }`. Params merge by
 key from parent to child, and `undefined` clears one. They apply to
 whichever layout the active view shows, also when a child names another
 layout, and the layout gets them over its own params.
@@ -231,8 +233,8 @@ const banner = viewLayout({
 ```
 
 A view names a registered layout and fills its slots with a literal or
-`{ from: 'source' }`, for example
-`{ layout: 'banner', slots: { banner: 'Offline', compact: { from: 'narrow' } } }`.
+`{ $from: 'source' }`, for example
+`{ layout: 'banner', slots: { banner: 'Offline', compact: { $from: 'narrow' } } }`.
 The value must have the slot's type: a literal of another type, or a source
 in `sources.slot` that gives another type, is a type error. `SourceTypes`
 gives the source types of a `slot` registry, for the machine's `ViewDef`.
@@ -264,7 +266,7 @@ does, so a layout that renders `inputUI.input` (as `StandardLayout` does)
 shows it. With no `input` param, the layout's own `input` stays. The typed
 text stays when the kind changes.
 
-A view's `placeholder` is the input placeholder: text or `{ from: ... }` for
+A view's `placeholder` is the input placeholder: text or `{ $from: ... }` for
 a source that gives text, for example `{ placeholder: 'Note...' }`. It is not
 a layout param: the adapter sets it on the input. A child's `placeholder`
 replaces its parent's, and `placeholder: undefined` clears it.

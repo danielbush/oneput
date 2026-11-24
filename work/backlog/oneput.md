@@ -230,6 +230,13 @@ The following are potential work (tickets for work) sorted by priority: earlier 
   - [ ] tomato timer
 - [.] DECLARATIVE_APPOBJECTS - use with ROUTED_MODE
   - COMMENT: the aim is to see a global state machine for the whole demo (ROUTED_MODE) and also a state machine for any individual declarative app object
+  - [.] ROUTED_MODE with normal root AppObject
+  - [ ] ROUTED_MODE with declarative AppObject
+  - details
+    - [ ] Online is handled in a svelte file; move it out
+      - /Users/danb/projects/@oneput/apps/oneput-demo/src/routes/(routed)/routed/+page.svelte
+    - [ ] next: in root menu item - should be "Form demo..."
+    - [ ] fix blank placeholder text in routed demo
 - [x] refactor: DECLARATIVE_APPOBJECTS - AppObject's becomes data that an agent can build;
   - this allows for making the glue of AppObject's declarative, data, that can be set and stored reducing if/else logic
   - it further helps to separate the business logic which can be triggered using the AppObject

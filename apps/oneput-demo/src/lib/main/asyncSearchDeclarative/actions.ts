@@ -10,7 +10,7 @@ import { viewLayouts } from '../../common/layout.js';
 import { SearchService, type SearchFailure, type SearchItem } from '../../service/SearchService.js';
 import type { SearchContext, SearchContent } from './content.js';
 
-type RowEvent = { type: 'RETRY_SEARCH' };
+type RowEvent = { type: 'RETRY_SEARCH' } | { type: 'RESULT_ACTIVATED'; id: string };
 type FetchEvent =
   | { type: 'SEARCH_SUCCEEDED'; results: readonly SearchItem[] }
   | { type: 'SEARCH_FAILED'; error: SearchFailure };
@@ -53,7 +53,7 @@ export function searchActions(service: SearchService) {
       isBlankInput: ({ event }) => event.type === 'INPUT_CHANGED' && !/\S/.test(event.value),
       hasResults: ({ event }) => event.type === 'SEARCH_SUCCEEDED' && event.results.length > 0,
       resultExists: ({ context, event }) =>
-        event.type === 'ITEM_ACTIVATED' && resultById(context, event.id) !== undefined
+        event.type === 'RESULT_ACTIVATED' && resultById(context, event.id) !== undefined
     },
     actions: {
       writeQuery: assign((_, params: { value: string }) => ({

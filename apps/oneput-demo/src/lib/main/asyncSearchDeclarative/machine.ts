@@ -112,7 +112,7 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
           }
         },
         on: {
-          ITEM_ACTIVATED: {
+          RESULT_ACTIVATED: {
             guard: 'resultExists',
             actions: { type: 'selectResult', params: ({ event }) => ({ id: event.id }) },
             description: 'Show the selected result text if its row still exists.'

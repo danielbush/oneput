@@ -32,10 +32,8 @@ type ViewSettings = Pick<
 /** The row fields that the interpreter reads. The builder's params are apart, in `params`. */
 type RowFields<Event extends RowEvent> = {
   id: string;
-  /** Send this event when the user activates the row. */
+  /** Send this event when the user activates the row. Only a row with `send` activates. */
   send?: Event;
-  /** Let the row activate with no `send`: it then sends `ITEM_ACTIVATED` with its ID. */
-  activate?: boolean;
 };
 
 /** The name of the row builder that draws each row with no `build` name. */
@@ -238,8 +236,8 @@ export type RowBuilder<Params extends SlotMap = SlotMap> = {
   params: Params;
   /**
    * Make the item from the row's ID and the values of its params. Return the
-   * item with the row's ID. `activate` is present when the row activates (it
-   * has `send` or `activate: true`); use it as the item's action.
+   * item with the row's ID. `activate` is present when the row has `send`;
+   * use it as the item's action.
    */
   build(
     row: { id: string; params: OptionalUndefined<SlotTypes<Params>> },
@@ -485,8 +483,6 @@ export type OneputView = {
   placeholder?: string;
 };
 
-type Activation<Event extends RowEvent> = Event | { type: 'ITEM_ACTIVATED'; id: string };
-
 /**
  * Resolve the active states' metadata, with parents first.
  * A child's `layout` replaces its parent's; when it names a different layout,
@@ -520,7 +516,7 @@ export function renderActiveView<
     >,
   sources: ViewSources<NoInfer<Snapshot>, Source, List, Event, Builders>,
   layouts: Layouts,
-  { activate }: { activate: (event: Activation<Event>) => void }
+  { activate }: { activate: (event: Event) => void }
 ): Result<OneputView, ViewError> {
   const views = Object.entries(snapshot.getMeta())
     .flatMap(([id, meta]) =>
@@ -598,11 +594,8 @@ export function renderActiveView<
   }
 
   const renderRow = (row: AnyRow<Event>): Result<MenuItem, ViewError> => {
-    const { id, build = defaultRow, send, activate: activates, params = {} } = row;
-    const raise =
-      (activates ?? send !== undefined)
-        ? () => activate(send ?? { type: 'ITEM_ACTIVATED', id })
-        : undefined;
+    const { id, build = defaultRow, send, params = {} } = row;
+    const raise = send === undefined ? undefined : () => activate(send);
     return Result.combine([named(sources.menuItem, build), readAll(params)]).andThen(
       ([builder, values]) => attempt(() => builder.build({ id, params: values }, raise))
     );

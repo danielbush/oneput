@@ -44,13 +44,14 @@ export function createContent(online: Online) {
       searchError: ({ context }: SearchSnapshot) => context.error?.message ?? ''
     },
     menu: {
-      // Each row carries its result's text as the `result` builder's `text` param.
+      // Each row carries its result's text as the `result` builder's `text`
+      // param, and sends its result's ID when the user activates it.
       results: ({ context }: SearchSnapshot) =>
         context.results.map(({ id, text }) => ({
           id,
           build: 'result' as const,
           params: { text },
-          activate: true
+          send: { type: 'RESULT_ACTIVATED' as const, id }
         }))
     },
     menuItem: {

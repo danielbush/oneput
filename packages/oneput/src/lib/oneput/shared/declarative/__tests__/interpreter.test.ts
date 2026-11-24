@@ -77,7 +77,7 @@ const builders = {
   })
 };
 
-type PageEvent = { type: 'NEXT_PAGE' } | { type: 'PREVIOUS_PAGE' };
+type PageEvent = { type: 'NEXT_PAGE' } | { type: 'PREVIOUS_PAGE' } | { type: 'OPENED'; id: string };
 type PageSources = { pageText: string; labelText: string; page: number };
 type Rows = RowParams<typeof builders>;
 type PageView = ViewDef<PageSources, 'pages', PageEvent, Rows, Layouts>;
@@ -102,7 +102,7 @@ const wideLayouts: ViewLayouts = layouts;
 function createPages<View extends PageView | WideView | TypedView>(...views: View[]) {
   const state = { page: 1, activated: null as string | null };
   const pages = {
-    send(event: PageEvent | { type: 'ITEM_ACTIVATED'; id: string }) {
+    send(event: PageEvent) {
       if (event.type === 'NEXT_PAGE') state.page += 1;
       else if (event.type === 'PREVIOUS_PAGE') state.page -= 1;
       else state.activated = event.id;
@@ -131,7 +131,14 @@ const sources = {
     page: ({ page }: Snapshot) => page
   },
   menu: {
-    pages: () => [{ id: 'list-row', build: 'badge' as const, params: { page: 7 }, activate: true }]
+    pages: () => [
+      {
+        id: 'list-row',
+        build: 'badge' as const,
+        params: { page: 7 },
+        send: { type: 'OPENED' as const, id: 'list-row' }
+      }
+    ]
   },
   menuItem: builders
 } satisfies ViewSources<Snapshot, PageSources, 'pages', PageEvent, typeof builders>;
@@ -185,7 +192,11 @@ describe('row builders', () => {
   test('row with no build uses the default builder', () => {
     // arrange
     const pages = pagesWith([
-      { id: 'details', params: { text: { from: 'pageText' }, detail: 'Details' }, activate: true }
+      {
+        id: 'details',
+        params: { text: { from: 'pageText' }, detail: 'Details' },
+        send: { type: 'OPENED', id: 'details' }
+      }
     ]);
     const [item] = render(pages);
 
@@ -219,7 +230,7 @@ describe('row builders', () => {
     expect(segments(render(pages)[0])).toEqual(pageSegments(2));
   });
 
-  test('row with no send or activate has no action', () => {
+  test('row with no send has no action', () => {
     // arrange
     const pages = pagesWith([{ id: 'help', params: { text: 'Help' } }]);
 
@@ -250,7 +261,7 @@ describe('row builders', () => {
 });
 
 describe('list rows', () => {
-  test('list row with activate sends its id', () => {
+  test('list row sends its event', () => {
     // arrange
     const pages = createPages<PageView>({ layout: 'plain', menu: { id: 'pages', from: 'pages' } });
     const [item] = render(pages);
@@ -610,7 +621,12 @@ describe('readable sources', () => {
     const heading = cell('First');
     const label = cell('Label A');
     const rows = cell<readonly ViewRow<Rows, PageSources, PageEvent>[]>([
-      { id: 'list-row', build: 'badge', params: { page: { from: 'page' } }, activate: true },
+      {
+        id: 'list-row',
+        build: 'badge',
+        params: { page: { from: 'page' } },
+        send: { type: 'OPENED', id: 'list-row' }
+      },
       { id: 'label-row', params: { text: { from: 'labelText' } } }
     ]);
     const mixed = {
@@ -647,7 +663,7 @@ describe('readable sources', () => {
     expect(text(items[1])).toBe('Label B');
   });
 
-  test('row from a readable list activates its id', () => {
+  test('row from a readable list sends its event', () => {
     // arrange
     const { pages, render } = mixedPages();
     const [item] = render().menu.items as MenuItem[];

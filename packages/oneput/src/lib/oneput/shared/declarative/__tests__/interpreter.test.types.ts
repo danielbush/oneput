@@ -100,8 +100,7 @@ const typedRows: PlainView = {
       {
         id: 'a',
         params: { text: 'A', detail: { from: 'known' } },
-        send: undefined,
-        activate: true
+        send: undefined
       },
       { id: 'b', build: 'counter', params: { count: 2, done: { from: 'flag' } } },
       { id: 'c', build: 'counter', params: { count: { from: 'total' } } },
@@ -109,6 +108,10 @@ const typedRows: PlainView = {
       { id: 'e', build: 'info', params: { text: 'Info' } }
     ]
   }
+};
+const activateField: PlainView = {
+  // @ts-expect-error A row activates only with send.
+  menu: { items: [{ id: 'row', params: { text: 'Row' }, activate: true }] }
 };
 // A param is required unless its type allows undefined.
 const missingParam: PlainView = {
@@ -312,4 +315,4 @@ void [emptySlot, inferredSnapshot];
 void [typedValues, wrongLiteral, textForBuilder, flagForText, textSourceForFlag];
 void [flagSourceForText, inheritedWrongLiteral, flagRowText, builderRowDetail, flagPlaceholder];
 void [textRow, registryTypes, wrongSource, rowFieldParams];
-void [missingParam, noParams, missingDefaultParam];
+void [missingParam, noParams, missingDefaultParam, activateField];

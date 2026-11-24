@@ -5,7 +5,7 @@ import {
   type StandardLayoutParams
 } from '@oneput/oneput/shared/ui/layout/StandardLayout.js';
 import { standardLayout } from '@oneput/oneput/shared/declarative/standardLayout.js';
-import { icons } from './_icons.js';
+import { icons } from './icons.js';
 
 /** StandardLayout slots (roles) mapped to this demo's icons. */
 const layoutIcons: StandardLayoutIcons = {

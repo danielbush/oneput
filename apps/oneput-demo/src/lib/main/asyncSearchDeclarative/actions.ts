@@ -6,7 +6,7 @@ import type {
   ViewDef
 } from '@oneput/oneput/shared/declarative/interpreter.js';
 import type { OneputEvent } from '@oneput/oneput/shared/declarative/oneputEvents.js';
-import { viewLayouts } from '../../common/_layout.js';
+import { viewLayouts } from '../../common/layout.js';
 import { SearchService, type SearchFailure, type SearchItem } from '../../service/SearchService.js';
 import type { SearchContext, SearchContent } from './content.js';
 

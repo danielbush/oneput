@@ -6,9 +6,9 @@
   import Anchor from '@oneput/oneput/shared/components/Anchor.svelte';
   import OneputController from '@oneput/oneput/shared/components/OneputController.svelte';
   import OneputCornerButton from '@oneput/oneput/shared/components/OneputCornerButton.svelte';
-  import { icons } from '$lib/common/_icons.js';
+  import { icons } from '$lib/common/icons.js';
   import { flowMachine, routeFlow } from '$lib/routed/flowMachine.js';
-  import { Layout } from '$lib/common/_layout.js';
+  import { Layout } from '$lib/common/layout.js';
 
   // Each page visit owns its actor and router subscriptions.
   const actor = createActor(flowMachine);

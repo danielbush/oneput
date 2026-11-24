@@ -13,8 +13,8 @@ import { ElizaChat } from './ElizaChat.js';
 import { FocusedMenuLiveEditExample } from './liveEdit/FocusedMenuLiveEditExample.js';
 import { MenuLiveEditExample } from './liveEdit/MenuLiveEditExample.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
-import { Layout, type LayoutSettings } from '../common/_layout.js';
-import { icons } from '../common/_icons.js';
+import { Layout, type LayoutSettings } from '../common/layout.js';
+import { icons } from '../common/icons.js';
 import { Online } from '../common/online.js';
 import type { AppObject, UIFlags } from '@oneput/oneput';
 

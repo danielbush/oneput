@@ -4,7 +4,7 @@ import { StdMenuItemIds } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.j
 import { err, ok } from 'neverthrow';
 import { describe, expect, it } from 'vitest';
 import { SimulatedClock } from 'xstate';
-import { Layout } from '../../../common/_layout.js';
+import { Layout } from '../../../common/layout.js';
 import { Online } from '../../../common/online.js';
 import { createAsyncSearchAppObject } from '../appObject.js';
 import { SearchService } from '../../../service/SearchService.js';

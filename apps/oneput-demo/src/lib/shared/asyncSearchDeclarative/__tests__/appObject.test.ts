@@ -397,4 +397,28 @@ describe('declarative async search AppObject', () => {
     ctl.app.exit();
     ctl._destroy();
   });
+
+  it('exits back to the parent AppObject when Back is pressed', async () => {
+    // arrange
+    const ctl = Controller.createNull({ menuOpen: true });
+    const home = { layout: { layout: Layout.create, params: {} } };
+    ctl.app.run(home);
+    const search = createAsyncSearchAppObject(ctl, Online.createNull(), SearchService.createNull());
+    const shown = viewShows(ctl, { status: '', rows: ['instructions'] });
+    ctl.app.run(search);
+    await shown;
+    const resumed = waitForState(ctl, 'app-change', {
+      name: 'parent AppObject to resume',
+      reached: () => ctl.app.isCurrent(home),
+      seen: () => (ctl.app.isCurrent(search) ? 'still in search' : 'other app')
+    });
+
+    // act
+    ctl.app.goBack();
+    await resumed;
+
+    // assert
+    expect(ctl.app.isCurrent(home)).toBe(true);
+    ctl._destroy();
+  });
 });

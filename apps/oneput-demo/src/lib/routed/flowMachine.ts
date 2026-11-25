@@ -1,12 +1,16 @@
 import { setup, type ActorRefFrom } from 'xstate';
 import type { Controller } from '@oneput/oneput';
-import { routeMachine } from '@oneput/oneput/shared/routing/xstate/routeMachine.js';
+import { fromChild, routeMachine } from '@oneput/oneput/shared/routing/xstate/routeMachine.js';
 import { Welcome } from './Welcome.js';
 import { Form } from './form/Form.js';
 import { Confirm } from './form/Confirm.js';
 import { Done } from './form/Done.js';
 import type { Online } from '../common/online.js';
-import { createAsyncSearchAppObject } from '../shared/asyncSearchDeclarative/appObject.js';
+import {
+  attachAsyncSearchAppObject,
+  type AsyncSearchActor
+} from '../shared/asyncSearchDeclarative/appObject.js';
+import { createAsyncSearchMachine } from '../shared/asyncSearchDeclarative/machine.js';
 
 /** Events that the routed AppObjects send. */
 export type AppEvent =
@@ -20,7 +24,8 @@ export type Send = (event: AppEvent) => void;
 
 /** Only the AppObjects send events. The machine chooses the screen. */
 export const flowMachine = setup({
-  types: { events: {} as FlowEvent }
+  types: { events: {} as FlowEvent },
+  actors: { asyncSearch: createAsyncSearchMachine() }
 }).createMachine({
   id: 'routed-demo',
   initial: 'welcome',
@@ -66,7 +71,12 @@ export const flowMachine = setup({
       }
     },
     search: {
-      description: 'Run declarative async search.'
+      description: 'Run declarative async search.',
+      invoke: {
+        id: 'search',
+        src: 'asyncSearch',
+        onDone: { target: 'welcome', description: 'Return to welcome when search finishes.' }
+      }
     }
   }
 });
@@ -88,6 +98,8 @@ export function routeFlow(
       confirm: () => Confirm.create(ctl, send)
     },
     done: () => Done.create(ctl, send),
-    search: () => createAsyncSearchAppObject(ctl, online)
+    search: fromChild('search', (_, child: AsyncSearchActor) =>
+      attachAsyncSearchAppObject(ctl, child, online)
+    )
   });
 }

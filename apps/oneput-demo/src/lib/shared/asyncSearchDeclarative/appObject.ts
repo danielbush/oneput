@@ -23,7 +23,7 @@ export function createAsyncSearchAppObject(
   return appObjectActor(ctl, actor, createContent(online), viewLayouts);
 }
 
-/** Attach an invoked search actor to a Oneput AppObject (`ROUTED_MODE`). The host owns `online`. */
+/** Attach an invoked search actor to a Oneput AppObject (`ROUTED_DECL`). The host owns `online`. */
 export function attachAsyncSearchAppObject(
   ctl: Controller,
   actor: AsyncSearchActor,

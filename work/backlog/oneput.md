@@ -233,10 +233,9 @@ The following are potential work (tickets for work) sorted by priority: earlier 
   - [.] ROUTED_MODE with normal root AppObject
   - [ ] ROUTED_MODE with declarative AppObject
   - details
-    - [ ] Online is handled in a svelte file; move it out
-      - /Users/danb/projects/@oneput/apps/oneput-demo/src/routes/(routed)/routed/+page.svelte
-    - [ ] next: in root menu item - should be "Form demo..."
-    - [ ] fix blank placeholder text in routed demo
+    - tension: passing send in routeFlow to AsyncSearchModeDeclarative (an inner state machine)
+    - flowMachine.ts -> machine.ts (ROUTED_MODE)
+    - routeMachine.ts -> router.ts (it's not a machine)
 - [x] refactor: DECLARATIVE_APPOBJECTS - AppObject's becomes data that an agent can build;
   - this allows for making the glue of AppObject's declarative, data, that can be set and stored reducing if/else logic
   - it further helps to separate the business logic which can be triggered using the AppObject

@@ -78,12 +78,6 @@ function applyView(ctl: Controller, view: OneputView, rowsChanged: boolean) {
  * - Rendering: redraws when the snapshot or any {@link Readable} source
  *   changes, switches the layout component when the view's layout changes, and
  *   uses `sources.menuItem.default` for rows without a named builder.
- * - Type inference: `actor` infers `Snapshot` and `Event`; `sources` infers
- *   `Source`, `List`, and `Builders`; `layouts` infers `Layouts`. `NoInfer`
- *   stops `sources` from inferring `Snapshot` (from source callbacks) or
- *   `Event` (from row `send`). Constraining `Snapshot` rather than intersecting
- *   rejects views with only undeclared slots; {@link DeclaredSlots} catches
- *   undeclared slots alongside declared ones.
  */
 export function appObjectActor<
   Source,
@@ -127,8 +121,8 @@ export function appObjectActor<
 /**
  * Attach a parent-owned actor to an AppObject (`ROUTED_DECL`).
  *
- * Shares rendering and type contracts with {@link appObjectActor}, except the
- * parent machine owns the actor's lifecycle:
+ * Shares rendering with {@link appObjectActor}, except the parent machine owns
+ * the actor's lifecycle:
  * - `onStart` sends `STARTED` without calling `start()`.
  * - `onExit` does not send `EXITED` or call `stop()`.
  * - `onBack` sends `BACK` if current and active (`!done`, `!stopped`), and never calls `ctl.app.exit()`.
@@ -166,6 +160,11 @@ export function attachAppObjectActor<
   return app;
 }
 
+// Type inference invariants (shared across appObjectActor, attachAppObjectActor, and createAppObjectActor):
+// - `actor` infers `Snapshot` and `Event`; `sources` infers `Source`, `List`, and `Builders`; `layouts` infers `Layouts`.
+// - `NoInfer` stops `sources` from inferring `Snapshot` (from source callbacks) or `Event` (from row `send`).
+// - Constraining `Snapshot` rather than intersecting rejects views with only undeclared slots;
+//   `DeclaredSlots` catches undeclared slots alongside declared ones.
 function createAppObjectActor<
   Source,
   List extends string,

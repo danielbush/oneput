@@ -19,6 +19,7 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
       }
     },
     on: {
+      BACK: { target: '.done', description: 'Leave search.' },
       INPUT_CHANGED: [
         {
           guard: 'isBlankInput',
@@ -150,6 +151,10 @@ export function createAsyncSearchMachine(service = SearchService.create()) {
             description: 'Run the last query again through the same debounce.'
           }
         }
+      },
+      done: {
+        type: 'final',
+        description: 'Search finished.'
       }
     }
   });

@@ -15,12 +15,30 @@ import {
 } from './interpreter.js';
 import type { OneputEvent } from './oneputEvents.js';
 
-type ViewActor<Snapshot, Event extends { type: string }> = {
+type AttachedViewActor<Snapshot, Event extends { type: string }> = {
+  // Function-property syntax keeps `send` contravariant under strictFunctionTypes.
+  send: (event: OneputEvent | Event) => void;
+  getSnapshot(): Snapshot & {
+    can(event: OneputEvent | Event): boolean;
+    status?: string;
+    output?: unknown;
+  };
+  subscribe(onChange: () => void): { unsubscribe(): void };
+};
+
+type OwnedViewActor<Snapshot, Event extends { type: string }> = AttachedViewActor<
+  Snapshot,
+  Event
+> & {
   start(): void;
   stop(): void;
-  send(event: OneputEvent | Event): void;
-  getSnapshot(): Snapshot & { can(event: OneputEvent | Event): boolean };
-  subscribe(onChange: () => void): { unsubscribe(): void };
+};
+
+type ActorLifecycle = {
+  onStart(): void;
+  onExit(): void;
+  onBack(): void;
+  onDone(output: unknown): void;
 };
 
 /** The menu ID and row IDs: what the user sees as "the same rows". */
@@ -51,31 +69,18 @@ function applyView(ctl: Controller, view: OneputView, rowsChanged: boolean) {
 }
 
 /**
- * Connect an actor to its AppObject. Oneput owns the AppObject stack and the input.
- * `layouts` are the layouts that the actor's views can name, shared across AppObjects.
- * The row builders are in `sources.menuItem`; its `default` builder draws the
- * rows that do not name a builder.
- * When the active view names a layout other than the one this AppObject shows,
- * the adapter shows that layout's component.
+ * Connect an actor owned by this AppObject (`STACK_MODE`).
  *
- * The view redraws when the actor has a new snapshot, and when any readable
- * source changes (see {@link Readable}).
- * Changing the view's input kind keeps the typed text.
- * Editor and claim views, and menu focus, menu update, and claim release
- * events are not supported.
- *
- * Which argument decides each type parameter: `actor` decides `Snapshot` and
- * `Event`; `sources` decides `Source` (the slot source types), `List` (the
- * list names) and `Builders` (the row builders); `layouts` decides `Layouts`.
- * `NoInfer` keeps `sources` from deciding them too: `Snapshot` from the
- * parameter types of its source functions (with an xstate actor, that
- * candidate wins and fails the constraint), and `Event` from the list rows'
- * `send`.
- * The constraint on `Snapshot` checks the actor's views against the others.
- * It is a constraint, not an intersection with the snapshot type, so that a
- * view filling only a slot the layout does not declare (a misspelt one) is an
- * error. {@link DeclaredSlots} on `layouts` catches such a slot beside
- * declared ones, which the constraint allows: TypeScript has no exact types.
+ * - Lifecycle: `onStart` calls `start()` and sends `STARTED`; `onExit` sends
+ *   `EXITED` (unless `done` or `stopped`) and calls `stop()`. When
+ *   `status === 'done'`, the AppObject exits with `snapshot.output`. Unhandled
+ *   `BACK` calls `ctl.app.exit()` when current and the stack can go back.
+ * - Rendering: redraws when the snapshot or any {@link Readable} source
+ *   changes, switches the layout component when the view's layout changes, and
+ *   uses `sources.menuItem.default` for rows without a named builder.
+ * - A change of the view's input kind keeps the typed text.
+ * - Not supported: editor and claim views, and menu focus, menu update, and
+ *   claim release events.
  */
 export function appObjectActor<
   Source,
@@ -86,9 +91,96 @@ export function appObjectActor<
   Snapshot extends ViewSnapshot<Source, List, Event, RowParams<Builders>, LayoutSlots<Layouts>>
 >(
   ctl: Controller,
-  actor: ViewActor<Snapshot, Event>,
+  actor: OwnedViewActor<Snapshot, Event>,
   sources: ViewSources<NoInfer<Snapshot>, Source, List, NoInfer<Event>, Builders>,
   layouts: Layouts & DeclaredSlots<NoInfer<Snapshot>, NoInfer<Layouts>>
+): AppObject {
+  const back = { type: 'BACK' } as const;
+  const app = createAppObjectActor(ctl, actor, sources, layouts, {
+    onStart() {
+      actor.start();
+      actor.send({ type: 'STARTED' });
+    },
+    onExit() {
+      const status = actor.getSnapshot().status;
+      if (status !== 'done' && status !== 'stopped') actor.send({ type: 'EXITED' });
+      // An action can exit while the actor still processes an event.
+      queueMicrotask(() => actor.stop());
+    },
+    onBack() {
+      if (actor.getSnapshot().status === 'done') return;
+      const handled = actor.getSnapshot().can(back);
+      actor.send(back);
+      if (actor.getSnapshot().status === 'done') return;
+      if (!handled && ctl.app.isCurrent(app) && ctl.app.canGoBack()) ctl.app.exit();
+    },
+    onDone(output) {
+      if (ctl.app.isCurrent(app)) ctl.app.exit(output);
+    }
+  });
+  return app;
+}
+
+/**
+ * Attach a parent-owned actor to an AppObject (`ROUTED_DECL`).
+ *
+ * Shares rendering with {@link appObjectActor}, except the parent machine owns
+ * the actor's lifecycle:
+ * - `onStart` sends `STARTED` without calling `start()`.
+ * - `onExit` does not send `EXITED` or call `stop()`.
+ * - `onBack` sends `BACK` if current and active (`!done`, `!stopped`), and never calls `ctl.app.exit()`.
+ * - When `status === 'done'`, skips redrawing and lets the parent's `onDone` transition.
+ */
+export function attachAppObjectActor<
+  Source,
+  List extends string,
+  Event extends { type: string },
+  Builders extends RowBuilders,
+  Layouts extends ViewLayouts,
+  Snapshot extends ViewSnapshot<Source, List, Event, RowParams<Builders>, LayoutSlots<Layouts>>
+>(
+  ctl: Controller,
+  actor: AttachedViewActor<Snapshot, Event>,
+  sources: ViewSources<NoInfer<Snapshot>, Source, List, NoInfer<Event>, Builders>,
+  layouts: Layouts & DeclaredSlots<NoInfer<Snapshot>, NoInfer<Layouts>>
+): AppObject {
+  const app = createAppObjectActor(ctl, actor, sources, layouts, {
+    onStart() {
+      actor.send({ type: 'STARTED' });
+    },
+    onExit() {
+      // The parent machine owns child termination; sending EXITED here could
+      // trigger parent onDone and re-enter routing during external replacement.
+    },
+    onBack() {
+      const status = actor.getSnapshot().status;
+      if (ctl.app.isCurrent(app) && status !== 'done' && status !== 'stopped') {
+        actor.send({ type: 'BACK' });
+      }
+    },
+    onDone() {}
+  });
+  return app;
+}
+
+// Type inference invariants (shared across appObjectActor, attachAppObjectActor, and createAppObjectActor):
+// - `actor` infers `Snapshot` and `Event`; `sources` infers `Source`, `List`, and `Builders`; `layouts` infers `Layouts`.
+// - `NoInfer` stops `sources` from inferring `Snapshot` (from source callbacks) or `Event` (from row `send`).
+// - Constraining `Snapshot` rather than intersecting rejects views with only undeclared slots;
+//   `DeclaredSlots` catches undeclared slots alongside declared ones.
+function createAppObjectActor<
+  Source,
+  List extends string,
+  Event extends { type: string },
+  Builders extends RowBuilders,
+  Layouts extends ViewLayouts,
+  Snapshot extends ViewSnapshot<Source, List, Event, RowParams<Builders>, LayoutSlots<Layouts>>
+>(
+  ctl: Controller,
+  actor: AttachedViewActor<Snapshot, Event>,
+  sources: ViewSources<NoInfer<Snapshot>, Source, List, NoInfer<Event>, Builders>,
+  layouts: Layouts & DeclaredSlots<NoInfer<Snapshot>, NoInfer<Layouts>>,
+  lifecycle: ActorLifecycle
 ): AppObject {
   const sendIfCurrent = (event: OneputEvent | Event) => {
     if (ctl.app.isCurrent(app)) actor.send(event);
@@ -100,27 +192,16 @@ export function appObjectActor<
 
   const app: AppObject = {
     menu: () => menu,
-    onStart() {
-      actor.start();
-      actor.send({ type: 'STARTED' });
-    },
+    onStart: lifecycle.onStart,
     onSuspend() {
       actor.send({ type: 'SUSPENDED' });
     },
     onResume(result) {
       actor.send({ type: 'RESUMED', result: result?.payload });
     },
-    onExit() {
-      actor.send({ type: 'EXITED' });
-      // An action can exit while the actor still processes an event.
-      queueMicrotask(() => actor.stop());
-    },
+    onExit: lifecycle.onExit,
     hasBackLevel: () => actor.getSnapshot().can(back),
-    onBack() {
-      const handled = actor.getSnapshot().can(back);
-      actor.send(back);
-      if (!handled && ctl.app.isCurrent(app) && ctl.app.canGoBack()) ctl.app.exit();
-    },
+    onBack: lifecycle.onBack,
     onInputChange({ value }) {
       sendIfCurrent({ type: 'INPUT_CHANGED', value });
     },
@@ -142,7 +223,12 @@ export function appObjectActor<
       ...sourceSubscriptions(sources)
     ],
     onRefresh() {
-      const rendered = renderActiveView(actor.getSnapshot(), sources, layouts, {
+      const snapshot = actor.getSnapshot();
+      if (snapshot.status === 'done') {
+        lifecycle.onDone(snapshot.output);
+        return;
+      }
+      const rendered = renderActiveView(snapshot, sources, layouts, {
         activate: sendIfCurrent
       });
       if (rendered.isErr()) {

@@ -37,39 +37,35 @@ export type MachineActor<S extends MachineSnapshot> = {
 export type MakeApp<S, A = unknown> = (snapshot: S, actor: A) => AppObject;
 
 /**
- * A map from state name to AppObject, in the shape of the machine.
- *
- * Each entry is one of three things:
- * - a function: show this AppObject for the state and all of its children;
- * - a map: the state has children; look up the child state in it;
- * - {@link fromChild}: the state invokes a child machine; route on the
- *   child's state with the child's own map.
+ * Map from state name to AppObject in the shape of the machine:
+ * - {@link MakeApp} (`ROUTED_IMP`): one AppObject for the state and its child states.
+ * - {@link AppMap} (`ROUTED_GROUP`): nested states inside the same actor.
+ * - {@link fromChild} (`ROUTED_DECL` or `ROUTED_REC`): an invoked child actor.
  */
 export type AppMap<S, A = unknown> = { [state: string]: MakeApp<S, A> | AppMap<S, A> | ChildRoute };
 
 /**
- * A map entry for a state that invokes a child machine: route on the child's
- * state, with `apps`, a map in the shape of the child machine. `id` is the
- * invoke id, the key of the child in the parent's `snapshot.children`.
+ * Map entry for an invoked child actor (`ROUTED_DECL` with {@link MakeApp}, or
+ * `ROUTED_REC` with {@link AppMap}). `id` is the invoke id matching
+ * `snapshot.children[id]` on the parent.
  */
 export class ChildRoute {
   constructor(
     readonly id: string,
-    readonly apps: AppMap<never, never>
+    readonly target: AppMap<never, never> | MakeApp<never, never>
   ) {}
 }
 
 /**
- * Route on the child machine that the state invokes as `id`, while the parent
- * is in that state. The child's AppObjects get the child's snapshot and the
- * child actor, so they send to the child; events for the parent (for example
- * Back out of the child) go to the parent, as the app decides.
+ * Create a {@link ChildRoute} for the child actor invoked as `id` (`snapshot.children[id]`).
+ * Pass a {@link MakeApp} for `ROUTED_DECL` or an {@link AppMap} for `ROUTED_REC`.
+ * The AppObject receives the child's snapshot and actor.
  */
-export function fromChild<C extends MachineSnapshot, A extends MachineActor<C>>(
+export function fromChild<A extends MachineActor<MachineSnapshot>>(
   id: string,
-  apps: AppMap<C, A>
+  target: AppMap<ReturnType<A['getSnapshot']>, A> | MakeApp<ReturnType<A['getSnapshot']>, A>
 ): ChildRoute {
-  return new ChildRoute(id, apps as AppMap<never, never>);
+  return new ChildRoute(id, target as AppMap<never, never> | MakeApp<never, never>);
 }
 
 /** The entry found for a state value, and the path of state names to it. */
@@ -120,13 +116,28 @@ function oneChild(value: { [name: string]: StateValue | undefined }, path: strin
  */
 export type Route = { key: string; make: () => AppObject; actors: MachineActor<MachineSnapshot>[] };
 
+const actorIds = new WeakMap<object, number>();
+let nextActorId = 0;
+
+/** Stable per-instance ID so a respawned child (for example `reenter: true`) gets a new route key. */
+function actorId(actor: object) {
+  let id = actorIds.get(actor);
+  if (id === undefined) {
+    id = ++nextActorId;
+    actorIds.set(actor, id);
+  }
+  return id;
+}
+
 /**
- * Resolve the route of `actor` with `apps`, following {@link fromChild}
- * entries into the invoked children. The key joins the paths with '/', for
- * example 'home.setup/setup:keyForm.providers'.
+ * Resolve `actor`'s active route in `apps`, following {@link fromChild} into
+ * invoked children (`ROUTED_DECL` / `ROUTED_REC`).
+ * Route keys join segments with `/` and tag each child with `#<id>`, e.g.
+ * `'home.search/search#1'` (`ROUTED_DECL`) or `'home.setup/setup#1:keyForm.providers'`
+ * (`ROUTED_REC`).
  *
- * Returns undefined while the route is not settled: a followed child is
- * missing, or is done and its parent has not moved on yet.
+ * Returns `undefined` while unsettled (`actor` or a followed child is `done`, or
+ * `snapshot.children[id]` is missing).
  */
 export function resolveRoute(
   actor: MachineActor<MachineSnapshot>,
@@ -144,10 +155,21 @@ export function resolveRoute(
   }
   const child = snapshot.children?.[found.child.id] as MachineActor<MachineSnapshot> | undefined;
   if (!child) return undefined;
-  const inner = resolveRoute(child, found.child.apps);
+  const childSegment = `${found.child.id}#${actorId(child)}`;
+  if (typeof found.child.target === 'function') {
+    const childSnapshot = child.getSnapshot();
+    if (childSnapshot.status === 'done') return undefined;
+    const make = found.child.target as MakeApp<MachineSnapshot, unknown>;
+    return {
+      key: `${found.path}/${childSegment}`,
+      make: () => make(childSnapshot, child),
+      actors: [actor, child]
+    };
+  }
+  const inner = resolveRoute(child, found.child.target);
   if (!inner) return undefined;
   return {
-    key: `${found.path}/${found.child.id}:${inner.key}`,
+    key: `${found.path}/${childSegment}:${inner.key}`,
     make: inner.make,
     actors: [actor, ...inner.actors]
   };

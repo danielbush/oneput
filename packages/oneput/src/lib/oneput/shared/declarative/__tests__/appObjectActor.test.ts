@@ -6,7 +6,7 @@ import type { AppLayoutParams, UILayout } from '../../../types.js';
 import { StandardLayout } from '../../ui/layout/StandardLayout.js';
 import { StdMenuItemIds } from '../../ui/menuItems/stdMenuItem.js';
 import { waitForState } from '../../test/index.js';
-import { appObjectActor } from '../appObjectActor.js';
+import { appObjectActor, attachAppObjectActor } from '../appObjectActor.js';
 import {
   readable,
   slot,
@@ -282,4 +282,223 @@ test('a readable source change redraws the view with no new snapshot', async () 
   expect(rowsAfterTitle).toEqual(['a']);
   expect(ctl.currentProps.menuItems?.map((item) => item.id)).toEqual(['b']);
   expect(header()).toContain('Second label');
+});
+
+test('owned actor reaching done exits the AppObject and passes output to parent onResume', async () => {
+  // arrange
+  const ctl = Controller.createNull({ menuOpen: true });
+  controllers.push(ctl);
+  let resumedWith: unknown;
+  const home = {
+    layout: {
+      layout: (c: Controller, params: object) => StandardLayout.create(c, params, icons),
+      params: {}
+    },
+    onResume(result?: { payload?: unknown }) {
+      resumedWith = result?.payload;
+    }
+  };
+  ctl.app.run(home);
+  let status: 'active' | 'done' = 'active';
+  const listeners = new Set<() => void>();
+  const makeSnapshot = () => ({
+    machine: { getStateNodeById: () => ({ path: [] }) },
+    getMeta: () => ({ root: { view: rootView } }),
+    can: () => false,
+    status,
+    output: status === 'done' ? { picked: 'alpha' } : undefined
+  });
+  let current = makeSnapshot();
+  const actor = {
+    start() {},
+    stop() {},
+    send(event: OneputEvent | PageEvent) {
+      if (event.type !== 'NEXT_PAGE') return;
+      status = 'done';
+      current = makeSnapshot();
+      listeners.forEach((listener) => listener());
+    },
+    getSnapshot: () => current,
+    subscribe(onChange: () => void) {
+      listeners.add(onChange);
+      return { unsubscribe: () => listeners.delete(onChange) };
+    }
+  };
+  const app = appObjectActor(ctl, actor, { slot: {}, menu: {}, menuItem: builders }, layouts);
+  const shown = menuShows(ctl, 'Next page');
+  ctl.app.run(app);
+  await shown;
+  const exited = waitForState(ctl, 'app-change', {
+    name: 'home to resume',
+    reached: () => ctl.app.isCurrent(home),
+    seen: () => (ctl.app.isCurrent(app) ? 'still in child app' : 'other app')
+  });
+
+  // act
+  ctl.simulateMenuItemClick('next');
+  await exited;
+
+  // assert
+  expect(ctl.app.isCurrent(home)).toBe(true);
+  expect(resumedWith).toEqual({ picked: 'alpha' });
+});
+
+test('attachAppObjectActor forwards events without start/stop and never exits on BACK or done', async () => {
+  // arrange
+  const ctl = Controller.createNull({ menuOpen: true });
+  controllers.push(ctl);
+  const home = {
+    layout: {
+      layout: (c: Controller, params: object) => StandardLayout.create(c, params, icons),
+      params: {}
+    }
+  };
+  ctl.app.run(home);
+  const sent: (OneputEvent | PageEvent)[] = [];
+  let status: 'active' | 'done' = 'active';
+  const listeners = new Set<() => void>();
+  const makeSnapshot = () => ({
+    machine: { getStateNodeById: () => ({ path: [] }) },
+    getMeta: () => ({ root: { view: rootView } }),
+    can: () => false,
+    status,
+    output: status === 'done' ? 'finished' : undefined
+  });
+  let current = makeSnapshot();
+  // No start() or stop() methods, matching XState v5 invoked ActorRef.
+  const actor = {
+    send(event: OneputEvent | PageEvent) {
+      sent.push(event);
+    },
+    getSnapshot: () => current,
+    subscribe(onChange: () => void) {
+      listeners.add(onChange);
+      return { unsubscribe: () => listeners.delete(onChange) };
+    },
+    finish() {
+      status = 'done';
+      current = makeSnapshot();
+      listeners.forEach((listener) => listener());
+    }
+  };
+  const app = attachAppObjectActor(ctl, actor, { slot: {}, menu: {}, menuItem: builders }, layouts);
+  const shown = menuShows(ctl, 'Next page');
+  ctl.app.run(app);
+  await shown;
+
+  // act
+  await ctl.input.typeText('hi');
+  ctl.app.goBack();
+  const afterBack = ctl.app.isCurrent(app);
+  actor.finish();
+  await Promise.resolve();
+  await Promise.resolve();
+  const afterDone = ctl.app.isCurrent(app);
+  ctl.app.replace({ layout: home.layout });
+
+  // assert
+  expect(sent).toContainEqual({ type: 'STARTED' });
+  expect(sent).toContainEqual({ type: 'INPUT_CHANGED', value: 'hi' });
+  expect(sent).toContainEqual({ type: 'BACK' });
+  expect(sent).not.toContainEqual({ type: 'EXITED' });
+  expect(afterBack).toBe(true);
+  expect(afterDone).toBe(true);
+});
+
+test('two synchronous Backs on an owned actor exit once with output and keep home current', async () => {
+  // arrange
+  const ctl = Controller.createNull({ menuOpen: true });
+  controllers.push(ctl);
+  const layout = {
+    layout: (c: Controller, params: object) => StandardLayout.create(c, params, icons),
+    params: {}
+  };
+  const root = { layout };
+  const resumed: unknown[] = [];
+  const home = {
+    layout,
+    onResume(result?: { payload?: unknown }) {
+      resumed.push(result?.payload);
+    }
+  };
+  ctl.app.run(root);
+  ctl.app.run(home);
+  let status: 'active' | 'done' = 'active';
+  const listeners = new Set<() => void>();
+  const makeSnapshot = () => ({
+    machine: { getStateNodeById: () => ({ path: [] }) },
+    getMeta: () => ({ root: { view: rootView } }),
+    can: (event: OneputEvent | PageEvent) => status === 'active' && event.type === 'BACK',
+    status,
+    output: status === 'done' ? { picked: 'beta' } : undefined
+  });
+  let current = makeSnapshot();
+  const actor = {
+    start() {},
+    stop() {},
+    send(event: OneputEvent | PageEvent) {
+      if (event.type !== 'BACK' || status === 'done') return;
+      status = 'done';
+      current = makeSnapshot();
+      listeners.forEach((listener) => listener());
+    },
+    getSnapshot: () => current,
+    subscribe(onChange: () => void) {
+      listeners.add(onChange);
+      return { unsubscribe: () => listeners.delete(onChange) };
+    }
+  };
+  const app = appObjectActor(ctl, actor, { slot: {}, menu: {}, menuItem: builders }, layouts);
+  const shown = menuShows(ctl, 'Next page');
+  ctl.app.run(app);
+  await shown;
+  const exited = waitForState(ctl, 'app-change', {
+    name: 'home to resume',
+    reached: () => ctl.app.isCurrent(home),
+    seen: () => (ctl.app.isCurrent(app) ? 'still in child app' : 'other app')
+  });
+
+  // act
+  ctl.app.goBack();
+  ctl.app.goBack();
+  await exited;
+
+  // assert
+  expect(ctl.app.isCurrent(home)).toBe(true);
+  expect(resumed).toEqual([{ picked: 'beta' }]);
+});
+
+test('attachAppObjectActor does not send EXITED when externally replaced while active', async () => {
+  // arrange
+  const ctl = Controller.createNull({ menuOpen: true });
+  controllers.push(ctl);
+  const layout = {
+    layout: (c: Controller, params: object) => StandardLayout.create(c, params, icons),
+    params: {}
+  };
+  ctl.app.run({ layout });
+  const sent: (OneputEvent | PageEvent)[] = [];
+  const snapshot = {
+    machine: { getStateNodeById: () => ({ path: [] }) },
+    getMeta: () => ({ root: { view: rootView } }),
+    can: () => false,
+    status: 'active' as const
+  };
+  const actor = {
+    send(event: OneputEvent | PageEvent) {
+      sent.push(event);
+    },
+    getSnapshot: () => snapshot,
+    subscribe: () => ({ unsubscribe() {} })
+  };
+  const app = attachAppObjectActor(ctl, actor, { slot: {}, menu: {}, menuItem: builders }, layouts);
+  const shown = menuShows(ctl, 'Next page');
+  ctl.app.run(app);
+  await shown;
+
+  // act
+  ctl.app.replace({ layout });
+
+  // assert
+  expect(sent).toEqual([{ type: 'STARTED' }]);
 });

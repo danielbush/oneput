@@ -1,52 +1,12 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
-  import { onDestroy } from 'svelte';
-  import { createActor, type StateValue } from 'xstate';
-  import type { AppObject, Controller } from '@oneput/oneput';
   import Anchor from '@oneput/oneput/shared/components/Anchor.svelte';
   import OneputController from '@oneput/oneput/shared/components/OneputController.svelte';
   import OneputCornerButton from '@oneput/oneput/shared/components/OneputCornerButton.svelte';
   import { icons } from '$lib/common/icons.js';
-  import { flowMachine, routeFlow } from '$lib/routed/flowMachine.js';
-  import { Layout } from '$lib/common/layout.js';
+  import { init } from '$lib/routed/_init.js';
 
-  // Each page visit owns its actor and router subscriptions.
-  const actor = createActor(flowMachine);
-  // Show a nested state as a path, for example 'form.confirm'.
-  const pathOf = (value: StateValue): string =>
-    typeof value === 'string'
-      ? value
-      : Object.entries(value)
-          .map(([name, child]) => (child ? `${name}.${pathOf(child)}` : name))
-          .join(', ');
-  let state = $state(pathOf(actor.getSnapshot().value));
-  const subscription = actor.subscribe((snapshot) => (state = pathOf(snapshot.value)));
-  let routing: ReturnType<typeof routeFlow> | undefined;
-
-  // OneputController needs an AppObject to run. routeFlow replaces it at once
-  // with Welcome, so the stack is [Welcome] and Welcome is the root.
-  function init(ctl: Controller): AppObject {
-    return {
-      layout: { layout: Layout.create, params: {} },
-      settings: { enableGoBack: false },
-      onStart() {
-        actor.start();
-        routing = routeFlow(ctl, actor);
-        // A routed AppObject exited: the stack is empty and routeApp has
-        // stopped. Tell the machine, then route again from its new state.
-        ctl.app.setOnRootExit(() => {
-          actor.send({ type: 'EXITED' });
-          routing = routeFlow(ctl, actor);
-        });
-      }
-    };
-  }
-
-  onDestroy(() => {
-    routing?.stop();
-    subscription.unsubscribe();
-    actor.stop();
-  });
+  let state = $state('');
 </script>
 
 <svelte:head>
@@ -61,9 +21,9 @@
     <li>
       A small XState machine (<code>flowMachine.ts</code>) decides which AppObject Oneput shows.
     </li>
-    <li>States: welcome, form (with child states editing and confirm), done.</li>
+    <li>States: welcome, form (with child states editing and confirm), done, search.</li>
     <li>Each state has one AppObject, in a map with the shape of the machine.</li>
-    <li>The AppObjects only send events (Next, Back, Restart).</li>
+    <li>The AppObjects only send events (Next, Back, Restart, Search).</li>
     <li>
       When the state changes, <code>routeMachine</code> swaps in the AppObject for the new state.
     </li>
@@ -72,7 +32,7 @@
     </li>
     <li>
       In done, "Exit anyway" calls <code>ctl.app.exit</code>, which routed AppObjects should not do.
-      The page's <code>setOnRootExit</code> handler then sends EXITED, and the machine goes back to welcome.
+      The <code>setOnRootExit</code> handler then sends EXITED, and the machine goes back to welcome.
     </li>
   </ul>
   <p aria-live="polite"><small>Current state: <strong>{state}</strong></small></p>
@@ -80,6 +40,6 @@
 
 <!-- The routed page mounts its own controller. -->
 <Anchor>
-  <OneputController run={init} />
+  <OneputController run={(ctl) => init(ctl, (next) => (state = next))} />
 </Anchor>
 <OneputCornerButton icon={icons.Command} />

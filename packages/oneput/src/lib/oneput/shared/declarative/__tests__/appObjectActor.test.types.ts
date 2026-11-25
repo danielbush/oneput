@@ -1,6 +1,6 @@
 import type { Controller } from '../../../controllers/controller.js';
 import type { AppLayoutParams, UILayout } from '../../../types.js';
-import { appObjectActor } from '../appObjectActor.js';
+import { appObjectActor, attachAppObjectActor } from '../appObjectActor.js';
 import { slot, viewLayout } from '../interpreter.js';
 import { standardRow } from '../standardRow.js';
 
@@ -90,5 +90,35 @@ appObjectActor(
       missing: ({ context }) => context.missing
     }
   },
+  layouts
+);
+
+/** An invoked actor without start() or stop(), matching XState v5 ActorRef. */
+function attachedActorOf<const View>(view: View) {
+  const { start: _start, stop: _stop, ...ref } = actorOf(view);
+  return ref;
+}
+
+attachAppObjectActor(
+  ctl,
+  attachedActorOf({
+    layout: 'plain',
+    slots: { heading: { $from: 'query' } },
+    menu: { id: 'menu', items: [{ id: 'row', params: { text: 'Row' } }] }
+  }),
+  sources,
+  layouts
+);
+
+// Function-property `send` rejects actors that only accept a subset of OneputEvent.
+const narrowActor = {
+  ...attachedActorOf({ layout: 'plain', menu: { id: 'menu' } }),
+  send: (_event: { type: 'ONLY_CUSTOM' }) => {}
+};
+attachAppObjectActor(
+  ctl,
+  // @ts-expect-error Actor `send` must accept OneputEvent.
+  narrowActor,
+  sources,
   layouts
 );

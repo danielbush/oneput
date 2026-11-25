@@ -888,7 +888,7 @@ StandardLayout's header Back button also uses `canGoBack()`. When Back has nowhe
 
 All levels share one set of `actions`, bindings, `settings` and lifecycle hooks. When a level needs its own keys, flags or cleanup, use a child AppObject (`ctl.app.run`) instead.
 
-## STACK_MODE and ROUTED_MODE - two ways to move between AppObjects
+## App structure - STACK_MODE and ROUTED_MODE - two ways to move between AppObjects
 
 Oneput keeps a stack of AppObjects. The current AppObject is on top, and its parents are below it.
 
@@ -898,6 +898,48 @@ Oneput keeps a stack of AppObjects. The current AppObject is on top, and its par
 The two modes can mix. A routed AppObject can start STACK_MODE with `ctl.app.run`. `replace` always acts on the current AppObject, whichever it is. Thus a child can call `replace` to change to a different child, and the parent stays below and gets `onResume` when that child exits. But a router must wait until the stack is back at its AppObject, because a `replace` while a child is current replaces the child, and the routed AppObject stays below it.
 
 `ctl.app.exitToRoot(payload?)` returns to the stack root without a reference to it. Suppose the stack is `[ChatUI, ChatActionsUI, ChatsUI, RenameChatUI]`. After saving, `RenameChatUI` calls `exitToRoot("done")`: the children get `onExit`, top first, and only `ChatUI` gets `onResume({ payload: "done" })`. One `app-change` follows the resume and UI setup, so `routeApp` can route again. The target is the actual stack root, which is the routed AppObject only when routing started there. At the root or with no app, the call does nothing. It keeps the menu state and waits for a close outro already in progress. See `architecture.md` for pending exits and calls during resume.
+
+### App structure (ROUTED_MODE and STACK_MODE)
+
+#### xstate patterns
+
+xstate has 2 patterns that we use:
+
+1. nested states - a state in a machine contains child states; when the machine transitions to this state, it must transition to one of the child states within; transitions must reference a child state when dealing with this state.
+2. invoked child actor - a state may invoke a child actor when a state is transitioned to; the machine can talk to the child actor and vice versa (sendParent, sendTo). The child actor can have its own state machine.
+
+#### ROUTED_MODE and app structure
+
+ROUTED_MODE means we have a state machine (R) that controls what AppObject Oneput displays and how/when to transition between AppObject's. A map (AppMap which we'll call M here) provides labels that map to AppObject creation functions for this purpose.
+
+An AppMap is a map whose keys are state labels and whose values are:
+
+- (1) (ROUTED_IMP) an AppObject creator fn,
+  - R manages an AppObject for the lifetime of the associated state; the AppObject is passed `send` which allows them to send events to R
+  - use imperative AppObjects here; prefer 2a when using declarative AppObjects
+    - if we use a declarative AppObject here, we are running a second unattached actor
+- (2) a `ChildRoute`,
+  - uses invoked child actor xstate pattern
+  - communication can occur between the actors but the state machines do not see eachother
+  - `fromChild` generates the `ChildRoute`, 2 flavours:
+    - (a) (ROUTED_DECL) `fromChild(id, MakeApp)`
+      - actor is a declarative AppObject created using MakeApp
+      - this is the declarative version of (1) above
+    - (b) (ROUTED_REC) `fromChild(id, AppMap)`
+      - actor is a nested ROUTED_MODE machine, call it R' . So this is fully recursing the parent.
+      - gives you nested states that are reusable, isolated multi-screen flows
+      - suppose a setup wizard (pick provider → enter key) is needed from both home and chat — as an invoked child machine with its own AppMap, it keeps its own private context and events and can be invoked from multiple states in R without duplicating states or bloating R
+- (3) (ROUTED_GROUP) another AppMap, then we are using the nested states pattern.
+  - uses nested states xstate pattern
+  - the nested states are inside R (like form: { editing, confirm })
+  - R is still the single machine/actor, and routeMachine walks into the nested AppMap to show the plain AppObject for the active sub-state (Form or Confirm), still passing R's send.
+
+#### STACK_MODE and app structure
+
+In STACK_MODE we have a root AppObject (R). This can be imperative or declarative.
+
+- R can push imperative or declarative child AppObject's.
+- R can also replace itself.
 
 ### Example ROUTED_MODE
 
@@ -952,27 +994,8 @@ routeApp(
     - Once at the start: right after the first replace, in case the machine moved during it.
     - note: if its AppObject has left the stack (for example, after a root exit), routeApp stops, and does not wait.
 
----
+### ROUTED_MODE behaviour
 
-### ROUTED_MODE with a child machine
-
-A state can invoke a child machine, for example a setup flow that two parent states share. The child is a separate actor: while it runs, the parent's state stays the invoking state, and the child's state is only in `snapshot.children[id].getSnapshot().value`. So the map entry for the invoking state is `fromChild(id, childApps)`, and `routeMachine` routes on the child with `childApps`, a map in the shape of the child machine. There is still one router, so nothing fights over the screen.
-
-```ts
-const setupApps = {
-  providers: (snapshot, child) => ProvidersUI.create({ send: child.send }),
-  provider: (snapshot, child) =>
-    ProviderUI.create({ provider: snapshot.context.picked, send: child.send })
-};
-routeMachine(ctl, actor, {
-  home: { menu: () => Home.create(ctl, send), setup: fromChild('setup', setupApps) },
-  chat: { setup: fromChild('setup', setupApps), session: () => Chat.create(ctl, send) }
-});
-```
-
-- Each entry gets the snapshot and the actor whose state it is: the child's for the child's states. An AppObject sends the child's events to the child, and the events that leave the child (for example Back out of the flow) to the parent. The map says which.
-- The key joins the paths, for example `home.setup/setup:provider`, so a new child, or the same child in another state, replaces the AppObject.
-- `routeMachine` subscribes to the parent and to each child on the route, and drops a child when the route leaves it.
 - A child that is done (in a final state) keeps the AppObject that is shown until the parent's `onDone` moves it on; a child that is not there yet is not routed either. `resolveRoute` returns undefined for both.
 
 Oneput has no `send`. The code that sets up ROUTED_MODE decides its own send mechanism (for example `actor.send` for XState), and injects it into each routed AppObject when it makes it. The injection happens in `appFor` (here, in the `apps` map). `routeApp` only calls `appFor` and never sees `send`, so it works with any send mechanism. This has three results:

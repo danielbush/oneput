@@ -55,7 +55,7 @@ describe('findApp', () => {
 /**
  * An actor as routeMachine sees it, with an EMBEDDED_STUB for XState: `set`
  * moves it to a new snapshot and tells its subscribers. `sent` tracks the
- * events sent to it, and `subscribers` how many follow it.
+ * events sent to it.
  */
 function stubActor(snapshot: MachineSnapshot) {
   let current = snapshot;
@@ -63,7 +63,6 @@ function stubActor(snapshot: MachineSnapshot) {
   const sent: unknown[] = [];
   return {
     sent,
-    subscribers: () => listeners.size,
     getSnapshot: () => current,
     subscribe(onChange: () => void) {
       listeners.add(onChange);
@@ -90,7 +89,7 @@ const screen = (name: string, actor?: StubActor): AppObject & { name: string } =
 describe('findApp: fromChild', () => {
   it('stops at a child entry', () => {
     // arrange
-    const child = fromChild<MachineSnapshot, StubActor>('flow', { a: make('a') });
+    const child = fromChild<StubActor>('flow', { a: make('a') });
 
     // act
     const found = findApp({ setup: 'whatever' }, { setup: child });
@@ -103,21 +102,27 @@ describe('findApp: fromChild', () => {
 describe('resolveRoute', () => {
   const apps = {
     home: make('home'),
-    setup: fromChild<MachineSnapshot, StubActor>('flow', {
+    setup: fromChild<StubActor>('flow', {
       keyForm: { providers: make('providers') }
     })
   } as AppMap<never, never>;
 
-  it('key: parent path, child id and child path', () => {
+  it('key: parent path, child id with instance tag, and child path', () => {
     // arrange
     const child = stubActor({ value: { keyForm: 'providers' } });
+    const otherChild = stubActor({ value: { keyForm: 'providers' } });
     const parent = stubActor({ value: 'setup', children: { flow: child } });
+    const parentWithOther = stubActor({ value: 'setup', children: { flow: otherChild } });
 
     // act
     const route = resolveRoute(parent, apps);
+    const sameRoute = resolveRoute(parent, apps);
+    const otherRoute = resolveRoute(parentWithOther, apps);
 
     // assert
-    expect(route?.key).toBe('setup/flow:keyForm.providers');
+    expect(route?.key).toMatch(/^setup\/flow#\d+:keyForm\.providers$/);
+    expect(sameRoute?.key).toBe(route?.key);
+    expect(otherRoute?.key).not.toBe(route?.key);
     expect(route?.make()).toBe('providers');
     expect(route?.actors).toEqual([parent, child]);
   });
@@ -136,6 +141,38 @@ describe('resolveRoute', () => {
     // assert
     expect(routes).toEqual([undefined, undefined]);
   });
+
+  it('single makeApp child: key includes child instance tag; unsettled when missing or done', () => {
+    // arrange
+    const singleApps = {
+      search: fromChild<StubActor>('search', (_snapshot, child) =>
+        screen(`search:${String(child.getSnapshot().value)}`, child)
+      )
+    } as AppMap<never, never>;
+    const child = stubActor({ value: 'empty' });
+    const otherChild = stubActor({ value: 'empty' });
+    const parent = stubActor({ value: 'search', children: { search: child } });
+    const parentWithOther = stubActor({ value: 'search', children: { search: otherChild } });
+    const missing = stubActor({ value: 'search', children: {} });
+    const done = stubActor({
+      value: 'search',
+      children: { search: stubActor({ value: 'done', status: 'done' }) }
+    });
+
+    // act
+    const route = resolveRoute(parent, singleApps);
+    const sameRoute = resolveRoute(parent, singleApps);
+    const otherRoute = resolveRoute(parentWithOther, singleApps);
+    const unsettled = [resolveRoute(missing, singleApps), resolveRoute(done, singleApps)];
+
+    // assert
+    expect(route?.key).toMatch(/^search\/search#\d+$/);
+    expect(sameRoute?.key).toBe(route?.key);
+    expect(otherRoute?.key).not.toBe(route?.key);
+    expect((route?.make() as AppObject & { name: string }).name).toBe('search:empty');
+    expect(route?.actors).toEqual([parent, child]);
+    expect(unsettled).toEqual([undefined, undefined]);
+  });
 });
 
 describe('routeMachine: fromChild', () => {
@@ -151,7 +188,7 @@ describe('routeMachine: fromChild', () => {
     const parent = stubActor({ value: 'home', children: {} });
     routeMachine(ctl, parent, {
       home: () => screen('home', parent),
-      setup: fromChild<MachineSnapshot, StubActor>('flow', {
+      setup: fromChild<StubActor>('flow', {
         providers: (_snapshot, child) => screen('providers', child),
         provider: (snapshot, child) => screen(`provider ${snapshot.value}`, child)
       })
@@ -172,7 +209,6 @@ describe('routeMachine: fromChild', () => {
     // assert
     expect(entered).toBe('providers');
     expect(current()).toBe('provider provider');
-    expect(child.subscribers()).toBe(1);
   });
 
   it('a done child keeps its screen until the parent moves on; then the child is dropped', () => {
@@ -185,11 +221,11 @@ describe('routeMachine: fromChild', () => {
     child.set({ value: 'done', status: 'done' });
     const done = current();
     parent.set({ value: 'home', children: {} });
+    child.set({ value: 'provider' });
 
     // assert
     expect(done).toBe('providers');
     expect(current()).toBe('home');
-    expect(child.subscribers()).toBe(0);
   });
 
   it('Back: a child screen sends BACK to the child, a parent screen to the parent', () => {
@@ -216,10 +252,78 @@ describe('routeMachine: fromChild', () => {
 
     // act
     parent.set({ value: 'setup', children: { flow: second } });
+    const afterSwap = current();
+    first.set({ value: 'providers' });
+    const afterOldChildChanges = current();
+    second.set({ value: 'providers' });
 
     // assert
-    expect(current()).toBe('provider provider');
-    expect(first.subscribers()).toBe(0);
-    expect(second.subscribers()).toBe(1);
+    expect(afterSwap).toBe('provider provider');
+    expect(afterOldChildChanges).toBe('provider provider');
+    expect(current()).toBe('providers');
+  });
+});
+
+describe('routeMachine: fromChild with MakeApp', () => {
+  it('keeps one AppObject across child transitions and done, then replaces it when parent leaves', () => {
+    // arrange
+    const ctl = Controller.createNull();
+    const shown: AppObject[] = [];
+    ctl.events.on('app-change', (change) => {
+      if (change.current) shown.push(change.current);
+    });
+    const parent = stubActor({ value: 'home', children: {} });
+    routeMachine(ctl, parent, {
+      home: () => screen('home', parent),
+      search: fromChild<StubActor>('search', (_snapshot, child) => screen('search', child))
+    });
+    const child = stubActor({ value: 'empty' });
+
+    // act
+    parent.set({ value: 'search', children: { search: child } });
+    const entered = shown.at(-1);
+    child.set({ value: 'debouncing' });
+    child.set({ value: 'results' });
+    const afterChildTransitions = shown.at(-1);
+    child.set({ value: 'done', status: 'done' });
+    const whileDone = shown.at(-1);
+    parent.set({ value: 'home', children: {} });
+    child.set({ value: 'empty' });
+    const afterParentLeaves = shown.at(-1);
+
+    // assert
+    expect((entered as { name?: string })?.name).toBe('search');
+    expect(afterChildTransitions).toBe(entered);
+    expect(whileDone).toBe(entered);
+    expect((afterParentLeaves as { name?: string })?.name).toBe('home');
+    expect(shown.map((app) => (app as { name?: string }).name)).toEqual(['home', 'search', 'home']);
+  });
+
+  it('replaces the AppObject when the parent spawns a new child instance under the same state and id', () => {
+    // arrange
+    const ctl = Controller.createNull();
+    const shown: AppObject[] = [];
+    ctl.events.on('app-change', (change) => {
+      if (change.current) shown.push(change.current);
+    });
+    const parent = stubActor({ value: 'home', children: {} });
+    routeMachine(ctl, parent, {
+      home: () => screen('home', parent),
+      search: fromChild<StubActor>('search', (_snapshot, child) => screen('search', child))
+    });
+    const first = stubActor({ value: 'empty' });
+    const second = stubActor({ value: 'empty' });
+    parent.set({ value: 'search', children: { search: first } });
+    const firstApp = shown.at(-1);
+
+    // act
+    parent.set({ value: 'search', children: { search: second } });
+    const secondApp = shown.at(-1);
+    ctl.app.goBack();
+
+    // assert
+    expect(secondApp).not.toBe(firstApp);
+    expect(first.sent).toEqual([]);
+    expect(second.sent).toEqual([{ type: 'BACK' }]);
   });
 });

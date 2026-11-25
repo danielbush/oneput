@@ -1,6 +1,6 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
-import type { Send } from './flowMachine.js';
+import type { Send } from '../flowMachine.js';
 
 /** The confirm step finishes the form or returns to editing it. */
 export class Confirm implements AppObject {

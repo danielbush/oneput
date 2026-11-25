@@ -1,20 +1,31 @@
 import { setup, type ActorRefFrom } from 'xstate';
 import type { Controller } from '@oneput/oneput';
-import { routeMachine } from '@oneput/oneput/shared/routing/xstate/routeMachine.js';
+import { fromChild, routeMachine } from '@oneput/oneput/shared/routing/xstate/routeMachine.js';
 import { Welcome } from './Welcome.js';
-import { Form } from './Form.js';
-import { Confirm } from './Confirm.js';
-import { Done } from './Done.js';
+import { Form } from './form/Form.js';
+import { Confirm } from './form/Confirm.js';
+import { Done } from './form/Done.js';
+import type { Online } from '../common/online.js';
+import {
+  attachAsyncSearchAppObject,
+  type AsyncSearchActor
+} from '../shared/asyncSearchDeclarative/appObject.js';
+import { createAsyncSearchMachine } from '../shared/asyncSearchDeclarative/machine.js';
 
 /** Events that the routed AppObjects send. */
-export type AppEvent = { type: 'NEXT' } | { type: 'BACK' } | { type: 'RESTART' };
+export type AppEvent =
+  | { type: 'NEXT' }
+  | { type: 'BACK' }
+  | { type: 'RESTART' }
+  | { type: 'SEARCH' };
 /** EXITED comes from the page, when a routed AppObject exits (a root exit). */
 export type FlowEvent = AppEvent | { type: 'EXITED' };
 export type Send = (event: AppEvent) => void;
 
 /** Only the AppObjects send events. The machine chooses the screen. */
 export const flowMachine = setup({
-  types: { events: {} as FlowEvent }
+  types: { events: {} as FlowEvent },
+  actors: { asyncSearch: createAsyncSearchMachine() }
 }).createMachine({
   id: 'routed-demo',
   initial: 'welcome',
@@ -27,7 +38,10 @@ export const flowMachine = setup({
   states: {
     welcome: {
       description: 'Start the demo.',
-      on: { NEXT: { target: 'form', description: 'Open the form.' } }
+      on: {
+        NEXT: { target: 'form', description: 'Open the form.' },
+        SEARCH: { target: 'search', description: 'Open declarative async search.' }
+      }
     },
     form: {
       description: 'Fill in the form, then confirm it.',
@@ -55,6 +69,14 @@ export const flowMachine = setup({
         BACK: { target: 'form.confirm', description: 'Return to the confirm step.' },
         RESTART: { target: 'welcome', description: 'Start again.' }
       }
+    },
+    search: {
+      description: 'Run declarative async search.',
+      invoke: {
+        id: 'search',
+        src: 'asyncSearch',
+        onDone: { target: 'welcome', description: 'Return to welcome when search finishes.' }
+      }
     }
   }
 });
@@ -63,7 +85,11 @@ export const flowMachine = setup({
  * The complete map from machine states to Oneput AppObjects. It has the shape
  * of the machine: `form` has child states, so its entry is a map of them.
  */
-export function routeFlow(ctl: Controller, actor: ActorRefFrom<typeof flowMachine>) {
+export function routeFlow(
+  ctl: Controller,
+  actor: ActorRefFrom<typeof flowMachine>,
+  online: Online
+) {
   const send: Send = (event) => actor.send(event);
   return routeMachine(ctl, actor, {
     welcome: () => Welcome.create(ctl, send),
@@ -71,6 +97,9 @@ export function routeFlow(ctl: Controller, actor: ActorRefFrom<typeof flowMachin
       editing: () => Form.create(ctl, send),
       confirm: () => Confirm.create(ctl, send)
     },
-    done: () => Done.create(ctl, send)
+    done: () => Done.create(ctl, send),
+    search: fromChild('search', (_, child: AsyncSearchActor) =>
+      attachAsyncSearchAppObject(ctl, child, online)
+    )
   });
 }

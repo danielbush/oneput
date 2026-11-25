@@ -914,31 +914,32 @@ ROUTED_MODE means we have a state machine (R) that controls what AppObject Onepu
 
 An AppMap is a map whose keys are state labels and whose values are:
 
-- (1) an AppObject creator fn,
+- (1) (ROUTED_IMP) an AppObject creator fn,
   - R manages an AppObject for the lifetime of the associated state; the AppObject is passed `send` which allows them to send events to R
   - use imperative AppObjects here; prefer 2a when using declarative AppObjects
     - if we use a declarative AppObject here, we are running a second unattached actor
-- (2) a ChildRoute,
+- (2) a `ChildRoute`,
   - uses invoked child actor xstate pattern
   - communication can occur between the actors but the state machines do not see eachother
-  - `fromChild` generates the ChildRoute, 2 flavours:
-    - (a) `fromChild(id, MakeApp)`
+  - `fromChild` generates the `ChildRoute`, 2 flavours:
+    - (a) (ROUTED_DECL) `fromChild(id, MakeApp)`
       - actor is a declarative AppObject created using MakeApp
       - this is the declarative version of (1) above
-    - (b) `fromChild(id, AppMap)`
+    - (b) (ROUTED_REC) `fromChild(id, AppMap)`
       - actor is a nested ROUTED_MODE machine, call it R' . So this is fully recursing the parent.
       - gives you nested states that are reusable, isolated multi-screen flows
       - suppose a setup wizard (pick provider → enter key) is needed from both home and chat — as an invoked child machine with its own AppMap, it keeps its own private context and events and can be invoked from multiple states in R without duplicating states or bloating R
-- (3) another AppMap, then we are using the nested states pattern.
+- (3) (ROUTED_GROUP) another AppMap, then we are using the nested states pattern.
   - uses nested states xstate pattern
   - the nested states are inside R (like form: { editing, confirm })
   - R is still the single machine/actor, and routeMachine walks into the nested AppMap to show the plain AppObject for the active sub-state (Form or Confirm), still passing R's send.
 
 #### STACK_MODE and app structure
 
-In STACK_MODE we have a root AppObject (A). This can be imperative or declarative.
-A can push imperative or declarative child AppObject's.
-A can also replace itself.
+In STACK_MODE we have a root AppObject (R). This can be imperative or declarative.
+
+- R can push imperative or declarative child AppObject's.
+- R can also replace itself.
 
 ### Example ROUTED_MODE
 

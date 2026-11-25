@@ -69,34 +69,21 @@ function applyView(ctl: Controller, view: OneputView, rowsChanged: boolean) {
 }
 
 /**
- * Connect an actor that this AppObject owns (`STACK_MODE`).
+ * Connect an actor owned by this AppObject (`STACK_MODE` in `docs/CONCEPTS.md`).
  *
- * `onStart` starts the actor and sends `STARTED`; `onExit` sends `EXITED` and
- * stops the actor. When the actor reaches a `final` state (`status === 'done'`),
- * the AppObject exits with `snapshot.output`. Unhandled `BACK` exits when the
- * stack can go back.
- *
- * `layouts` are the layouts that the actor's views can name, shared across AppObjects.
- * The row builders are in `sources.menuItem`; its `default` builder draws the
- * rows that do not name a builder.
- * When the active view names a layout other than the one this AppObject shows,
- * the adapter shows that layout's component.
- *
- * The view redraws when the actor has a new snapshot, and when any readable
- * source changes (see {@link Readable}).
- *
- * Which argument decides each type parameter: `actor` decides `Snapshot` and
- * `Event`; `sources` decides `Source` (the slot source types), `List` (the
- * list names) and `Builders` (the row builders); `layouts` decides `Layouts`.
- * `NoInfer` keeps `sources` from deciding them too: `Snapshot` from the
- * parameter types of its source functions (with an xstate actor, that
- * candidate wins and fails the constraint), and `Event` from the list rows'
- * `send`.
- * The constraint on `Snapshot` checks the actor's views against the others.
- * It is a constraint, not an intersection with the snapshot type, so that a
- * view filling only a slot the layout does not declare (a misspelt one) is an
- * error. {@link DeclaredSlots} on `layouts` catches such a slot beside
- * declared ones, which the constraint allows: TypeScript has no exact types.
+ * - Lifecycle: `onStart` calls `start()` and sends `STARTED`; `onExit` sends
+ *   `EXITED` (unless `done` or `stopped`) and calls `stop()`. When
+ *   `status === 'done'`, the AppObject exits with `snapshot.output`. Unhandled
+ *   `BACK` calls `ctl.app.exit()` when current and the stack can go back.
+ * - Rendering: redraws when the snapshot or any {@link Readable} source
+ *   changes, switches the layout component when the view's layout changes, and
+ *   uses `sources.menuItem.default` for rows without a named builder.
+ * - Type inference: `actor` infers `Snapshot` and `Event`; `sources` infers
+ *   `Source`, `List`, and `Builders`; `layouts` infers `Layouts`. `NoInfer`
+ *   stops `sources` from inferring `Snapshot` (from source callbacks) or
+ *   `Event` (from row `send`). Constraining `Snapshot` rather than intersecting
+ *   rejects views with only undeclared slots; {@link DeclaredSlots} catches
+ *   undeclared slots alongside declared ones.
  */
 export function appObjectActor<
   Source,
@@ -138,14 +125,14 @@ export function appObjectActor<
 }
 
 /**
- * Attach a parent-owned actor to an AppObject (`ROUTED_MODE`).
+ * Attach a parent-owned actor to an AppObject (`ROUTED_DECL` in `docs/CONCEPTS.md`).
  *
- * The parent machine owns the actor's lifecycle (for example an invoked child
- * under `fromChild`). `onStart` sends `STARTED` without calling `start()`;
- * `onExit` neither sends `EXITED` nor calls `stop()`, because the parent
- * machine owns child termination. `onBack` sends `BACK` to the active actor
- * and never calls `ctl.app.exit()`. When the actor reaches `done`, the adapter
- * skips redrawing and lets the parent's `onDone` move on.
+ * Shares rendering and type contracts with {@link appObjectActor}, except the
+ * parent machine owns the actor's lifecycle:
+ * - `onStart` sends `STARTED` without calling `start()`.
+ * - `onExit` does not send `EXITED` or call `stop()`.
+ * - `onBack` sends `BACK` if current and active (`!done`, `!stopped`), and never calls `ctl.app.exit()`.
+ * - When `status === 'done'`, skips redrawing and lets the parent's `onDone` transition.
  */
 export function attachAppObjectActor<
   Source,

@@ -37,21 +37,17 @@ export type MachineActor<S extends MachineSnapshot> = {
 export type MakeApp<S, A = unknown> = (snapshot: S, actor: A) => AppObject;
 
 /**
- * A map from state name to AppObject, in the shape of the machine.
- *
- * Each entry is one of three things:
- * - a function: show this AppObject for the state and all of its children;
- * - a map: the state has children; look up the child state in it;
- * - {@link fromChild}: the state invokes a child machine; route on the
- *   child's state with a map, or show one AppObject for the child.
+ * Map from state name to AppObject in the shape of the machine (see `docs/CONCEPTS.md`):
+ * - {@link MakeApp} (`ROUTED_IMP`): one AppObject for the state and its child states.
+ * - {@link AppMap} (`ROUTED_GROUP`): nested states inside the same actor.
+ * - {@link fromChild} (`ROUTED_DECL` or `ROUTED_REC`): an invoked child actor.
  */
 export type AppMap<S, A = unknown> = { [state: string]: MakeApp<S, A> | AppMap<S, A> | ChildRoute };
 
 /**
- * A map entry for a state that invokes a child machine: either an
- * {@link AppMap} to route on the child's state, or a {@link MakeApp} to show
- * one AppObject for the child across its internal states. `id` is the invoke
- * id, the key of the child in the parent's `snapshot.children`.
+ * Map entry for an invoked child actor (`ROUTED_DECL` with {@link MakeApp}, or
+ * `ROUTED_REC` with {@link AppMap}; see `docs/CONCEPTS.md`). `id` is the invoke
+ * id matching `snapshot.children[id]` on the parent.
  */
 export class ChildRoute {
   constructor(
@@ -61,10 +57,9 @@ export class ChildRoute {
 }
 
 /**
- * Route to the child machine that the state invokes as `id`, while the parent
- * is in that state. Pass an {@link AppMap} to route on the child's state, or a
- * {@link MakeApp} to show one AppObject for the child across all of its
- * internal states. The AppObject gets the child's snapshot and actor.
+ * Create a {@link ChildRoute} for the child actor invoked as `id` (`snapshot.children[id]`).
+ * Pass a {@link MakeApp} for `ROUTED_DECL` or an {@link AppMap} for `ROUTED_REC`
+ * (see `docs/CONCEPTS.md`). The AppObject receives the child's snapshot and actor.
  */
 export function fromChild<A extends MachineActor<MachineSnapshot>>(
   id: string,
@@ -135,14 +130,14 @@ function actorId(actor: object) {
 }
 
 /**
- * Resolve the route of `actor` with `apps`, following {@link fromChild}
- * entries into the invoked children. The key joins the paths with '/' and tags
- * each invoked child with its instance ID, for example
- * 'home.setup/setup#1:keyForm.providers' for a child map, or
- * 'home.search/search#1' for a single child AppObject.
+ * Resolve `actor`'s active route in `apps`, following {@link fromChild} into
+ * invoked children (`ROUTED_DECL` / `ROUTED_REC` in `docs/CONCEPTS.md`).
+ * Route keys join segments with `/` and tag each child with `#<id>`, e.g.
+ * `'home.search/search#1'` (`ROUTED_DECL`) or `'home.setup/setup#1:keyForm.providers'`
+ * (`ROUTED_REC`).
  *
- * Returns undefined while the route is not settled: a followed child is
- * missing, or is done and its parent has not moved on yet.
+ * Returns `undefined` while unsettled (`actor` or a followed child is `done`, or
+ * `snapshot.children[id]` is missing).
  */
 export function resolveRoute(
   actor: MachineActor<MachineSnapshot>,

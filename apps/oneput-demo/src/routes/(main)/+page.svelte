@@ -8,6 +8,7 @@
 <main>
   <h1>Oneput Demo</h1>
   <p><a href={resolve('/routed')}>Open the routed demo</a></p>
+  <p><a href={resolve('/declarative')}>Open the declarative demo</a></p>
   <VisualDebugControls />
   <ForceDarkModeControls />
   <section id="katex-demo"></section>

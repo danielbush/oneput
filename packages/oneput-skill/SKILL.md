@@ -159,7 +159,7 @@ ctl.app.goBack();
 // Report its own levels so a root AppObject shows the Back row correctly:
 hasBackLevel = () => this.path !== "/";
 // ctl.app.canGoBack(): true with a parent or root-exit handler; otherwise
-// hasBackLevel. See BACK_HANDLING in docs/CONCEPTS.md.
+// hasBackLevel.
 ```
 
 ## Bindings Pattern
@@ -367,7 +367,7 @@ Oneput adds `<class>--focused` to the row with menu focus, where `<class>` is
 the row's `class` (default `oneput__menu-item`). The default CSS styles only
 `button.oneput__menu-item--focused`. For a custom row (for example a `div`
 preview pane), set `class: 'my-row'` and style `.my-row--focused` in the app's
-CSS. See CUSTOM_ROW_FOCUS in `docs/CONCEPTS.md`.
+CSS.
 
 ### Multiline input next to menu controls (INPUT_ROW)
 
@@ -375,8 +375,7 @@ To keep menu focus on and still let `Enter` write newlines in a textarea, give
 the input its own focusable row with no `action`. `Enter` on that row falls
 through to the textarea. Keep focus in step with the AppObject `onMenuItemFocus` hook (filter
 `cause === 'keyboard'`), `ctl.input.focus()` / `blur()` and
-`ctl.input.subscribeFocusChange`. See INPUT_ROW in `docs/CONCEPTS.md` and
-`KatexDemo`.
+`ctl.input.subscribeFocusChange`.
 
 ### Pull rows: display without a rebuild
 
@@ -532,17 +531,3 @@ ctl.ui.setInputUI({
   }),
 });
 ```
-
-## Key Source Files
-
-For deeper detail, read the source:
-
-- **Types**: `packages/oneput/src/lib/oneput/types.ts` — `AppObject`, `FlexParams`, `FChildParams`, `MenuItem`
-- **Bindings**: `packages/oneput/src/lib/oneput/lib/bindings.ts` — `KeyBinding`, `ActionBinding`, `KeyEventBindings`
-- **Controller**: `packages/oneput/src/lib/oneput/controllers/controller.ts`
-- **KeysController**: `packages/oneput/src/lib/oneput/controllers/KeysController.ts`
-- **AppController**: `packages/oneput/src/lib/oneput/controllers/AppController.ts`
-- **stdMenuItem**: `packages/oneput/src/lib/oneput/shared/ui/menuItems/stdMenuItem.ts`
-- **Builder**: `packages/oneput/src/lib/oneput/lib/builder.ts` — `FlexChildBuilder`, `hflex`, `vflex`
-- **Default actions and bindings**: `packages/oneput/src/lib/oneput/shared/actions/OneputActionProvider.ts`
-- **Architecture**: `packages/oneput/docs/architecture.md`

@@ -78,6 +78,9 @@ function applyView(ctl: Controller, view: OneputView, rowsChanged: boolean) {
  * - Rendering: redraws when the snapshot or any {@link Readable} source
  *   changes, switches the layout component when the view's layout changes, and
  *   uses `sources.menuItem.default` for rows without a named builder.
+ * - A change of the view's input kind keeps the typed text.
+ * - Not supported: editor and claim views, and menu focus, menu update, and
+ *   claim release events.
  */
 export function appObjectActor<
   Source,

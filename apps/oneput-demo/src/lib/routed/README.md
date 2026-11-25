@@ -11,14 +11,3 @@ The `/routed` demo shows a `ROUTED_MODE` app driven by a single XState machine (
 - **Root-exit recovery**: Routed AppObjects should not exit the root. `form/Done.ts` calls `ctl.app.exit()` to demonstrate recovery: `routeMachine` stops, `ctl.app.setOnRootExit` in `_init.ts` sends `EXITED` to `flowMachine` (which transitions to `welcome`), and `routeFlow` starts again.
 
 `ROUTED_REC` (`fromChild(id, AppMap)` for a nested `ROUTED_MODE` child machine) is not demonstrated here yet.
-
-## Files
-
-- `_init.ts`: Keeps all Oneput and XState setup in plain TypeScript outside `+page.svelte` (actor lifecycle, `routeFlow`, `setOnRootExit`, placeholder, and teardown).
-- `flowMachine.ts`: Defines `flowMachine` and `routeFlow`, which maps machine states to AppObjects with `routeMachine`.
-- `Welcome.ts`: Start screen (`welcome`) that routes to the form or declarative async search.
-- `form/Form.ts`: First form step (`form.editing`) that opens `ColourPicker` as a stack child or moves to `confirm`.
-- `form/ColourPicker.ts`: `STACK_MODE` child AppObject pushed from `Form.ts`.
-- `form/Confirm.ts`: Second form step (`form.confirm`) that returns to `editing` or finishes in `done`.
-- `form/Done.ts`: Final form screen (`done`) that can restart, go back, or trigger a root exit with `ctl.app.exit()`.
-- `__tests__/flowMachine.test.ts`: Tests `ROUTED_DECL` search transitions, parent-driven exit, and `reenter: true` through Oneput with null dependencies.

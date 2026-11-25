@@ -69,7 +69,7 @@ function applyView(ctl: Controller, view: OneputView, rowsChanged: boolean) {
 }
 
 /**
- * Connect an actor owned by this AppObject (`STACK_MODE` in `docs/CONCEPTS.md`).
+ * Connect an actor owned by this AppObject (`STACK_MODE`).
  *
  * - Lifecycle: `onStart` calls `start()` and sends `STARTED`; `onExit` sends
  *   `EXITED` (unless `done` or `stopped`) and calls `stop()`. When
@@ -125,7 +125,7 @@ export function appObjectActor<
 }
 
 /**
- * Attach a parent-owned actor to an AppObject (`ROUTED_DECL` in `docs/CONCEPTS.md`).
+ * Attach a parent-owned actor to an AppObject (`ROUTED_DECL`).
  *
  * Shares rendering and type contracts with {@link appObjectActor}, except the
  * parent machine owns the actor's lifecycle:

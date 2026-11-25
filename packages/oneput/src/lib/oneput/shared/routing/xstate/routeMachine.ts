@@ -37,7 +37,7 @@ export type MachineActor<S extends MachineSnapshot> = {
 export type MakeApp<S, A = unknown> = (snapshot: S, actor: A) => AppObject;
 
 /**
- * Map from state name to AppObject in the shape of the machine (see `docs/CONCEPTS.md`):
+ * Map from state name to AppObject in the shape of the machine:
  * - {@link MakeApp} (`ROUTED_IMP`): one AppObject for the state and its child states.
  * - {@link AppMap} (`ROUTED_GROUP`): nested states inside the same actor.
  * - {@link fromChild} (`ROUTED_DECL` or `ROUTED_REC`): an invoked child actor.
@@ -46,8 +46,8 @@ export type AppMap<S, A = unknown> = { [state: string]: MakeApp<S, A> | AppMap<S
 
 /**
  * Map entry for an invoked child actor (`ROUTED_DECL` with {@link MakeApp}, or
- * `ROUTED_REC` with {@link AppMap}; see `docs/CONCEPTS.md`). `id` is the invoke
- * id matching `snapshot.children[id]` on the parent.
+ * `ROUTED_REC` with {@link AppMap}). `id` is the invoke id matching
+ * `snapshot.children[id]` on the parent.
  */
 export class ChildRoute {
   constructor(
@@ -58,8 +58,8 @@ export class ChildRoute {
 
 /**
  * Create a {@link ChildRoute} for the child actor invoked as `id` (`snapshot.children[id]`).
- * Pass a {@link MakeApp} for `ROUTED_DECL` or an {@link AppMap} for `ROUTED_REC`
- * (see `docs/CONCEPTS.md`). The AppObject receives the child's snapshot and actor.
+ * Pass a {@link MakeApp} for `ROUTED_DECL` or an {@link AppMap} for `ROUTED_REC`.
+ * The AppObject receives the child's snapshot and actor.
  */
 export function fromChild<A extends MachineActor<MachineSnapshot>>(
   id: string,
@@ -131,7 +131,7 @@ function actorId(actor: object) {
 
 /**
  * Resolve `actor`'s active route in `apps`, following {@link fromChild} into
- * invoked children (`ROUTED_DECL` / `ROUTED_REC` in `docs/CONCEPTS.md`).
+ * invoked children (`ROUTED_DECL` / `ROUTED_REC`).
  * Route keys join segments with `/` and tag each child with `#<id>`, e.g.
  * `'home.search/search#1'` (`ROUTED_DECL`) or `'home.setup/setup#1:keyForm.providers'`
  * (`ROUTED_REC`).

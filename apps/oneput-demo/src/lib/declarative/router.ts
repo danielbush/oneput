@@ -8,16 +8,8 @@ import {
 } from '../shared/asyncSearchDeclarative/appObject.js';
 import { createAsyncSearchMachine } from '../shared/asyncSearchDeclarative/machine.js';
 import type { SearchService } from '../service/SearchService.js';
-import {
-  attachKatexStubAppObject,
-  createKatexStubMachine,
-  type KatexStubActor
-} from './apps/katexStub.js';
-import {
-  attachRootMenuAppObject,
-  createRootMenuMachine,
-  type RootMenuActor
-} from './apps/rootMenu.js';
+import { katexStub } from './apps/katexStub.js';
+import { rootMenu } from './apps/rootMenu.js';
 
 /**
  * The declarative demo flow. This machine is only a router: it has no views.
@@ -27,9 +19,9 @@ import {
 export function createAppMachine(search?: SearchService) {
   return setup({
     actors: {
-      rootMenu: createRootMenuMachine(),
+      rootMenu: rootMenu.machine,
       asyncSearch: createAsyncSearchMachine(search),
-      katexStub: createKatexStubMachine()
+      katexStub: katexStub.machine
     }
   }).createMachine({
     id: 'declarative-demo',
@@ -79,10 +71,10 @@ export type AppActor = ActorRefFrom<ReturnType<typeof createAppMachine>>;
 /** Map each machine state to a declarative AppObject. The host owns `online`. */
 export function routeAppFlow(ctl: Controller, actor: AppActor, online: Online) {
   return routeMachine(ctl, actor, {
-    root: fromChild('root', (_, child: RootMenuActor) => attachRootMenuAppObject(ctl, child)),
+    root: rootMenu.fromChild(ctl, 'root'),
     search: fromChild('search', (_, child: AsyncSearchActor) =>
       attachAsyncSearchAppObject(ctl, child, online)
     ),
-    katex: fromChild('katex', (_, child: KatexStubActor) => attachKatexStubAppObject(ctl, child))
+    katex: katexStub.fromChild(ctl, 'katex')
   });
 }

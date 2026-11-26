@@ -1,13 +1,6 @@
-import type { AppObject, Controller } from '@oneput/oneput';
-import { attachAppObjectActor } from '@oneput/oneput/shared/declarative/appObjectActor.js';
-import type { ViewFor } from '@oneput/oneput/shared/declarative/interpreter.js';
 import type { OneputEvent } from '@oneput/oneput/shared/declarative/oneputEvents.js';
-import { standardRow } from '@oneput/oneput/shared/declarative/standardRow.js';
-import { setup, type ActorRefFrom } from 'xstate';
-import { viewLayouts } from '../../common/layout.js';
-
-/** The root menu shows only fixed rows, so it has no slot or menu sources. */
-const content = { slot: {}, menu: {}, menuItem: { default: standardRow } };
+import { setup } from 'xstate';
+import { declarativeApp, type DefaultView } from '../../common/declarative.js';
 
 /** Events that the root menu rows send. */
 type RootMenuEvent = { type: 'OPEN_SEARCH' } | { type: 'OPEN_KATEX' };
@@ -15,18 +8,16 @@ type RootMenuEvent = { type: 'OPEN_SEARCH' } | { type: 'OPEN_KATEX' };
 /** The demo that the user chose. It is the output of the machine. */
 type RootMenuChoice = 'search' | 'katex';
 
-type RootMenuView = ViewFor<typeof content, typeof viewLayouts, RootMenuEvent>;
-
 /**
  * The root menu of the declarative demo. A row finishes the machine, and the
  * output tells the parent which demo to open. The machine has no `BACK`
  * transition, so the root menu has no Back.
  */
-export function createRootMenuMachine() {
+function createRootMenuMachine() {
   return setup({
     types: {
       events: {} as OneputEvent | RootMenuEvent,
-      meta: {} as { view?: RootMenuView },
+      meta: {} as { view?: DefaultView<RootMenuEvent> },
       output: {} as RootMenuChoice
     }
   }).createMachine({
@@ -79,9 +70,5 @@ export function createRootMenuMachine() {
   });
 }
 
-export type RootMenuActor = ActorRefFrom<ReturnType<typeof createRootMenuMachine>>;
-
-/** Attach an invoked root menu actor to a Oneput AppObject (`ROUTED_DECL`). */
-export function attachRootMenuAppObject(ctl: Controller, actor: RootMenuActor): AppObject {
-  return attachAppObjectActor(ctl, actor, content, viewLayouts);
-}
+/** The root menu: its machine, and how to show an invoked actor of it (`ROUTED_DECL`). */
+export const rootMenu = declarativeApp(createRootMenuMachine());

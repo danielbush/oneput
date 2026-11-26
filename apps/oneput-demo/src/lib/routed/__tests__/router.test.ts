@@ -8,7 +8,7 @@ import { Layout } from '../../common/layout.js';
 import { Online } from '../../common/online.js';
 import { SearchService } from '../../service/SearchService.js';
 import { createAsyncSearchApp } from '../../shared/asyncSearchDeclarative/appObject.js';
-import { createFlowRouter } from '../router.js';
+import { createRouter } from '../router.js';
 
 const controllers: Controller[] = [];
 const stops: (() => void)[] = [];
@@ -36,26 +36,23 @@ function startRoutedDemo() {
   const ctl = Controller.createNull({ menuOpen: true });
   controllers.push(ctl);
   ctl.app.run({ layout: { layout: Layout.create, params: {} } });
-  const router = createFlowRouter({
+  const router = createRouter({
     search: SearchService.createNull(),
     online: Online.createNull()
   });
-  const actor = createActor(router.machine);
-  actor.start();
-  const route = router.route(ctl, actor);
-  stops.push(() => {
-    route.stop();
-    actor.stop();
-  });
-  return { ctl, actor };
+  const states: string[] = [];
+  router.onState((state) => states.push(state));
+  router.start(ctl);
+  stops.push(() => router.stop());
+  return { ctl, router, state: () => states.at(-1) };
 }
 
 describe('routed declarative async search', () => {
   it('returns to welcome via parent onDone when Back is pressed', async () => {
     // arrange
-    const { ctl, actor } = startRoutedDemo();
+    const { ctl, router, state } = startRoutedDemo();
     const searchShown = menuHas(ctl, 'instructions');
-    actor.send({ type: 'SEARCH' });
+    router.send({ type: 'SEARCH' });
     await searchShown;
     const welcomeShown = menuHas(ctl, 'search');
 
@@ -64,24 +61,24 @@ describe('routed declarative async search', () => {
     await welcomeShown;
 
     // assert
-    expect(actor.getSnapshot().value).toBe('welcome');
+    expect(state()).toBe('welcome');
     expect(rowIds(ctl)).toContain('search');
   });
 
   it('leaves cleanly when the parent transitions away while the child is active', async () => {
     // arrange
-    const { ctl, actor } = startRoutedDemo();
+    const { ctl, router, state } = startRoutedDemo();
     const searchShown = menuHas(ctl, 'instructions');
-    actor.send({ type: 'SEARCH' });
+    router.send({ type: 'SEARCH' });
     await searchShown;
     const welcomeShown = menuHas(ctl, 'search');
 
     // act
-    actor.send({ type: 'EXITED' });
+    router.send({ type: 'EXITED' });
     await welcomeShown;
 
     // assert
-    expect(actor.getSnapshot().value).toBe('welcome');
+    expect(state()).toBe('welcome');
     expect(rowIds(ctl)).toContain('search');
   });
 

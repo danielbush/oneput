@@ -1,40 +1,23 @@
-import { createActor, type StateValue } from 'xstate';
 import type { AppObject, Controller } from '@oneput/oneput';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { Layout } from '$lib/common/layout.js';
 import { Online } from '$lib/common/online.js';
-import { createFlowRouter } from './router.js';
-
-/** Format an XState state value as a dot-separated path, for example `form.confirm`. */
-function pathOf(value: StateValue): string {
-  return typeof value === 'string'
-    ? value
-    : Object.entries(value)
-        .map(([name, child]) => (child ? `${name}.${pathOf(child)}` : name))
-        .join(', ');
-}
+import { createRouter } from './router.js';
 
 /**
- * Set up Oneput and the XState flow actor for the routed demo page.
- * Subscribes to machine state changes and tears down on destroy.
+ * Set up Oneput and the router for the routed demo page.
+ * Subscribes to state changes and tears down on destroy.
  * OneputController needs an AppObject to run; the router replaces it at once
  * with Welcome, so the stack is [Welcome] and Welcome is the root.
  */
 export function init(ctl: Controller, onStateChange?: (state: string) => void): AppObject {
   const online = Online.create();
-  const router = createFlowRouter({ online });
-  const actor = createActor(router.machine);
-  let routing: ReturnType<typeof router.route> | undefined;
-
-  onStateChange?.(pathOf(actor.getSnapshot().value));
-  const subscription = actor.subscribe((snapshot) => {
-    onStateChange?.(pathOf(snapshot.value));
-  });
+  const router = createRouter({ online });
+  const unsubscribe = router.onState((state) => onStateChange?.(state));
 
   ctl.onDestroy(() => {
-    routing?.stop();
-    subscription.unsubscribe();
-    actor.stop();
+    unsubscribe();
+    router.stop();
     online.dispose();
   });
 
@@ -51,14 +34,9 @@ export function init(ctl: Controller, onStateChange?: (state: string) => void): 
     layout: { layout: Layout.create, params: {} },
     settings: { enableGoBack: false },
     onStart() {
-      actor.start();
-      routing = router.route(ctl, actor);
-      // A routed AppObject exited: the stack is empty and routeApp has
-      // stopped. Tell the machine, then route again from its new state.
-      ctl.app.setOnRootExit(() => {
-        actor.send({ type: 'EXITED' });
-        routing = router.route(ctl, actor);
-      });
+      router.start(ctl);
+      // A routed AppObject exited, which it should not do.
+      ctl.app.setOnRootExit(() => router.recoverFromExit(ctl));
     }
   };
 }

@@ -1,4 +1,4 @@
-import { setup, type ActorRefFrom } from 'xstate';
+import { createActor, setup, type StateValue } from 'xstate';
 import type { Controller } from '@oneput/oneput';
 import { routeMachine } from '@oneput/oneput/shared/routing/xstate/routeMachine.js';
 import { Welcome } from './apps/Welcome.js';
@@ -19,13 +19,22 @@ export type AppEvent =
 export type FlowEvent = AppEvent | { type: 'EXITED' };
 export type Send = (event: AppEvent) => void;
 
+/** Format an XState state value as a dot-separated path, for example `form.confirm`. */
+function pathOf(value: StateValue): string {
+  return typeof value === 'string'
+    ? value
+    : Object.entries(value)
+        .map(([name, child]) => (child ? `${name}.${pathOf(child)}` : name))
+        .join(', ');
+}
+
 /**
- * The routed demo flow. Only the AppObjects send events, and `machine` chooses
- * the screen. `route` is the complete map from machine states to Oneput
- * AppObjects. It has the shape of the machine: `form` has child states, so its
- * entry is a map of them. The host owns `online`.
+ * The routed demo flow. The AppObjects send events, and the machine chooses
+ * the screen. The route map has the shape of the machine: `form` has child
+ * states, so its entry is a map of them. The host uses the returned handle and
+ * owns `online`.
  */
-export function createFlowRouter({ search, online }: { search?: SearchService; online: Online }) {
+export function createRouter({ search, online }: { search?: SearchService; online: Online }) {
   const asyncSearch = createAsyncSearchApp({ search, online });
   const machine = setup({
     types: { events: {} as FlowEvent },
@@ -85,9 +94,13 @@ export function createFlowRouter({ search, online }: { search?: SearchService; o
     }
   });
 
-  const route = (ctl: Controller, actor: ActorRefFrom<typeof machine>) => {
-    const send: Send = (event) => actor.send(event);
-    return routeMachine(ctl, actor, {
+  const actor = createActor(machine);
+  let routing: ReturnType<typeof routeMachine> | undefined;
+  const send = (event: FlowEvent) => actor.send(event);
+
+  /** The complete map from machine states to Oneput AppObjects. */
+  const route = (ctl: Controller) =>
+    routeMachine(ctl, actor, {
       welcome: () => Welcome.create(ctl, send),
       form: {
         editing: () => Form.create(ctl, send),
@@ -96,7 +109,32 @@ export function createFlowRouter({ search, online }: { search?: SearchService; o
       done: () => Done.create(ctl, send),
       search: asyncSearch.fromChild(ctl, 'search')
     });
-  };
 
-  return { machine, route };
+  return {
+    /** Start the flow and show the AppObject for each state. */
+    start(ctl: Controller) {
+      actor.start();
+      routing = route(ctl);
+    },
+    /** Stop the routing and the flow. */
+    stop() {
+      routing?.stop();
+      actor.stop();
+    },
+    send,
+    /** Call `onChange` with the state now and on each change. Returns an unsubscribe function. */
+    onState(onChange: (state: string) => void) {
+      onChange(pathOf(actor.getSnapshot().value));
+      const subscription = actor.subscribe((snapshot) => onChange(pathOf(snapshot.value)));
+      return () => subscription.unsubscribe();
+    },
+    /**
+     * Use after a root exit: the stack is empty and the routing has stopped.
+     * Tell the machine, then route again from its new state.
+     */
+    recoverFromExit(ctl: Controller) {
+      send({ type: 'EXITED' });
+      routing = route(ctl);
+    }
+  };
 }

@@ -25,18 +25,16 @@ function menuHas(ctl: Controller, id: string) {
   });
 }
 
-/** Run the page's AppObject with null infrastructure and wait for the root menu. */
+/** Start the page with null infrastructure and wait for the root menu. */
 async function startDeclarativeDemo() {
   const ctl = Controller.createNull({ menuOpen: true });
   controllers.push(ctl);
   const states: string[] = [];
   const rootShown = menuHas(ctl, 'katex');
-  ctl.app.run(
-    init(ctl, (state) => states.push(state), {
-      online: Online.createNull(),
-      search: SearchService.createNull()
-    })
-  );
+  init(ctl, (state) => states.push(state), {
+    online: Online.createNull(),
+    search: SearchService.createNull()
+  });
   await rootShown;
   return { ctl, state: () => states.at(-1) };
 }

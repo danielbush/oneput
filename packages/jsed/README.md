@@ -39,9 +39,11 @@ Then mount a `JsedDocument` through `JsedEditDocumentUI`:
 
   const run = (ctl: Controller) => {
     const root = document.querySelector('#editable-document') as HTMLElement;
-    return JsedEditDocumentUI.create(ctl, {
-      document: JsedDocument.create(root)
-    });
+    ctl.app.run(
+      JsedEditDocumentUI.create(ctl, {
+        document: JsedDocument.create(root)
+      })
+    );
   };
 </script>
 

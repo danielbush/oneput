@@ -4,7 +4,7 @@
   import Oneput from './Oneput.svelte';
   import { Controller } from '../../controllers/controller.js';
   import { onDestroy, onMount } from 'svelte';
-  import type { AppObject, OneputProps } from '../../types.js';
+  import type { OneputProps } from '../../types.js';
   import { setMountContext } from './mountContext.js';
 
   let inputElement: HTMLInputElement | undefined = $state(undefined);
@@ -16,7 +16,7 @@
     menuItems: [],
     menuOpen: false
   });
-  const props: { run: (ctl: Controller) => AppObject } = $props();
+  const props: { run: (ctl: Controller) => void } = $props();
 
   const controller = Controller.create(currentProps);
   setMountContext({ pull: controller.pull });
@@ -26,7 +26,7 @@
   });
 
   onMount(() => {
-    controller.app.run(props.run(controller));
+    props.run(controller);
   });
 
   onDestroy(() => {

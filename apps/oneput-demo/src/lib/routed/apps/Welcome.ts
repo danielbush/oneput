@@ -1,11 +1,11 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
-import type { Send } from '../flowMachine.js';
+import type { Send } from '../router.js';
 
-/** The confirm step finishes the form or returns to editing it. */
-export class Confirm implements AppObject {
+/** The first screen asks the machine to open the form. */
+export class Welcome implements AppObject {
   static create(ctl: Controller, send: Send) {
-    return new Confirm(ctl, send);
+    return new Welcome(ctl, send);
   }
 
   constructor(
@@ -13,22 +13,22 @@ export class Confirm implements AppObject {
     private send: Send
   ) {}
 
-  layout = { params: { menuTitle: 'Confirm' } };
+  layout = { params: { menuTitle: 'Welcome' } };
   settings = { enableGoBack: false };
 
   onStart() {
     this.ctl.menu.setMenu({
-      id: 'confirm',
+      id: 'welcome',
       items: [
         stdMenuItem({
           id: 'next',
-          textContent: 'Next: finish the form',
+          textContent: 'Form demo...',
           action: () => this.send({ type: 'NEXT' })
         }),
         stdMenuItem({
-          id: 'back',
-          textContent: 'Back: edit the form',
-          action: () => this.send({ type: 'BACK' })
+          id: 'search',
+          textContent: 'Async search (declarative)...',
+          action: () => this.send({ type: 'SEARCH' })
         })
       ]
     });

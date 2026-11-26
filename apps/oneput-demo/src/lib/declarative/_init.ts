@@ -4,7 +4,7 @@ import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.
 import { Layout } from '$lib/common/layout.js';
 import { Online } from '$lib/common/online.js';
 import { SearchService } from '$lib/service/SearchService.js';
-import { createAppMachine, routeAppFlow } from './appMachine.js';
+import { createAppMachine, routeAppFlow } from './router.js';
 
 /** The infrastructure that the demo uses. Tests give the `createNull()` versions. */
 export type InitDeps = { online?: Online; search?: SearchService };

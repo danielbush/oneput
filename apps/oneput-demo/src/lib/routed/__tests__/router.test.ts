@@ -12,7 +12,7 @@ import {
   type AsyncSearchActor
 } from '../../shared/asyncSearchDeclarative/appObject.js';
 import { createAsyncSearchMachine } from '../../shared/asyncSearchDeclarative/machine.js';
-import { flowMachine, routeFlow } from '../flowMachine.js';
+import { flowMachine, routeFlow } from '../router.js';
 
 const controllers: Controller[] = [];
 const stops: (() => void)[] = [];

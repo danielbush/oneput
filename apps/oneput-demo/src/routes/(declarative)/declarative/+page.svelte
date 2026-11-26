@@ -23,7 +23,7 @@
       shows. There are no imperative AppObject classes.
     </li>
     <li>
-      The root menu is a view of the top-level machine (<code>appMachine.ts</code>).
+      The root menu is a view of the top-level machine (<code>router.ts</code>).
     </li>
     <li>
       Each other screen is an invoked child machine. When it finishes, the parent goes back to the

@@ -84,5 +84,5 @@ export function createActorRouter<A extends RoutableActor>(
     }
   };
 
-  return { start, stop, reattach, send };
+  return { actor, start, stop, reattach, send };
 }

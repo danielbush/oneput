@@ -18,12 +18,9 @@ export function createRouter({ search, online }: { search?: SearchService; onlin
     asyncSearch: asyncSearch.machine,
     katexStub: katexStub.machine
   });
-  const actor = createActor(machine);
-  const { start, stop } = createActorRouter(actor, (ctl) => ({
+  return createActorRouter(createActor(machine), (ctl) => ({
     root: rootMenu.fromChild(ctl, 'root'),
     search: asyncSearch.fromChild(ctl, 'search'),
     katex: katexStub.fromChild(ctl, 'katex')
   }));
-
-  return { actor, start, stop };
 }

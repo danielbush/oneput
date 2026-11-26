@@ -29,8 +29,11 @@ export function init(ctl: Controller, { online = Online.create() }: InitDeps = {
 
   ctl.ui.setLayout(Layout.create(ctl, {}));
   router.start(ctl);
-  // A routed AppObject exited, which it should not do.
-  ctl.app.setOnRootExit(() => router.recoverFromExit());
+  // A routed AppObject exited, which it should not do: tell the machine, then route again.
+  ctl.app.setOnRootExit(() => {
+    router.send({ type: 'EXITED' });
+    router.reattach();
+  });
 
   return { actor: router.actor };
 }

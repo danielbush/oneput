@@ -16,8 +16,7 @@ import { createMachine } from './machine.js';
  */
 export function createRouter({ search, online }: { search?: SearchService; online: Online }) {
   const asyncSearch = createAsyncSearchApp({ search, online });
-  const actor = createActor(createMachine(asyncSearch.machine));
-  const { start, stop, send, reattach } = createActorRouter(actor, (ctl, send) => ({
+  return createActorRouter(createActor(createMachine(asyncSearch.machine)), (ctl, send) => ({
     welcome: () => Welcome.create(ctl, send),
     form: {
       editing: () => Form.create(ctl, send),
@@ -26,19 +25,4 @@ export function createRouter({ search, online }: { search?: SearchService; onlin
     done: () => Done.create(ctl, send),
     search: asyncSearch.fromChild(ctl, 'search')
   }));
-
-  return {
-    actor,
-    start,
-    stop,
-    send,
-    /**
-     * Use after a root exit: the stack is empty and the routing has stopped.
-     * Tell the machine, then route again from its new state.
-     */
-    recoverFromExit() {
-      send({ type: 'EXITED' });
-      reattach();
-    }
-  };
 }

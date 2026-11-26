@@ -177,6 +177,31 @@ hasBackLevel = () => this.path !== "/";
 // hasBackLevel.
 ```
 
+### Routing from a state machine
+
+`createActorRouter` shows the AppObject for each state of an XState actor.
+Oneput does not depend on XState. Give an actor that is not started.
+
+```typescript
+import { createActorRouter } from "@oneput/oneput/shared/routing/xstate/actorRouter.js";
+
+const router = createActorRouter(createActor(machine), (ctl, send) => ({
+  welcome: () => Welcome.create(ctl, send),
+  form: { editing: () => Form.create(ctl, send) }, // nested states
+}));
+
+// The router stops itself when Oneput is destroyed.
+router.start(ctl);
+```
+
+- `send` sends an event to the actor, with the actor's event types.
+- `stop()` stops the routing and the actor. You cannot start them again.
+- If `start` fails, it stops the router and throws the error.
+- `reattach()` routes again after a root exit, on the controller given to
+  `start`. It throws if the router does not run. First send an event that
+  moves the machine to the state to show.
+- Routed AppObjects send events and do not call `exit()`.
+
 ## Bindings Pattern
 
 Each binding declares `when` conditions controlling when it fires.

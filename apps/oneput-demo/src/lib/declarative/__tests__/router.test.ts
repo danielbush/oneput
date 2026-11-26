@@ -3,6 +3,7 @@ import { Controller } from '@oneput/oneput';
 import { waitForState } from '@oneput/oneput/shared/test/index.js';
 import { afterEach, describe, expect, it } from 'vitest';
 import { Online } from '../../common/online.js';
+import { pathOf } from '../../common/watchState.js';
 import { SearchService } from '../../service/SearchService.js';
 import { init } from '../_init.js';
 
@@ -29,14 +30,13 @@ function menuHas(ctl: Controller, id: string) {
 async function startDeclarativeDemo() {
   const ctl = Controller.createNull({ menuOpen: true });
   controllers.push(ctl);
-  const states: string[] = [];
   const rootShown = menuHas(ctl, 'katex');
-  init(ctl, (state) => states.push(state), {
+  const { actor } = init(ctl, {
     online: Online.createNull(),
     search: SearchService.createNull()
   });
   await rootShown;
-  return { ctl, state: () => states.at(-1) };
+  return { ctl, state: () => pathOf(actor.getSnapshot().value) };
 }
 
 describe('declarative demo', () => {

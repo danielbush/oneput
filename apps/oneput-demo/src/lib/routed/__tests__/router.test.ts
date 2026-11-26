@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { createActor, setup } from 'xstate';
 import { Layout } from '../../common/layout.js';
 import { Online } from '../../common/online.js';
+import { pathOf } from '../../common/watchState.js';
 import { SearchService } from '../../service/SearchService.js';
 import { createAsyncSearchApp } from '../../shared/asyncSearchDeclarative/appObject.js';
 import { init } from '../_init.js';
@@ -41,11 +42,8 @@ function startRoutedDemo() {
     search: SearchService.createNull(),
     online: Online.createNull()
   });
-  const states: string[] = [];
-  router.onState((state) => states.push(state));
   router.start(ctl);
-  stops.push(() => router.stop());
-  return { ctl, router, state: () => states.at(-1) };
+  return { ctl, router, state: () => pathOf(router.actor.getSnapshot().value) };
 }
 
 describe('routed demo init', () => {
@@ -53,14 +51,14 @@ describe('routed demo init', () => {
     // arrange
     const ctl = Controller.createNull({ menuOpen: true });
     controllers.push(ctl);
-    const states: string[] = [];
-    init(ctl, (state) => states.push(state), { online: Online.createNull() });
-    const stateAtStart = states.at(-1);
+    const { actor } = init(ctl, { online: Online.createNull() });
+    const state = () => pathOf(actor.getSnapshot().value);
+    const stateAtStart = state();
     const canGoBackAtStart = ctl.app.canGoBack();
     ctl.simulateMenuItemClick('next');
     ctl.simulateMenuItemClick('next');
     ctl.simulateMenuItemClick('next');
-    const stateBeforeExit = states.at(-1);
+    const stateBeforeExit = state();
 
     // act
     ctl.simulateMenuItemClick('exit');
@@ -69,7 +67,7 @@ describe('routed demo init', () => {
     expect(stateAtStart).toBe('welcome');
     expect(canGoBackAtStart).toBe(false);
     expect(stateBeforeExit).toBe('done');
-    expect(states.at(-1)).toBe('welcome');
+    expect(state()).toBe('welcome');
     expect(rowIds(ctl)).toEqual(['next', 'search']);
     expect(ctl.app.canGoBack()).toBe(false);
   });

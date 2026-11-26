@@ -16,7 +16,8 @@ import type { AppObject } from '../../types.js';
  * a routed root, an `exit()` (or Back) is a root exit: Oneput reports it to
  * `ctl.app.setOnRootExit`, which belongs to the app, not to routeApp. Routed
  * AppObjects should not call exit; the machine decides the flow. `stop`
- * detaches routeApp without changing the stack.
+ * detaches routeApp without changing the stack. If an error occurs
+ * before routeApp returns, it detaches and throws the error again.
  * See ROUTED_MODE in docs/CONCEPTS.md.
  *
  * @param ctl The Oneput controller.
@@ -84,9 +85,12 @@ export function routeApp<T, K = T>(
   const unsubscribeApp = ctl.events.on('app-change', sync);
   try {
     ctl.app.replace(routed);
-  } finally {
     transitioning = false;
     sync();
+  } catch (error) {
+    // The caller gets no handle to detach with.
+    stop();
+    throw error;
   }
   return { stop };
 }

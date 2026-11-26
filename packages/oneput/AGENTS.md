@@ -19,13 +19,13 @@ Any ID that Oneput core gives an element must contain `oneput`, for example `one
 
 Read the entry file's JSDoc for contracts and edge cases, and `docs/CONCEPTS.md` for design rationale. Paths in the **Entry point** column are under `packages/oneput/src/lib/oneput/`; paths in **Concepts / Docs** are relative to `packages/oneput/`.
 
-| System                   | Entry point                                                                                                                    | Concepts / Docs                              |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------- |
-| Controller & events      | `controllers/controller.ts`, `controllers/InternalEventEmitter.ts`                                                             | —                                            |
-| App stack & routing      | `controllers/AppController.ts`, `types.ts`, `shared/routing/routeApp.ts`, `shared/routing/xstate/routeMachine.ts`              | `STACK_MODE`, `ROUTED_MODE`, `BACK_HANDLING` |
-| Declarative AppObject    | `shared/declarative/appObjectActor.ts`, `shared/declarative/interpreter.ts`, `shared/declarative/standardLayout.ts`            | —                                            |
-| Bindings                 | `controllers/KeysController.ts`, `lib/bindings.ts`, `shared/actions/OneputActionProvider.ts`, `shared/bindings/BindingsIDB.ts` | `ENTER_SEMANTICS`, `PROVIDER_PATTERN`        |
-| Input claims & live edit | `controllers/helpers/InputClaims.ts`, `shared/behaviors/liveEdit/`                                                             | `INPUT_CLAIM`, `LIVE_EDIT`                   |
-| Pull rows                | `lib/pull.ts`, `shared/components/mountContext.ts`, `shared/ui/menuItems/pull/`                                                | `PULL_OBJECT`, `CONTROLLED_PATTERN`          |
-| Standard layout          | `shared/ui/layout/StandardLayout.ts`, `shared/ui/buttons.ts`                                                                   | Layout params vs direct UI                   |
-| Safe UI content & icons  | `lib/domSafety.ts`, `lib/icons.ts`                                                                                             | `docs/safe-content.md`, `THREAT_MODEL.md`    |
+| System                   | Entry point                                                                                                                                               | Concepts / Docs                              |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| Controller & events      | `controllers/controller.ts`, `controllers/InternalEventEmitter.ts`                                                                                        | —                                            |
+| App stack & routing      | `controllers/AppController.ts`, `types.ts`, `shared/routing/routeApp.ts`, `shared/routing/xstate/routeMachine.ts`, `shared/routing/xstate/actorRouter.ts` | `STACK_MODE`, `ROUTED_MODE`, `BACK_HANDLING` |
+| Declarative AppObject    | `shared/declarative/appObjectActor.ts`, `shared/declarative/interpreter.ts`, `shared/declarative/standardLayout.ts`                                       | —                                            |
+| Bindings                 | `controllers/KeysController.ts`, `lib/bindings.ts`, `shared/actions/OneputActionProvider.ts`, `shared/bindings/BindingsIDB.ts`                            | `ENTER_SEMANTICS`, `PROVIDER_PATTERN`        |
+| Input claims & live edit | `controllers/helpers/InputClaims.ts`, `shared/behaviors/liveEdit/`                                                                                        | `INPUT_CLAIM`, `LIVE_EDIT`                   |
+| Pull rows                | `lib/pull.ts`, `shared/components/mountContext.ts`, `shared/ui/menuItems/pull/`                                                                           | `PULL_OBJECT`, `CONTROLLED_PATTERN`          |
+| Standard layout          | `shared/ui/layout/StandardLayout.ts`, `shared/ui/buttons.ts`                                                                                              | Layout params vs direct UI                   |
+| Safe UI content & icons  | `lib/domSafety.ts`, `lib/icons.ts`                                                                                                                        | `docs/safe-content.md`, `THREAT_MODEL.md`    |

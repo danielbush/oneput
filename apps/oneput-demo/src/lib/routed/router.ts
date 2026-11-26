@@ -1,10 +1,10 @@
 import { setup, type ActorRefFrom } from 'xstate';
 import type { Controller } from '@oneput/oneput';
 import { fromChild, routeMachine } from '@oneput/oneput/shared/routing/xstate/routeMachine.js';
-import { Welcome } from './Welcome.js';
-import { Form } from './form/Form.js';
-import { Confirm } from './form/Confirm.js';
-import { Done } from './form/Done.js';
+import { Welcome } from './apps/Welcome.js';
+import { Form } from './apps/form/Form.js';
+import { Confirm } from './apps/form/Confirm.js';
+import { Done } from './apps/form/Done.js';
 import type { Online } from '../common/online.js';
 import {
   attachAsyncSearchAppObject,

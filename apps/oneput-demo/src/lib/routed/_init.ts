@@ -3,7 +3,7 @@ import type { AppObject, Controller } from '@oneput/oneput';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { Layout } from '$lib/common/layout.js';
 import { Online } from '$lib/common/online.js';
-import { flowMachine, routeFlow } from './flowMachine.js';
+import { flowMachine, routeFlow } from './router.js';
 
 /** Format an XState state value as a dot-separated path, for example `form.confirm`. */
 function pathOf(value: StateValue): string {

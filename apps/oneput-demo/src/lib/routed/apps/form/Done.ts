@@ -1,6 +1,6 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
-import type { Send } from '../flowMachine.js';
+import type { Send } from '../../router.js';
 
 /** The last screen can return to the form or start again. */
 export class Done implements AppObject {

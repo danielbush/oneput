@@ -12,8 +12,12 @@ import {
   attachKatexStubAppObject,
   createKatexStubMachine,
   type KatexStubActor
-} from './katexStub.js';
-import { attachRootMenuAppObject, createRootMenuMachine, type RootMenuActor } from './rootMenu.js';
+} from './apps/katexStub.js';
+import {
+  attachRootMenuAppObject,
+  createRootMenuMachine,
+  type RootMenuActor
+} from './apps/rootMenu.js';
 
 /**
  * The declarative demo flow. This machine is only a router: it has no views.

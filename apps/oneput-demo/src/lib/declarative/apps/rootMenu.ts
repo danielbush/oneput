@@ -4,7 +4,7 @@ import type { ViewFor } from '@oneput/oneput/shared/declarative/interpreter.js';
 import type { OneputEvent } from '@oneput/oneput/shared/declarative/oneputEvents.js';
 import { standardRow } from '@oneput/oneput/shared/declarative/standardRow.js';
 import { setup, type ActorRefFrom } from 'xstate';
-import { viewLayouts } from '../common/layout.js';
+import { viewLayouts } from '../../common/layout.js';
 
 /** The root menu shows only fixed rows, so it has no slot or menu sources. */
 const content = { slot: {}, menu: {}, menuItem: { default: standardRow } };

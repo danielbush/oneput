@@ -1,16 +1,12 @@
 import type { AppObject, Controller } from '@oneput/oneput';
-import {
-  appObjectActor,
-  attachAppObjectActor
-} from '@oneput/oneput/shared/declarative/appObjectActor.js';
-import { createActor, type ActorOptions, type ActorRefFrom } from 'xstate';
+import { appObjectActor } from '@oneput/oneput/shared/declarative/appObjectActor.js';
+import { createActor, type ActorOptions } from 'xstate';
+import { declarativeAppWith } from '../../common/declarative.js';
 import { viewLayouts } from '../../common/layout.js';
 import { createAsyncSearchMachine } from './machine.js';
 import type { Online } from '../../common/online.js';
 import type { SearchService } from '../../service/SearchService.js';
 import { createContent } from './content.js';
-
-export type AsyncSearchActor = ActorRefFrom<ReturnType<typeof createAsyncSearchMachine>>;
 
 /** Run the search machine as a Oneput AppObject (`STACK_MODE`). The host owns `online`. */
 export function createAsyncSearchAppObject(
@@ -23,11 +19,16 @@ export function createAsyncSearchAppObject(
   return appObjectActor(ctl, actor, createContent(online), viewLayouts);
 }
 
-/** Attach an invoked search actor to a Oneput AppObject (`ROUTED_DECL`). The host owns `online`. */
-export function attachAsyncSearchAppObject(
-  ctl: Controller,
-  actor: AsyncSearchActor,
-  online: Online
-): AppObject {
-  return attachAppObjectActor(ctl, actor, createContent(online), viewLayouts);
+/**
+ * The search machine as a child of a routed app (`ROUTED_DECL`), see
+ * {@link declarativeAppWith}. The host owns `online`.
+ */
+export function createAsyncSearchApp({
+  search,
+  online
+}: {
+  search?: SearchService;
+  online: Online;
+}) {
+  return declarativeAppWith(createAsyncSearchMachine(search), createContent(online));
 }

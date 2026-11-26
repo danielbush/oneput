@@ -1,35 +1,25 @@
 import type { Controller } from '@oneput/oneput';
-import { fromChild, routeMachine } from '@oneput/oneput/shared/routing/xstate/routeMachine.js';
-import { setup, type ActorRefFrom } from 'xstate';
+import { routeMachine } from '@oneput/oneput/shared/routing/xstate/routeMachine.js';
+import { createActor, setup } from 'xstate';
 import type { Online } from '../common/online.js';
-import {
-  attachAsyncSearchAppObject,
-  type AsyncSearchActor
-} from '../shared/asyncSearchDeclarative/appObject.js';
-import { createAsyncSearchMachine } from '../shared/asyncSearchDeclarative/machine.js';
+import { createAsyncSearchApp } from '../shared/asyncSearchDeclarative/appObject.js';
 import type { SearchService } from '../service/SearchService.js';
-import {
-  attachKatexStubAppObject,
-  createKatexStubMachine,
-  type KatexStubActor
-} from './apps/katexStub.js';
-import {
-  attachRootMenuAppObject,
-  createRootMenuMachine,
-  type RootMenuActor
-} from './apps/rootMenu.js';
+import { katexStub } from './apps/katexStub.js';
+import { rootMenu } from './apps/rootMenu.js';
 
 /**
- * The declarative demo flow. This machine is only a router: it has no views.
+ * The declarative demo flow. Its machine is only a router: it has no views.
  * Each screen is an invoked declarative child. The root menu finishes with the
- * demo to open. Each demo returns to the root when it finishes.
+ * demo to open. Each demo returns to the root when it finishes. The host uses
+ * the returned handle and owns `online`.
  */
-export function createAppMachine(search?: SearchService) {
-  return setup({
+export function createRouter({ search, online }: { search?: SearchService; online: Online }) {
+  const asyncSearch = createAsyncSearchApp({ search, online });
+  const machine = setup({
     actors: {
-      rootMenu: createRootMenuMachine(),
-      asyncSearch: createAsyncSearchMachine(search),
-      katexStub: createKatexStubMachine()
+      rootMenu: rootMenu.machine,
+      asyncSearch: asyncSearch.machine,
+      katexStub: katexStub.machine
     }
   }).createMachine({
     id: 'declarative-demo',
@@ -72,17 +62,30 @@ export function createAppMachine(search?: SearchService) {
       }
     }
   });
-}
 
-export type AppActor = ActorRefFrom<ReturnType<typeof createAppMachine>>;
+  const actor = createActor(machine);
+  let routing: ReturnType<typeof routeMachine> | undefined;
 
-/** Map each machine state to a declarative AppObject. The host owns `online`. */
-export function routeAppFlow(ctl: Controller, actor: AppActor, online: Online) {
-  return routeMachine(ctl, actor, {
-    root: fromChild('root', (_, child: RootMenuActor) => attachRootMenuAppObject(ctl, child)),
-    search: fromChild('search', (_, child: AsyncSearchActor) =>
-      attachAsyncSearchAppObject(ctl, child, online)
-    ),
-    katex: fromChild('katex', (_, child: KatexStubActor) => attachKatexStubAppObject(ctl, child))
-  });
+  return {
+    /** Start the flow and show the AppObject for each state. */
+    start(ctl: Controller) {
+      actor.start();
+      routing = routeMachine(ctl, actor, {
+        root: rootMenu.fromChild(ctl, 'root'),
+        search: asyncSearch.fromChild(ctl, 'search'),
+        katex: katexStub.fromChild(ctl, 'katex')
+      });
+    },
+    /** Stop the routing and the flow. */
+    stop() {
+      routing?.stop();
+      actor.stop();
+    },
+    /** Call `onChange` with the state now and on each change. Returns an unsubscribe function. */
+    onState(onChange: (state: string) => void) {
+      onChange(actor.getSnapshot().value);
+      const subscription = actor.subscribe((snapshot) => onChange(snapshot.value));
+      return () => subscription.unsubscribe();
+    }
+  };
 }

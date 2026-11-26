@@ -8,6 +8,7 @@ The `/routed` demo shows a `ROUTED_MODE` app driven by a single XState machine a
 - **`ROUTED_GROUP`**: Nested states inside `flowMachine` (`form: { editing, confirm }`) mapped to a matching nested object in the route map. One machine owns the whole flow while `routeMachine` resolves the active leaf.
 - **`ROUTED_DECL`**: The `search` state invokes `asyncSearch` as a child actor. `createAsyncSearchApp` gives its machine and its `fromChild` route entry. When the child reaches its `final` state, `onDone` returns `flowMachine` to `welcome`.
 - **`STACK_MODE` child inside `ROUTED_MODE`**: `apps/form/Form.ts` pushes `apps/form/ColourPicker.ts` onto the stack with `ctl.app.run`. Routing pauses while the child is open and resumes when the child closes, without changing machine state.
-- **Root-exit recovery**: Routed AppObjects should not exit the root. `apps/form/Done.ts` calls `ctl.app.exit()` to demonstrate recovery: `routeMachine` stops, and `ctl.app.setOnRootExit` in `_init.ts` sends `EXITED` to `flowMachine` (which transitions to `welcome`) and calls `router.reattach()`.
+
+Routed AppObjects should not call `ctl.app.exit()` — send an event to the machine instead. If one ever does exit the root, `ctl.app.setOnRootExit` is available to catch it.
 
 `ROUTED_REC` (`fromChild(id, AppMap)` for a nested `ROUTED_MODE` child machine) is not demonstrated here yet.

@@ -149,36 +149,4 @@ describe('createActorRouter', () => {
     expect(ctl.app.isCurrent(welcome)).toBe(true);
     expect(ctl.app.contains(other)).toBe(false);
   });
-
-  it('reattach: routes again after a root exit', () => {
-    // arrange
-    const { ctl, actor, router, shown } = arrange();
-    router.start(ctl);
-    ctl.app.exit();
-    const afterExit = shown();
-    actor.set({ value: { form: 'editing' } });
-
-    // act
-    router.reattach();
-    const reattached = shown();
-    actor.set({ value: 'welcome' });
-
-    // assert
-    expect(afterExit).toBeUndefined();
-    expect(reattached).toBe('editing');
-    expect(shown()).toBe('welcome');
-  });
-
-  it('reattach: throws after stop', () => {
-    // arrange
-    const { ctl, router } = arrange();
-    router.start(ctl);
-    router.stop();
-
-    // act
-    const reattach = () => router.reattach();
-
-    // assert
-    expect(reattach).toThrow('needs a started router');
-  });
 });

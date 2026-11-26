@@ -31,10 +31,6 @@
     <li>
       In form, "Pick a colour" opens a child AppObject on top. While it is open, nothing is swapped.
     </li>
-    <li>
-      In done, "Exit anyway" calls <code>ctl.app.exit</code>, which routed AppObjects should not do.
-      The <code>setOnRootExit</code> handler then sends EXITED, and the machine goes back to welcome.
-    </li>
   </ul>
   <p aria-live="polite"><small>Current state: <strong>{state}</strong></small></p>
 </main>

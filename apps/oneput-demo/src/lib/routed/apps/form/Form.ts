@@ -1,7 +1,7 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { ColourPicker } from './ColourPicker.js';
-import type { Send } from '../../router.js';
+import type { Send } from '../../machine.js';
 
 /** The picker is a child on the stack. It does not change the machine state. */
 export class Form implements AppObject {

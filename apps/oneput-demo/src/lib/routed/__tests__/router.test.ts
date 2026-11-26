@@ -47,7 +47,7 @@ function startRoutedDemo() {
 }
 
 describe('routed demo init', () => {
-  it('starts on welcome as root with no Back, and recovers to welcome after a root exit', () => {
+  it('starts on welcome as root with no Back, and restart returns there from done', () => {
     // arrange
     const ctl = Controller.createNull({ menuOpen: true });
     controllers.push(ctl);
@@ -58,15 +58,15 @@ describe('routed demo init', () => {
     ctl.simulateMenuItemClick('next');
     ctl.simulateMenuItemClick('next');
     ctl.simulateMenuItemClick('next');
-    const stateBeforeExit = state();
+    const stateBeforeRestart = state();
 
     // act
-    ctl.simulateMenuItemClick('exit');
+    ctl.simulateMenuItemClick('restart');
 
     // assert
     expect(stateAtStart).toBe('welcome');
     expect(canGoBackAtStart).toBe(false);
-    expect(stateBeforeExit).toBe('done');
+    expect(stateBeforeRestart).toBe('done');
     expect(state()).toBe('welcome');
     expect(rowIds(ctl)).toEqual(['next', 'search']);
     expect(ctl.app.canGoBack()).toBe(false);
@@ -93,19 +93,54 @@ describe('routed declarative async search', () => {
 
   it('leaves cleanly when the parent transitions away while the child is active', async () => {
     // arrange
-    const { ctl, router, state } = startRoutedDemo();
+    const ctl = Controller.createNull({ menuOpen: true });
+    controllers.push(ctl);
+    ctl.ui.setLayout(Layout.create(ctl, {}));
+    const asyncSearch = createAsyncSearchApp({
+      search: SearchService.createNull(),
+      online: Online.createNull()
+    });
+    const parentMachine = setup({
+      types: { events: {} as { type: 'LEAVE' } },
+      actors: { asyncSearch: asyncSearch.machine }
+    }).createMachine({
+      id: 'leave-demo',
+      initial: 'search',
+      states: {
+        search: {
+          invoke: { id: 'search', src: 'asyncSearch' },
+          on: { LEAVE: 'home' }
+        },
+        home: {}
+      }
+    });
+    const actor = createActor(parentMachine);
+    actor.start();
     const searchShown = menuHas(ctl, 'instructions');
-    router.send({ type: 'SEARCH' });
+    const home: AppObject = {};
+    const route = routeMachine(ctl, actor, {
+      search: asyncSearch.fromChild(ctl, 'search'),
+      home: () => home
+    });
+    stops.push(() => {
+      route.stop();
+      actor.stop();
+    });
     await searchShown;
-    const welcomeShown = menuHas(ctl, 'search');
 
     // act
-    router.send({ type: 'EXITED' });
-    await welcomeShown;
+    const homeShown = waitForState(ctl, 'app-change', {
+      name: 'home AppObject',
+      reached: () => ctl.app.isCurrent(home),
+      seen: () => 'search AppObject'
+    });
+    actor.send({ type: 'LEAVE' });
+    await homeShown;
 
     // assert
-    expect(state()).toBe('welcome');
-    expect(rowIds(ctl)).toContain('search');
+    expect(actor.getSnapshot().value).toBe('home');
+    expect(actor.getSnapshot().children.search).toBeUndefined();
+    expect(ctl.app.isCurrent(home)).toBe(true);
   });
 
   it('replaces the AppObject with the new child actor on same-state reenter: true', async () => {

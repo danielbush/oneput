@@ -41,19 +41,6 @@ export function createActorRouter<A extends RoutableActor>(
   const send = ((event: never) => actor.send(event)) as A['send'];
 
   /**
-   * Route from the current state, and stop the routing that is there. Use it
-   * after a root exit. Throws if the router does not run.
-   */
-  const reattach = () => {
-    if (!startedCtl) throw new Error('createActorRouter: reattach needs a started router');
-    routing?.stop();
-    const next = routeMachine(startedCtl, actor, appsFor(startedCtl, send));
-    // The first `onStart` can stop the router before there is a handle to keep.
-    if (!startedCtl) next.stop();
-    else routing = next;
-  };
-
-  /**
    * Stop the routing and the actor. The AppObject stack
    * does not change. It has no effect if the router does not run.
    */
@@ -77,12 +64,15 @@ export function createActorRouter<A extends RoutableActor>(
       unregisterDestroy = ctl.onDestroy(stop);
       actor.start();
       if (!startedCtl) return;
-      reattach();
+      const next = routeMachine(ctl, actor, appsFor(ctl, send));
+      // The first `onStart` can stop the router before there is a handle to keep.
+      if (!startedCtl) next.stop();
+      else routing = next;
     } catch (error) {
       stop();
       throw error;
     }
   };
 
-  return { actor, start, stop, reattach, send };
+  return { actor, start, stop, send };
 }

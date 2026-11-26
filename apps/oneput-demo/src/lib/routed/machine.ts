@@ -3,8 +3,6 @@ import type { createAsyncSearchMachine } from '../shared/asyncSearchDeclarative/
 
 /** Events that the routed AppObjects send. */
 type AppEvent = { type: 'NEXT' } | { type: 'BACK' } | { type: 'RESTART' } | { type: 'SEARCH' };
-/** EXITED comes from the page, when a routed AppObject exits (a root exit). */
-type FlowEvent = AppEvent | { type: 'EXITED' };
 export type Send = (event: AppEvent) => void;
 
 /**
@@ -13,17 +11,11 @@ export type Send = (event: AppEvent) => void;
  */
 export function createMachine(asyncSearchMachine: ReturnType<typeof createAsyncSearchMachine>) {
   return setup({
-    types: { events: {} as FlowEvent },
+    types: { events: {} as AppEvent },
     actors: { asyncSearch: asyncSearchMachine }
   }).createMachine({
     id: 'routed-demo',
     initial: 'welcome',
-    on: {
-      EXITED: {
-        target: '.welcome',
-        description: 'A routed AppObject exited, which it should not do. Start again.'
-      }
-    },
     states: {
       welcome: {
         description: 'Start the demo.',

@@ -197,9 +197,6 @@ router.start(ctl);
 - `send` sends an event to the actor, with the actor's event types.
 - `stop()` stops the routing and the actor. You cannot start them again.
 - If `start` fails, it stops the router and throws the error.
-- `reattach()` routes again after a root exit, on the controller given to
-  `start`. It throws if the router does not run. First send an event that
-  moves the machine to the state to show.
 - Routed AppObjects send events and do not call `exit()`.
 
 ## Bindings Pattern

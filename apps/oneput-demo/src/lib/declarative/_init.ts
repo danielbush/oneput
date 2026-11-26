@@ -1,4 +1,4 @@
-import type { AppObject, Controller } from '@oneput/oneput';
+import type { Controller } from '@oneput/oneput';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { Layout } from '$lib/common/layout.js';
 import { Online } from '$lib/common/online.js';
@@ -11,8 +11,8 @@ export type InitDeps = { online?: Online; search?: SearchService };
 /**
  * Set up Oneput and the router for the declarative demo page.
  * Subscribes to state changes and tears down on destroy.
- * OneputController needs an AppObject to run; the router replaces it at
- * once with the declarative root menu, which becomes the stack root.
+ * The router starts the declarative root menu as the stack root. The root
+ * menu inherits the layout that this function sets.
  * There is no root-exit handler: the declarative AppObjects never exit, and
  * a handler would give the root menu a Back button.
  */
@@ -20,7 +20,7 @@ export function init(
   ctl: Controller,
   onStateChange?: (state: string) => void,
   { online = Online.create(), search = SearchService.create() }: InitDeps = {}
-): AppObject {
+): void {
   const router = createRouter({ search, online });
   const unsubscribe = router.onState((state) => onStateChange?.(state));
 
@@ -39,11 +39,6 @@ export function init(
   );
   ctl.input.setDefaultPlaceholder(dynamicPlaceholder);
 
-  return {
-    layout: { layout: Layout.create, params: {} },
-    settings: { enableGoBack: false },
-    onStart() {
-      router.start(ctl);
-    }
-  };
+  ctl.ui.setLayout(Layout.create(ctl, {}));
+  router.start(ctl);
 }

@@ -17,6 +17,21 @@ The main building blocks:
 - **Menu items** — built with `stdMenuItem` and friends
 - **UI layout** — flex-based skeleton with named areas
 
+## Startup
+
+`<OneputController run={run} />` calls `run(ctl)` one time, when it mounts. `run` must start the app:
+
+- Stack mode: call `ctl.app.run(appObject)`.
+- Routed mode: start your router.
+
+`OneputController` ignores the return value of `run`. It does not run a returned `AppObject`. TypeScript does not find this error, because it accepts `() => AppObject` where `() => void` is expected.
+
+```typescript
+const run = (ctl: Controller) => {
+  ctl.app.run(MyScreen.create(ctl));
+};
+```
+
 ## AppObject Pattern
 
 An AppObject represents a screen. AppObjects form a stack — `ctl.app.run()` pushes, `ctl.app.exit()` pops. `ctl.app.exitToRoot(payload?)` exits all children and resumes only the stack root with `{ payload }`. It does nothing at the root. The root is the routed AppObject only when routing started there.

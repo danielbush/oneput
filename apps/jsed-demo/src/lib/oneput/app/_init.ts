@@ -3,7 +3,7 @@ import { Root } from './Root.js';
 import { WordFilter } from '@oneput/oneput/shared/filters/WordFilter.js';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 
-export function init(ctl: Controller) {
+export function init(ctl: Controller): void {
   const dynamicPlaceholder = DynamicPlaceholder.create(ctl, (params) =>
     params.menuOpenBinding
       ? params.isMenuOpen
@@ -16,5 +16,5 @@ export function init(ctl: Controller) {
   ctl.menu.setDefaultFocusBehaviour('last-action,first');
   ctl.input.setDefaultPlaceholder(dynamicPlaceholder);
 
-  return Root.create(ctl);
+  ctl.app.run(Root.create(ctl));
 }

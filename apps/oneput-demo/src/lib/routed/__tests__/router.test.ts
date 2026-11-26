@@ -8,6 +8,7 @@ import { Layout } from '../../common/layout.js';
 import { Online } from '../../common/online.js';
 import { SearchService } from '../../service/SearchService.js';
 import { createAsyncSearchApp } from '../../shared/asyncSearchDeclarative/appObject.js';
+import { init } from '../_init.js';
 import { createRouter } from '../router.js';
 
 const controllers: Controller[] = [];
@@ -35,7 +36,7 @@ function menuHas(ctl: Controller, id: string) {
 function startRoutedDemo() {
   const ctl = Controller.createNull({ menuOpen: true });
   controllers.push(ctl);
-  ctl.app.run({ layout: { layout: Layout.create, params: {} } });
+  ctl.ui.setLayout(Layout.create(ctl, {}));
   const router = createRouter({
     search: SearchService.createNull(),
     online: Online.createNull()
@@ -46,6 +47,33 @@ function startRoutedDemo() {
   stops.push(() => router.stop());
   return { ctl, router, state: () => states.at(-1) };
 }
+
+describe('routed demo init', () => {
+  it('starts on welcome as root with no Back, and recovers to welcome after a root exit', () => {
+    // arrange
+    const ctl = Controller.createNull({ menuOpen: true });
+    controllers.push(ctl);
+    const states: string[] = [];
+    init(ctl, (state) => states.push(state), { online: Online.createNull() });
+    const stateAtStart = states.at(-1);
+    const canGoBackAtStart = ctl.app.canGoBack();
+    ctl.simulateMenuItemClick('next');
+    ctl.simulateMenuItemClick('next');
+    ctl.simulateMenuItemClick('next');
+    const stateBeforeExit = states.at(-1);
+
+    // act
+    ctl.simulateMenuItemClick('exit');
+
+    // assert
+    expect(stateAtStart).toBe('welcome');
+    expect(canGoBackAtStart).toBe(false);
+    expect(stateBeforeExit).toBe('done');
+    expect(states.at(-1)).toBe('welcome');
+    expect(rowIds(ctl)).toEqual(['next', 'search']);
+    expect(ctl.app.canGoBack()).toBe(false);
+  });
+});
 
 describe('routed declarative async search', () => {
   it('returns to welcome via parent onDone when Back is pressed', async () => {
@@ -86,7 +114,7 @@ describe('routed declarative async search', () => {
     // arrange
     const ctl = Controller.createNull({ menuOpen: true });
     controllers.push(ctl);
-    ctl.app.run({ layout: { layout: Layout.create, params: {} } });
+    ctl.ui.setLayout(Layout.create(ctl, {}));
     const shownApps: AppObject[] = [];
     ctl.events.on('app-change', (change) => {
       if (change.current) shownApps.push(change.current);

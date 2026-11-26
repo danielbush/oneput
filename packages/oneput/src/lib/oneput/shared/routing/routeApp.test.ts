@@ -339,4 +339,44 @@ describe('routeApp', () => {
     expect(ctl.app.isCurrent(c)).toBe(true);
     expect(ctl.app.contains(b)).toBe(false);
   });
+
+  it('detaches when the first start hook throws', () => {
+    // arrange
+    const ctl = Controller.createNull();
+    const source = trackedSource<'a' | 'b'>('a');
+    const a: AppObject = {
+      onStart: () => {
+        throw new Error('start failed');
+      }
+    };
+    const b: AppObject = {};
+
+    // act
+    const route = () => routeApp(ctl, source, (value) => (value === 'a' ? a : b));
+
+    // assert
+    expect(route).toThrow('start failed');
+    expect(source.active.size).toBe(0);
+    source.set('b');
+    expect(ctl.app.contains(b)).toBe(false);
+  });
+
+  it('detaches when the follow-up route throws on start', () => {
+    // arrange
+    const ctl = Controller.createNull();
+    const source = trackedSource<'a' | 'b'>('a');
+    const a: AppObject = { onStart: () => source.set('b') };
+    const b: AppObject = {
+      onStart: () => {
+        throw new Error('start failed');
+      }
+    };
+
+    // act
+    const route = () => routeApp(ctl, source, (value) => (value === 'a' ? a : b));
+
+    // assert
+    expect(route).toThrow('start failed');
+    expect(source.active.size).toBe(0);
+  });
 });

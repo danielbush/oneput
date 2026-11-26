@@ -9,7 +9,7 @@ export type InitDeps = { online?: Online };
 
 /**
  * Set up Oneput and the router for the routed demo page.
- * Subscribes to state changes and tears down on destroy.
+ * Reports state changes to `onStateChange`. The router stops on destroy.
  * The router starts Welcome as the stack root. Welcome inherits the layout
  * that this function sets.
  */
@@ -18,14 +18,9 @@ export function init(
   onStateChange?: (state: string) => void,
   { online = Online.create() }: InitDeps = {}
 ): void {
+  // Before the router starts, so that `online` is disposed if the start throws.
+  ctl.onDestroy(() => online.dispose());
   const router = createRouter({ online });
-  const unsubscribe = router.onState((state) => onStateChange?.(state));
-
-  ctl.onDestroy(() => {
-    unsubscribe();
-    router.stop();
-    online.dispose();
-  });
 
   const dynamicPlaceholder = DynamicPlaceholder.create(ctl, (params) =>
     params.menuOpenBinding
@@ -37,7 +32,7 @@ export function init(
   ctl.input.setDefaultPlaceholder(dynamicPlaceholder);
 
   ctl.ui.setLayout(Layout.create(ctl, {}));
-  router.start(ctl);
+  router.start(ctl, { onState: onStateChange });
   // A routed AppObject exited, which it should not do.
-  ctl.app.setOnRootExit(() => router.recoverFromExit(ctl));
+  ctl.app.setOnRootExit(() => router.recoverFromExit());
 }

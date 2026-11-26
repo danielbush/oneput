@@ -1,6 +1,6 @@
-import type { Controller } from '@oneput/oneput';
+import { createActorRouter } from '@oneput/oneput/shared/routing/xstate/actorRouter.js';
+import { createActor } from 'xstate';
 import type { Online } from '../common/online.js';
-import { createMachineRouter } from '../common/router.js';
 import type { SearchService } from '../service/SearchService.js';
 import { createAsyncSearchApp } from '../shared/asyncSearchDeclarative/appObject.js';
 import { Confirm } from './apps/form/Confirm.js';
@@ -16,8 +16,8 @@ import { createMachine } from './machine.js';
  */
 export function createRouter({ search, online }: { search?: SearchService; online: Online }) {
   const asyncSearch = createAsyncSearchApp({ search, online });
-  const { start, stop, send, onState, reattach } = createMachineRouter(
-    createMachine(asyncSearch.machine),
+  const { start, stop, send, reattach } = createActorRouter(
+    createActor(createMachine(asyncSearch.machine)),
     (ctl, send) => ({
       welcome: () => Welcome.create(ctl, send),
       form: {
@@ -33,14 +33,13 @@ export function createRouter({ search, online }: { search?: SearchService; onlin
     start,
     stop,
     send,
-    onState,
     /**
      * Use after a root exit: the stack is empty and the routing has stopped.
      * Tell the machine, then route again from its new state.
      */
-    recoverFromExit(ctl: Controller) {
+    recoverFromExit() {
       send({ type: 'EXITED' });
-      reattach(ctl);
+      reattach();
     }
   };
 }

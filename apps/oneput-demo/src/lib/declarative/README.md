@@ -1,6 +1,6 @@
 # Declarative demo
 
-The `/declarative` demo is a `ROUTED_MODE` app built only from declarative AppObjects and XState machines. `machine.ts` is the statechart; `router.ts` connects it to Oneput with `common/router.ts` and `routeMachine`. It has zero imperative `AppObject` classes and no `STACK_MODE` children.
+The `/declarative` demo is a `ROUTED_MODE` app built only from declarative AppObjects and XState machines. `machine.ts` is the statechart; `router.ts` connects it to Oneput with `createActorRouter`. It has zero imperative `AppObject` classes and no `STACK_MODE` children.
 
 ## How it differs from `/routed`
 

@@ -10,7 +10,7 @@ export type InitDeps = { online?: Online; search?: SearchService };
 
 /**
  * Set up Oneput and the router for the declarative demo page.
- * Subscribes to state changes and tears down on destroy.
+ * Reports state changes to `onStateChange`. The router stops on destroy.
  * The router starts the declarative root menu as the stack root. The root
  * menu inherits the layout that this function sets.
  * There is no root-exit handler: the declarative AppObjects never exit, and
@@ -21,14 +21,9 @@ export function init(
   onStateChange?: (state: string) => void,
   { online = Online.create(), search = SearchService.create() }: InitDeps = {}
 ): void {
+  // Before the router starts, so that `online` is disposed if the start throws.
+  ctl.onDestroy(() => online.dispose());
   const router = createRouter({ search, online });
-  const unsubscribe = router.onState((state) => onStateChange?.(state));
-
-  ctl.onDestroy(() => {
-    unsubscribe();
-    router.stop();
-    online.dispose();
-  });
 
   const dynamicPlaceholder = DynamicPlaceholder.create(ctl, (params) =>
     params.menuOpenBinding
@@ -40,5 +35,5 @@ export function init(
   ctl.input.setDefaultPlaceholder(dynamicPlaceholder);
 
   ctl.ui.setLayout(Layout.create(ctl, {}));
-  router.start(ctl);
+  router.start(ctl, { onState: onStateChange });
 }

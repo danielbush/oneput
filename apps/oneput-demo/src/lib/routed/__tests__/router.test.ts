@@ -42,9 +42,7 @@ function startRoutedDemo() {
     online: Online.createNull()
   });
   const states: string[] = [];
-  router.onState((state) => states.push(state));
-  router.start(ctl);
-  stops.push(() => router.stop());
+  router.start(ctl, { onState: (state) => states.push(state) });
   return { ctl, router, state: () => states.at(-1) };
 }
 

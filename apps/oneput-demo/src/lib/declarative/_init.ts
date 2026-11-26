@@ -4,7 +4,7 @@ import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.
 import { Layout } from '$lib/common/layout.js';
 import { Online } from '$lib/common/online.js';
 import { SearchService } from '$lib/service/SearchService.js';
-import { createAppMachine, routeAppFlow } from './router.js';
+import { createDeclarativeRouter } from './router.js';
 
 /** The infrastructure that the demo uses. Tests give the `createNull()` versions. */
 export type InitDeps = { online?: Online; search?: SearchService };
@@ -12,7 +12,7 @@ export type InitDeps = { online?: Online; search?: SearchService };
 /**
  * Set up Oneput and the XState actor for the declarative demo page.
  * Subscribes to machine state changes and tears down on destroy.
- * OneputController needs an AppObject to run; routeAppFlow replaces it at
+ * OneputController needs an AppObject to run; the router replaces it at
  * once with the declarative root menu, which becomes the stack root.
  * There is no root-exit handler: the declarative AppObjects never exit, and
  * a handler would give the root menu a Back button.
@@ -22,8 +22,9 @@ export function init(
   onStateChange?: (state: string) => void,
   { online = Online.create(), search = SearchService.create() }: InitDeps = {}
 ): AppObject {
-  const actor = createActor(createAppMachine(search));
-  let routing: ReturnType<typeof routeAppFlow> | undefined;
+  const router = createDeclarativeRouter({ search, online });
+  const actor = createActor(router.machine);
+  let routing: ReturnType<typeof router.route> | undefined;
 
   onStateChange?.(actor.getSnapshot().value);
   const subscription = actor.subscribe((snapshot) => {
@@ -51,7 +52,7 @@ export function init(
     settings: { enableGoBack: false },
     onStart() {
       actor.start();
-      routing = routeAppFlow(ctl, actor, online);
+      routing = router.route(ctl, actor);
     }
   };
 }

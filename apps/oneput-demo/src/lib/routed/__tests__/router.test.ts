@@ -1,18 +1,14 @@
 // @vitest-environment jsdom
 import { Controller, type AppObject } from '@oneput/oneput';
-import { fromChild, routeMachine } from '@oneput/oneput/shared/routing/xstate/routeMachine.js';
+import { routeMachine } from '@oneput/oneput/shared/routing/xstate/routeMachine.js';
 import { waitForState } from '@oneput/oneput/shared/test/index.js';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createActor, setup } from 'xstate';
 import { Layout } from '../../common/layout.js';
 import { Online } from '../../common/online.js';
 import { SearchService } from '../../service/SearchService.js';
-import {
-  attachAsyncSearchAppObject,
-  type AsyncSearchActor
-} from '../../shared/asyncSearchDeclarative/appObject.js';
-import { createAsyncSearchMachine } from '../../shared/asyncSearchDeclarative/machine.js';
-import { flowMachine, routeFlow } from '../router.js';
+import { createAsyncSearchApp } from '../../shared/asyncSearchDeclarative/appObject.js';
+import { createFlowRouter } from '../router.js';
 
 const controllers: Controller[] = [];
 const stops: (() => void)[] = [];
@@ -40,12 +36,13 @@ function startRoutedDemo() {
   const ctl = Controller.createNull({ menuOpen: true });
   controllers.push(ctl);
   ctl.app.run({ layout: { layout: Layout.create, params: {} } });
-  const machine = flowMachine.provide({
-    actors: { asyncSearch: createAsyncSearchMachine(SearchService.createNull()) }
+  const router = createFlowRouter({
+    search: SearchService.createNull(),
+    online: Online.createNull()
   });
-  const actor = createActor(machine);
+  const actor = createActor(router.machine);
   actor.start();
-  const route = routeFlow(ctl, actor, Online.createNull());
+  const route = router.route(ctl, actor);
   stops.push(() => {
     route.stop();
     actor.stop();
@@ -97,10 +94,13 @@ describe('routed declarative async search', () => {
     ctl.events.on('app-change', (change) => {
       if (change.current) shownApps.push(change.current);
     });
-    const online = Online.createNull();
+    const asyncSearch = createAsyncSearchApp({
+      search: SearchService.createNull(),
+      online: Online.createNull()
+    });
     const parentMachine = setup({
       types: { events: {} as { type: 'REENTER' } },
-      actors: { asyncSearch: createAsyncSearchMachine(SearchService.createNull()) }
+      actors: { asyncSearch: asyncSearch.machine }
     }).createMachine({
       id: 'reenter-demo',
       initial: 'search',
@@ -116,9 +116,7 @@ describe('routed declarative async search', () => {
     actor.start();
     const firstShown = menuHas(ctl, 'instructions');
     const route = routeMachine(ctl, actor, {
-      search: fromChild('search', (_snapshot, child: AsyncSearchActor) =>
-        attachAsyncSearchAppObject(ctl, child, online)
-      ),
+      search: asyncSearch.fromChild(ctl, 'search'),
       done: () => ({})
     });
     stops.push(() => {

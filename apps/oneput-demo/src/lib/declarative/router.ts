@@ -1,26 +1,30 @@
 import type { Controller } from '@oneput/oneput';
-import { fromChild, routeMachine } from '@oneput/oneput/shared/routing/xstate/routeMachine.js';
+import { routeMachine } from '@oneput/oneput/shared/routing/xstate/routeMachine.js';
 import { setup, type ActorRefFrom } from 'xstate';
 import type { Online } from '../common/online.js';
-import {
-  attachAsyncSearchAppObject,
-  type AsyncSearchActor
-} from '../shared/asyncSearchDeclarative/appObject.js';
-import { createAsyncSearchMachine } from '../shared/asyncSearchDeclarative/machine.js';
+import { createAsyncSearchApp } from '../shared/asyncSearchDeclarative/appObject.js';
 import type { SearchService } from '../service/SearchService.js';
 import { katexStub } from './apps/katexStub.js';
 import { rootMenu } from './apps/rootMenu.js';
 
 /**
- * The declarative demo flow. This machine is only a router: it has no views.
+ * The declarative demo flow. `machine` is only a router: it has no views.
  * Each screen is an invoked declarative child. The root menu finishes with the
- * demo to open. Each demo returns to the root when it finishes.
+ * demo to open. Each demo returns to the root when it finishes. `route` maps
+ * each state to a declarative AppObject. The host owns `online`.
  */
-export function createAppMachine(search?: SearchService) {
-  return setup({
+export function createDeclarativeRouter({
+  search,
+  online
+}: {
+  search?: SearchService;
+  online: Online;
+}) {
+  const asyncSearch = createAsyncSearchApp({ search, online });
+  const machine = setup({
     actors: {
       rootMenu: rootMenu.machine,
-      asyncSearch: createAsyncSearchMachine(search),
+      asyncSearch: asyncSearch.machine,
       katexStub: katexStub.machine
     }
   }).createMachine({
@@ -64,17 +68,14 @@ export function createAppMachine(search?: SearchService) {
       }
     }
   });
-}
 
-export type AppActor = ActorRefFrom<ReturnType<typeof createAppMachine>>;
-
-/** Map each machine state to a declarative AppObject. The host owns `online`. */
-export function routeAppFlow(ctl: Controller, actor: AppActor, online: Online) {
-  return routeMachine(ctl, actor, {
-    root: rootMenu.fromChild(ctl, 'root'),
-    search: fromChild('search', (_, child: AsyncSearchActor) =>
-      attachAsyncSearchAppObject(ctl, child, online)
-    ),
-    katex: katexStub.fromChild(ctl, 'katex')
-  });
+  return {
+    machine,
+    route: (ctl: Controller, actor: ActorRefFrom<typeof machine>) =>
+      routeMachine(ctl, actor, {
+        root: rootMenu.fromChild(ctl, 'root'),
+        search: asyncSearch.fromChild(ctl, 'search'),
+        katex: katexStub.fromChild(ctl, 'katex')
+      })
+  };
 }

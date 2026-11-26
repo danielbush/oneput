@@ -52,18 +52,16 @@ function arrange() {
     welcome: () => screen('welcome'),
     form: { editing: () => screen('editing') }
   }));
-  const states: string[] = [];
-  const onState = (state: string) => states.push(state);
-  return { ctl, actor, router, states, onState, shown: () => shown };
+  return { ctl, actor, router, shown: () => shown };
 }
 
 describe('createActorRouter', () => {
-  it('starts the actor, routes it and reports each state', () => {
+  it('starts the actor and routes it', () => {
     // arrange
-    const { ctl, actor, router, states, onState, shown } = arrange();
+    const { ctl, actor, router, shown } = arrange();
 
     // act
-    router.start(ctl, { onState });
+    router.start(ctl);
     const atStart = shown();
     actor.set({ value: { form: 'editing' } });
     router.send({ type: 'NEXT' });
@@ -72,14 +70,13 @@ describe('createActorRouter', () => {
     expect(actor.status()).toBe('running');
     expect(atStart).toBe('welcome');
     expect(shown()).toBe('editing');
-    expect(states).toEqual(['welcome', 'form.editing']);
     expect(actor.sent).toEqual([{ type: 'NEXT' }]);
   });
 
   it('stops everything when the controller is destroyed', () => {
     // arrange
-    const { ctl, actor, router, states, onState } = arrange();
-    router.start(ctl, { onState });
+    const { ctl, actor, router } = arrange();
+    router.start(ctl);
 
     // act
     ctl._destroy();
@@ -88,13 +85,12 @@ describe('createActorRouter', () => {
     // assert
     expect(actor.status()).toBe('stopped');
     expect(actor.subscribers()).toBe(0);
-    expect(states).toEqual(['welcome']);
   });
 
   it('stop: later updates change nothing, also after repeats', () => {
     // arrange
-    const { ctl, actor, router, states, onState, shown } = arrange();
-    router.start(ctl, { onState });
+    const { ctl, actor, router, shown } = arrange();
+    router.start(ctl);
 
     // act
     router.stop();
@@ -105,7 +101,6 @@ describe('createActorRouter', () => {
     // assert
     expect(actor.status()).toBe('stopped');
     expect(actor.subscribers()).toBe(0);
-    expect(states).toEqual(['welcome']);
     expect(shown()).toBe('welcome');
   });
 
@@ -122,30 +117,16 @@ describe('createActorRouter', () => {
 
   it('start: rolls back when the first route throws', () => {
     // arrange
-    const { ctl, actor, router, states, onState } = arrange();
+    const { ctl, actor, router } = arrange();
     actor.set({ value: 'unmapped' });
 
     // act
-    const start = () => router.start(ctl, { onState });
+    const start = () => router.start(ctl);
 
     // assert
     expect(start).toThrow("no AppObject for state 'unmapped'");
     expect(actor.status()).toBe('stopped');
     expect(actor.subscribers()).toBe(0);
-    expect(states).toEqual(['unmapped']);
-  });
-
-  it('start: no routing when onState stops the router', () => {
-    // arrange
-    const { ctl, actor, router, shown } = arrange();
-
-    // act
-    router.start(ctl, { onState: () => router.stop() });
-
-    // assert
-    expect(actor.status()).toBe('stopped');
-    expect(actor.subscribers()).toBe(0);
-    expect(shown()).toBeUndefined();
   });
 
   it('start: no routing when the first onStart stops the router', () => {

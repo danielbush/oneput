@@ -7,8 +7,7 @@ import {
   routeMachine,
   type AppMap,
   type MachineActor,
-  type MachineSnapshot,
-  type StateValue
+  type MachineSnapshot
 } from './routeMachine.js';
 
 /**
@@ -21,15 +20,6 @@ export type RoutableActor = MachineActor<MachineSnapshot> & {
   stop(): unknown;
   send(event: never): void;
 };
-
-/** Format a state value as a dot-separated path, for example `form.confirm`. */
-function pathOf(value: StateValue): string {
-  return typeof value === 'string'
-    ? value
-    : Object.entries(value)
-        .map(([name, child]) => (child ? `${name}.${pathOf(child)}` : name))
-        .join(', ');
-}
 
 /**
  * Connect `actor` to Oneput with {@link routeMachine}. `appsFor` gives the
@@ -46,7 +36,6 @@ export function createActorRouter<A extends RoutableActor>(
   /** The controller given to `start`. It is set only while the router runs. */
   let startedCtl: Controller | undefined;
   let routing: ReturnType<typeof routeMachine> | undefined;
-  let stateSubscription: { unsubscribe(): void } | undefined;
   let unregisterDestroy: (() => void) | undefined;
 
   const send = ((event: never) => actor.send(event)) as A['send'];
@@ -65,38 +54,28 @@ export function createActorRouter<A extends RoutableActor>(
   };
 
   /**
-   * Stop the routing, the `onState` reports and the actor. The AppObject stack
+   * Stop the routing and the actor. The AppObject stack
    * does not change. It has no effect if the router does not run.
    */
   const stop = () => {
     if (!startedCtl) return;
     startedCtl = undefined;
     routing?.stop();
-    stateSubscription?.unsubscribe();
     unregisterDestroy?.();
-    routing = stateSubscription = unregisterDestroy = undefined;
+    routing = unregisterDestroy = undefined;
     actor.stop();
   };
 
   /**
-   * Start the actor and show the AppObject for each state. `onState` gets the
-   * state path now and on each change. If the start fails, it calls `stop` and
-   * throws the error again.
+   * Start the actor and show the AppObject for each state. If the start fails,
+   * it calls `stop` and throws the error again.
    */
-  const start = (ctl: Controller, { onState }: { onState?: (state: string) => void } = {}) => {
+  const start = (ctl: Controller) => {
     startedCtl = ctl;
     try {
-      // First, so that a callback below can destroy `ctl` and stop the router.
+      // Before routing, so that an `onStart` can destroy `ctl` and stop the router.
       unregisterDestroy = ctl.onDestroy(stop);
       actor.start();
-      if (!startedCtl) return;
-      if (onState) {
-        const report = () => onState(pathOf(actor.getSnapshot().value));
-        // Subscribe before routing: an AppObject can send from its onStart.
-        stateSubscription = actor.subscribe(report);
-        report();
-      }
-      // `onState` can stop the router.
       if (!startedCtl) return;
       reattach();
     } catch (error) {

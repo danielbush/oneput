@@ -4,6 +4,7 @@
   import OneputController from '@oneput/oneput/shared/components/OneputController.svelte';
   import OneputCornerButton from '@oneput/oneput/shared/components/OneputCornerButton.svelte';
   import { icons } from '$lib/common/icons.js';
+  import { watchState } from '$lib/common/watchState.js';
   import { init } from '$lib/declarative/_init.js';
 
   let state = $state('');
@@ -35,6 +36,11 @@
 
 <!-- The declarative page mounts its own controller. -->
 <Anchor>
-  <OneputController run={(ctl) => init(ctl, (next) => (state = next))} />
+  <OneputController
+    run={(ctl) => {
+      const { actor } = init(ctl);
+      watchState(ctl, actor, (next) => (state = next));
+    }}
+  />
 </Anchor>
 <OneputCornerButton icon={icons.Command} />

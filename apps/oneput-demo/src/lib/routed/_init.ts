@@ -9,15 +9,11 @@ export type InitDeps = { online?: Online };
 
 /**
  * Set up Oneput and the router for the routed demo page.
- * Reports state changes to `onStateChange`. The router stops on destroy.
+ * The router stops on destroy. Returns the actor of the router.
  * The router starts Welcome as the stack root. Welcome inherits the layout
  * that this function sets.
  */
-export function init(
-  ctl: Controller,
-  onStateChange?: (state: string) => void,
-  { online = Online.create() }: InitDeps = {}
-): void {
+export function init(ctl: Controller, { online = Online.create() }: InitDeps = {}) {
   // Before the router starts, so that `online` is disposed if the start throws.
   ctl.onDestroy(() => online.dispose());
   const router = createRouter({ online });
@@ -32,7 +28,9 @@ export function init(
   ctl.input.setDefaultPlaceholder(dynamicPlaceholder);
 
   ctl.ui.setLayout(Layout.create(ctl, {}));
-  router.start(ctl, { onState: onStateChange });
+  router.start(ctl);
   // A routed AppObject exited, which it should not do.
   ctl.app.setOnRootExit(() => router.recoverFromExit());
+
+  return { actor: router.actor };
 }

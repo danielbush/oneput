@@ -16,20 +16,19 @@ import { createMachine } from './machine.js';
  */
 export function createRouter({ search, online }: { search?: SearchService; online: Online }) {
   const asyncSearch = createAsyncSearchApp({ search, online });
-  const { start, stop, send, reattach } = createActorRouter(
-    createActor(createMachine(asyncSearch.machine)),
-    (ctl, send) => ({
-      welcome: () => Welcome.create(ctl, send),
-      form: {
-        editing: () => Form.create(ctl, send),
-        confirm: () => Confirm.create(ctl, send)
-      },
-      done: () => Done.create(ctl, send),
-      search: asyncSearch.fromChild(ctl, 'search')
-    })
-  );
+  const actor = createActor(createMachine(asyncSearch.machine));
+  const { start, stop, send, reattach } = createActorRouter(actor, (ctl, send) => ({
+    welcome: () => Welcome.create(ctl, send),
+    form: {
+      editing: () => Form.create(ctl, send),
+      confirm: () => Confirm.create(ctl, send)
+    },
+    done: () => Done.create(ctl, send),
+    search: asyncSearch.fromChild(ctl, 'search')
+  }));
 
   return {
+    actor,
     start,
     stop,
     send,

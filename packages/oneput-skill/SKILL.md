@@ -191,7 +191,7 @@ const router = createActorRouter(createActor(machine), (ctl, send) => ({
 }));
 
 // The router stops itself when Oneput is destroyed.
-router.start(ctl, { onState: (state) => console.log(state) });
+router.start(ctl);
 ```
 
 - `send` sends an event to the actor, with the actor's event types.

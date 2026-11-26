@@ -1,6 +1,6 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
-import type { Send } from '../router.js';
+import type { Send } from '../machine.js';
 
 /** The first screen asks the machine to open the form. */
 export class Welcome implements AppObject {

@@ -23,12 +23,11 @@
       shows. There are no imperative AppObject classes.
     </li>
     <li>
-      The root menu is a view of the top-level machine (<code>router.ts</code>).
+      The top-level machine (<code>machine.ts</code>) has no views. It invokes
+      <code>rootMenu</code>,
+      <code>asyncSearch</code> and <code>katexStub</code> as child machines.
     </li>
-    <li>
-      Each other screen is an invoked child machine. When it finishes, the parent goes back to the
-      root menu.
-    </li>
+    <li>When a demo finishes, the parent goes back to the root menu.</li>
     <li>Screens: async search, and a KaTeX stub.</li>
   </ul>
   <p aria-live="polite"><small>Current state: <strong>{state}</strong></small></p>

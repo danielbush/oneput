@@ -1,6 +1,6 @@
 # Routed demo
 
-The `/routed` demo shows a `ROUTED_MODE` app driven by a single XState machine and `routeMachine`. `createRouter` in `router.ts` makes the machine (`flowMachine` below) and its actor, and returns a handle that has no XState types. Each routed AppObject only sends events to the machine; the machine decides which screen to show.
+The `/routed` demo shows a `ROUTED_MODE` app driven by a single XState machine and `routeMachine`. `machine.ts` is the statechart (`flowMachine` below). `createRouter` in `router.ts` gives it a route map and uses `common/router.ts` to run it, and returns the handle for `_init.ts`. Each routed AppObject only sends events to the machine; the machine decides which screen to show.
 
 ## Patterns demonstrated
 

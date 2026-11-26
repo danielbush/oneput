@@ -19,7 +19,7 @@
   <p>Open the menu with the button in the corner.</p>
   <ul>
     <li>
-      A small XState machine (<code>router.ts</code>) decides which AppObject Oneput shows.
+      A small XState machine (<code>machine.ts</code>) decides which AppObject Oneput shows.
     </li>
     <li>States: welcome, form (with child states editing and confirm), done, search.</li>
     <li>Each state has one AppObject, in a map with the shape of the machine.</li>

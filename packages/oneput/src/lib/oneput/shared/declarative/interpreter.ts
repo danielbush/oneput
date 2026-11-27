@@ -1,4 +1,5 @@
 import type { Controller } from '../../controllers/controller.js';
+import type { ActionBinding } from '../../lib/bindings.js';
 import type { Pull } from '../../lib/pull.js';
 import type { AppLayoutParams, Menu, MenuItem, UIFlags, UILayout } from '../../types.js';
 import { err, ok, Result } from 'neverthrow';
@@ -31,6 +32,18 @@ function isFrom(value: unknown): value is { $from: string } {
   return typeof value === 'object' && value !== null && '$from' in value;
 }
 type RowEvent = { type: string };
+
+/**
+ * A view's action: what `AppObject.actions` declares, with an event in place
+ * of the function. The adapter sends the event when the machine can take it
+ * (`snapshot.can`); otherwise the action declines, so the key does what the
+ * browser does by default.
+ */
+export type ViewAction<Event extends RowEvent> = {
+  send: Event;
+  /** The key. With no binding, the action uses the key its ID already has, such as SUBMIT's. */
+  binding?: ActionBinding;
+};
 type ViewSettings = Pick<
   UIFlags,
   'enableFilter' | 'enableInputElement' | 'enableMenuItemFocus' | 'clearInputAfterAction'
@@ -376,13 +389,30 @@ export type ViewDef<
   };
   /** The input placeholder: text, or a source that gives text. */
   placeholder?: Text<Source>;
+  /**
+   * The input text, when the machine controls it: text, or a source that
+   * gives text. When it is not the input's text, the adapter sets the input. Keep it equal to the text that `INPUT_CHANGED` gives,
+   * and change it to change the input, for example to clear it after a
+   * submit. With no value, the user alone controls the input.
+   */
+  inputValue?: Text<Source>;
+  /**
+   * Actions by action ID, as `AppObject.actions` declares them. Merged by ID;
+   * a child's action replaces its parent's.
+   */
+  actions?: { [actionId: string]: ViewAction<Event> };
+  /**
+   * The layout's send control (`inputSend`) and the event that it sends. It
+   * is enabled while the machine can take the event.
+   */
+  inputSend?: { send: Event };
   settings?: ViewSettings;
 };
 
 /**
  * The {@link ViewDef} for an AppObject's content (its `slot`, `menu` and
- * `menuItem` registries, see {@link ViewSources}), its layouts and its row
- * events, for the machine's `meta` type:
+ * `menuItem` registries, see {@link ViewSources}), its layouts and the events
+ * that its rows, actions and `inputSend` send, for the machine's `meta` type:
  *
  * ```ts
  * type SearchView = ViewFor<SearchContent, typeof viewLayouts, RowEvent>;
@@ -565,12 +595,15 @@ export function sourceSubscriptions(sources: {
     .map(({ source }) => source);
 }
 
-export type OneputView = {
+export type OneputView<Event extends RowEvent = RowEvent> = {
   /** The named layout and its params. */
   layout: { name: string; create: ViewLayout['create']; params: AppLayoutParams };
   menu: Menu;
   settings: ViewSettings;
   placeholder?: string;
+  inputValue?: string;
+  actions: Record<string, ViewAction<Event>>;
+  inputSend?: { send: Event };
 };
 
 /**
@@ -579,8 +612,8 @@ export type OneputView = {
  * the parent's slots do not apply, and its `params` still do. Params, slots,
  * settings and menu fields merge by key, and a child clears a param with
  * `undefined`; a child's `input` param replaces its parent's whole input kind.
- * A child's `placeholder` replaces its parent's, and `placeholder: undefined`
- * clears it. The layout gets the view's params over its own. List rows keep
+ * A child's `placeholder`, `inputValue` and `inputSend` replace its parent's,
+ * and `undefined` clears them. Actions merge by ID. The layout gets the view's params over its own. List rows keep
  * their order and IDs, including repeats. Fixed rows follow in order of
  * first declaration, with same-ID overrides (see {@link mergeRow}).
  * A name with no source, builder or layout, or a slot that the active layout
@@ -610,7 +643,7 @@ export function renderActiveView<
   sources: ViewSources<NoInfer<Snapshot>, Source, List, NoInfer<Event>, Builders>,
   layouts: Layouts & DeclaredSlots<NoInfer<Snapshot>, NoInfer<Layouts>>,
   { activate }: { activate: (event: Event) => void }
-): Result<OneputView, ViewError> {
+): Result<OneputView<Event>, ViewError> {
   const views = Object.entries(snapshot.getMeta())
     .flatMap(([id, meta]) =>
       meta?.view
@@ -621,6 +654,9 @@ export function renderActiveView<
     .map(({ view }) => view);
   let layoutName: string | undefined;
   let placeholder: ViewDef<Source>['placeholder'];
+  let inputValue: ViewDef<Source>['inputValue'];
+  let inputSend: ViewDef<Source, List, Event>['inputSend'];
+  let actions: Record<string, ViewAction<Event>> = {};
   // The rows are merged by ID below, not with the other menu fields.
   let menu: Omit<NonNullable<ViewDef<Source, List>['menu']>, 'items'> = {};
   let settings: ViewSettings = {};
@@ -632,6 +668,9 @@ export function renderActiveView<
       slots = slotRecord();
     }
     if ('placeholder' in view) placeholder = view.placeholder;
+    if ('inputValue' in view) inputValue = view.inputValue;
+    if ('inputSend' in view) inputSend = view.inputSend;
+    actions = { ...actions, ...view.actions };
     menu = { ...menu, ...view.menu };
     settings = { ...settings, ...view.settings };
     Object.assign(slots, view.slots);
@@ -700,8 +739,9 @@ export function renderActiveView<
     readAll(slots).map(filledOf),
     // The view types give each param a value of its type.
     readAll(params).map(filledOf) as Result<SharedParams, NameError | ReadError>,
-    read(placeholder) as Result<string | undefined, NameError | ReadError>
-  ]).map(([items, values, shared, text]) => ({
+    read(placeholder) as Result<string | undefined, NameError | ReadError>,
+    read(inputValue) as Result<string | undefined, NameError | ReadError>
+  ]).map(([items, values, shared, text, value]) => ({
     layout: {
       name: layoutName,
       create: layout.create,
@@ -709,6 +749,9 @@ export function renderActiveView<
     },
     menu: { id: menuId, focusBehaviour: menu.focusBehaviour, items },
     settings,
-    placeholder: text
+    placeholder: text,
+    inputValue: value,
+    actions,
+    inputSend
   }));
 }

@@ -1,5 +1,5 @@
 import type { Controller } from '../../controllers/controller.js';
-import type { AppObject, Menu } from '../../types.js';
+import type { AppActions, AppLayoutParams, AppObject, Menu } from '../../types.js';
 import {
   sourceSubscriptions,
   renderActiveView,
@@ -51,7 +51,12 @@ function rowKey(menu: Menu) {
  * new menu ID or new row IDs); a redraw of the same rows keeps the focus where
  * the user had it.
  */
-function applyView(ctl: Controller, view: OneputView, rowsChanged: boolean) {
+function applyView(
+  ctl: Controller,
+  view: OneputView,
+  params: AppLayoutParams,
+  rowsChanged: boolean
+) {
   ctl.app.applyFlags({
     enableFilter: view.settings.enableFilter,
     enableInputElement: view.settings.enableInputElement,
@@ -60,8 +65,12 @@ function applyView(ctl: Controller, view: OneputView, rowsChanged: boolean) {
   });
   // The view gives all the params of this AppObject each time. This is the
   // one layout redraw per refresh.
-  ctl.ui.setParams(view.layout.params);
+  ctl.ui.setParams(params);
   ctl.input.setPlaceholder(view.placeholder);
+  // A controlled input: set it only when the machine changed the text.
+  if (view.inputValue !== undefined && view.inputValue !== ctl.input.getInputValue()) {
+    void ctl.input.setInputValue(view.inputValue);
+  }
   // New rows: set the menu now, which runs the view's focus rule. The watch
   // refresh after onRefresh asks for 'none', so it keeps that focus. The same
   // rows: the watch refresh rebuilds them from menu() and keeps the focus.
@@ -79,6 +88,8 @@ function applyView(ctl: Controller, view: OneputView, rowsChanged: boolean) {
  *   changes, switches the layout component when the view's layout changes, and
  *   uses `sources.menuItem.default` for rows without a named builder.
  * - A change of the view's input kind keeps the typed text.
+ * - Actions and the `inputSend` control send their event only while current
+ *   and when the machine can take it; otherwise an action declines.
  * - Not supported: editor and claim views, and menu focus, menu update, and
  *   claim release events.
  */
@@ -185,13 +196,22 @@ function createAppObjectActor<
   const sendIfCurrent = (event: OneputEvent | Event) => {
     if (ctl.app.isCurrent(app)) actor.send(event);
   };
+  /** Send `event` if the machine can take it now. False when it does not. */
+  const accept = (event: OneputEvent | Event) => {
+    if (!ctl.app.isCurrent(app) || !actor.getSnapshot().can(event)) return false;
+    actor.send(event);
+    return true;
+  };
   const back = { type: 'BACK' } as const;
   let menu: Menu = { id: '', items: [] };
+  let actions: AppActions = {};
   let shownLayout: string | undefined;
   let shownRows: string | undefined;
 
   const app: AppObject = {
     menu: () => menu,
+    // A function, so Oneput reads the actions and their keys again on each refresh.
+    actions: () => actions,
     onStart: lifecycle.onStart,
     onSuspend() {
       actor.send({ type: 'SUSPENDED' });
@@ -236,7 +256,24 @@ function createAppObjectActor<
         return;
       }
       menu = rendered.value.menu;
-      const { name, create, params } = rendered.value.layout;
+      actions = Object.fromEntries(
+        Object.entries(rendered.value.actions).map(([id, { send, binding }]) => [
+          id,
+          { action: () => accept(send), binding }
+        ])
+      );
+      const { name, create } = rendered.value.layout;
+      const send = rendered.value.inputSend?.send;
+      const params: AppLayoutParams =
+        send === undefined
+          ? rendered.value.layout.params
+          : {
+              ...rendered.value.layout.params,
+              inputSend: {
+                run: () => void accept(send),
+                enabled: () => actor.getSnapshot().can(send)
+              }
+            };
       if (name !== shownLayout) {
         // Show the component; applyView sets its params. A child inherits it,
         // and Oneput shows it again when this AppObject resumes.
@@ -244,7 +281,7 @@ function createAppObjectActor<
         shownLayout = name;
       }
       const rows = rowKey(rendered.value.menu);
-      applyView(ctl, rendered.value, rows !== shownRows);
+      applyView(ctl, rendered.value, params, rows !== shownRows);
       shownRows = rows;
     }
   };

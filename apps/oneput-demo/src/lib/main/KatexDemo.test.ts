@@ -1,39 +1,23 @@
 // @vitest-environment jsdom
 import { describe, expect, test } from 'vitest';
 import { notifier } from '@oneput/oneput';
-import { DemoDocument, KatexFormula, KatexPreview } from './KatexDemo.js';
+import { DemoDocument } from '../shared/katex/katex.js';
+import { KatexFormula, KatexPreview } from './KatexDemo.js';
 
-describe('KaTeX content boundary', () => {
-  test('append preserves old nodes', () => {
-    // arrange
-    const root = document.createElement('div');
-    const existing = document.createElement('button');
-    root.append(existing);
-    const formula = new KatexFormula(DemoDocument.createNull(root));
-    formula.setSource('x^2');
-
-    // act
-    const inserted = formula.insert();
-
-    // assert
-    expect(inserted).toBe(true);
-    expect(root.firstChild).toBe(existing);
-    expect(root.querySelector('p .katex')).not.toBeNull();
-    expect(root.querySelector('math')).not.toBeNull();
-  });
-
-  test('display output', () => {
+describe('KatexFormula', () => {
+  test('insert appends and starts a new formula', () => {
     // arrange
     const root = document.createElement('div');
     const formula = new KatexFormula(DemoDocument.createNull(root), true);
     formula.setSource('x');
 
     // act
-    formula.insert();
+    const inserted = formula.insert();
 
     // assert
+    expect(inserted).toBe(true);
     expect(root.querySelector('.katex-display')).not.toBeNull();
-    expect(root.querySelector('p')).toBeNull();
+    expect(formula.current).toMatchObject({ source: '', preview: null, canInsert: false });
   });
 
   test('preview follows source and clears', () => {
@@ -86,39 +70,18 @@ describe('KaTeX content boundary', () => {
     stop();
   });
 
-  test.each([
-    String.raw`\href{javascript:alert(1)}{x}`,
-    String.raw`\htmlStyle{background:url(https://example.com)}{x}`,
-    String.raw`\includegraphics{https://example.com/pixel}`
-  ])('trust stays off: %s', (source) => {
+  test('invalid source does not insert', () => {
     // arrange
     const root = document.createElement('div');
     const formula = new KatexFormula(DemoDocument.createNull(root));
-    formula.setSource(source);
+    formula.setSource('x^');
 
     // act
-    formula.insert();
+    const inserted = formula.insert();
 
     // assert
-    expect(root.querySelector('a, img, script, [onerror], [onload]')).toBeNull();
-    expect(root.querySelector('[style*="url("]')).toBeNull();
+    expect(inserted).toBe(false);
+    expect(formula.current.error).toBeDefined();
+    expect(root.childNodes).toHaveLength(0);
   });
-
-  test.each([String.raw`\def\a{\a}\a`, 'x'.repeat(4097), 'x+'.repeat(1000)])(
-    'refuses unsafe or large input: %s',
-    (source) => {
-      // arrange
-      const root = document.createElement('div');
-      const formula = new KatexFormula(DemoDocument.createNull(root));
-      formula.setSource(source);
-
-      // act
-      const inserted = formula.insert();
-
-      // assert
-      expect(inserted).toBe(false);
-      expect(formula.current.error).toBeDefined();
-      expect(root.childNodes).toHaveLength(0);
-    }
-  );
 });

@@ -5,15 +5,14 @@
  * PROVIDER_WHEN in `packages/oneput/docs/CONCEPTS.md`):
  *
  * - `KatexFormula` is the model: the app logic. It does not know about Oneput.
- *   It writes to the page only through `DemoDocument`.
- * - `DemoDocument` is the infrastructure wrapper for the page (nullables).
+ *   It compiles with `renderFormula` and writes to the page only through
+ *   `DemoDocument` (both in `../shared/katex/`).
  * - `KatexDemo` is the AppObject: the UI adapter. It shows the model's state
  *   and calls the model on user events. It holds no rules.
  *
- * These parts share one file because the demo is small.
+ * The model and the AppObject share one file because the demo is small.
  */
 import type { Controller } from '@oneput/oneput';
-import katex from 'katex';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { divider, menuItem } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
@@ -23,81 +22,8 @@ import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.
 import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
 import { icons } from '../common/icons.js';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
-import './KatexDemo.css';
-import { insertSafeHtml, sanitiseHtml, type SafeHtml } from '@oneput/safe-html';
-import { err, type Result } from 'neverthrow';
-
-/**
- * Checks formula output and inserts accepted formulas into the page.
- *
- * Infrastructure wrapper: `create()` appends to `#katex-demo`. `createNull()`
- * appends to a detached root. Tests can supply a root and read its DOM.
- */
-export class DemoDocument {
-  static create() {
-    return new DemoDocument(document.getElementById('katex-demo')!);
-  }
-
-  static createNull(
-    root = document.createElement('div'),
-    { sanitiseErrors = [] }: { sanitiseErrors?: (Error | null)[] } = {}
-  ) {
-    return new DemoDocument(root, [...sanitiseErrors]);
-  }
-
-  constructor(
-    private root: HTMLElement,
-    private sanitiseErrors: (Error | null)[] = []
-  ) {}
-
-  /** Check output before the model publishes it to subscribers. */
-  prepare(output: string): Result<SafeHtml, Error> {
-    const refusal = this.sanitiseErrors.shift();
-    return refusal ? err(refusal) : sanitiseHtml(output, 'math');
-  }
-
-  append(formula: SafeHtml, displayMode: boolean) {
-    const output = this.root.ownerDocument.createElement('div');
-    insertSafeHtml(output, formula);
-    const nodes = this.root.ownerDocument.createDocumentFragment();
-    nodes.append(...output.childNodes);
-    if (displayMode) this.root.append(nodes);
-    else {
-      const paragraph = this.root.ownerDocument.createElement('p');
-      paragraph.append(nodes);
-      this.root.append(paragraph);
-    }
-  }
-}
-
-/** The result of compiling katex source. */
-type RenderResult =
-  | { empty: true } // nothing typed
-  | { html: SafeHtml } // valid katex
-  | { error: string }; // invalid katex
-
-/**
- * Compile bounded source with fixed options. Store only accepted output.
- */
-function renderToString(source: string, displayMode: boolean, doc: DemoDocument): RenderResult {
-  if (source.length > 4096) return { error: 'Formula source is too large.' };
-  if (source.trim() === '') return { empty: true };
-  try {
-    const output = katex.renderToString(source, {
-      displayMode,
-      throwOnError: true,
-      trust: false,
-      strict: 'error',
-      maxExpand: 1000,
-      maxSize: 20
-    });
-    if (output.length > 200000) return { error: 'Formula output is too large.' };
-    const content = doc.prepare(output);
-    return content.isErr() ? { error: content.error.message } : { html: content.value };
-  } catch (err) {
-    return { error: (err as Error).message };
-  }
-}
+import type { SafeHtml } from '@oneput/safe-html';
+import { DemoDocument, paintPreview, renderFormula } from '../shared/katex/katex.js';
 
 type FormulaState = { source: string; displayMode: boolean };
 
@@ -143,7 +69,7 @@ export class KatexFormula {
   ) {
     this.state = writable({ source: '', displayMode });
     this.view = derived(this.state, ({ source, displayMode }) => {
-      const compiled = renderToString(source, displayMode, this.doc);
+      const compiled = renderFormula(source, displayMode, this.doc);
       if ('empty' in compiled) this.lastValid = null;
       else if ('html' in compiled) this.lastValid = compiled.html;
       return {
@@ -173,12 +99,8 @@ export class KatexFormula {
   /**
    * Put the formula in the document, then start a new, empty one.
    *
-   * Returns false, and does nothing, when `canInsert` is false.
-   *
-   * Display mode gives a block formula in a `.katex-display` wrapper, which
-   * katex.css puts on its own line and centers. Thus we do not put it in a
-   * paragraph. Inline mode gives a formula that flows with text, so a
-   * paragraph is correct.
+   * Returns false, and does nothing, when `canInsert` is false. See
+   * {@link DemoDocument.append} for display mode.
    */
   insert(): boolean {
     const { canInsert, displayMode, preview } = this.current;
@@ -193,11 +115,7 @@ export class KatexFormula {
 export class KatexPreview {
   static onMount(formula: KatexFormula) {
     return (node: HTMLElement, { pull }: MountContext) => {
-      const paint = () => {
-        const current = formula.current.preview;
-        if (current) insertSafeHtml(node, current);
-        else node.textContent = '(preview)';
-      };
+      const paint = () => paintPreview(node, formula.current.preview);
       const offFormula = formula.subscribe(paint);
       const offPull = pull.subscribe(paint);
       return () => {
@@ -320,7 +238,7 @@ export class KatexDemo implements AppObject {
         // limits above and below the operator.
         // INPUT_ROW: focusable, with no action (see onMenuItemFocus). Its own
         // `class` gives it its own focus style (CUSTOM_ROW_FOCUS, see
-        // KatexDemo.css).
+        // shared/katex/katex.css).
         menuItem({
           id: PREVIEW_ID,
           type: 'vflex',

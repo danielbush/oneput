@@ -202,6 +202,77 @@ describe('Controller', () => {
     });
   });
 
+  describe('replaceBindings', () => {
+    const modal = { OK: { bindings: ['Enter'], description: 'OK', action: () => {} } };
+    const app = { SAVE: { bindings: ['$mod+s'], description: 'Save', action: () => {} } };
+    const ctls: Controller[] = [];
+    afterEach(() => ctls.splice(0).forEach((ctl) => ctl._destroy()));
+    const createNull = () => {
+      const ctl = Controller.createNull();
+      ctls.push(ctl);
+      return ctl;
+    };
+
+    it('keeps the modal keys when the app sets bindings', () => {
+      // arrange
+      const ctl = createNull();
+      ctl.keys.replaceBindings(modal);
+
+      // act
+      ctl.keys.setBindings(app);
+
+      // assert
+      expect(Object.keys(ctl.keys.getCurrentBindings())).toEqual(['OK']);
+    });
+
+    it('restores the latest app bindings', () => {
+      // arrange
+      const ctl = createNull();
+      const restore = ctl.keys.replaceBindings(modal);
+      ctl.keys.setBindings(app);
+
+      // act
+      restore();
+
+      // assert
+      expect(ctl.keys.getCurrentBindings()).toHaveProperty('SAVE');
+      expect(ctl.keys.getCurrentBindings()).not.toHaveProperty('OK');
+    });
+
+    it('runs the modal action, not an app action with the same ID', async () => {
+      // arrange
+      const ctl = createNull();
+      const ran: string[] = [];
+      ctl.app.run({ actions: { cancel: { action: () => void ran.push('app cancel') } } });
+      ctl.keys.replaceBindings({
+        cancel: {
+          bindings: ['Escape'],
+          description: 'Cancel',
+          action: () => void ran.push('modal cancel')
+        }
+      });
+
+      // act
+      await ctl.simulateKey('Escape');
+
+      // assert
+      expect(ran).toEqual(['modal cancel']);
+    });
+
+    it('restores the outer modal', () => {
+      // arrange
+      const ctl = createNull();
+      ctl.keys.replaceBindings(modal);
+      const restoreInner = ctl.keys.replaceBindings(app);
+
+      // act
+      restoreInner();
+
+      // assert
+      expect(Object.keys(ctl.keys.getCurrentBindings())).toEqual(['OK']);
+    });
+  });
+
   /**
    * ENTER_SEMANTICS (docs/CONCEPTS.md): who owns the Enter key.
    */

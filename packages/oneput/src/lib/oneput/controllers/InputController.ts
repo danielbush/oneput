@@ -219,6 +219,7 @@ export class InputController {
 
   /**
    * Allows you to set the value in the input programmatically.  Typing by the user will also update it.
+   * The input gets the value exactly, whitespace included; no value clears it.
    *
    * setInputValue writes currentProps.inputValue, a reactive prop bound to
    * the <input>. In the real app the actual DOM <input>.value doesn't update
@@ -230,7 +231,7 @@ export class InputController {
    * .value.length is stale, so the selection range is wrong.
    */
   setInputValue(val?: string) {
-    this.ctl.currentProps.inputValue = val?.trim() || '';
+    this.ctl.currentProps.inputValue = val ?? '';
     if (this.inputElement) {
       this.inputElement.value = this.ctl.currentProps.inputValue;
     }

@@ -6,6 +6,16 @@ import type { AppLayoutParams, UILayout } from '../../../types.js';
 import { StandardLayout } from '../../ui/layout/StandardLayout.js';
 import { StdMenuItemIds } from '../../ui/menuItems/stdMenuItem.js';
 import { waitForState } from '../../test/index.js';
+import {
+  icons,
+  markedView,
+  menuShows,
+  mod,
+  noteView,
+  runNotes,
+  sendButton,
+  sendClick
+} from './notesApp.js';
 import { appObjectActor, attachAppObjectActor } from '../appObjectActor.js';
 import {
   readable,
@@ -21,16 +31,6 @@ import { standardLayout } from '../standardLayout.js';
 import { standardRow } from '../standardRow.js';
 
 type PageEvent = { type: 'NEXT_PAGE' };
-
-const icons = {
-  Close: 'x',
-  Accept: 'check',
-  Reject: 'x',
-  Send: 'send',
-  Back: 'left',
-  MenuToggle: 'down',
-  Busy: 'spin'
-};
 
 type BannerParams = AppLayoutParams & { banner?: string };
 
@@ -119,15 +119,6 @@ afterEach(() => {
   for (const ctl of controllers) ctl._destroy();
   controllers.length = 0;
 });
-
-/** Wait until the menu publishes rows that show `text`. */
-function menuShows(ctl: Controller, text: string) {
-  return waitForState(ctl, 'set-menu-items', {
-    name: `menu rows to show "${text}"`,
-    reached: () => JSON.stringify(ctl.currentProps.menuItems).includes(text),
-    seen: () => `rows [${ctl.currentProps.menuItems?.map((item) => item.id).join(', ') ?? ''}]`
-  });
-}
 
 function runPages(second?: PageView) {
   const ctl = Controller.createNull({ menuOpen: true });
@@ -501,4 +492,140 @@ test('attachAppObjectActor does not send EXITED when externally replaced while a
 
   // assert
   expect(sent).toEqual([{ type: 'STARTED' }]);
+});
+
+test('a view action sends its event when the machine can take it and declines otherwise', async () => {
+  // arrange
+  const { ctl, state, shown } = runNotes(controllers);
+  await shown;
+
+  // act
+  const declined = await ctl.simulateKey('Enter', mod);
+  await ctl.input.typeText('hello');
+  await menuShows(ctl, 'Text: [hello]');
+  const saved = await ctl.simulateKey('Enter', mod);
+  await ctl.simulateKey('m', mod);
+
+  // assert
+  expect(declined.defaultPrevented).toBe(false);
+  expect(saved.defaultPrevented).toBe(true);
+  expect(state.saved).toEqual(['hello']);
+  expect(state.marks).toBe(1);
+});
+
+test('a state change replaces and removes view key bindings', async () => {
+  // arrange
+  const { ctl, state, shown } = runNotes(controllers, ({ marks }) =>
+    marks > 0 ? markedView : noteView
+  );
+  await shown;
+  await ctl.input.typeText('hello');
+  await menuShows(ctl, 'Text: [hello]');
+
+  // act
+  await ctl.simulateKey('m', mod);
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  await ctl.simulateKey('m', mod);
+  await ctl.simulateKey('Enter', mod);
+  const savedByOldKey = [...state.saved];
+  await ctl.simulateKey('s', mod);
+
+  // assert
+  expect(state.marks).toBe(1);
+  expect(savedByOldKey).toEqual([]);
+  expect(state.saved).toEqual(['hello']);
+  expect(ctl.keys.getCurrentBindings()).not.toHaveProperty('MARK');
+});
+
+test('a refresh while a modal is open keeps the modal keys', async () => {
+  // arrange
+  const { ctl, actor, state, shown } = runNotes(controllers);
+  await shown;
+  ctl.confirm({ message: 'Sure?' });
+  const modalKeys = Object.keys(ctl.keys.getCurrentBindings());
+  const refreshed = menuShows(ctl, 'Text: [hello]');
+
+  // act
+  actor.send({ type: 'INPUT_CHANGED', value: 'hello' });
+  await refreshed;
+  const keysAfterRefresh = Object.keys(ctl.keys.getCurrentBindings());
+  await ctl.simulateKey('Escape');
+  await ctl.simulateKey('Enter', mod);
+
+  // assert
+  expect(modalKeys).toEqual(['ok', 'cancel']);
+  expect(keysAfterRefresh).toEqual(['ok', 'cancel']);
+  expect(state.saved).toEqual(['hello']);
+});
+
+test('Escape closes Confirm when the app has a cancel action', async () => {
+  // arrange
+  const { ctl, state, shown } = runNotes(controllers, () => ({
+    ...noteView,
+    actions: { ...noteView.actions, cancel: { send: { type: 'MARK' } } }
+  }));
+  await shown;
+  ctl.confirm({ message: 'Sure?' });
+
+  // act
+  await ctl.simulateKey('Escape');
+
+  // assert
+  expect(state.marks).toBe(0);
+  expect(Object.keys(ctl.keys.getCurrentBindings())).not.toContain('ok');
+});
+
+test('inputSend is enabled while the machine can take its event, and inputValue clears the input', async () => {
+  // arrange
+  const { ctl, state, shown } = runNotes(controllers);
+  await shown;
+  const disabledAtStart = sendButton(ctl).attr?.disabled;
+  await ctl.input.typeText('hello');
+  await menuShows(ctl, 'Text: [hello]');
+  const enabledWithText = !sendButton(ctl).attr?.disabled;
+  const cleared = menuShows(ctl, 'Text: []');
+
+  // act
+  sendClick(ctl)(new MouseEvent('click'));
+  await cleared;
+
+  // assert
+  expect(disabledAtStart).toBe(true);
+  expect(enabledWithText).toBe(true);
+  expect(state.saved).toEqual(['hello']);
+  expect(ctl.input.getInputValue()).toBe('');
+  expect(sendButton(ctl).attr?.disabled).toBe(true);
+});
+
+test('a retained inputSend callback sends nothing when the machine cannot take it or the app is not current', async () => {
+  // arrange
+  const { ctl, actor, state, shown } = runNotes(controllers);
+  await shown;
+  await ctl.input.typeText('hello');
+  await menuShows(ctl, 'Text: [hello]');
+  const retained = sendClick(ctl);
+  actor.send({ type: 'INPUT_CHANGED', value: '' });
+
+  // act
+  retained(new MouseEvent('click'));
+  actor.send({ type: 'INPUT_CHANGED', value: 'again' });
+  ctl.app.run({ layout: { layout: (c) => StandardLayout.create(c, {}, icons), params: {} } });
+  retained(new MouseEvent('click'));
+
+  // assert
+  expect(state.saved).toEqual([]);
+});
+
+test('a controlled inputValue keeps its whitespace', async () => {
+  // arrange
+  const { ctl, actor, shown } = runNotes(controllers);
+  await shown;
+  const shownSpaced = menuShows(ctl, 'Text: [ x ]');
+
+  // act
+  actor.send({ type: 'INPUT_CHANGED', value: ' x ' });
+  await shownSpaced;
+
+  // assert
+  expect(ctl.input.getInputValue()).toBe(' x ');
 });

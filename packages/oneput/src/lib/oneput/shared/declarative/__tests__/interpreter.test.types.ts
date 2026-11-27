@@ -240,6 +240,22 @@ const flagTitle: PlainView = { params: { menuTitle: { $from: 'flag' } } };
 // @ts-expect-error An affordance is a function, so it is not a view param.
 const affordance: PlainView = { params: { inputSend: { run: () => {} } } };
 
+// Actions and the send control give an event of the view, not a function.
+type SaveView = ViewDef<Sources, never, { type: 'SAVE' }, Rows, Layouts>;
+const eventControls: SaveView = {
+  actions: {
+    SAVE: { send: { type: 'SAVE' }, binding: { bindings: ['$mod+s'], description: 'S' } }
+  },
+  inputSend: { send: { type: 'SAVE' } },
+  inputValue: { $from: 'known' }
+};
+// @ts-expect-error 'OTHER' is not an event of the view.
+const otherAction: SaveView = { actions: { SAVE: { send: { type: 'OTHER' } } } };
+// @ts-expect-error The send control gives an event, not a function.
+const sendFunction: SaveView = { inputSend: { run: () => {} } };
+// @ts-expect-error 'flag' gives a boolean; the input value is text.
+const flagInputValue: SaveView = { inputValue: { $from: 'flag' } };
+
 // A literal cannot carry a '$from' key, not even an optional one: it would read as a source.
 type Tagged = { label: string; $from?: string };
 const taggedLayouts = {
@@ -454,3 +470,4 @@ void [flagSourceForText, inheritedWrongLiteral, flagRowText, builderRowDetail, f
 void [textRow, registryTypes, wrongSource, rowFieldParams];
 void [missingParam, noParams, missingDefaultParam, activateField, taggedLiteral, fromData];
 void [sharedParams, textBusy, flagTitle, affordance, viewFor, fromViewFor];
+void [eventControls, otherAction, sendFunction, flagInputValue];

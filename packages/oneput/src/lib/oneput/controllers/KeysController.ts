@@ -38,6 +38,11 @@ import { OneputActionProvider } from '../shared/actions/OneputActionProvider.js'
  * on top of defaults. replaceBindings() fully replaces all bindings and
  * returns a restore callback (for modals). resetBindings() restores to
  * just the defaults.
+ *
+ * There are two layers. The app layer holds what setBindings() and
+ * resetBindings() give. A modal layer, from replaceBindings(), hides it while
+ * the modal is open. setBindings() during a modal changes only the app layer,
+ * thus the modal keeps its keys, and the change applies when the modal closes.
  */
 export class KeysController {
   public static create(ctl: Controller) {
@@ -53,7 +58,12 @@ export class KeysController {
     private defaultBindings: KeyBindingMap = OneputActionProvider.create(ctl).getBindings()
   ) {}
 
+  /** The active bindings: the innermost modal layer's, or else the app layer's. */
   private currentBindings: KeyBindingMap = {};
+  /** The defaults and the current AppObject's actions. */
+  private appBindings: KeyBindingMap = {};
+  /** The open modals' bindings, innermost last. */
+  private modalLayers: { bindings: KeyBindingMap }[] = [];
   private unsubscribe: () => void = () => {};
   private keysDisabled = false;
 
@@ -78,7 +88,12 @@ export class KeysController {
       // The action runs first so that it can decline: an action that returns
       // false did not handle the key, thus we leave the default alone (e.g.
       // DO_ACTION with no focused menu item lets a textarea write a newline).
-      const handled = this.ctl.app.handleKeyAction(match.actionId, evt, match.kb.action);
+      // A modal layer has the keys alone: its own action runs, never an
+      // AppObject action with the same ID.
+      const handled =
+        this.modalLayers.length > 0
+          ? match.kb.action?.(this.ctl, { source: 'keyboard', event: evt })
+          : this.ctl.app.handleKeyAction(match.actionId, evt, match.kb.action);
       // });
       if (handled !== false && (match.kb.preventDefault ?? true)) {
         evt.preventDefault();
@@ -152,6 +167,22 @@ export class KeysController {
     this.unsubscribe();
     this.unsubscribe = () => {};
     this.currentBindings = {};
+    this.appBindings = {};
+    this.modalLayers = [];
+  }
+
+  /** Register the innermost modal layer, or the app layer when no modal is open. */
+  private applyBindings() {
+    this.currentBindings =
+      this.modalLayers[this.modalLayers.length - 1]?.bindings ?? this.appBindings;
+    this.registerKeys(this.currentBindings);
+    this.ctl.events.emit({ type: 'bindings-change', payload: { bindings: this.currentBindings } });
+  }
+
+  /** Set the app layer. While a modal is open, the modal keeps the keys. */
+  private setAppBindings(bindings: KeyBindingMap) {
+    this.appBindings = bindings;
+    if (this.modalLayers.length === 0) this.applyBindings();
   }
 
   /**
@@ -179,30 +210,24 @@ export class KeysController {
     //     `Binding "${c.key}" on action "${c.overrideActionId}" overrides default action "${c.defaultActionId}"`
     //   );
     // }
-    this.currentBindings = finalBindings.keyBindingMap;
-    this.registerKeys(this.currentBindings);
-    this.ctl.events.emit({ type: 'bindings-change', payload: { bindings: this.currentBindings } });
+    this.setAppBindings(finalBindings.keyBindingMap);
   }
 
   /**
-   * Fully replaces all bindings (defaults are NOT included). Returns a
-   * callback that restores the previous bindings.
+   * Fully replaces all bindings (defaults are NOT included) with a modal
+   * layer. Returns a callback that removes the layer: the next modal layer,
+   * or else the current app layer, then has the keys.
    *
    * Use this for modals like Alert/Confirm that need exclusive control
    * over key handling.
    */
   replaceBindings(bindings: KeyBindingMap): () => void {
-    const savedBindings = this.currentBindings;
-    this.currentBindings = bindings;
-    this.registerKeys(this.currentBindings);
-    this.ctl.events.emit({ type: 'bindings-change', payload: { bindings: this.currentBindings } });
+    const layer = { bindings };
+    this.modalLayers.push(layer);
+    this.applyBindings();
     return () => {
-      this.currentBindings = savedBindings;
-      this.registerKeys(this.currentBindings);
-      this.ctl.events.emit({
-        type: 'bindings-change',
-        payload: { bindings: this.currentBindings }
-      });
+      this.modalLayers = this.modalLayers.filter((open) => open !== layer);
+      this.applyBindings();
     };
   }
 
@@ -210,8 +235,6 @@ export class KeysController {
    * Reset bindings to default values or nothing if no default values are set.
    */
   resetBindings() {
-    this.currentBindings = { ...this.defaultBindings };
-    this.registerKeys(this.currentBindings);
-    this.ctl.events.emit({ type: 'bindings-change', payload: { bindings: this.currentBindings } });
+    this.setAppBindings({ ...this.defaultBindings });
   }
 }

@@ -2,11 +2,20 @@ import { afterEach, expect, test } from 'vitest';
 import { Controller } from '../../../controllers/controller.js';
 import { fchild, hflex } from '../../../lib/builder.js';
 import { cell } from '../../../lib/pull.js';
-import { walk } from '../../../lib/utils.js';
-import type { AppLayoutParams, FChildParams, FlexParams, UILayout } from '../../../types.js';
+import type { AppLayoutParams, UILayout } from '../../../types.js';
 import { StandardLayout } from '../../ui/layout/StandardLayout.js';
 import { StdMenuItemIds } from '../../ui/menuItems/stdMenuItem.js';
 import { waitForState } from '../../test/index.js';
+import {
+  icons,
+  markedView,
+  menuShows,
+  mod,
+  noteView,
+  runNotes,
+  sendButton,
+  sendClick
+} from './notesApp.js';
 import { appObjectActor, attachAppObjectActor } from '../appObjectActor.js';
 import {
   readable,
@@ -22,16 +31,6 @@ import { standardLayout } from '../standardLayout.js';
 import { standardRow } from '../standardRow.js';
 
 type PageEvent = { type: 'NEXT_PAGE' };
-
-const icons = {
-  Close: 'x',
-  Accept: 'check',
-  Reject: 'x',
-  Send: 'send',
-  Back: 'left',
-  MenuToggle: 'down',
-  Busy: 'spin'
-};
 
 type BannerParams = AppLayoutParams & { banner?: string };
 
@@ -120,15 +119,6 @@ afterEach(() => {
   for (const ctl of controllers) ctl._destroy();
   controllers.length = 0;
 });
-
-/** Wait until the menu publishes rows that show `text`. */
-function menuShows(ctl: Controller, text: string) {
-  return waitForState(ctl, 'set-menu-items', {
-    name: `menu rows to show "${text}"`,
-    reached: () => JSON.stringify(ctl.currentProps.menuItems).includes(text),
-    seen: () => `rows [${ctl.currentProps.menuItems?.map((item) => item.id).join(', ') ?? ''}]`
-  });
-}
 
 function runPages(second?: PageView) {
   const ctl = Controller.createNull({ menuOpen: true });
@@ -504,119 +494,9 @@ test('attachAppObjectActor does not send EXITED when externally replaced while a
   expect(sent).toEqual([{ type: 'STARTED' }]);
 });
 
-// tinykeys maps $mod to Meta on a mac and to Control elsewhere.
-const mod = /Mac|iPod|iPhone|iPad/.test(navigator.platform) ? { metaKey: true } : { ctrlKey: true };
-
-type NoteEvent = { type: 'SAVE' } | { type: 'MARK' };
-type NoteView = ViewDef<{ text: string; label: string }, never, NoteEvent, Rows, Layouts>;
-type NoteState = { text: string; saved: string[]; marks: number };
-
-const noteMenu: NoteView['menu'] = {
-  id: 'note',
-  items: [{ id: 'label', params: { text: { $from: 'label' } } }]
-};
-const noteView: NoteView = {
-  layout: 'standard',
-  inputValue: { $from: 'text' },
-  actions: {
-    SAVE: { send: { type: 'SAVE' }, binding: { bindings: ['$mod+Enter'], description: 'Save' } },
-    MARK: { send: { type: 'MARK' }, binding: { bindings: ['$mod+m'], description: 'Mark' } }
-  },
-  inputSend: { send: { type: 'SAVE' } },
-  menu: noteMenu
-};
-/** After a mark: SAVE moves to another key, and MARK is gone. */
-const markedView: NoteView = {
-  layout: 'standard',
-  actions: {
-    SAVE: { send: { type: 'SAVE' }, binding: { bindings: ['$mod+s'], description: 'Save' } }
-  },
-  menu: noteMenu
-};
-
-/**
- * A note editor. The machine can take SAVE only with text; SAVE stores the
- * text and clears it. MARK counts, and `viewOf` can show another view after it.
- */
-function createNoteActor(viewOf: (state: NoteState) => NoteView) {
-  const state: NoteState = { text: '', saved: [], marks: 0 };
-  const listeners = new Set<() => void>();
-  const snapshot = () => ({
-    machine: { getStateNodeById: () => ({ path: [] }) },
-    getMeta: () => ({ root: { view: viewOf(state) } }),
-    can: (event: OneputEvent | NoteEvent) => event.type !== 'SAVE' || state.text !== '',
-    context: { text: state.text }
-  });
-  let current = snapshot();
-  const actor = {
-    start() {},
-    stop() {},
-    send(event: OneputEvent | NoteEvent) {
-      if (event.type === 'INPUT_CHANGED') state.text = event.value;
-      else if (event.type === 'SAVE') {
-        state.saved.push(state.text);
-        state.text = '';
-      } else if (event.type === 'MARK') state.marks++;
-      else return;
-      current = snapshot();
-      listeners.forEach((listener) => listener());
-    },
-    getSnapshot: () => current,
-    subscribe(onChange: () => void) {
-      listeners.add(onChange);
-      return { unsubscribe: () => listeners.delete(onChange) };
-    }
-  };
-  return { actor, state };
-}
-
-function runNotes(viewOf: (state: NoteState) => NoteView = () => noteView) {
-  const ctl = Controller.createNull({ menuOpen: true });
-  controllers.push(ctl);
-  const home = {
-    layout: {
-      layout: (c: Controller, params: object) => StandardLayout.create(c, params, icons),
-      params: {}
-    }
-  };
-  ctl.app.run(home);
-  const { actor, state } = createNoteActor(viewOf);
-  type Note = ReturnType<typeof actor.getSnapshot>;
-  const app = appObjectActor(
-    ctl,
-    actor,
-    {
-      slot: {
-        text: ({ context }: Note) => context.text,
-        label: ({ context }: Note) => `Text: [${context.text}]`
-      },
-      menu: {},
-      menuItem: builders
-    },
-    layouts
-  );
-  const shown = menuShows(ctl, 'Text: []');
-  ctl.app.run(app);
-  return { ctl, actor, state, shown };
-}
-
-function sendButton(ctl: Controller) {
-  let found: FChildParams | undefined;
-  walk(ctl.currentProps.inputUI?.right as FlexParams, (child) => {
-    if (child.type === 'fchild' && child.attr?.title === 'Send') found = child as FChildParams;
-  });
-  if (!found) throw new Error('no Send button');
-  return found;
-}
-
-/** The Send button's click handler. The button has one only while enabled. */
-function sendClick(ctl: Controller) {
-  return sendButton(ctl).attr?.onclick as (event: Event) => void;
-}
-
 test('a view action sends its event when the machine can take it and declines otherwise', async () => {
   // arrange
-  const { ctl, state, shown } = runNotes();
+  const { ctl, state, shown } = runNotes(controllers);
   await shown;
 
   // act
@@ -635,7 +515,9 @@ test('a view action sends its event when the machine can take it and declines ot
 
 test('a state change replaces and removes view key bindings', async () => {
   // arrange
-  const { ctl, state, shown } = runNotes(({ marks }) => (marks > 0 ? markedView : noteView));
+  const { ctl, state, shown } = runNotes(controllers, ({ marks }) =>
+    marks > 0 ? markedView : noteView
+  );
   await shown;
   await ctl.input.typeText('hello');
   await menuShows(ctl, 'Text: [hello]');
@@ -657,7 +539,7 @@ test('a state change replaces and removes view key bindings', async () => {
 
 test('a refresh while a modal is open keeps the modal keys', async () => {
   // arrange
-  const { ctl, actor, state, shown } = runNotes();
+  const { ctl, actor, state, shown } = runNotes(controllers);
   await shown;
   ctl.confirm({ message: 'Sure?' });
   const modalKeys = Object.keys(ctl.keys.getCurrentBindings());
@@ -678,7 +560,7 @@ test('a refresh while a modal is open keeps the modal keys', async () => {
 
 test('Escape closes Confirm when the app has a cancel action', async () => {
   // arrange
-  const { ctl, state, shown } = runNotes(() => ({
+  const { ctl, state, shown } = runNotes(controllers, () => ({
     ...noteView,
     actions: { ...noteView.actions, cancel: { send: { type: 'MARK' } } }
   }));
@@ -695,7 +577,7 @@ test('Escape closes Confirm when the app has a cancel action', async () => {
 
 test('inputSend is enabled while the machine can take its event, and inputValue clears the input', async () => {
   // arrange
-  const { ctl, state, shown } = runNotes();
+  const { ctl, state, shown } = runNotes(controllers);
   await shown;
   const disabledAtStart = sendButton(ctl).attr?.disabled;
   await ctl.input.typeText('hello');
@@ -717,7 +599,7 @@ test('inputSend is enabled while the machine can take its event, and inputValue 
 
 test('a retained inputSend callback sends nothing when the machine cannot take it or the app is not current', async () => {
   // arrange
-  const { ctl, actor, state, shown } = runNotes();
+  const { ctl, actor, state, shown } = runNotes(controllers);
   await shown;
   await ctl.input.typeText('hello');
   await menuShows(ctl, 'Text: [hello]');
@@ -736,7 +618,7 @@ test('a retained inputSend callback sends nothing when the machine cannot take i
 
 test('a controlled inputValue keeps its whitespace', async () => {
   // arrange
-  const { ctl, actor, shown } = runNotes();
+  const { ctl, actor, shown } = runNotes(controllers);
   await shown;
   const shownSpaced = menuShows(ctl, 'Text: [ x ]');
 

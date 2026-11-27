@@ -256,6 +256,15 @@ const sendFunction: SaveView = { inputSend: { run: () => {} } };
 // @ts-expect-error 'flag' gives a boolean; the input value is text.
 const flagInputValue: SaveView = { inputValue: { $from: 'flag' } };
 
+// An action with no event declines, so its key does what the browser does.
+const declined: SaveView = { actions: { DO_ACTION: {} } };
+// Focus intent is a literal: the input is focused or blurred, and the menu names a row ID.
+const focusIntent: SaveView = { inputFocus: 'blurred', menu: { focusItem: 'row' } };
+// @ts-expect-error The input focus is 'focused' or 'blurred', not a boolean.
+const booleanFocus: SaveView = { inputFocus: true };
+// @ts-expect-error The input focus is a literal, not a source.
+const sourceFocus: SaveView = { inputFocus: { $from: 'known' } };
+
 // A literal cannot carry a '$from' key, not even an optional one: it would read as a source.
 type Tagged = { label: string; $from?: string };
 const taggedLayouts = {
@@ -470,4 +479,13 @@ void [flagSourceForText, inheritedWrongLiteral, flagRowText, builderRowDetail, f
 void [textRow, registryTypes, wrongSource, rowFieldParams];
 void [missingParam, noParams, missingDefaultParam, activateField, taggedLiteral, fromData];
 void [sharedParams, textBusy, flagTitle, affordance, viewFor, fromViewFor];
-void [eventControls, otherAction, sendFunction, flagInputValue];
+void [
+  eventControls,
+  otherAction,
+  sendFunction,
+  flagInputValue,
+  focusIntent,
+  booleanFocus,
+  sourceFocus,
+  declined
+];

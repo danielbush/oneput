@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { Controller, type MenuItem } from '@oneput/oneput';
 import { appObjectActor } from '@oneput/oneput/shared/declarative/appObjectActor.js';
-import { waitForState } from '@oneput/oneput/shared/test/index.js';
+import { swapInputElement, waitForState } from '@oneput/oneput/shared/test/index.js';
 import type { FChildParams } from '@oneput/oneput';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createActor } from 'xstate';
@@ -22,6 +22,13 @@ afterEach(() => {
 
 function row(ctl: Controller, id: string): MenuItem | undefined {
   return ctl.currentProps.menuItems?.find((item) => item.id === id);
+}
+
+/** Type a valid formula, so the Insert row is enabled and can get focus. */
+async function typeFormula(ctl: Controller) {
+  const valid = viewShows(ctl, 'a formula', () => preview(ctl)?.htmlContent !== undefined);
+  await ctl.input.typeText('x');
+  await valid;
 }
 
 /** The preview row's formula child. */
@@ -69,11 +76,50 @@ function viewShows(ctl: Controller, name: string, reached: () => boolean) {
   });
 }
 
-/** Run the KaTeX machine as an AppObject, with a page root to insert into. */
-async function runKatex() {
+/** The ID of the row with menu focus. */
+function focusedRow(ctl: Controller) {
+  const index = ctl.currentProps.menuItemFocus?.[0] ?? -1;
+  return ctl.currentProps.menuItems?.[index]?.id;
+}
+
+/** Wait until the textarea has native focus, or has lost it. */
+function inputFocused(ctl: Controller, focused: boolean) {
+  return waitForState(ctl, 'input-focus-change', {
+    name: focused ? 'the textarea to have focus' : 'the textarea to lose focus',
+    reached: () => ctl.input.isFocused === focused,
+    seen: () => `focused ${ctl.input.isFocused}`
+  });
+}
+
+/** Wait until the row `id` has menu focus. */
+function rowFocused(ctl: Controller, id: string) {
+  return waitForState(ctl, 'menu-item-focus', {
+    name: `row "${id}" to have menu focus`,
+    reached: () => focusedRow(ctl) === id,
+    seen: () => `row "${focusedRow(ctl)}"`
+  });
+}
+
+/** Press $mod+`key` (j: next, k: previous) until the row `id` has menu focus. */
+async function focusByKeyboard(ctl: Controller, id: string, key: 'j' | 'k' = 'j') {
+  for (let step = 0; step < 4 && focusedRow(ctl) !== id; step++) {
+    await ctl.simulateKey(key, mod);
+  }
+}
+
+/**
+ * Run the KaTeX machine as an AppObject, with a page root to insert into. The
+ * input is in the document, so it can get native focus.
+ */
+async function runKatex({ swapToTextarea = false } = {}) {
   const ctl = Controller.createNull({ menuOpen: true });
   controllers.push(ctl);
+  const input = ctl.currentProps.inputElement as HTMLElement;
+  document.body.appendChild(input);
+  ctl.onDestroy(() => input.remove());
   ctl.app.run({ layout: { layout: Layout.create, params: {} } });
+  // The root menu's single-line input has focus.
+  input.focus();
   const page = document.createElement('div');
   const actor = createActor(createKatexMachine(DemoDocument.createNull(page)));
   const shown = viewShows(
@@ -82,7 +128,17 @@ async function runKatex() {
     () => preview(ctl)?.textContent === '(preview)'
   );
   ctl.app.run(appObjectActor(ctl, actor, createContent(), viewLayouts));
+  // The view sets the rows, then queues the textarea focus.
   await shown;
+  if (swapToTextarea) {
+    // As in a browser: the textarea replaces the focused input before the
+    // queued focus runs, and the old input's removal blurs it.
+    const focused = inputFocused(ctl, true);
+    swapInputElement(ctl, 'textarea');
+    await focused;
+  }
+  // Let the queued focus run, thus it cannot reach the test's steps.
+  await new Promise((resolve) => setTimeout(resolve, 0));
   return { ctl, page };
 }
 
@@ -153,5 +209,124 @@ describe('declarative KaTeX AppObject', () => {
     expect(page.querySelector('.katex-display')).not.toBeNull();
     expect(page.querySelector('p')).toBeNull();
     expect(ctl.input.getInputValue()).toBe('');
+  });
+});
+
+describe('declarative KaTeX focus (INPUT_ROW)', () => {
+  it('keeps typing when the textarea replaces the focused input at start', async () => {
+    // arrange
+    const { ctl } = await runKatex({ swapToTextarea: true });
+    const changes: boolean[] = [];
+    ctl.input.subscribeFocusChange((focused) => changes.push(focused));
+
+    // act
+    for (let task = 0; task < 3; task++) await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // assert
+    expect(changes).toEqual([]);
+    expect(ctl.currentProps.inputElement?.tagName).toBe('TEXTAREA');
+    expect(ctl.input.isFocused).toBe(true);
+    expect(focusedRow(ctl)).toBe('katex-preview');
+  });
+
+  it('starts with the textarea and the preview row focused', async () => {
+    // arrange
+    const { ctl } = await runKatex();
+
+    // assert
+    expect(ctl.input.isFocused).toBe(true);
+    expect(focusedRow(ctl)).toBe('katex-preview');
+  });
+
+  it('blurs the textarea on keyboard focus of Insert and focuses it again on the preview', async () => {
+    // arrange
+    const { ctl } = await runKatex();
+    await typeFormula(ctl);
+    const blurred = inputFocused(ctl, false);
+    await focusByKeyboard(ctl, 'katex-insert');
+    await blurred;
+    const rowAfterMove = focusedRow(ctl);
+    const refocused = inputFocused(ctl, true);
+
+    // act
+    await focusByKeyboard(ctl, 'katex-preview', 'k');
+    await refocused;
+
+    // assert
+    expect(rowAfterMove).toBe('katex-insert');
+    expect(focusedRow(ctl)).toBe('katex-preview');
+    expect(ctl.input.isFocused).toBe(true);
+  });
+
+  it('moves menu focus back to the preview when the user focuses the textarea', async () => {
+    // arrange
+    const { ctl } = await runKatex();
+    await typeFormula(ctl);
+    const blurred = inputFocused(ctl, false);
+    await focusByKeyboard(ctl, 'katex-insert');
+    await blurred;
+    const onPreview = rowFocused(ctl, 'katex-preview');
+
+    // act
+    (ctl.currentProps.inputElement as HTMLElement).focus();
+    await onPreview;
+
+    // assert
+    expect(focusedRow(ctl)).toBe('katex-preview');
+  });
+
+  it('writes a newline on Enter while typing, also with Insert under the pointer', async () => {
+    // arrange
+    const { ctl, page } = await runKatex();
+    await typeFormula(ctl);
+    const index = ctl.currentProps.menuItems?.findIndex((item) => item.id === 'katex-insert');
+    ctl.menu.focusMenuItemByIndex(index as number, false, 'pointer');
+    const rowUnderPointer = focusedRow(ctl);
+
+    // act
+    const enter = await ctl.simulateKey('Enter');
+
+    // assert
+    expect(rowUnderPointer).toBe('katex-insert');
+    expect(enter.defaultPrevented).toBe(false);
+    expect(page.querySelector('.katex')).toBeNull();
+  });
+
+  it('keeps the textarea and focuses the preview after a click on Insert while typing', async () => {
+    // arrange
+    const { ctl, page } = await runKatex();
+    await typeFormula(ctl);
+    // The click moves menu focus to Insert. The insert disables the row, and
+    // Oneput moves focus off a disabled row to the first row, the preview.
+    const onPreview = rowFocused(ctl, 'katex-preview');
+
+    // act
+    ctl.simulateMenuItemClick('katex-insert');
+    await onPreview;
+
+    // assert
+    expect(page.querySelector('.katex')).not.toBeNull();
+    expect(ctl.input.isFocused).toBe(true);
+    expect(focusedRow(ctl)).toBe('katex-preview');
+  });
+
+  it('focuses the textarea again after a click on Insert', async () => {
+    // arrange
+    const { ctl, page } = await runKatex();
+    await typeFormula(ctl);
+    // A click on a row blurs the textarea before the click runs the row.
+    const blurred = inputFocused(ctl, false);
+    (ctl.currentProps.inputElement as HTMLElement).blur();
+    await blurred;
+    const refocused = inputFocused(ctl, true);
+
+    // act
+    ctl.simulateMenuItemClick('katex-insert');
+    await refocused;
+
+    // assert
+    expect(page.querySelector('.katex')).not.toBeNull();
+    expect(ctl.input.isFocused).toBe(true);
+    expect(focusedRow(ctl)).toBe('katex-preview');
   });
 });

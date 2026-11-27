@@ -26,6 +26,12 @@ export function canInsert(context: KatexContext) {
 type KatexSnapshot = { context: KatexContext };
 
 /**
+ * The preview row stands for the input (INPUT_ROW): it has no action, thus
+ * while it has menu focus, Enter writes a newline in the textarea.
+ */
+export const previewRowId = 'katex-preview';
+
+/**
  * The view sources for the declarative KaTeX demo. All of them read the
  * machine's snapshot. The row builders draw from the values they get, and the
  * menu rebuilds on each change, so no row keeps state of its own.

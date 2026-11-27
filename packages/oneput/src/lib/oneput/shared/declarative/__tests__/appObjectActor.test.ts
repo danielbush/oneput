@@ -5,7 +5,7 @@ import { cell } from '../../../lib/pull.js';
 import type { AppLayoutParams, UILayout } from '../../../types.js';
 import { StandardLayout } from '../../ui/layout/StandardLayout.js';
 import { StdMenuItemIds } from '../../ui/menuItems/stdMenuItem.js';
-import { waitForState } from '../../test/index.js';
+import { swapInputElement, waitForState } from '../../test/index.js';
 import {
   icons,
   markedView,
@@ -16,6 +16,7 @@ import {
   sendButton,
   sendClick
 } from './notesApp.js';
+import { focusedRow, inputFocused, rowFocused, runFocus, settle } from './focusApp.js';
 import { appObjectActor, attachAppObjectActor } from '../appObjectActor.js';
 import {
   readable,
@@ -491,7 +492,7 @@ test('attachAppObjectActor does not send EXITED when externally replaced while a
   ctl.app.replace({ layout });
 
   // assert
-  expect(sent).toEqual([{ type: 'STARTED' }]);
+  expect(sent.map(({ type }) => type)).toEqual(['STARTED', 'ITEM_FOCUSED']);
 });
 
 test('a view action sends its event when the machine can take it and declines otherwise', async () => {
@@ -628,4 +629,214 @@ test('a controlled inputValue keeps its whitespace', async () => {
 
   // assert
   expect(ctl.input.getInputValue()).toBe(' x ');
+});
+
+test('a state focuses its row, a keyboard move blurs the input, and a row event focuses it again', async () => {
+  // arrange
+  const { ctl, state, shown } = runFocus(controllers);
+  await shown;
+  const blurred = inputFocused(ctl, false);
+  await ctl.simulateKey('j', mod);
+  await blurred;
+  const stateAfterMove = state.state;
+  const rowAfterMove = focusedRow(ctl);
+  const refocused = inputFocused(ctl, true);
+
+  // act
+  ctl.simulateMenuItemClick('go');
+  await refocused;
+
+  // assert
+  expect(stateAfterMove).toBe('browsing');
+  expect(rowAfterMove).toBe('go');
+  expect(state.state).toBe('typing');
+  expect(focusedRow(ctl)).toBe('input-row');
+});
+
+test('a redraw with the same focus fields keeps the focus that the user moved', async () => {
+  // arrange
+  const { ctl, state, shown } = runFocus(controllers);
+  await shown;
+  ctl.menu.focusMenuItemByIndex(0, false, 'pointer');
+  const redrawn = menuShows(ctl, 'Input row');
+
+  // act
+  await ctl.input.typeText('x');
+  await redrawn;
+
+  // assert
+  expect(state.text).toBe('x');
+  expect(state.state).toBe('typing');
+  expect(focusedRow(ctl)).toBe('other');
+});
+
+test('input focus from the user sends INPUT_FOCUS_CHANGED once and the state focuses its row', async () => {
+  // arrange
+  const { ctl, state, shown } = runFocus(controllers);
+  await shown;
+  const blurred = inputFocused(ctl, false);
+  await ctl.simulateKey('j', mod);
+  await blurred;
+  state.inputFocusEvents.length = 0;
+  const onRow = rowFocused(ctl, 'input-row');
+
+  // act
+  (ctl.currentProps.inputElement as HTMLElement).focus();
+  await onRow;
+  await new Promise((resolve) => setTimeout(resolve, 0));
+
+  // assert
+  expect(state.state).toBe('typing');
+  expect(state.inputFocusEvents).toEqual([true]);
+  expect(ctl.input.isFocused).toBe(true);
+});
+
+test('input focus sends nothing while a child runs, and resume applies the focus again', async () => {
+  // arrange
+  const { ctl, app, state, shown } = runFocus(controllers);
+  await shown;
+  state.inputFocusEvents.length = 0;
+  ctl.app.run({ menu: () => ({ id: 'child', items: [] }) });
+  const input = ctl.currentProps.inputElement as HTMLElement;
+  input.blur();
+  input.focus();
+  const eventsWhileChild = [...state.inputFocusEvents];
+  const resumed = rowFocused(ctl, 'input-row');
+
+  // act
+  ctl.app.exit();
+  await resumed;
+
+  // assert
+  expect(eventsWhileChild).toEqual([]);
+  expect(ctl.app.isCurrent(app)).toBe(true);
+  expect(focusedRow(ctl)).toBe('input-row');
+});
+
+test('a second run of the same AppObject sends one INPUT_FOCUS_CHANGED per focus change', async () => {
+  // arrange
+  const { ctl, app, home, state, shown } = runFocus(controllers);
+  await shown;
+  ctl.app.exit();
+  const input = ctl.currentProps.inputElement as HTMLElement;
+  input.blur();
+  const shownAgain = rowFocused(ctl, 'input-row');
+  ctl.app.run(app);
+  await shownAgain;
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  input.blur();
+  state.inputFocusEvents.length = 0;
+
+  // act
+  input.focus();
+
+  // assert
+  expect(ctl.app.isCurrent(home)).toBe(false);
+  expect(state.inputFocusEvents).toEqual([true]);
+});
+
+test('an attached actor that starts and resumes in a blurred state keeps the input blurred', async () => {
+  // arrange
+  const { ctl, app, state, shown } = runFocus(controllers, { initial: 'browsing', attach: true });
+  await shown;
+  const afterStart = { state: state.state, focused: ctl.input.isFocused };
+  ctl.app.run({ menu: () => ({ id: 'child', items: [] }) });
+  await settle();
+
+  // act
+  ctl.app.exit();
+  await settle();
+
+  // assert
+  expect(afterStart).toEqual({ state: 'browsing', focused: false });
+  expect(ctl.app.isCurrent(app)).toBe(true);
+  expect(state.state).toBe('browsing');
+  expect(ctl.input.isFocused).toBe(false);
+  expect(state.inputFocusEvents).not.toContain(true);
+});
+
+test('a start with the menu closed focuses the view row when the menu opens', async () => {
+  // arrange
+  const { ctl, shown } = runFocus(controllers, { menuOpen: false });
+  await shown;
+  const onRow = rowFocused(ctl, 'input-row');
+
+  // act
+  await ctl.simulateOpenMenu();
+  await onRow;
+
+  // assert
+  expect(focusedRow(ctl)).toBe('input-row');
+});
+
+test('an exit during STARTED leaves no input focus subscription', async () => {
+  // arrange
+  const other = { menu: () => ({ id: 'other', items: [] }) };
+  let replaced = false;
+  const { ctl, app, state } = runFocus(controllers, {
+    attach: true,
+    menuOpen: false,
+    onStarted: (ctl) => {
+      if (replaced) return;
+      replaced = true;
+      ctl.app.replace(other);
+    }
+  });
+  await settle();
+  const replacedAtOnce = ctl.app.isCurrent(other);
+  ctl.app.run(app);
+  await settle();
+  const input = ctl.currentProps.inputElement as HTMLElement;
+  input.blur();
+  state.inputFocusEvents.length = 0;
+
+  // act
+  input.focus();
+
+  // assert
+  expect(replacedAtOnce).toBe(true);
+  expect(ctl.app.isCurrent(app)).toBe(true);
+  expect(state.inputFocusEvents).toEqual([true]);
+});
+
+test('a menu open in a blurred state keeps the input blurred', async () => {
+  // arrange
+  const { ctl, state, shown } = runFocus(controllers, { initial: 'browsing' });
+  await shown;
+  ctl.menu.closeMenu();
+  await settle();
+  state.inputFocusEvents.length = 0;
+
+  // act
+  await ctl.simulateOpenMenu();
+  await settle();
+
+  // assert
+  expect(ctl.menu.isMenuOpen).toBe(true);
+  expect(state.inputFocusEvents).toEqual([]);
+  expect(state.state).toBe('browsing');
+  expect(ctl.input.isFocused).toBe(false);
+});
+
+test('an input element swap while a focus move waits ends the moves', async () => {
+  // arrange
+  const { ctl, state, shown } = runFocus(controllers);
+  await shown;
+  // The row's command applies the typing focus again: the refresh queues a
+  // focus, then focuses the row. The swap then blurs the focused old element,
+  // and the machine goes to browsing, which queues a blur.
+  const refreshed = rowFocused(ctl, 'input-row');
+  ctl.simulateMenuItemClick('go');
+  await refreshed;
+  swapInputElement(ctl, 'textarea');
+  await settle();
+  const changes: boolean[] = [];
+  ctl.input.subscribeFocusChange((focused) => changes.push(focused));
+
+  // act
+  await settle();
+
+  // assert
+  expect(changes).toEqual([]);
+  expect(state.state).toBe('browsing');
 });

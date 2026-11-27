@@ -1,6 +1,7 @@
 import type { Controller } from '../../controllers/controller.js';
 import type { AppActions, AppLayoutParams, AppObject, Menu } from '../../types.js';
 import {
+  activeInputFocus,
   sourceSubscriptions,
   renderActiveView,
   type OneputView,
@@ -61,7 +62,9 @@ function applyView(
     enableFilter: view.settings.enableFilter,
     enableInputElement: view.settings.enableInputElement,
     enableMenuItemFocus: view.settings.enableMenuItemFocus,
-    clearInputAfterAction: view.settings.clearInputAfterAction
+    clearInputAfterAction: view.settings.clearInputAfterAction,
+    // A view that gives `inputFocus` decides input focus when the menu opens.
+    focusInputOnMenuOpen: view.inputFocus === undefined
   });
   // The view gives all the params of this AppObject each time. This is the
   // one layout redraw per refresh.
@@ -77,6 +80,30 @@ function applyView(
   if (rowsChanged) ctl.menu.setMenu(view.menu);
 }
 
+/** The focus that the adapter last applied, to compare with the next view's. */
+type ShownFocus = Pick<OneputView, 'inputFocus' | 'focusItem'>;
+
+/**
+ * Apply the view's focus fields only when they change, so a redraw while the
+ * user types or moves focus does not take focus back. New rows also apply
+ * `focusItem`, because `setMenu` ran the menu's focus rule. The caller forgets
+ * the shown focus when Oneput moves focus, and after the user's command: a
+ * click on a row blurs the input before the row runs, and the command's state
+ * says where focus goes next. Programmatic menu
+ * focus gives `ITEM_FOCUSED` with `cause: 'programmatic'`, and input focus
+ * gives `INPUT_FOCUS_CHANGED`; a machine that moves to the state it is in
+ * changes no field, thus they make no loop.
+ */
+function applyFocus(ctl: Controller, view: OneputView, shown: ShownFocus, rowsChanged: boolean) {
+  if (view.inputFocus !== shown.inputFocus) {
+    if (view.inputFocus === 'focused') ctl.input.focus();
+    if (view.inputFocus === 'blurred') ctl.input.blur();
+  }
+  if (view.focusItem !== undefined && (rowsChanged || view.focusItem !== shown.focusItem)) {
+    ctl.menu.focusMenuItemById(view.focusItem);
+  }
+}
+
 /**
  * Connect an actor owned by this AppObject (`STACK_MODE`).
  *
@@ -88,10 +115,17 @@ function applyView(
  *   changes, switches the layout component when the view's layout changes, and
  *   uses `sources.menuItem.default` for rows without a named builder.
  * - A change of the view's input kind keeps the typed text.
+ * - Focus: sends `ITEM_FOCUSED` and `INPUT_FOCUS_CHANGED` while current.
+ *   Applies the view's `inputFocus` and `menu.focusItem` when they change
+ *   (see {@link applyFocus}). It applies them again after start, resume and
+ *   menu open, where Oneput moves focus, and after a row, action or send
+ *   control sends its event. While the active view gives `inputFocus`,
+ *   Oneput does not focus the input on start, resume or menu open: the view
+ *   decides.
  * - Actions and the `inputSend` control send their event only while current
  *   and when the machine can take it; otherwise an action declines.
- * - Not supported: editor and claim views, and menu focus, menu update, and
- *   claim release events.
+ * - Not supported: editor and claim views, and menu update and claim release
+ *   events.
  */
 export function appObjectActor<
   Source,
@@ -196,10 +230,15 @@ function createAppObjectActor<
   const sendIfCurrent = (event: OneputEvent | Event) => {
     if (ctl.app.isCurrent(app)) actor.send(event);
   };
-  /** Send `event` if the machine can take it now. False when it does not. */
+  /**
+   * Send the event of an action or the send control if the machine can take
+   * it now. False when it does not. As for a row, the user's command applies
+   * the view's focus again (see {@link applyFocus}).
+   */
   const accept = (event: OneputEvent | Event) => {
     if (!ctl.app.isCurrent(app) || !actor.getSnapshot().can(event)) return false;
     actor.send(event);
+    shownFocus = {};
     return true;
   };
   const back = { type: 'BACK' } as const;
@@ -207,21 +246,58 @@ function createAppObjectActor<
   let actions: AppActions = {};
   let shownLayout: string | undefined;
   let shownRows: string | undefined;
+  let shownFocus: ShownFocus = {};
+  let stopInputFocus = () => {};
+  /**
+   * Oneput clears the menu and moves focus when this AppObject starts or
+   * resumes, so the next refresh sets the rows and focus again.
+   */
+  const forgetShown = () => {
+    shownRows = undefined;
+    shownFocus = {};
+  };
+  /**
+   * Run after the start or resume event, before Oneput's own input focus. A
+   * view that gives `inputFocus` owns input focus: Oneput's focus would send
+   * `INPUT_FOCUS_CHANGED` and move a `'blurred'` state before the refresh.
+   * The event can exit or replace this AppObject; then the flags are not its.
+   */
+  const yieldInputFocus = () => {
+    if (!ctl.app.isCurrent(app) || activeInputFocus(actor.getSnapshot()) === undefined) return;
+    ctl.app.applyFlags({ focusInputOnStart: false });
+  };
 
   const app: AppObject = {
     menu: () => menu,
     // A function, so Oneput reads the actions and their keys again on each refresh.
     actions: () => actions,
-    onStart: lifecycle.onStart,
+    onStart() {
+      forgetShown();
+      // Subscribe first: STARTED can exit this AppObject at once, and onExit
+      // then unsubscribes.
+      stopInputFocus = ctl.input.subscribeFocusChange((focused) =>
+        sendIfCurrent({ type: 'INPUT_FOCUS_CHANGED', focused })
+      );
+      lifecycle.onStart();
+      yieldInputFocus();
+    },
     onSuspend() {
       actor.send({ type: 'SUSPENDED' });
     },
     onResume(result) {
+      forgetShown();
       actor.send({ type: 'RESUMED', result: result?.payload });
+      yieldInputFocus();
     },
-    onExit: lifecycle.onExit,
+    onExit() {
+      stopInputFocus();
+      lifecycle.onExit();
+    },
     hasBackLevel: () => actor.getSnapshot().can(back),
     onBack: lifecycle.onBack,
+    onMenuItemFocus({ menuId, menuItem, index, cause }) {
+      sendIfCurrent({ type: 'ITEM_FOCUSED', menuId, id: menuItem?.id, index, cause });
+    },
     onInputChange({ value }) {
       sendIfCurrent({ type: 'INPUT_CHANGED', value });
     },
@@ -238,6 +314,16 @@ function createAppObjectActor<
           return () => subscription.unsubscribe();
         }
       },
+      // Oneput moves menu focus when the menu opens, and it cannot focus a
+      // row while the menu is closed: apply the view's focus again.
+      {
+        subscribe: (onChange) =>
+          ctl.events.on('menu-open-change', (open) => {
+            if (!open) return;
+            shownFocus = {};
+            onChange();
+          })
+      },
       // All readable sources, not only those the active view reads: a change
       // to an unused one costs one coalesced refresh, and the set stays fixed.
       ...sourceSubscriptions(sources)
@@ -249,7 +335,10 @@ function createAppObjectActor<
         return;
       }
       const rendered = renderActiveView(snapshot, sources, layouts, {
-        activate: sendIfCurrent
+        activate: (event: Event) => {
+          sendIfCurrent(event);
+          shownFocus = {};
+        }
       });
       if (rendered.isErr()) {
         ctl.notify(rendered.error);
@@ -259,7 +348,7 @@ function createAppObjectActor<
       actions = Object.fromEntries(
         Object.entries(rendered.value.actions).map(([id, { send, binding }]) => [
           id,
-          { action: () => accept(send), binding }
+          { action: () => send !== undefined && accept(send), binding }
         ])
       );
       const { name, create } = rendered.value.layout;
@@ -282,7 +371,9 @@ function createAppObjectActor<
       }
       const rows = rowKey(rendered.value.menu);
       applyView(ctl, rendered.value, params, rows !== shownRows);
+      applyFocus(ctl, rendered.value, shownFocus, rows !== shownRows);
       shownRows = rows;
+      shownFocus = { inputFocus: rendered.value.inputFocus, focusItem: rendered.value.focusItem };
     }
   };
 

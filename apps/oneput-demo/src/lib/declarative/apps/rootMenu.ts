@@ -43,7 +43,7 @@ function createRootMenuMachine() {
                 },
                 {
                   id: 'katex',
-                  params: { text: 'KaTeX demo (stub)...' },
+                  params: { text: 'KaTeX demo (declarative)...' },
                   send: { type: 'OPEN_KATEX' }
                 }
               ]
@@ -53,7 +53,7 @@ function createRootMenuMachine() {
         },
         on: {
           OPEN_SEARCH: { target: 'openSearch', description: 'Choose async search.' },
-          OPEN_KATEX: { target: 'openKatex', description: 'Choose the KaTeX stub.' }
+          OPEN_KATEX: { target: 'openKatex', description: 'Choose the KaTeX demo.' }
         }
       },
       openSearch: {
@@ -64,7 +64,7 @@ function createRootMenuMachine() {
       openKatex: {
         type: 'final',
         output: 'katex' satisfies RootMenuChoice,
-        description: 'The user chose the KaTeX stub.'
+        description: 'The user chose the KaTeX demo.'
       }
     }
   });

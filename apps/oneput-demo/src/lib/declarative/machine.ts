@@ -1,6 +1,6 @@
 import { setup } from 'xstate';
 import type { createAsyncSearchMachine } from '../shared/asyncSearchDeclarative/machine.js';
-import type { katexStub } from './apps/katexStub.js';
+import type { createKatexMachine } from '../shared/katexDeclarative/machine.js';
 import type { rootMenu } from './apps/rootMenu.js';
 
 /**
@@ -12,7 +12,7 @@ import type { rootMenu } from './apps/rootMenu.js';
 export function createMachine(actors: {
   rootMenu: typeof rootMenu.machine;
   asyncSearch: ReturnType<typeof createAsyncSearchMachine>;
-  katexStub: typeof katexStub.machine;
+  katex: ReturnType<typeof createKatexMachine>;
 }) {
   return setup({
     actors
@@ -34,7 +34,7 @@ export function createMachine(actors: {
             {
               guard: ({ event }) => event.output === 'katex',
               target: 'katex',
-              description: 'Open the KaTeX stub.'
+              description: 'Open the KaTeX demo.'
             }
           ]
         }
@@ -48,11 +48,11 @@ export function createMachine(actors: {
         }
       },
       katex: {
-        description: 'Show the KaTeX stub.',
+        description: 'Run the declarative KaTeX demo.',
         invoke: {
           id: 'katex',
-          src: 'katexStub',
-          onDone: { target: 'root', description: 'Return to the root when the stub finishes.' }
+          src: 'katex',
+          onDone: { target: 'root', description: 'Return to the root when KaTeX finishes.' }
         }
       }
     }

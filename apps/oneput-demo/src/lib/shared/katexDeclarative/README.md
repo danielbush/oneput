@@ -1,0 +1,11 @@
+# Declarative KaTeX
+
+The KaTeX demo written as a declarative AppObject: an XState machine whose states describe what Oneput shows. It does what `../../main/KatexDemo.ts` does, with no AppObject class.
+
+- `machine.ts`: the states and transitions, as data. The view gives a textarea input whose text the machine controls (`inputValue`), the SUBMIT and `TOGGLE_DISPLAY_MODE` actions, the Send button (`inputSend`) and the menu rows by name. `INSERT` runs only while the formula is valid; otherwise the key declines and Send is disabled.
+- `actions.ts`: the implementations behind the machine's names. Each change compiles the source with `renderFormula`; an insert appends to the `DemoDocument`.
+- `content.ts`: the named content the views refer to: `slot` sources that read the snapshot, and the `preview`, `insert` and `displayMode` row builders.
+- `appObject.ts`: `createKatexApp` makes the child of a routed app (`ROUTED_DECL`).
+- `__tests__/appObject.test.ts`: tests the AppObject through Oneput, with a null `DemoDocument`.
+
+The compile and the page wrapper are in `../katex/`, which the imperative demo also uses.

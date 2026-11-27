@@ -26,7 +26,7 @@ export function createKatexMachine(doc: DemoDocument) {
       view: {
         layout: 'standard',
         params: { menuTitle: 'KaTeX (declarative)', input: { kind: 'textarea', rows: 5 } },
-        placeholder: 'Type some katex...',
+        placeholder: { $from: 'placeholder' },
         inputValue: { $from: 'source' },
         slots: { status: { $from: 'status' } },
         // No binding for SUBMIT: it keeps the key that SUBMIT already has.
@@ -46,13 +46,13 @@ export function createKatexMachine(doc: DemoDocument) {
             {
               id: 'katex-insert',
               build: 'insert',
-              params: { enabled: { $from: 'canInsert' } },
+              params: { enabled: { $from: 'canInsert' }, hint: { $from: 'submitKey' } },
               send: { type: 'INSERT' }
             },
             {
               id: 'katex-display-mode',
               build: 'displayMode',
-              params: { on: { $from: 'displayMode' } },
+              params: { on: { $from: 'displayMode' }, hint: { $from: 'displayModeKey' } },
               send: { type: 'TOGGLE_DISPLAY_MODE' }
             }
           ]

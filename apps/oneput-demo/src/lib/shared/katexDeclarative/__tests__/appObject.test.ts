@@ -3,7 +3,9 @@ import { Controller, type MenuItem } from '@oneput/oneput';
 import { appObjectActor } from '@oneput/oneput/shared/declarative/appObjectActor.js';
 import { swapInputElement, waitForState } from '@oneput/oneput/shared/test/index.js';
 import type { FChildParams } from '@oneput/oneput';
+import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
 import { afterEach, describe, expect, it } from 'vitest';
+import { safeHtmlText } from '@oneput/safe-html';
 import { createActor } from 'xstate';
 import { Layout, viewLayouts } from '../../../common/layout.js';
 import { DemoDocument } from '../../katex/katex.js';
@@ -61,6 +63,25 @@ function titled(node: unknown, title: string): FChildParams | undefined {
     if (found) return found;
   }
   return undefined;
+}
+
+/** Find the child with `id` in a tree. */
+function childById(node: unknown, id: string): FChildParams | undefined {
+  if (typeof node !== 'object' || node === null) return undefined;
+  const child = node as FChildParams & { children?: unknown };
+  if (child.id === id) return child;
+  const children = Array.isArray(child.children) ? child.children : [];
+  for (const next of children) {
+    const found = childById(next, id);
+    if (found) return found;
+  }
+  return undefined;
+}
+
+/** The text of the key hint that row `id` shows. */
+function hint(ctl: Controller, id: string) {
+  const html = childById(row(ctl, id), `${id}-binding-hint`)?.htmlContent;
+  return html ? safeHtmlText(html) : undefined;
 }
 
 function sendDisabled(ctl: Controller) {
@@ -328,5 +349,71 @@ describe('declarative KaTeX focus (INPUT_ROW)', () => {
     expect(page.querySelector('.katex')).not.toBeNull();
     expect(ctl.input.isFocused).toBe(true);
     expect(focusedRow(ctl)).toBe('katex-preview');
+  });
+});
+
+describe('declarative KaTeX key hints', () => {
+  /** Wait until a menu refresh shows the Display mode key hint, or now if it does. */
+  function displayModeHintShown(ctl: Controller) {
+    const state = {
+      name: 'the Display mode key hint',
+      reached: () => hint(ctl, 'katex-display-mode') !== undefined,
+      seen: () => `hint ${hint(ctl, 'katex-display-mode')}`
+    };
+    return state.reached() ? Promise.resolve() : waitForState(ctl, 'set-menu-items', state);
+  }
+
+  it('shows the submit and display mode keys at start', async () => {
+    // arrange
+    const { ctl } = await runKatex();
+
+    // act
+    // The first render reads the keys before Oneput sets $mod+d; its event redraws.
+    await displayModeHintShown(ctl);
+
+    // assert
+    expect(ctl.input.getPlaceholder()).toBe('Type some katex and hit $mod+Enter...');
+    expect(help(ctl)).toContain('insert it with $mod+Enter or Send');
+    // $mod shows as the platform's key, Ctrl or ⌘.
+    expect(hint(ctl, 'katex-insert')).toMatch(/Enter$/);
+    expect(hint(ctl, 'katex-display-mode')).toMatch(/d$/);
+  });
+
+  it('shows a new submit key after a rebind, and no key when it has none', async () => {
+    // arrange
+    const { ctl } = await runKatex();
+    await displayModeHintShown(ctl);
+    const insertHint = hint(ctl, 'katex-insert');
+    const defaults = ctl.keys.getDefaultBindings();
+    const rebind = (bindings: string[]) =>
+      ctl.keys.setDefaultBindings({
+        ...defaults,
+        [OneputAction.SUBMIT]: { ...defaults[OneputAction.SUBMIT], bindings }
+      });
+    // A rebind resets to the default keys, thus $mod+d is gone until Oneput
+    // sets this app's actions again, and their event redraws.
+    const placeholderShows = (text: string) =>
+      viewShows(
+        ctl,
+        `placeholder "${text}" with the Display mode hint`,
+        () => ctl.input.getPlaceholder() === text && hint(ctl, 'katex-display-mode') !== undefined
+      );
+    const rebound = placeholderShows('Type some katex and hit $mod+i...');
+
+    // act
+    rebind(['$mod+i']);
+    await rebound;
+    const atRebind = { help: help(ctl), insertHint: hint(ctl, 'katex-insert') };
+    const unbound = placeholderShows('Type some katex...');
+    rebind([]);
+    await unbound;
+
+    // assert
+    expect(atRebind.help).toContain('insert it with $mod+i or Send');
+    expect(insertHint).toMatch(/Enter$/);
+    expect(atRebind.insertHint).toMatch(/i$/);
+    expect(help(ctl)).toContain('insert it with Send');
+    expect(hint(ctl, 'katex-insert')).toBeUndefined();
+    expect(hint(ctl, 'katex-display-mode')).toMatch(/d$/);
   });
 });

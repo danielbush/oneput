@@ -11,6 +11,7 @@ import {
   type Readable,
   type RowParams,
   type SourceTypes,
+  type ViewContext,
   type ViewDef,
   type ViewFor,
   type ViewSources
@@ -305,6 +306,8 @@ const textRow: PlainView = {
   menu: { items: [{ id: 'row', params: { text: { $from: 'known' }, detail: 'Detail' } }] }
 };
 
+/** A context with no keys, for the render calls below. */
+const context: ViewContext = { bindingOf: () => undefined };
 type Snapshot = { busy: boolean };
 const registry = {
   slot: {
@@ -321,6 +324,15 @@ const viewFor: ViewFor<typeof registry, typeof layouts>[] = [textRow, typedRows]
 const fromViewFor: PlainView = {} as ViewFor<typeof registry, typeof layouts>;
 // A registry gives the source types of its views.
 const registryTypes: Sources = {} as SourceTypes<typeof registry.slot>;
+// A source that reads the context gives its value type, as one that reads only the snapshot does.
+const contextTypes: { key: string | undefined; known: string } = {} as SourceTypes<{
+  key: (snapshot: Snapshot, context: ViewContext) => string | undefined;
+  known: () => string;
+}>;
+// @ts-expect-error The context source gives text, not a number.
+const contextNumber: { key: number } = {} as SourceTypes<{
+  key: (snapshot: Snapshot, context: ViewContext) => string;
+}>;
 const wrongSource: ViewSources<Snapshot, Sources, never> = {
   // @ts-expect-error The 'flag' source must give a boolean.
   slot: { known: () => 'Known', flag: () => 'yes', footer: () => footer, total: () => 3 },
@@ -355,7 +367,7 @@ function inferredSnapshot() {
   };
   const sources = { slot: {}, menu: {}, menuItem: {} };
   // @ts-expect-error The registry has no 'gone' layout.
-  return renderActiveView(snapshot, sources, layouts, { activate: () => {} });
+  return renderActiveView(snapshot, sources, layouts, { activate: () => {}, context });
 }
 
 /** A snapshot whose view, inferred from its literal, fills these slots of 'plain'. */
@@ -384,14 +396,17 @@ function misspeltSlot() {
   // @ts-expect-error 'plain' declares 'heading', not 'headng'.
   appObjectActor(ctl, actor, sources, layouts);
   // @ts-expect-error 'plain' declares 'heading', not 'headng'.
-  renderActiveView(misspeltSnapshot(), sources, layouts, { activate: () => {} });
+  renderActiveView(misspeltSnapshot(), sources, layouts, { activate: () => {}, context });
   const besideActor = { ...actor, getSnapshot: misspeltBesideSnapshot };
   // @ts-expect-error 'plain' does not declare 'headng', even beside 'heading'.
   appObjectActor(ctl, besideActor, sources, layouts);
   // @ts-expect-error 'plain' does not declare 'headng', even beside 'heading'.
-  renderActiveView(misspeltBesideSnapshot(), sources, layouts, { activate: () => {} });
+  renderActiveView(misspeltBesideSnapshot(), sources, layouts, { activate: () => {}, context });
   // Declared slots only: no error.
-  renderActiveView(plainSnapshot({ heading: 'Title' }), sources, layouts, { activate: () => {} });
+  renderActiveView(plainSnapshot({ heading: 'Title' }), sources, layouts, {
+    activate: () => {},
+    context
+  });
 }
 
 viewLayout({
@@ -476,7 +491,7 @@ void forged;
 void [emptySlot, inferredSnapshot, misspeltSlot];
 void [typedValues, wrongLiteral, textForBuilder, flagForText, textSourceForFlag];
 void [flagSourceForText, inheritedWrongLiteral, flagRowText, builderRowDetail, flagPlaceholder];
-void [textRow, registryTypes, wrongSource, rowFieldParams];
+void [textRow, registryTypes, contextTypes, contextNumber, wrongSource, rowFieldParams];
 void [missingParam, noParams, missingDefaultParam, activateField, taggedLiteral, fromData];
 void [sharedParams, textBusy, flagTitle, affordance, viewFor, fromViewFor];
 void [

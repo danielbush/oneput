@@ -8,7 +8,7 @@ import type { FChildParams, FlexParams } from '../../../types.js';
 import { StandardLayout } from '../../ui/layout/StandardLayout.js';
 import { waitForState } from '../../test/index.js';
 import { appObjectActor } from '../appObjectActor.js';
-import type { LayoutSlots, RowParams, ViewDef } from '../interpreter.js';
+import type { LayoutSlots, RowParams, ViewContext, ViewDef } from '../interpreter.js';
 import type { OneputEvent } from '../oneputEvents.js';
 import { standardLayout } from '../standardLayout.js';
 import { standardRow } from '../standardRow.js';
@@ -43,7 +43,13 @@ export const mod = /Mac|iPod|iPhone|iPad/.test(navigator.platform)
   : { ctrlKey: true };
 
 type NoteEvent = { type: 'SAVE' } | { type: 'MARK' };
-export type NoteView = ViewDef<{ text: string; label: string }, never, NoteEvent, Rows, Layouts>;
+export type NoteView = ViewDef<
+  { text: string; label: string; keys: string },
+  never,
+  NoteEvent,
+  Rows,
+  Layouts
+>;
 export type NoteState = { text: string; saved: string[]; marks: number };
 
 const noteMenu: NoteView['menu'] = {
@@ -126,7 +132,11 @@ export function runNotes(
     {
       slot: {
         text: ({ context }: Note) => context.text,
-        label: ({ context }: Note) => `Text: [${context.text}]`
+        label: ({ context }: Note) => `Text: [${context.text}]`,
+        // The keys of a default action (SUBMIT) and of a view action (MARK).
+        // SAVE takes SUBMIT's $mod+Enter, thus SUBMIT has no key at first.
+        keys: (_: Note, { bindingOf }: ViewContext) =>
+          `submit ${bindingOf('SUBMIT') ?? 'none'}, mark ${bindingOf('MARK')}`
       },
       menu: {},
       menuItem: builders

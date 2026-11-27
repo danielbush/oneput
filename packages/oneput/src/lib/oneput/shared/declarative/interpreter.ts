@@ -563,6 +563,16 @@ function attempt<T>(read: () => T): Result<T, ReadError> {
 }
 
 /**
+ * What a `slot` source can read besides the snapshot. The adapter reads it
+ * from its owner when the view renders, and redraws when it changes, thus a
+ * source keeps no copy.
+ */
+export type ViewContext = {
+  /** The first key of action `actionId` in the active bindings. `undefined` when it has none. */
+  readonly bindingOf: (actionId: string) => string | undefined;
+};
+
+/**
  * Named code that a view refers to by name, so the view stays data.
  * `slot` gives changing values for slots and row params, `menu` gives
  * changing rows, and `menuItem` holds the row builders (see {@link rowBuilder}).
@@ -571,7 +581,8 @@ function attempt<T>(read: () => T): Result<T, ReadError> {
  * its builder in `build`; the `default` builder draws each row with no `build`.
  *
  * A plain function reads the actor snapshot: use it for data that the machine
- * owns in its context. A source marked with {@link readable} reads data that
+ * owns in its context. A `slot` function also gets the {@link ViewContext},
+ * for example to show the key of an action. A source marked with {@link readable} reads data that
  * something else owns. One registry can hold both kinds.
  */
 export type ViewSources<
@@ -581,7 +592,11 @@ export type ViewSources<
   Event extends RowEvent = never,
   Builders extends RowBuilders = NoRows
 > = {
-  slot: { [Name in keyof Source]: ((snapshot: Snapshot) => Source[Name]) | Readable<Source[Name]> };
+  slot: {
+    [Name in keyof Source]:
+      | ((snapshot: Snapshot, context: ViewContext) => Source[Name])
+      | Readable<Source[Name]>;
+  };
   menu: Record<
     List,
     | ((snapshot: Snapshot) => readonly ViewRow<RowParams<Builders>, Source, Event>[])
@@ -597,7 +612,7 @@ export type ViewSources<
 export type SourceTypes<Sources> = {
   [Name in keyof Sources]: Sources[Name] extends Readable<infer T>
     ? T
-    : Sources[Name] extends (snapshot: never) => infer T
+    : Sources[Name] extends (snapshot: never, context: never) => infer T
       ? T
       : never;
 };
@@ -679,7 +694,8 @@ export type OneputView<Event extends RowEvent = RowEvent> = {
  * not intersected with them: an intersection would let a view fill a slot
  * that the layout does not declare, such as a misspelt one, and
  * {@link DeclaredSlots} on `layouts` catches one beside declared slots. `snapshot`
- * decides `Snapshot` and `activate` decides `Event`; `NoInfer` keeps the
+ * decides `Snapshot` and `activate` decides `Event`; `context` is what the
+ * `slot` functions read besides the snapshot; `NoInfer` keeps the
  * source functions' parameter types and the list rows' `send` from deciding
  * them. A layout
  * or row builder gets each filled value as the source or literal gives it,
@@ -696,7 +712,7 @@ export function renderActiveView<
   snapshot: Snapshot,
   sources: ViewSources<NoInfer<Snapshot>, Source, List, NoInfer<Event>, Builders>,
   layouts: Layouts & DeclaredSlots<NoInfer<Snapshot>, NoInfer<Layouts>>,
-  { activate }: { activate: (event: Event) => void }
+  { activate, context }: { activate: (event: Event) => void; context: ViewContext }
 ): Result<OneputView<Event>, ViewError> {
   const views = activeViews(snapshot);
   let layoutName: string | undefined;
@@ -743,7 +759,7 @@ export function renderActiveView<
   const read = (value: unknown): Result<unknown, NameError | ReadError> =>
     isFrom(value)
       ? named(sources.slot, value.$from as keyof Source & string).andThen((source) =>
-          attempt(() => (isReadable(source) ? source.source.get() : source(snapshot)))
+          attempt(() => (isReadable(source) ? source.source.get() : source(snapshot, context)))
         )
       : ok(value);
 

@@ -47,6 +47,29 @@ describe('toggleMenuItem', () => {
     expect(rendered).toEqual(['Neighbors', 'Shown']);
   });
 
+  test('binding hint - shown beside the value', () => {
+    // arrange
+    const item = toggleMenuItem({
+      id: 'mode',
+      label: 'Mode',
+      values: ['Off', 'On'],
+      index: 0,
+      onToggle: () => {},
+      bindingHint: '$mod+d',
+      bottom: false
+    });
+
+    // act
+    let hint: FChildParams | undefined;
+    walk(item, (child) => {
+      if (child.id === 'mode-binding-hint') hint = child as FChildParams;
+    });
+
+    // assert
+    expect(hint?.htmlContent).toBeDefined();
+    expect(texts(item)).toEqual(['Mode', 'Off']);
+  });
+
   test('click reports the next index', () => {
     // arrange
     const reported: number[] = [];

@@ -26,12 +26,14 @@
     <li>
       The top-level machine (<code>machine.ts</code>) has no views. It invokes
       <code>rootMenu</code>,
-      <code>asyncSearch</code> and <code>katexStub</code> as child machines.
+      <code>asyncSearch</code> and <code>katex</code> as child machines.
     </li>
     <li>When a demo finishes, the parent goes back to the root menu.</li>
-    <li>Screens: async search, and a KaTeX stub.</li>
+    <li>Screens: async search, and KaTeX.</li>
   </ul>
   <p aria-live="polite"><small>Current state: <strong>{state}</strong></small></p>
+  <!-- The KaTeX demo inserts formulas here. -->
+  <section id="katex-demo"></section>
 </main>
 
 <!-- The declarative page mounts its own controller. -->

@@ -3,10 +3,11 @@ import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.
 import { Layout } from '$lib/common/layout.js';
 import { Online } from '$lib/common/online.js';
 import { SearchService } from '$lib/service/SearchService.js';
+import { DemoDocument } from '$lib/shared/katex/katex.js';
 import { createRouter } from './router.js';
 
 /** The infrastructure that the demo uses. Tests give the `createNull()` versions. */
-export type InitDeps = { online?: Online; search?: SearchService };
+export type InitDeps = { online?: Online; search?: SearchService; doc?: DemoDocument };
 
 /**
  * Set up Oneput and the router for the declarative demo page.
@@ -18,11 +19,15 @@ export type InitDeps = { online?: Online; search?: SearchService };
  */
 export function init(
   ctl: Controller,
-  { online = Online.create(), search = SearchService.create() }: InitDeps = {}
+  {
+    online = Online.create(),
+    search = SearchService.create(),
+    doc = DemoDocument.create()
+  }: InitDeps = {}
 ) {
   // Before the router starts, so that `online` is disposed if the start throws.
   ctl.onDestroy(() => online.dispose());
-  const router = createRouter({ search, online });
+  const router = createRouter({ search, online, doc });
 
   const dynamicPlaceholder = DynamicPlaceholder.create(ctl, (params) =>
     params.menuOpenBinding

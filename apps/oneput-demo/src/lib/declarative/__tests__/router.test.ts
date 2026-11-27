@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { Online } from '../../common/online.js';
 import { pathOf } from '../../common/watchState.js';
 import { SearchService } from '../../service/SearchService.js';
+import { DemoDocument } from '../../shared/katex/katex.js';
 import { init } from '../_init.js';
 
 const controllers: Controller[] = [];
@@ -31,12 +32,14 @@ async function startDeclarativeDemo() {
   const ctl = Controller.createNull({ menuOpen: true });
   controllers.push(ctl);
   const rootShown = menuHas(ctl, 'katex');
+  const page = document.createElement('div');
   const { actor } = init(ctl, {
     online: Online.createNull(),
-    search: SearchService.createNull()
+    search: SearchService.createNull(),
+    doc: DemoDocument.createNull(page)
   });
   await rootShown;
-  return { ctl, state: () => pathOf(actor.getSnapshot().value) };
+  return { ctl, page, state: () => pathOf(actor.getSnapshot().value) };
 }
 
 describe('declarative demo', () => {
@@ -53,23 +56,26 @@ describe('declarative demo', () => {
     expect(canGoBack).toBe(false);
   });
 
-  it('opens the KaTeX stub and returns to root on Back', async () => {
+  it('opens KaTeX, inserts a formula in the page and returns to root on Back', async () => {
     // arrange
-    const { ctl, state } = await startDeclarativeDemo();
-    const stubShown = menuHas(ctl, 'back');
+    const { ctl, page, state } = await startDeclarativeDemo();
+    const katexShown = menuHas(ctl, 'katex-insert');
     ctl.simulateMenuItemClick('katex');
-    await stubShown;
-    const stateInStub = state();
-    const canGoBackInStub = ctl.app.canGoBack();
+    await katexShown;
+    const stateInKatex = state();
+    const canGoBackInKatex = ctl.app.canGoBack();
+    await ctl.input.typeText('x^2');
+    ctl.simulateMenuItemClick('katex-insert');
     const rootAgain = menuHas(ctl, 'katex');
 
     // act
-    ctl.simulateMenuItemClick('back');
+    ctl.app.goBack();
     await rootAgain;
 
     // assert
-    expect(stateInStub).toBe('katex');
-    expect(canGoBackInStub).toBe(true);
+    expect(stateInKatex).toBe('katex');
+    expect(canGoBackInKatex).toBe(true);
+    expect(page.querySelector('p .katex')).not.toBeNull();
     expect(state()).toBe('root');
     expect(ctl.app.canGoBack()).toBe(false);
   });

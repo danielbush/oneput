@@ -38,14 +38,9 @@ function preview(ctl: Controller) {
   return row(ctl, 'katex-preview')?.children?.[0] as FChildParams | undefined;
 }
 
-/** The value that the display mode row shows: Off or On. */
-function modeShown(ctl: Controller) {
-  const shown = JSON.stringify(row(ctl, 'katex-display-mode') ?? null);
-  return shown.includes('"textContent":"On"')
-    ? 'On'
-    : shown.includes('"textContent":"Off"')
-      ? 'Off'
-      : undefined;
+/** True when the display mode row's checkbox is checked. */
+function modeChecked(ctl: Controller) {
+  return childById(row(ctl, 'katex-display-mode'), 'katex-display-mode-input')?.attr?.checked;
 }
 
 function help(ctl: Controller) {
@@ -193,17 +188,17 @@ describe('declarative KaTeX AppObject', () => {
   it('toggles display mode from its row and from $mod+d', async () => {
     // arrange
     const { ctl } = await runKatex();
-    const on = viewShows(ctl, 'display mode on', () => modeShown(ctl) === 'On');
+    const on = viewShows(ctl, 'display mode on', () => modeChecked(ctl) === true);
     ctl.simulateMenuItemClick('katex-display-mode');
     await on;
-    const off = viewShows(ctl, 'display mode off', () => modeShown(ctl) === 'Off');
+    const off = viewShows(ctl, 'display mode off', () => modeChecked(ctl) === false);
 
     // act
     await ctl.simulateKey('d', mod);
     await off;
 
     // assert
-    expect(modeShown(ctl)).toBe('Off');
+    expect(modeChecked(ctl)).toBe(false);
   });
 
   it('inserts a display formula with $mod+Enter and clears the input', async () => {

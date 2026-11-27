@@ -6,8 +6,8 @@ import {
   type ViewContext
 } from '@oneput/oneput/shared/declarative/interpreter.js';
 import { infoRow, standardRow } from '@oneput/oneput/shared/declarative/standardRow.js';
+import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
-import { toggleMenuItem } from '@oneput/oneput/shared/ui/menuItems/toggleMenuItem.js';
 import type { SafeHtml } from '@oneput/safe-html';
 
 export type KatexContext = {
@@ -110,14 +110,12 @@ export function createContent() {
       displayMode: rowBuilder({
         params: { on: slot<boolean>(), hint: slot<string | undefined>() },
         build: ({ id, params: { on, hint } }, activate) =>
-          toggleMenuItem({
+          checkboxMenuItem({
             id,
-            label: 'Display mode',
+            textContent: 'Display mode',
+            checked: on,
             bindingHint: hint,
-            values: ['Off', 'On'],
-            index: on ? 1 : 0,
-            onToggle: () => activate?.(),
-            bottom: false
+            action: () => activate?.()
           })
       })
     }

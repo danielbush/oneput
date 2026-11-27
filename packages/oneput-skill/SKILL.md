@@ -340,7 +340,8 @@ import { infoMenuItem } from "@oneput/oneput/shared/ui/menuItems/infoMenuItem.js
 import { toggleMenuItem } from "@oneput/oneput/shared/ui/menuItems/toggleMenuItem.js";
 import { pullToggleMenuItem } from "@oneput/oneput/shared/ui/menuItems/pullToggleMenuItem.js";
 
-// Checkbox with label. The box paints itself from `source`.
+// Checkbox with label. The box paints itself from `source`. If you rebuild the
+// menu after each change, give `checked: boolean` instead of `source`.
 checkboxMenuItem({
   id: "toggle",
   textContent: "Enable feature",

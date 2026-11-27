@@ -52,8 +52,7 @@ export function katexActions(doc: DemoDocument) {
         event.type === 'ITEM_FOCUSED' && event.cause === 'keyboard' && event.id === previewRowId,
       keyboardOnOtherRow: ({ event }) =>
         event.type === 'ITEM_FOCUSED' && event.cause === 'keyboard' && event.id !== previewRowId,
-      inputFocused: ({ event }) => event.type === 'INPUT_FOCUS_CHANGED' && event.focused,
-      inputBlurred: ({ event }) => event.type === 'INPUT_FOCUS_CHANGED' && !event.focused
+      inputFocused: ({ event }) => event.type === 'INPUT_FOCUS_CHANGED' && event.focused
     },
     actions: {
       writeSource: assign(({ context }, params: { value: string }) =>

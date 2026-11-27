@@ -185,14 +185,20 @@ export class InputController {
     this.afterThisTask(() => this.inputElement?.focus());
   };
 
+  private pendingMove?: ReturnType<typeof setTimeout>;
+
   /**
-   * Run `move` in a new task, unless another AppObject activation (a run,
-   * replace, exit or resume) starts first: a focus move belongs to the
+   * Run `move` in a new task. Only the latest move runs: a `focus()` or
+   * `blur()` cancels the one before it, thus two moves in flight cannot
+   * undo each other. Another AppObject activation (a run, replace, exit or
+   * resume) before the task also cancels it: a focus move belongs to the
    * activation that asked for it.
    */
   private afterThisTask(move: () => void) {
+    clearTimeout(this.pendingMove);
     const generation = this.ctl.app.currentGeneration;
-    setTimeout(() => {
+    this.pendingMove = setTimeout(() => {
+      this.pendingMove = undefined;
       if (generation === this.ctl.app.currentGeneration) move();
     }, 0);
   }
@@ -205,8 +211,8 @@ export class InputController {
   /**
    * Remove native focus from the input.
    *
-   * Like `focus`, it runs in a new task. Thus `focus()` then `blur()` ends
-   * blurred, in the order of the calls. Like `focus`, a new AppObject
+   * Like `focus`, it runs in a new task, and the latest call wins. Thus
+   * `focus()` then `blur()` ends blurred, and the focus does not run. Like `focus`, a new AppObject
    * activation before the task cancels it.
    */
   blur = () => {

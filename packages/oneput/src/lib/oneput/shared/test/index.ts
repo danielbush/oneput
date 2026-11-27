@@ -68,3 +68,21 @@ export function assertMenuId(ctl: Controller, expectedMenuId: string): Promise<v
     seen: () => (last === undefined ? 'no menu items' : `menu "${last}"`)
   }).finally(stopRecording);
 }
+
+/**
+ * Swap the input element as the view does when the input kind changes, for
+ * example from `input` to `textarea`. A browser can blur the old element as
+ * it removes it; this blurs it first, as such a browser does. The new element
+ * is in the document, so it can get focus.
+ */
+export function swapInputElement(ctl: Controller, tagName: 'input' | 'textarea') {
+  const previous = ctl.currentProps.inputElement;
+  const next = document.createElement(tagName) as unknown as HTMLInputElement;
+  (previous?.parentNode ?? document.body).appendChild(next);
+  previous?.blur();
+  previous?.remove();
+  ctl.input.handleInputElementChange(next);
+  ctl.currentProps.inputElement = next;
+  ctl.onDestroy(() => next.remove());
+  return next;
+}

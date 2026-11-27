@@ -11,9 +11,10 @@ import { previewRowId } from './content.js';
  *
  * Focus is in the states (INPUT_ROW): `typing` focuses the textarea and the
  * preview row, and Enter writes a newline; `browsingMenu` blurs the textarea,
- * so Enter runs the focused row. A click on a row blurs the textarea first,
- * thus an insert from the Insert row goes from `browsingMenu` back to
- * `typing` and focuses the textarea again.
+ * so Enter runs the focused row. `typing` stays on a blur: a blur can come
+ * from the browser, not the user. A command such as an insert from the
+ * Insert row ends in `typing`, and the adapter applies the state's focus
+ * again after each command, thus the textarea gets focus again.
  */
 export function createKatexMachine(doc: DemoDocument) {
   return katexActions(doc).createMachine({
@@ -99,12 +100,10 @@ export function createKatexMachine(doc: DemoDocument) {
             guard: 'keyboardOnOtherRow',
             target: 'browsingMenu',
             description: 'The keyboard moved to a row with an action.'
-          },
-          INPUT_FOCUS_CHANGED: {
-            guard: 'inputBlurred',
-            target: 'browsingMenu',
-            description: 'The textarea lost focus, for example to a click on a row.'
           }
+          // No transition on a blur: the browser also blurs the textarea when
+          // the window loses focus, or when the input element changes from
+          // `input` to `textarea` as this demo starts.
         }
       },
       browsingMenu: {

@@ -5,7 +5,7 @@ import { cell } from '../../../lib/pull.js';
 import type { AppLayoutParams, UILayout } from '../../../types.js';
 import { StandardLayout } from '../../ui/layout/StandardLayout.js';
 import { StdMenuItemIds } from '../../ui/menuItems/stdMenuItem.js';
-import { waitForState } from '../../test/index.js';
+import { swapInputElement, waitForState } from '../../test/index.js';
 import {
   icons,
   markedView,
@@ -816,4 +816,27 @@ test('a menu open in a blurred state keeps the input blurred', async () => {
   expect(state.inputFocusEvents).toEqual([]);
   expect(state.state).toBe('browsing');
   expect(ctl.input.isFocused).toBe(false);
+});
+
+test('an input element swap while a focus move waits ends the moves', async () => {
+  // arrange
+  const { ctl, state, shown } = runFocus(controllers);
+  await shown;
+  // The row's command applies the typing focus again: the refresh queues a
+  // focus, then focuses the row. The swap then blurs the focused old element,
+  // and the machine goes to browsing, which queues a blur.
+  const refreshed = rowFocused(ctl, 'input-row');
+  ctl.simulateMenuItemClick('go');
+  await refreshed;
+  swapInputElement(ctl, 'textarea');
+  await settle();
+  const changes: boolean[] = [];
+  ctl.input.subscribeFocusChange((focused) => changes.push(focused));
+
+  // act
+  await settle();
+
+  // assert
+  expect(changes).toEqual([]);
+  expect(state.state).toBe('browsing');
 });

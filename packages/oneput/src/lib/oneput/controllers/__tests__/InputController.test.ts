@@ -301,6 +301,35 @@ describe('focus change', () => {
     expect(ctl.input.isFocused).toBe(false);
   });
 
+  it('focus then blur - the focus never runs', async () => {
+    // arrange
+    const { ctl, changes } = mounted();
+
+    // act
+    ctl.input.focus();
+    ctl.input.blur();
+    await nextTask();
+
+    // assert
+    expect(changes).toEqual([]);
+  });
+
+  it('blur then focus - the blur never runs', async () => {
+    // arrange
+    const { ctl, input, changes } = mounted();
+    input.focus();
+    changes.length = 0;
+
+    // act
+    ctl.input.blur();
+    ctl.input.focus();
+    await nextTask();
+
+    // assert
+    expect(changes).toEqual([]);
+    expect(ctl.input.isFocused).toBe(true);
+  });
+
   it('user focus - true', () => {
     // arrange
     const { input, changes } = mounted();

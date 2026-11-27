@@ -87,7 +87,9 @@ type ShownFocus = Pick<OneputView, 'inputFocus' | 'focusItem'>;
  * Apply the view's focus fields only when they change, so a redraw while the
  * user types or moves focus does not take focus back. New rows also apply
  * `focusItem`, because `setMenu` ran the menu's focus rule. The caller forgets
- * the shown focus when Oneput moves focus. Programmatic menu
+ * the shown focus when Oneput moves focus, and after the user's command: a
+ * click on a row blurs the input before the row runs, and the command's state
+ * says where focus goes next. Programmatic menu
  * focus gives `ITEM_FOCUSED` with `cause: 'programmatic'`, and input focus
  * gives `INPUT_FOCUS_CHANGED`; a machine that moves to the state it is in
  * changes no field, thus they make no loop.
@@ -115,8 +117,9 @@ function applyFocus(ctl: Controller, view: OneputView, shown: ShownFocus, rowsCh
  * - A change of the view's input kind keeps the typed text.
  * - Focus: sends `ITEM_FOCUSED` and `INPUT_FOCUS_CHANGED` while current.
  *   Applies the view's `inputFocus` and `menu.focusItem` when they change
- *   (see {@link applyFocus}), and again after start, resume and menu open,
- *   where Oneput moves focus. While the active view gives `inputFocus`,
+ *   (see {@link applyFocus}). It applies them again after start, resume and
+ *   menu open, where Oneput moves focus, and after a row, action or send
+ *   control sends its event. While the active view gives `inputFocus`,
  *   Oneput does not focus the input on start, resume or menu open: the view
  *   decides.
  * - Actions and the `inputSend` control send their event only while current
@@ -227,10 +230,15 @@ function createAppObjectActor<
   const sendIfCurrent = (event: OneputEvent | Event) => {
     if (ctl.app.isCurrent(app)) actor.send(event);
   };
-  /** Send `event` if the machine can take it now. False when it does not. */
+  /**
+   * Send the event of an action or the send control if the machine can take
+   * it now. False when it does not. As for a row, the user's command applies
+   * the view's focus again (see {@link applyFocus}).
+   */
   const accept = (event: OneputEvent | Event) => {
     if (!ctl.app.isCurrent(app) || !actor.getSnapshot().can(event)) return false;
     actor.send(event);
+    shownFocus = {};
     return true;
   };
   const back = { type: 'BACK' } as const;
@@ -327,7 +335,10 @@ function createAppObjectActor<
         return;
       }
       const rendered = renderActiveView(snapshot, sources, layouts, {
-        activate: sendIfCurrent
+        activate: (event: Event) => {
+          sendIfCurrent(event);
+          shownFocus = {};
+        }
       });
       if (rendered.isErr()) {
         ctl.notify(rendered.error);

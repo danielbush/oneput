@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { Controller, type MenuItem } from '@oneput/oneput';
 import { appObjectActor } from '@oneput/oneput/shared/declarative/appObjectActor.js';
-import { waitForState } from '@oneput/oneput/shared/test/index.js';
+import { swapInputElement, waitForState } from '@oneput/oneput/shared/test/index.js';
 import type { FChildParams } from '@oneput/oneput';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createActor } from 'xstate';
@@ -111,13 +111,15 @@ async function focusByKeyboard(ctl: Controller, id: string, key: 'j' | 'k' = 'j'
  * Run the KaTeX machine as an AppObject, with a page root to insert into. The
  * input is in the document, so it can get native focus.
  */
-async function runKatex() {
+async function runKatex({ swapToTextarea = false } = {}) {
   const ctl = Controller.createNull({ menuOpen: true });
   controllers.push(ctl);
   const input = ctl.currentProps.inputElement as HTMLElement;
   document.body.appendChild(input);
   ctl.onDestroy(() => input.remove());
   ctl.app.run({ layout: { layout: Layout.create, params: {} } });
+  // The root menu's single-line input has focus.
+  input.focus();
   const page = document.createElement('div');
   const actor = createActor(createKatexMachine(DemoDocument.createNull(page)));
   const shown = viewShows(
@@ -125,9 +127,18 @@ async function runKatex() {
     'the empty preview',
     () => preview(ctl)?.textContent === '(preview)'
   );
-  const focused = inputFocused(ctl, true);
   ctl.app.run(appObjectActor(ctl, actor, createContent(), viewLayouts));
-  await Promise.all([shown, focused]);
+  // The view sets the rows, then queues the textarea focus.
+  await shown;
+  if (swapToTextarea) {
+    // As in a browser: the textarea replaces the focused input before the
+    // queued focus runs, and the old input's removal blurs it.
+    const focused = inputFocused(ctl, true);
+    swapInputElement(ctl, 'textarea');
+    await focused;
+  }
+  // Let the queued focus run, thus it cannot reach the test's steps.
+  await new Promise((resolve) => setTimeout(resolve, 0));
   return { ctl, page };
 }
 
@@ -202,6 +213,22 @@ describe('declarative KaTeX AppObject', () => {
 });
 
 describe('declarative KaTeX focus (INPUT_ROW)', () => {
+  it('keeps typing when the textarea replaces the focused input at start', async () => {
+    // arrange
+    const { ctl } = await runKatex({ swapToTextarea: true });
+    const changes: boolean[] = [];
+    ctl.input.subscribeFocusChange((focused) => changes.push(focused));
+
+    // act
+    for (let task = 0; task < 3; task++) await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // assert
+    expect(changes).toEqual([]);
+    expect(ctl.currentProps.inputElement?.tagName).toBe('TEXTAREA');
+    expect(ctl.input.isFocused).toBe(true);
+    expect(focusedRow(ctl)).toBe('katex-preview');
+  });
+
   it('starts with the textarea and the preview row focused', async () => {
     // arrange
     const { ctl } = await runKatex();

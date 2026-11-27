@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { infoRow, standardRow } from '../standardRow.js';
+import { dividerRow, infoRow, standardRow } from '../standardRow.js';
 
 describe('standardRow', () => {
   test('text, detail, icon and action', () => {
@@ -48,6 +48,25 @@ describe('standardRow', () => {
     const item = standardRow.build(row);
 
     // assert
+    expect(item.action).toBeUndefined();
+  });
+});
+
+describe('dividerRow', () => {
+  test('ignored rule with no action', () => {
+    // arrange
+    const row = { id: 'rule', params: {} };
+
+    // act
+    const item = dividerRow.build(row, () => {});
+
+    // assert
+    expect(item).toMatchObject({
+      id: 'rule',
+      tag: 'hr',
+      ignored: true,
+      classes: expect.arrayContaining(['oneput__divider'])
+    });
     expect(item.action).toBeUndefined();
   });
 });

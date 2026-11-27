@@ -1007,3 +1007,72 @@ describe('context', () => {
     expect(view._unsafeUnwrap().placeholder).toBe('Next with $mod+n');
   });
 });
+
+describe('omitted registries', () => {
+  const { slot: slotSources, menu: menuSources, menuItem: builderSources } = wideSources;
+
+  type Content = Parameters<
+    typeof renderActiveView<
+      PageEvent,
+      RowBuilders,
+      ViewLayouts,
+      ReturnType<typeof createPages<WideView>>['snapshot'],
+      Record<string, string>,
+      string
+    >
+  >[1];
+
+  /**
+   * Render `view` on the 'plain' layout with content that omits a registry. The
+   * types of this content declare any name, thus they require both registries:
+   * the cast gives the content that only an untyped caller can give.
+   */
+  function render(content: Partial<Content> & Pick<Content, 'menuItem'>, view: WideView) {
+    const pages = createPages<WideView>({ layout: 'plain', ...view });
+    return renderActiveView(pages.snapshot, content as Content, wideLayouts, {
+      activate: pages.send,
+      context: noBindings
+    });
+  }
+
+  test.each<[string, Parameters<typeof render>[0]]>([
+    ['no slot', { menu: menuSources, menuItem: builderSources }],
+    ['no menu', { slot: slotSources, menuItem: builderSources }],
+    ['neither', { menuItem: builderSources }]
+  ])('%s: literals render', (_, content) => {
+    // act
+    const view = render(content, {
+      slots: { heading: 'Title' },
+      menu: { id: 'pages', items: [{ id: 'row', params: { text: 'Row' } }] }
+    });
+
+    // assert
+    expect(view._unsafeUnwrap().layout.params).toEqual({ menuTitle: 'Title' });
+    expect(view._unsafeUnwrap().menu.items.map((item) => item && item.id)).toEqual(['row']);
+  });
+
+  test.each<[string, WideView]>([
+    ['slot name', { placeholder: { $from: 'pageText' }, menu: { id: 'pages' } }],
+    ['list name', { menu: { id: 'pages', $from: 'pages' } }]
+  ])('%s with no registry', (_, view) => {
+    // act
+    const result = render({ menuItem: builderSources }, view);
+
+    // assert
+    expect(result._unsafeUnwrapErr()).toBe('Expected a source for each name');
+  });
+
+  const marked = readable(cell('Marked'));
+
+  test.each([
+    ['no slot', { menu: { pages: marked } }, [marked.source]],
+    ['no menu', { slot: { pageText: marked } }, [marked.source]],
+    ['neither', { menuItem: builders }, []]
+  ])('%s: subscriptions', (_, registry, subscribed) => {
+    // act
+    const subscriptions = sourceSubscriptions(registry);
+
+    // assert
+    expect(subscriptions).toEqual(subscribed);
+  });
+});

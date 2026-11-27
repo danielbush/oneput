@@ -427,6 +427,9 @@ export type ViewDef<
   settings?: ViewSettings;
 };
 
+/** A source registry of some content. Content that omits it has no sources. */
+type RegistryOf<Content, Key> = Key extends keyof Content ? NonNullable<Content[Key]> : NoSources;
+
 /**
  * The {@link ViewDef} for an AppObject's content (its `slot`, `menu` and
  * `menuItem` registries, see {@link ViewSources}), its layouts and the events
@@ -437,12 +440,12 @@ export type ViewDef<
  * ```
  */
 export type ViewFor<
-  Content extends { slot: object; menu: object; menuItem: RowBuilders },
+  Content extends { slot?: object; menu?: object; menuItem: RowBuilders },
   Layouts extends ViewLayouts,
   Event extends RowEvent = never
 > = ViewDef<
-  SourceTypes<Content['slot']>,
-  keyof Content['menu'] & string,
+  SourceTypes<RegistryOf<Content, 'slot'>>,
+  keyof RegistryOf<Content, 'menu'> & string,
   Event,
   RowParams<Content['menuItem']>,
   LayoutSlots<Layouts>
@@ -576,6 +579,7 @@ export type ViewContext = {
  * Named code that a view refers to by name, so the view stays data.
  * `slot` gives changing values for slots and row params, `menu` gives
  * changing rows, and `menuItem` holds the row builders (see {@link rowBuilder}).
+ * Omit `slot` or `menu` only when its type declares no names.
  * A `slot` source gives a value of the type that the slot or param declares,
  * and the input placeholder takes only sources that give a string. A row names
  * its builder in `build`; the `default` builder draws each row with no `build`.
@@ -592,18 +596,26 @@ export type ViewSources<
   Event extends RowEvent = never,
   Builders extends RowBuilders = NoRows
 > = {
-  slot: {
+  slot?: {
     [Name in keyof Source]:
       | ((snapshot: Snapshot, context: ViewContext) => Source[Name])
       | Readable<Source[Name]>;
   };
-  menu: Record<
+  menu?: Record<
     List,
     | ((snapshot: Snapshot) => readonly ViewRow<RowParams<Builders>, Source, Event>[])
     | Readable<readonly ViewRow<RowParams<Builders>, Source, Event>[]>
   >;
   menuItem: Builders;
-};
+} & RequiredRegistries<Source, List>;
+
+/**
+ * Makes `slot` or `menu` required when its type declares names. This is apart
+ * from the fields of {@link ViewSources}, thus TypeScript still infers
+ * `Source` and `List` from them. `{}` also rejects `undefined`.
+ */
+type RequiredRegistries<Source, List> = ([keyof Source] extends [never] ? unknown : { slot: {} }) &
+  ([List] extends [never] ? unknown : { menu: {} });
 
 /**
  * The value type of each source in a `slot` registry, by name: the `Source`
@@ -619,10 +631,12 @@ export type SourceTypes<Sources> = {
 
 /** The readable sources in a registry, to subscribe to, so that their changes redraw the view. */
 export function sourceSubscriptions(sources: {
-  slot: object;
-  menu: object;
+  slot?: object;
+  menu?: object;
+  // Not read. With it, content that has only `menuItem` fits this type.
+  menuItem?: unknown;
 }): ReadableSource<unknown>[] {
-  return [sources.slot, sources.menu]
+  return [sources.slot ?? {}, sources.menu ?? {}]
     .flatMap(sourcesOf)
     .filter(isReadable)
     .map(({ source }) => source);
@@ -702,12 +716,13 @@ export type OneputView<Event extends RowEvent = RowEvent> = {
  * and decides how to show it.
  */
 export function renderActiveView<
-  Source,
-  List extends string,
   Event extends RowEvent,
   Builders extends RowBuilders,
   Layouts extends ViewLayouts,
-  Snapshot extends ViewSnapshot<Source, List, Event, RowParams<Builders>, LayoutSlots<Layouts>>
+  Snapshot extends ViewSnapshot<Source, List, Event, RowParams<Builders>, LayoutSlots<Layouts>>,
+  // Last, with defaults: content that omits a registry gives no inference.
+  Source = Record<never, never>,
+  List extends string = never
 >(
   snapshot: Snapshot,
   sources: ViewSources<NoInfer<Snapshot>, Source, List, NoInfer<Event>, Builders>,
@@ -715,6 +730,9 @@ export function renderActiveView<
   { activate, context }: { activate: (event: Event) => void; context: ViewContext }
 ): Result<OneputView<Event>, ViewError> {
   const views = activeViews(snapshot);
+  // An omitted registry has no sources, thus `named` finds no name in it.
+  const slotSources = sources.slot ?? ({} as NonNullable<typeof sources.slot>);
+  const menuSources = sources.menu ?? ({} as NonNullable<typeof sources.menu>);
   let layoutName: string | undefined;
   let placeholder: ViewDef<Source>['placeholder'];
   let inputValue: ViewDef<Source>['inputValue'];
@@ -758,7 +776,7 @@ export function renderActiveView<
    */
   const read = (value: unknown): Result<unknown, NameError | ReadError> =>
     isFrom(value)
-      ? named(sources.slot, value.$from as keyof Source & string).andThen((source) =>
+      ? named(slotSources, value.$from as keyof Source & string).andThen((source) =>
           attempt(() => (isReadable(source) ? source.source.get() : source(snapshot, context)))
         )
       : ok(value);
@@ -776,7 +794,7 @@ export function renderActiveView<
   // The rows that the view types allow, as the interpreter merges and draws them.
   let listRows: readonly AnyRow<Event>[] = [];
   if (menu.$from !== undefined) {
-    const list = named(sources.menu, menu.$from).andThen((source) =>
+    const list = named(menuSources, menu.$from).andThen((source) =>
       attempt(() => (isReadable(source) ? source.source.get() : source(snapshot)))
     );
     if (list.isErr()) return err(list.error);

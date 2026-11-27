@@ -1,3 +1,4 @@
+import { divider } from '../../lib/builder.js';
 import { infoMenuItem } from '../ui/menuItems/infoMenuItem.js';
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
 import { rowBuilder, slot } from './interpreter.js';
@@ -39,4 +40,13 @@ export const standardRow = rowBuilder({
 export const infoRow = rowBuilder({
   params: { text: slot<string>(), icon: slot<string | undefined>() },
   build: ({ id, params: { text, icon } }) => infoMenuItem({ id, msg: text, icon: icon ?? 'Info' })
+});
+
+/**
+ * The row builder that shows a divider between rows. It takes no params and
+ * raises no event, even when the row has `send`. Menu focus skips it.
+ */
+export const dividerRow = rowBuilder({
+  params: {},
+  build: ({ id }) => divider({ id })
 });

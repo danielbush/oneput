@@ -5,7 +5,7 @@ import {
   slot,
   type ViewContext
 } from '@oneput/oneput/shared/declarative/interpreter.js';
-import { infoRow, standardRow } from '@oneput/oneput/shared/declarative/standardRow.js';
+import { dividerRow, infoRow, standardRow } from '@oneput/oneput/shared/declarative/standardRow.js';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import type { SafeHtml } from '@oneput/safe-html';
@@ -65,10 +65,10 @@ export function createContent() {
         bindingOf('TOGGLE_DISPLAY_MODE'),
       status: ({ context }: KatexSnapshot) => (context.error === null ? '' : '⚠️ Invalid katex')
     },
-    menu: {},
     menuItem: {
       default: standardRow,
       info: infoRow,
+      divider: dividerRow,
       // One isolated formula, centered in both modes. `htmlContent` paints
       // again on each rebuild. See shared/katex/katex.css.
       preview: rowBuilder({

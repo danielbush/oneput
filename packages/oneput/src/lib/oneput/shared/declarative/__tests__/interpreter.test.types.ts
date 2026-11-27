@@ -6,6 +6,7 @@ import {
   renderActiveView,
   rowBuilder,
   slot,
+  sourceSubscriptions,
   viewLayout,
   type LayoutSlots,
   type Readable,
@@ -16,7 +17,7 @@ import {
   type ViewFor,
   type ViewSources
 } from '../interpreter.js';
-import { appObjectActor } from '../appObjectActor.js';
+import { appObjectActor, attachAppObjectActor } from '../appObjectActor.js';
 import { infoRow, standardRow } from '../standardRow.js';
 
 declare function component<Params extends AppLayoutParams>(
@@ -354,6 +355,102 @@ const wrongListRow: ViewSources<Snapshot, Sources, 'rows', never, typeof builder
   // @ts-expect-error 'count' takes a number, not text.
   menu: { rows: () => [{ id: 'b', build: 'counter', params: { count: 'one' } }] }
 };
+
+// Content can omit `slot`, `menu` or both. An omitted registry has no names.
+const noMenu = { slot: registry.slot, menuItem: builders };
+const noSlot = {
+  menu: { rows: () => [{ id: 'a', params: { text: 'A' } }] },
+  menuItem: builders
+};
+const noRegistries = { menuItem: builders };
+const noMenuView: ViewFor<typeof noMenu, typeof layouts> = {
+  placeholder: { $from: 'known' }
+};
+const noMenuList: ViewFor<typeof noMenu, typeof layouts> = {
+  // @ts-expect-error With no 'menu' registry, there is no list to name.
+  menu: { $from: 'anything' }
+};
+const noSlotView: ViewFor<typeof noSlot, typeof layouts> = { menu: { $from: 'rows' } };
+const noSlotName: ViewFor<typeof noSlot, typeof layouts> = {
+  // @ts-expect-error With no 'slot' registry, there is no source to name.
+  placeholder: { $from: 'anything' }
+};
+const noRegistriesView: ViewFor<typeof noRegistries, typeof layouts> = {
+  placeholder: 'Type',
+  menu: { items: [{ id: 'row', params: { text: 'Row' } }] }
+};
+const noRegistriesList: ViewFor<typeof noRegistries, typeof layouts> = {
+  // @ts-expect-error With no 'menu' registry, there is no list to name.
+  menu: { $from: 'anything' }
+};
+const noRegistriesName: ViewFor<typeof noRegistries, typeof layouts> = {
+  // @ts-expect-error With no 'slot' registry, there is no source to name.
+  placeholder: { $from: 'anything' }
+};
+void [noMenuView, noMenuList, noSlotView, noSlotName];
+void [noRegistriesView, noRegistriesList, noRegistriesName];
+
+// A registry is required when its type declares names.
+// @ts-expect-error 'known' is a slot name, thus 'slot' is required.
+const namedSlotOmitted: ViewSources<Snapshot, { known: string }, never, never, typeof builders> = {
+  menuItem: builders
+};
+// @ts-expect-error 'rows' is a list name, thus 'menu' is required.
+const namedListOmitted: ViewSources<
+  Snapshot,
+  Record<never, never>,
+  'rows',
+  never,
+  typeof builders
+> = { menuItem: builders };
+const noNamesOmitted: ViewSources<Snapshot, Record<never, never>, never, never, typeof builders> = {
+  menuItem: builders
+};
+// Content with no registry can be given to `sourceSubscriptions`.
+sourceSubscriptions(noRegistries);
+void [namedSlotOmitted, namedListOmitted, noNamesOmitted];
+
+/** A snapshot whose view, inferred from its literal, is `view` on the 'plain' layout. */
+function inferredView<const View>(view: View) {
+  return {
+    machine: { getStateNodeById: () => ({ path: [] }) },
+    getMeta: () => ({ root: { view } }),
+    can: () => false
+  };
+}
+/** The render and adapter calls infer no names from an omitted registry. */
+function omittedRegistries() {
+  const options = { activate: () => {}, context };
+  const base = { layout: 'plain', menu: { id: 'menu' } } as const;
+  const list = { layout: 'plain', menu: { id: 'menu', $from: 'anything' } } as const;
+  const name = { ...base, placeholder: { $from: 'anything' } } as const;
+  const actor = <Snapshot>(snapshot: Snapshot) => ({
+    start() {},
+    stop() {},
+    send(_event: { type: string }) {},
+    getSnapshot: () => snapshot,
+    subscribe: () => ({ unsubscribe() {} })
+  });
+
+  renderActiveView(inferredView(base), noRegistries, layouts, options);
+  appObjectActor(ctl, actor(inferredView(base)), noRegistries, layouts);
+  attachAppObjectActor(ctl, actor(inferredView(base)), noRegistries, layouts);
+
+  // @ts-expect-error With no 'menu' registry, there is no list to name.
+  renderActiveView(inferredView(list), noRegistries, layouts, options);
+  // @ts-expect-error With no 'menu' registry, there is no list to name.
+  appObjectActor(ctl, actor(inferredView(list)), noRegistries, layouts);
+  // @ts-expect-error With no 'menu' registry, there is no list to name.
+  attachAppObjectActor(ctl, actor(inferredView(list)), noRegistries, layouts);
+
+  // @ts-expect-error With no 'slot' registry, there is no source to name.
+  renderActiveView(inferredView(name), noRegistries, layouts, options);
+  // @ts-expect-error With no 'slot' registry, there is no source to name.
+  appObjectActor(ctl, actor(inferredView(name)), noRegistries, layouts);
+  // @ts-expect-error With no 'slot' registry, there is no source to name.
+  attachAppObjectActor(ctl, actor(inferredView(name)), noRegistries, layouts);
+}
+void omittedRegistries;
 
 const inherited: PlainView = { slots: { note: { $from: 'known' } } };
 // @ts-expect-error A layout with no slots takes none.

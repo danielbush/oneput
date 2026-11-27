@@ -4,11 +4,16 @@ import type { MenuItem } from '../../../types.js';
 import { PullCheckbox } from './pull/PullCheckbox.js';
 import { stdMenuItem, type StdMenuItemParams } from './stdMenuItem.js';
 
-export type CheckboxMenuItemParams = {
+/** Give one of the two. */
+type CheckboxState =
+  /** Live checked state. */
+  | { source: Pull<boolean>; checked?: never }
+  /** Checked state at build time. */
+  | { checked: boolean; source?: never };
+
+export type CheckboxMenuItemParams = CheckboxState & {
   id: string;
   textContent: string;
-  /** Live checked state. */
-  source: Pull<boolean>;
   action: (c: Controller, checked: boolean) => void;
   closeMenuOnAction?: StdMenuItemParams['closeMenuOnAction'];
   /** Key binding shown on the right, e.g. `$mod+d`. See `stdMenuItem`. */
@@ -16,15 +21,18 @@ export type CheckboxMenuItemParams = {
 };
 
 /**
- * Build a menu row with a checkbox. The box shows `source.get()` and updates
- * after each click, without a menu rebuild.
+ * Build a menu row with a checkbox.
  *
- * `action` must write the new value before it returns, so that `get()` reads
- * it.
+ * With `checked`, the box shows that value. Rebuild the menu to show a new
+ * value. After a click, the rebuild must occur before the next task.
+ *
+ * With `source`, the box shows `source.get()` and updates after each click,
+ * without a menu rebuild. `action` must write the new value before it returns,
+ * so that `get()` reads it.
  *
  * Give `source.subscribe` only if something else can change the value, such as
  * a key binding. Use a rebuild for other things that the value changes, such
- * as preview content.
+ * as preview content. Keep one mode (`checked` or `source`) for a given row `id`.
  */
 export function checkboxMenuItem(params: CheckboxMenuItemParams): MenuItem {
   const inputId = params.id + '-input';
@@ -41,6 +49,11 @@ export function checkboxMenuItem(params: CheckboxMenuItemParams): MenuItem {
         tag: 'input',
         attr: {
           type: 'checkbox',
+          // `checked` shows a rebuilt value. `data-checked` keeps that value
+          // on the node, where the browser cannot put it back after a click.
+          ...(params.source
+            ? {}
+            : { checked: params.checked, 'data-checked': String(params.checked) }),
           title: params.textContent,
           onclick: (event: Event) => {
             // CONTROLLED_PATTERN
@@ -52,11 +65,16 @@ export function checkboxMenuItem(params: CheckboxMenuItemParams): MenuItem {
           }
         },
         classes: ['oneput__checkbox'],
-        onMount: PullCheckbox.onMount(params.source)
+        onMount: (node, ctx) => {
+          // A rebuild keeps the node and its first `onMount`. Thus read a
+          // static value from the node, not from `params`.
+          const source = params.source ?? { get: () => node.dataset.checked === 'true' };
+          return PullCheckbox.onMount(source)(node, ctx);
+        }
       })
     ],
     action: (ctl: Controller) => {
-      const checked = !params.source.get();
+      const checked = !(params.source ? params.source.get() : params.checked);
       params.action(ctl, checked);
       // CONTROLLED_PATTERN
       // Update the box in a new task. Because of preventDefault, the browser

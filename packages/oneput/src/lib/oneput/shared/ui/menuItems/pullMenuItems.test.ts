@@ -402,3 +402,62 @@ describe('checkboxMenuItem', () => {
     expect(nodeB.checked).toBe(false);
   });
 });
+
+describe('checkboxMenuItem with checked', () => {
+  test.each([true, false])('checked: %s - box state', (checked) => {
+    // arrange
+    const item = checkboxMenuItem({
+      id: 'box',
+      textContent: 'Display mode',
+      checked,
+      action: () => {}
+    });
+
+    // act
+    const input = findChild(item, 'box-input');
+
+    // assert
+    expect(input.attr?.checked).toBe(checked);
+  });
+
+  test('a click repaints the rebuilt value', async () => {
+    // arrange
+    const ctl = createNull();
+    const build = (checked: boolean) =>
+      checkboxMenuItem({
+        id: 'box',
+        textContent: 'Display mode',
+        checked,
+        action: () => {}
+      });
+    const { node } = mountCheckbox(build(false), 'box', ctl);
+    const rebuilt = findChild(build(true), 'box-input');
+
+    // act
+    build(false).action?.(ctl);
+    // The rebuild writes the attributes; then the browser reverts the box.
+    node.dataset.checked = String(rebuilt.attr?.['data-checked']);
+    node.checked = false;
+    await nextTask();
+
+    // assert
+    expect(node.checked).toBe(true);
+  });
+
+  test.each([true, false])('checked: %s - click reports the opposite', (checked) => {
+    // arrange
+    const reported: boolean[] = [];
+    const item = checkboxMenuItem({
+      id: 'box',
+      textContent: 'Display mode',
+      checked,
+      action: (_, next) => reported.push(next)
+    });
+
+    // act
+    item.action?.(createNull());
+
+    // assert
+    expect(reported).toEqual([!checked]);
+  });
+});

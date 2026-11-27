@@ -37,13 +37,18 @@ type RowEvent = { type: string };
  * A view's action: what `AppObject.actions` declares, with an event in place
  * of the function. The adapter sends the event when the machine can take it
  * (`snapshot.can`); otherwise the action declines, so the key does what the
- * browser does by default.
+ * browser does by default. With no `send`, the action always declines: a
+ * state can give a key back to the browser, for example `DO_ACTION` (Enter)
+ * to a textarea.
  */
 export type ViewAction<Event extends RowEvent> = {
-  send: Event;
+  send?: Event;
   /** The key. With no binding, the action uses the key its ID already has, such as SUBMIT's. */
   binding?: ActionBinding;
 };
+/** Where a view wants native focus: in the input, or out of it. */
+type InputFocus = 'focused' | 'blurred';
+
 type ViewSettings = Pick<
   UIFlags,
   'enableFilter' | 'enableInputElement' | 'enableMenuItemFocus' | 'clearInputAfterAction'
@@ -379,6 +384,12 @@ export type ViewDef<
   menu?: {
     id?: string;
     focusBehaviour?: Menu['focusBehaviour'];
+    /**
+     * The ID of the row to give menu focus. The adapter focuses it when the
+     * value changes and when the rows change, not on each redraw, so the
+     * user's keyboard and pointer moves stay until the view asks again.
+     */
+    focusItem?: string;
     /** Fixed rows. A child can override a parent's fixed row with the same ID. */
     items?: readonly ViewRow<Rows, Source, Event>[];
     /**
@@ -396,6 +407,13 @@ export type ViewDef<
    * submit. With no value, the user alone controls the input.
    */
   inputValue?: Text<Source>;
+  /**
+   * Native focus for the input: `'focused'` focuses it, `'blurred'` blurs it.
+   * The adapter applies it when the value changes, not on each redraw, so a
+   * state can say where focus goes when the machine enters it. With no
+   * value, the adapter does not move input focus.
+   */
+  inputFocus?: InputFocus;
   /**
    * Actions by action ID, as `AppObject.actions` declares them. Merged by ID;
    * a child's action replaces its parent's.
@@ -595,6 +613,39 @@ export function sourceSubscriptions(sources: {
     .map(({ source }) => source);
 }
 
+/** A snapshot as {@link activeViews} reads it. */
+type MetaSnapshot<View> = {
+  machine: { getStateNodeById(id: string): { path: readonly string[] } };
+  getMeta(): Record<string, { view?: View } | undefined>;
+};
+
+/** The views of the active states, with parents first. */
+function activeViews<View>(snapshot: MetaSnapshot<View>): View[] {
+  return Object.entries(snapshot.getMeta())
+    .flatMap(([id, meta]) =>
+      meta?.view
+        ? [{ depth: snapshot.machine.getStateNodeById(id).path.length, view: meta.view }]
+        : []
+    )
+    .sort((a, b) => a.depth - b.depth)
+    .map(({ view }) => view);
+}
+
+/**
+ * The active view's `inputFocus`: the deepest state's value, and `undefined`
+ * clears it. It is a literal, thus it reads no source, and the adapter can
+ * read it before a refresh.
+ */
+export function activeInputFocus(
+  snapshot: MetaSnapshot<{ inputFocus?: InputFocus }>
+): InputFocus | undefined {
+  let inputFocus: InputFocus | undefined;
+  for (const view of activeViews(snapshot)) {
+    if ('inputFocus' in view) inputFocus = view.inputFocus;
+  }
+  return inputFocus;
+}
+
 export type OneputView<Event extends RowEvent = RowEvent> = {
   /** The named layout and its params. */
   layout: { name: string; create: ViewLayout['create']; params: AppLayoutParams };
@@ -602,6 +653,9 @@ export type OneputView<Event extends RowEvent = RowEvent> = {
   settings: ViewSettings;
   placeholder?: string;
   inputValue?: string;
+  inputFocus?: InputFocus;
+  /** The row to give menu focus (`menu.focusItem`). */
+  focusItem?: string;
   actions: Record<string, ViewAction<Event>>;
   inputSend?: { send: Event };
 };
@@ -612,7 +666,7 @@ export type OneputView<Event extends RowEvent = RowEvent> = {
  * the parent's slots do not apply, and its `params` still do. Params, slots,
  * settings and menu fields merge by key, and a child clears a param with
  * `undefined`; a child's `input` param replaces its parent's whole input kind.
- * A child's `placeholder`, `inputValue` and `inputSend` replace its parent's,
+ * A child's `placeholder`, `inputValue`, `inputFocus` and `inputSend` replace its parent's,
  * and `undefined` clears them. Actions merge by ID. The layout gets the view's params over its own. List rows keep
  * their order and IDs, including repeats. Fixed rows follow in order of
  * first declaration, with same-ID overrides (see {@link mergeRow}).
@@ -644,14 +698,7 @@ export function renderActiveView<
   layouts: Layouts & DeclaredSlots<NoInfer<Snapshot>, NoInfer<Layouts>>,
   { activate }: { activate: (event: Event) => void }
 ): Result<OneputView<Event>, ViewError> {
-  const views = Object.entries(snapshot.getMeta())
-    .flatMap(([id, meta]) =>
-      meta?.view
-        ? [{ depth: snapshot.machine.getStateNodeById(id).path.length, view: meta.view }]
-        : []
-    )
-    .sort((a, b) => a.depth - b.depth)
-    .map(({ view }) => view);
+  const views = activeViews(snapshot);
   let layoutName: string | undefined;
   let placeholder: ViewDef<Source>['placeholder'];
   let inputValue: ViewDef<Source>['inputValue'];
@@ -751,6 +798,8 @@ export function renderActiveView<
     settings,
     placeholder: text,
     inputValue: value,
+    inputFocus: activeInputFocus(snapshot),
+    focusItem: menu.focusItem,
     actions,
     inputSend
   }));

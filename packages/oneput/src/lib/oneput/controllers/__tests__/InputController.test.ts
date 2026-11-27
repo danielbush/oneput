@@ -268,6 +268,39 @@ describe('focus change', () => {
     expect(ctl.input.isFocused).toBe(false);
   });
 
+  // The new AppObject does not focus the input itself, thus only a stale move could.
+  const replaced = { settings: { focusInputOnStart: false } };
+
+  it('blur then app change - stays focused', async () => {
+    // arrange
+    const { ctl, input } = mounted();
+    ctl.app.run({});
+    input.focus();
+    ctl.input.blur();
+
+    // act
+    ctl.app.replace(replaced);
+    await nextTask();
+
+    // assert
+    expect(ctl.app.isCurrent(replaced)).toBe(true);
+    expect(ctl.input.isFocused).toBe(true);
+  });
+
+  it('focus then app change - stays blurred', async () => {
+    // arrange
+    const { ctl } = mounted();
+    ctl.app.run(replaced);
+    ctl.input.focus();
+
+    // act
+    ctl.app.replace({ settings: { focusInputOnStart: false } });
+    await nextTask();
+
+    // assert
+    expect(ctl.input.isFocused).toBe(false);
+  });
+
   it('user focus - true', () => {
     // arrange
     const { input, changes } = mounted();

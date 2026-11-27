@@ -1,18 +1,25 @@
 import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
 import type { DemoDocument } from '../katex/katex.js';
 import { emptyFormula, katexActions } from './actions.js';
+import { previewRowId } from './content.js';
 
 /**
  * Type katex, see a preview, and insert the formula in the page. Insert is
  * the SUBMIT action ($mod+Enter), the Send button and the Insert row; it runs
  * only while the formula is valid. The machine controls the input text, so it
  * clears the input after an insert.
+ *
+ * Focus is in the states (INPUT_ROW): `typing` focuses the textarea and the
+ * preview row, and Enter writes a newline; `browsingMenu` blurs the textarea,
+ * so Enter runs the focused row. A click on a row blurs the textarea first,
+ * thus an insert from the Insert row goes from `browsingMenu` back to
+ * `typing` and focuses the textarea again.
  */
 export function createKatexMachine(doc: DemoDocument) {
   return katexActions(doc).createMachine({
     id: 'katex',
     description: 'Edit a katex formula and insert it in the page.',
-    initial: 'editing',
+    initial: 'typing',
     context: emptyFormula,
     meta: {
       view: {
@@ -33,7 +40,7 @@ export function createKatexMachine(doc: DemoDocument) {
         menu: {
           id: 'katex',
           items: [
-            { id: 'katex-preview', build: 'preview', params: { html: { $from: 'preview' } } },
+            { id: previewRowId, build: 'preview', params: { html: { $from: 'preview' } } },
             { id: 'katex-instructions', build: 'info', params: { text: { $from: 'help' } } },
             {
               id: 'katex-insert',
@@ -49,12 +56,11 @@ export function createKatexMachine(doc: DemoDocument) {
             }
           ]
         },
-        // The input is a katex editor, not a menu filter. With no menu item
-        // focus, Enter writes a newline in the textarea.
+        // The input is a katex editor, not a menu filter.
         settings: {
           enableFilter: false,
           enableInputElement: true,
-          enableMenuItemFocus: false,
+          enableMenuItemFocus: true,
           clearInputAfterAction: false
         }
       }
@@ -71,12 +77,52 @@ export function createKatexMachine(doc: DemoDocument) {
       },
       INSERT: {
         guard: 'canInsert',
+        target: '.typing',
         actions: ['insert', 'clearSource'],
-        description: 'Put the valid formula in the page, then start a new one.'
+        description: 'Put the valid formula in the page, then type a new one.'
       }
     },
     states: {
-      editing: { description: 'Edit the formula.' },
+      typing: {
+        description: 'Type the formula: the textarea and the preview row have focus.',
+        meta: {
+          view: {
+            inputFocus: 'focused',
+            menu: { focusItem: previewRowId },
+            // Enter declines, thus the textarea writes a newline, also when
+            // pointer hover moved menu focus to a row.
+            actions: { [OneputAction.DO_ACTION]: {} }
+          }
+        },
+        on: {
+          ITEM_FOCUSED: {
+            guard: 'keyboardOnOtherRow',
+            target: 'browsingMenu',
+            description: 'The keyboard moved to a row with an action.'
+          },
+          INPUT_FOCUS_CHANGED: {
+            guard: 'inputBlurred',
+            target: 'browsingMenu',
+            description: 'The textarea lost focus, for example to a click on a row.'
+          }
+        }
+      },
+      browsingMenu: {
+        description: 'Use the rows: the textarea is blurred, so Enter runs the focused row.',
+        meta: { view: { inputFocus: 'blurred' } },
+        on: {
+          ITEM_FOCUSED: {
+            guard: 'keyboardOnPreview',
+            target: 'typing',
+            description: 'The keyboard moved back to the preview row.'
+          },
+          INPUT_FOCUS_CHANGED: {
+            guard: 'inputFocused',
+            target: 'typing',
+            description: 'The user focused the textarea.'
+          }
+        }
+      },
       done: { type: 'final', description: 'The KaTeX demo finished.' }
     }
   });

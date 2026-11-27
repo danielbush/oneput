@@ -4,7 +4,7 @@ import type { OneputEvent } from '@oneput/oneput/shared/declarative/oneputEvents
 import { assign, setup } from 'xstate';
 import { viewLayouts } from '../../common/layout.js';
 import { renderFormula, type DemoDocument } from '../katex/katex.js';
-import { canInsert, type KatexContent, type KatexContext } from './content.js';
+import { canInsert, previewRowId, type KatexContent, type KatexContext } from './content.js';
 
 /** The events that the rows, the actions and the Send button send. */
 export type KatexEvent = { type: 'INSERT' } | { type: 'TOGGLE_DISPLAY_MODE' };
@@ -45,7 +45,15 @@ export function katexActions(doc: DemoDocument) {
       meta: {} as { view?: KatexView }
     },
     guards: {
-      canInsert: ({ context }) => canInsert(context)
+      canInsert: ({ context }) => canInsert(context),
+      // Keyboard focus only: pointer hover and Oneput's own focus moves must
+      // not take the input away while the user types.
+      keyboardOnPreview: ({ event }) =>
+        event.type === 'ITEM_FOCUSED' && event.cause === 'keyboard' && event.id === previewRowId,
+      keyboardOnOtherRow: ({ event }) =>
+        event.type === 'ITEM_FOCUSED' && event.cause === 'keyboard' && event.id !== previewRowId,
+      inputFocused: ({ event }) => event.type === 'INPUT_FOCUS_CHANGED' && event.focused,
+      inputBlurred: ({ event }) => event.type === 'INPUT_FOCUS_CHANGED' && !event.focused
     },
     actions: {
       writeSource: assign(({ context }, params: { value: string }) =>

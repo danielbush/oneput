@@ -505,13 +505,13 @@ export class AppController {
       });
     }
     this.unsubscribeMenuOpenFocus?.();
-    if (this.focusInputOnMenuOpen) {
-      this.unsubscribeMenuOpenFocus = this.ctl.events.on('menu-open-change', (open) => {
-        if (open) {
-          this.ctl.input.focus();
-        }
-      });
-    }
+    // Read the flag on each open, thus applyFlags can change it while the
+    // AppObject runs.
+    this.unsubscribeMenuOpenFocus = this.ctl.events.on('menu-open-change', (open) => {
+      if (open && this.focusInputOnMenuOpen) {
+        this.ctl.input.focus();
+      }
+    });
 
     // Reset stuff...
     this.resetOnBack();

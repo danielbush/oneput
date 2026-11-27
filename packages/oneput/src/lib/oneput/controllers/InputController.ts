@@ -182,10 +182,20 @@ export class InputController {
     // input element.
     //
     // TODO: I think we could use svelte tick() here?
-    setTimeout(() => {
-      this.inputElement?.focus();
-    }, 0);
+    this.afterThisTask(() => this.inputElement?.focus());
   };
+
+  /**
+   * Run `move` in a new task, unless another AppObject activation (a run,
+   * replace, exit or resume) starts first: a focus move belongs to the
+   * activation that asked for it.
+   */
+  private afterThisTask(move: () => void) {
+    const generation = this.ctl.app.currentGeneration;
+    setTimeout(() => {
+      if (generation === this.ctl.app.currentGeneration) move();
+    }, 0);
+  }
 
   /**
    * TODO: replace focusInput with this.
@@ -196,12 +206,11 @@ export class InputController {
    * Remove native focus from the input.
    *
    * Like `focus`, it runs in a new task. Thus `focus()` then `blur()` ends
-   * blurred, in the order of the calls.
+   * blurred, in the order of the calls. Like `focus`, a new AppObject
+   * activation before the task cancels it.
    */
   blur = () => {
-    setTimeout(() => {
-      this.inputElement?.blur();
-    }, 0);
+    this.afterThisTask(() => this.inputElement?.blur());
   };
 
   /** True when the input element has native browser focus. */

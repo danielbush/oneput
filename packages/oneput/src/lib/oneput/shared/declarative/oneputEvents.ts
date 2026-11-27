@@ -17,8 +17,17 @@ export type OneputEvent =
   | { type: 'BACK' }
   /** Replaces AppObject.onMenuUpdate after the displayed rows and focus resolve. */
   | { type: 'MENU_UPDATED'; menuId: string; id?: string; index: number; cause: MenuUpdateCause }
-  /** Replaces AppObject.onMenuItemFocus and MenuItem.onFocus. */
+  /**
+   * Replaces AppObject.onMenuItemFocus and MenuItem.onFocus. `id` is the
+   * focused row's ID. A view's `menu.focusItem` gives `cause: 'programmatic'`;
+   * use `cause` to tell it from the user's keyboard or pointer.
+   */
   | { type: 'ITEM_FOCUSED'; menuId: string; id?: string; index: number; cause: MenuItemFocusCause }
+  /**
+   * Replaces `ctl.input.subscribeFocusChange`: the input got (`true`) or lost
+   * (`false`) native focus, from any cause, including a view's `inputFocus`.
+   */
+  | { type: 'INPUT_FOCUS_CHANGED'; focused: boolean }
   /** Replaces AppObject.onInputChange and the active claim's value.write. */
   | { type: 'INPUT_CHANGED'; value: string }
   /** Replaces the claim's onRelease and names its menu row when it has one. */

@@ -6,7 +6,7 @@ Write an AppObject as an XState machine whose states describe what Oneput shows.
 - `interpreter.ts`: turns the active view into a Oneput menu, layout and input (`renderActiveView`), and defines the types a machine and its content use (`ViewDef`, `ViewSources`, `viewLayout`, `rowBuilder`, `readable`). `ViewFor<Content, Layouts, RowEvent>` gives a machine's `ViewDef` from its content and layouts.
 - `oneputEvents.ts`: the standard events Oneput sends into a machine, such as `STARTED`, `BACK`, `INPUT_CHANGED`, `ITEM_FOCUSED` and `INPUT_FOCUS_CHANGED`. A row sends its own event.
 - `standardLayout.ts`: a ready-made layout built on Oneput's standard layout, with a `status` slot; `StandardLayout` itself draws the `menuTitle` and `busy` params. An app can register its own layouts instead.
-- `standardRow.ts`: ready-made row builders: `standardRow` for a Oneput standard menu item and `infoRow` for an information message. An app registers them, often `standardRow` as `default` (the builder for rows that name no builder), or registers its own instead.
+- `standardRow.ts`: ready-made row builders: `standardRow` for a Oneput standard menu item, `infoRow` for an information message and `dividerRow` for a divider. An app registers them, often `standardRow` as `default` (the builder for rows that name no builder), or registers its own instead.
 - `signalSource.ts`: adapts a TC39 signal into a readable source, for data the machine doesn't own. Needs the optional `signal-polyfill` peer.
 
 Tests sit in `__tests__/` as `*.test.ts`; `__tests__/*.test.types.ts` hold the compile-time checks.

@@ -43,6 +43,7 @@ export function createKatexMachine(doc: DemoDocument) {
           items: [
             { id: previewRowId, build: 'preview', params: { html: { $from: 'preview' } } },
             { id: 'katex-instructions', build: 'info', params: { text: { $from: 'help' } } },
+            { id: 'katex-divider', build: 'divider' },
             {
               id: 'katex-insert',
               build: 'insert',

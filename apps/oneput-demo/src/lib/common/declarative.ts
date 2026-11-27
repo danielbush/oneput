@@ -23,8 +23,6 @@ type Layouts = typeof viewLayouts;
 
 /** The content for a machine that shows only fixed rows: no slot or menu sources. */
 const defaultContent = {
-  slot: {},
-  menu: {},
   menuItem: { default: standardRow, info: infoRow }
 };
 
@@ -54,11 +52,12 @@ type AppSnapshot<
  */
 export function declarativeAppWith<
   Machine,
-  Source,
-  List extends string,
   Event extends { type: string },
   Builders extends RowBuilders,
-  Snapshot extends AppSnapshot<Source, List, Event, Builders>
+  Snapshot extends AppSnapshot<Source, List, Event, Builders>,
+  // Last, with defaults: content that omits a registry gives no inference.
+  Source = Record<never, never>,
+  List extends string = never
 >(
   // `DeclaredSlots` must be here: TypeScript does not check it again for each
   // machine at the `attachAppObjectActor` call below.

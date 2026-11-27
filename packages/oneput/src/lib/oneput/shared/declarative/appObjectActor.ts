@@ -131,12 +131,13 @@ function applyFocus(ctl: Controller, view: OneputView, shown: ShownFocus, rowsCh
  *   events.
  */
 export function appObjectActor<
-  Source,
-  List extends string,
   Event extends { type: string },
   Builders extends RowBuilders,
   Layouts extends ViewLayouts,
-  Snapshot extends ViewSnapshot<Source, List, Event, RowParams<Builders>, LayoutSlots<Layouts>>
+  Snapshot extends ViewSnapshot<Source, List, Event, RowParams<Builders>, LayoutSlots<Layouts>>,
+  // Last, with defaults: content that omits a registry gives no inference.
+  Source = Record<never, never>,
+  List extends string = never
 >(
   ctl: Controller,
   actor: OwnedViewActor<Snapshot, Event>,
@@ -180,12 +181,13 @@ export function appObjectActor<
  * - When `status === 'done'`, skips redrawing and lets the parent's `onDone` transition.
  */
 export function attachAppObjectActor<
-  Source,
-  List extends string,
   Event extends { type: string },
   Builders extends RowBuilders,
   Layouts extends ViewLayouts,
-  Snapshot extends ViewSnapshot<Source, List, Event, RowParams<Builders>, LayoutSlots<Layouts>>
+  Snapshot extends ViewSnapshot<Source, List, Event, RowParams<Builders>, LayoutSlots<Layouts>>,
+  // Last, with defaults: content that omits a registry gives no inference.
+  Source = Record<never, never>,
+  List extends string = never
 >(
   ctl: Controller,
   actor: AttachedViewActor<Snapshot, Event>,
@@ -217,12 +219,13 @@ export function attachAppObjectActor<
 // - Constraining `Snapshot` rather than intersecting rejects views with only undeclared slots;
 //   `DeclaredSlots` catches undeclared slots alongside declared ones.
 function createAppObjectActor<
-  Source,
-  List extends string,
   Event extends { type: string },
   Builders extends RowBuilders,
   Layouts extends ViewLayouts,
-  Snapshot extends ViewSnapshot<Source, List, Event, RowParams<Builders>, LayoutSlots<Layouts>>
+  Snapshot extends ViewSnapshot<Source, List, Event, RowParams<Builders>, LayoutSlots<Layouts>>,
+  // Last, with defaults: content that omits a registry gives no inference.
+  Source = Record<never, never>,
+  List extends string = never
 >(
   ctl: Controller,
   actor: AttachedViewActor<Snapshot, Event>,

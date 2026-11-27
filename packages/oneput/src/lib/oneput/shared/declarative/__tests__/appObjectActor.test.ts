@@ -840,3 +840,50 @@ test('an input element swap while a focus move waits ends the moves', async () =
   expect(changes).toEqual([]);
   expect(state.state).toBe('browsing');
 });
+
+/** Wait until a menu refresh shows `text` as the placeholder, or now if it does. */
+function placeholderShows(ctl: Controller, text: string) {
+  const state = {
+    name: `placeholder "${text}"`,
+    reached: () => ctl.input.getPlaceholder() === text,
+    seen: () => `placeholder "${ctl.input.getPlaceholder()}"`
+  };
+  return state.reached() ? Promise.resolve() : waitForState(ctl, 'set-menu-items', state);
+}
+
+test('a slot shows the active keys or none, redraws on a rebind, and stops after exit', async () => {
+  // arrange
+  const { ctl, shown } = runNotes(controllers, () => ({
+    ...noteView,
+    placeholder: { $from: 'keys' }
+  }));
+  await shown;
+  // The first render reads the keys before Oneput sets MARK; its event redraws.
+  await placeholderShows(ctl, 'submit none, mark $mod+m');
+  const defaults = ctl.keys.getDefaultBindings();
+  const rebind = (key: string) =>
+    ctl.keys.setDefaultBindings({
+      ...defaults,
+      SUBMIT: { ...defaults.SUBMIT, bindings: [key] }
+    });
+  const rebound = placeholderShows(ctl, 'submit $mod+s, mark $mod+m');
+
+  // act
+  rebind('$mod+s');
+  await rebound;
+  ctl.app.exit();
+  const afterExit = ctl.input.getPlaceholder();
+  rebind('$mod+u');
+  // A menu update after the rebind: a refresh of the exited app would run before it.
+  const updated = waitForState(ctl, 'set-menu-items', {
+    name: 'a menu update',
+    reached: () => true,
+    seen: () => 'none'
+  });
+  void ctl.menu.invalidate();
+  await updated;
+
+  // assert
+  expect(ctl.input.getPlaceholder()).toBe(afterExit);
+  expect(afterExit).not.toContain('$mod+u');
+});

@@ -22,8 +22,12 @@ import {
   sourceSubscriptions,
   type ViewLayouts,
   type ViewRow,
+  type ViewContext,
   type ViewSources
 } from '../interpreter.js';
+
+/** A context with no key for any action. */
+const noBindings: ViewContext = { bindingOf: () => undefined };
 
 /** A layout component. These tests do not show it. */
 function component(_ctl: Controller, _params: AppLayoutParams): UILayout {
@@ -187,7 +191,10 @@ const wideSources: ViewSources<Snapshot, Record<string, string>, string, PageEve
 };
 
 function renderView(pages: ReturnType<typeof createPages<PageView>>) {
-  return renderActiveView(pages.snapshot, sources, layouts, { activate: pages.send });
+  return renderActiveView(pages.snapshot, sources, layouts, {
+    activate: pages.send,
+    context: noBindings
+  });
 }
 
 /** The interpreter puts only menu items in the menu. */
@@ -302,7 +309,8 @@ describe('row builders', () => {
 
     // act
     const result = renderActiveView(pages.snapshot, registry, wideLayouts, {
-      activate: pages.send
+      activate: pages.send,
+      context: noBindings
     });
 
     // assert
@@ -340,7 +348,8 @@ describe('list rows', () => {
 
     // act
     const { menu } = renderActiveView(pages.snapshot, registry, layouts, {
-      activate: pages.send
+      activate: pages.send,
+      context: noBindings
     })._unsafeUnwrap();
 
     // assert
@@ -493,7 +502,10 @@ describe('layouts', () => {
     const pages = createPages<TypedView>({ layout: 'typed', slots, menu: { id: 'pages' } });
 
     // act
-    const view = renderActiveView(pages.snapshot, typedSources, layouts, { activate: pages.send });
+    const view = renderActiveView(pages.snapshot, typedSources, layouts, {
+      activate: pages.send,
+      context: noBindings
+    });
 
     // assert
     const { params } = view._unsafeUnwrap().layout;
@@ -516,7 +528,10 @@ describe('layouts', () => {
     );
 
     // act
-    const view = renderActiveView(pages.snapshot, registry, layouts, { activate: pages.send });
+    const view = renderActiveView(pages.snapshot, registry, layouts, {
+      activate: pages.send,
+      context: noBindings
+    });
 
     // assert
     expect(view._unsafeUnwrap().layout.params).toEqual({ menuTitle: 'Parent' });
@@ -618,7 +633,10 @@ describe('layouts', () => {
     const pages = createPages<InputView>(view);
 
     // act
-    const result = renderActiveView(pages.snapshot, registry, layouts, { activate: pages.send });
+    const result = renderActiveView(pages.snapshot, registry, layouts, {
+      activate: pages.send,
+      context: noBindings
+    });
 
     // assert
     expect(result._unsafeUnwrap().layout.params).toEqual({ input: { kind: 'textarea', rows: 3 } });
@@ -662,7 +680,8 @@ describe('layouts', () => {
 
     // act
     const view = renderActiveView(pages.snapshot, wideSources, wideLayouts, {
-      activate: pages.send
+      activate: pages.send,
+      context: noBindings
     });
 
     // assert
@@ -760,7 +779,8 @@ describe('missing names', () => {
 
     // act
     const result = renderActiveView(pages.snapshot, wideSources, wideLayouts, {
-      activate: pages.send
+      activate: pages.send,
+      context: noBindings
     });
 
     // assert
@@ -793,7 +813,10 @@ describe('readable sources', () => {
       menu: { id: 'pages', $from: 'pages' }
     });
     const render = () =>
-      renderActiveView(pages.snapshot, mixed, layouts, { activate: pages.send })._unsafeUnwrap();
+      renderActiveView(pages.snapshot, mixed, layouts, {
+        activate: pages.send,
+        context: noBindings
+      })._unsafeUnwrap();
     return { heading, rows, label, mixed, pages, render };
   }
 
@@ -856,7 +879,10 @@ describe('readable sources', () => {
     });
 
     // act
-    const view = renderActiveView(pages.snapshot, registry, layouts, { activate: pages.send });
+    const view = renderActiveView(pages.snapshot, registry, layouts, {
+      activate: pages.send,
+      context: noBindings
+    });
 
     // assert
     expect(view._unsafeUnwrap().layout.params).toEqual({ menuTitle: title });
@@ -908,7 +934,10 @@ describe('readable sources', () => {
     const pages = createPages<PageView>({ layout: 'plain', ...view });
 
     // act
-    const result = renderActiveView(pages.snapshot, registry, layouts, { activate: pages.send });
+    const result = renderActiveView(pages.snapshot, registry, layouts, {
+      activate: pages.send,
+      context: noBindings
+    });
 
     // assert
     expect(result._unsafeUnwrapErr()).toBe('Expected each source to read without an error');
@@ -926,7 +955,10 @@ describe('readable sources', () => {
     });
 
     // act
-    const result = renderActiveView(pages.snapshot, registry, layouts, { activate: pages.send });
+    const result = renderActiveView(pages.snapshot, registry, layouts, {
+      activate: pages.send,
+      context: noBindings
+    });
 
     // assert
     expect(result._unsafeUnwrapErr()).toBe('Expected a source for each name');
@@ -945,5 +977,33 @@ describe('readable sources', () => {
 
     // assert
     expect(subscriptions).toEqual([]);
+  });
+});
+
+describe('context', () => {
+  test('a slot function reads a key from the context', () => {
+    // arrange
+    const registry = {
+      ...sources,
+      slot: {
+        ...sources.slot,
+        labelText: (_: Snapshot, { bindingOf }: ViewContext) => `Next with ${bindingOf('NEXT')}`
+      }
+    };
+    const pages = createPages<PageView>({
+      layout: 'plain',
+      placeholder: { $from: 'labelText' },
+      menu: { id: 'pages' }
+    });
+    const context: ViewContext = { bindingOf: (id) => (id === 'NEXT' ? '$mod+n' : undefined) };
+
+    // act
+    const view = renderActiveView(pages.snapshot, registry, layouts, {
+      activate: pages.send,
+      context
+    });
+
+    // assert
+    expect(view._unsafeUnwrap().placeholder).toBe('Next with $mod+n');
   });
 });

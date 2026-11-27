@@ -1,5 +1,10 @@
 import { menuItem } from '@oneput/oneput';
-import { rowBuilder, slot } from '@oneput/oneput/shared/declarative/interpreter.js';
+import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
+import {
+  rowBuilder,
+  slot,
+  type ViewContext
+} from '@oneput/oneput/shared/declarative/interpreter.js';
 import { infoRow, standardRow } from '@oneput/oneput/shared/declarative/standardRow.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { toggleMenuItem } from '@oneput/oneput/shared/ui/menuItems/toggleMenuItem.js';
@@ -33,7 +38,8 @@ export const previewRowId = 'katex-preview';
 
 /**
  * The view sources for the declarative KaTeX demo. All of them read the
- * machine's snapshot. The row builders draw from the values they get, and the
+ * machine's snapshot; the key sources and hints also read the active keys from
+ * the context, so a rebind redraws them. The row builders draw from the values they get, and the
  * menu rebuilds on each change, so no row keeps state of its own.
  */
 export function createContent() {
@@ -43,10 +49,20 @@ export function createContent() {
       preview: ({ context }: KatexSnapshot) => context.preview,
       canInsert: ({ context }: KatexSnapshot) => canInsert(context),
       displayMode: ({ context }: KatexSnapshot) => context.displayMode,
-      help: ({ context }: KatexSnapshot) =>
-        context.error === null
-          ? 'Type some katex, then insert it with Send...'
-          : `Invalid katex: ${context.error}`,
+      placeholder: (_: KatexSnapshot, { bindingOf }: ViewContext) => {
+        const key = bindingOf(OneputAction.SUBMIT);
+        return key ? `Type some katex and hit ${key}...` : 'Type some katex...';
+      },
+      help: ({ context }: KatexSnapshot, { bindingOf }: ViewContext) => {
+        if (context.error !== null) return `Invalid katex: ${context.error}`;
+        const key = bindingOf(OneputAction.SUBMIT);
+        return key
+          ? `Type some katex, then insert it with ${key} or Send...`
+          : 'Type some katex, then insert it with Send...';
+      },
+      submitKey: (_: KatexSnapshot, { bindingOf }: ViewContext) => bindingOf(OneputAction.SUBMIT),
+      displayModeKey: (_: KatexSnapshot, { bindingOf }: ViewContext) =>
+        bindingOf('TOGGLE_DISPLAY_MODE'),
       status: ({ context }: KatexSnapshot) => (context.error === null ? '' : '⚠️ Invalid katex')
     },
     menu: {},
@@ -79,23 +95,25 @@ export function createContent() {
       }),
       // Disabled while there is nothing valid to insert.
       insert: rowBuilder({
-        params: { enabled: slot<boolean>() },
-        build: ({ id, params: { enabled } }, activate) =>
+        params: { enabled: slot<boolean>(), hint: slot<string | undefined>() },
+        build: ({ id, params: { enabled, hint } }, activate) =>
           stdMenuItem({
             id,
             textContent: 'Insert',
             left: (b) => [b.icon('ArrowUp')],
+            bindingHint: hint,
             attr: { disabled: !enabled },
             closeMenuOnAction: false,
             action: activate
           })
       }),
       displayMode: rowBuilder({
-        params: { on: slot<boolean>() },
-        build: ({ id, params: { on } }, activate) =>
+        params: { on: slot<boolean>(), hint: slot<string | undefined>() },
+        build: ({ id, params: { on, hint } }, activate) =>
           toggleMenuItem({
             id,
             label: 'Display mode',
+            bindingHint: hint,
             values: ['Off', 'On'],
             index: on ? 1 : 0,
             onToggle: () => activate?.(),

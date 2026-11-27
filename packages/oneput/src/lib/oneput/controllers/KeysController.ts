@@ -169,13 +169,26 @@ export class KeysController {
     this.currentBindings = {};
     this.appBindings = {};
     this.modalLayers = [];
+    this.lastEmitted = undefined;
   }
 
-  /** Register the innermost modal layer, or the app layer when no modal is open. */
+  /** The key of the bindings last sent with `bindings-change`. */
+  private lastEmitted?: string;
+
+  /**
+   * Register the innermost modal layer, or the app layer when no modal is
+   * open. The keys always register, so new action functions take effect.
+   * `bindings-change` goes out only when what a user sees changes (see
+   * {@link bindingsKey}): an AppObject sets its bindings again on each
+   * refresh, and a listener that redraws on the event must not loop.
+   */
   private applyBindings() {
     this.currentBindings =
       this.modalLayers[this.modalLayers.length - 1]?.bindings ?? this.appBindings;
     this.registerKeys(this.currentBindings);
+    const key = bindingsKey(this.currentBindings);
+    if (key === this.lastEmitted) return;
+    this.lastEmitted = key;
     this.ctl.events.emit({ type: 'bindings-change', payload: { bindings: this.currentBindings } });
   }
 
@@ -237,4 +250,20 @@ export class KeysController {
   resetBindings() {
     this.setAppBindings({ ...this.defaultBindings });
   }
+}
+
+/**
+ * What a user sees of the bindings: each action's keys, `when` and
+ * description, by sorted action ID. The action functions are left out:
+ * they are new each time an AppObject sets its bindings.
+ */
+function bindingsKey(bindings: KeyBindingMap) {
+  return JSON.stringify(
+    Object.keys(bindings)
+      .sort()
+      .map((id) => {
+        const { bindings: keys, when, description } = bindings[id];
+        return [id, keys, when, description];
+      })
+  );
 }

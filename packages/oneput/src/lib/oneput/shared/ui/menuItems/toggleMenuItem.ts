@@ -9,6 +9,8 @@ export type ToggleMenuItemParams = {
   index: number;
   onToggle: (index: number) => void;
   left?: (b: FlexChildBuilder) => FlexChildren;
+  /** The key that toggles the value, shown as `stdMenuItem` shows it. */
+  bindingHint?: string;
   bottom?:
     | false
     | {
@@ -33,6 +35,7 @@ export function toggleMenuItem(params: ToggleMenuItemParams): MenuItem {
     attr: { type: 'button' },
     textContent: params.label,
     left: params.left,
+    bindingHint: params.bindingHint,
     right: (b) => [
       b.fchild({
         classes: ['oneput__toggle-value'],

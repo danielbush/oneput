@@ -11,6 +11,7 @@ import {
   type RowParams,
   type ViewLayouts,
   type DeclaredSlots,
+  type ViewContext,
   type ViewSnapshot,
   type ViewSources
 } from './interpreter.js';
@@ -115,6 +116,8 @@ function applyFocus(ctl: Controller, view: OneputView, shown: ShownFocus, rowsCh
  *   changes, switches the layout component when the view's layout changes, and
  *   uses `sources.menuItem.default` for rows without a named builder.
  * - A change of the view's input kind keeps the typed text.
+ * - Bindings: `slot` functions read keys with `context.bindingOf`, and a
+ *   `bindings-change` redraws, for example after a rebind.
  * - Focus: sends `ITEM_FOCUSED` and `INPUT_FOCUS_CHANGED` while current.
  *   Applies the view's `inputFocus` and `menu.focusItem` when they change
  *   (see {@link applyFocus}). It applies them again after start, resume and
@@ -242,6 +245,14 @@ function createAppObjectActor<
     return true;
   };
   const back = { type: 'BACK' } as const;
+  /** Reads the bindings from their owner on each render; a change redraws (see `watch`). */
+  const context: ViewContext = {
+    // Own keys only: an action ID such as 'toString' names no binding.
+    bindingOf: (actionId) => {
+      const bindings = ctl.keys.getCurrentBindings();
+      return Object.hasOwn(bindings, actionId) ? bindings[actionId].bindings[0] : undefined;
+    }
+  };
   let menu: Menu = { id: '', items: [] };
   let actions: AppActions = {};
   let shownLayout: string | undefined;
@@ -324,6 +335,11 @@ function createAppObjectActor<
             onChange();
           })
       },
+      // The keys that `bindingOf` reads. KeysController sends the event only
+      // when the keys change, thus this refresh, which sets this AppObject's
+      // keys again, does not send it again. The first refresh reads the keys
+      // before Oneput sets this AppObject's actions; their event then redraws.
+      { subscribe: (onChange) => ctl.events.on('bindings-change', onChange) },
       // All readable sources, not only those the active view reads: a change
       // to an unused one costs one coalesced refresh, and the set stays fixed.
       ...sourceSubscriptions(sources)
@@ -335,6 +351,7 @@ function createAppObjectActor<
         return;
       }
       const rendered = renderActiveView(snapshot, sources, layouts, {
+        context,
         activate: (event: Event) => {
           sendIfCurrent(event);
           shownFocus = {};
